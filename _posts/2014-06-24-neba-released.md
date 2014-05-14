@@ -1,6 +1,5 @@
 ---
 layout: post
-permalink: /20140505neba
 ---
 
 # NEBA Open Source release #
