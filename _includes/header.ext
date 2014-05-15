@@ -1,6 +1,6 @@
 <header>
   <div class="inner">
-	<img src="{{site.baseurl}}/images/logo.png" class="logo"/>
+	<a href="{{site.baseurl}}"><img src="{{site.baseurl}}/images/logo.png" class="logo"/></a>
 	<h2>The best of Sling, powered by Spring</h2>
 	<a href="https://github.com/neba-io/neba" class="button"><small>View project on</small>GitHub</a>
   </div>
