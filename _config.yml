@@ -1,3 +1,4 @@
 pygments: true
 github: [Repository metadata]
 baseurl: http://unic.github.io/neba
+markdown: kramdown
