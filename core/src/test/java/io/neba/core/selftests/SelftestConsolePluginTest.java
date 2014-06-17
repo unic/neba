@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SelftestConsolePluginTest {
     @Mock
-    private SelfTestRegistrar registrar;
+    private SelftestRegistrar registrar;
     @Mock
     private HttpServletRequest request;
     @Mock

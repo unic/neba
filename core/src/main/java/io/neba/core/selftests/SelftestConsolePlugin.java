@@ -48,7 +48,7 @@ public class SelftestConsolePlugin extends AbstractWebConsolePlugin {
     private static final long serialVersionUID = -5152654100152618897L;
     public static final String LABEL = "selftests";
     @Inject
-    private SelfTestRegistrar selfTestRegistrar;
+    private SelftestRegistrar selftestRegistrar;
 
     public String getCategory() {
         return "NEBA";
@@ -201,10 +201,10 @@ public class SelftestConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private List<SelftestReference> getSelftestReferences() {
-        return this.selfTestRegistrar.getSelftestReferences();
+        return this.selftestRegistrar.getSelftestReferences();
     }
 
-    public void setSelfTestRegistrar(SelfTestRegistrar registrar) {
-        this.selfTestRegistrar = registrar;
+    public void setSelftestRegistrar(SelftestRegistrar registrar) {
+        this.selftestRegistrar = registrar;
     }
 }
