@@ -83,6 +83,7 @@ public class ReverseFileByLineReaderTest {
         withEstimatedBytesPerLine(1000);
         withUnixLogfile();
         readLines(2);
+
         assertReadLinesAre(EXPECTED_LINES);
     }
 

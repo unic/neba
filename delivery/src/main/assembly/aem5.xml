@@ -2,7 +2,7 @@
         xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-    <id>crx</id>
+    <id>aem5</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -25,7 +25,7 @@
             <directory>src/main/cq-resources</directory>
         </fileSet>
         <fileSet>
-            <outputDirectory>/jcr_root/apps/neba2/install/</outputDirectory>
+            <outputDirectory>/jcr_root/apps/neba/install/</outputDirectory>
             <includes>
                 <include>**/*.jar</include>
             </includes>
@@ -37,8 +37,8 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
-            <outputDirectory>/jcr_root/apps/neba2/install/</outputDirectory>
-            <scope>runtime</scope>
+            <outputDirectory>/jcr_root/apps/neba/install/</outputDirectory>
+            <scope>compile</scope>
         </dependencySet>
     </dependencySets>
 </assembly>

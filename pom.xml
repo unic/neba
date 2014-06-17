@@ -1,118 +1,25 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>io.neba</groupId>
-	<artifactId>neba</artifactId>
-	<version>3.0-SNAPSHOT</version>
-	<name>NEBA</name>
-	<description>POJOs and Spring for Sling</description>
-	<url>https://github.com/unic/neba</url>
-
-	<issueManagement>
-		<url>https://github.com/unic/neba/issues</url>
-		<system>GitHub Issues</system>
-	</issueManagement>
-
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
-	<scm>
-		<url>https://github.com/unic/neba</url>
-		<connection>scm:git:git://github.com/unic/neba.git</connection>
-		<developerConnection>scm:git:git@github.com:unic/unic.git</developerConnection>
-	</scm>
+	<artifactId>io.neba</artifactId>
+	<name>NEBA modules POM</name>
+	<packaging>pom</packaging>
 	
-	<developers>
-		<developer>
-			<name>Daniel Takai</name>
-			<email>daniel.takai@unic.com</email>
-			<organization>Unic AG</organization>
-			<organizationUrl>http://www.unic.com</organizationUrl>
-		</developer>
-		<developer>
-			<name>Olaf Otto</name>
-			<email>olaf.otto@unic.com</email>
-			<organization>Unic AG</organization>
-			<organizationUrl>http://www.unic.com</organizationUrl>
-		</developer>
-		<developer>
-			<name>Daniel Rey</name>
-			<email>daniel.rey@unic.com</email>
-			<organization>Unic AG</organization>
-			<organizationUrl>http://www.unic.com</organizationUrl>
-		</developer>
-		<developer>
-			<name>Christoph Huber</name>
-			<email>christoph.huber@unic.com</email>
-			<organization>Unic AG</organization>
-			<organizationUrl>http://www.unic.com</organizationUrl>
-		</developer>
-	</developers>
+	<description>
+		NEBA - the best of Sling, powered by Spring.
+	</description>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
-	
-	<profiles>
-		<profile> 
-			<id>release</id>	
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>2.2.1</version>
-						<executions>
-							<execution>
-								<id>attach-sources</id>
-								<goals>
-									<goal>jar-no-fork</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.9.1</version>
-						<executions>
-							<execution>
-								<id>attach-javadocs</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.5</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>	
+	<parent>
+		<groupId>io.neba</groupId>
+		<artifactId>io.neba.neba-parent</artifactId>
+		<relativePath>parent/pom.xml</relativePath>
+		<version>3.0.1-SNAPSHOT</version>
+	</parent>
+
+	<modules>
+		<module>parent</module>
+		<module>api</module>
+		<module>core</module>
+        <module>delivery</module>
+	</modules>
 </project>

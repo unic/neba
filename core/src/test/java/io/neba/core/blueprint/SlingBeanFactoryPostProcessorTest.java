@@ -18,7 +18,7 @@ package io.neba.core.blueprint;
 
 import io.neba.core.mvc.MvcServlet;
 import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.selftests.SelftestRegistrar;
+import io.neba.core.selftests.SelfTestRegistrar;
 import io.neba.core.spring.applicationcontext.configuration.PlaceholderVariableResolverRegistrar;
 import io.neba.core.spring.applicationcontext.configuration.RequestScopeConfigurator;
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class SlingBeanFactoryPostProcessorTest {
     @Mock
     private PlaceholderVariableResolverRegistrar variableResolver;
     @Mock
-    private SelftestRegistrar selftestRegistrar;
+    private SelfTestRegistrar selfTestRegistrar;
     @Mock
     private RequestScopeConfigurator requestScopeConfigurator;
     @Mock
@@ -74,13 +74,13 @@ public class SlingBeanFactoryPostProcessorTest {
     		this.requestScopeConfigurator,
     		this.variableResolver, 
     		this.modelRegistrar, 
-        	this.selftestRegistrar,
+        	this.selfTestRegistrar,
         	this.dispatcherServlet);
         
         inOrder.verify(this.requestScopeConfigurator).registerRequestScope(eq(this.beanFactory));
         inOrder.verify(this.variableResolver).registerResolvers(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.modelRegistrar).registerModels(eq(this.context), eq(this.beanFactory));
-        inOrder.verify(this.selftestRegistrar).registerSelftests(eq(this.beanFactory), eq(this.bundle));
+        inOrder.verify(this.selfTestRegistrar).registerSelftests(eq(this.beanFactory), eq(this.bundle));
         inOrder.verify(this.dispatcherServlet).enableMvc(eq(this.beanFactory), eq(this.context));
     }
 

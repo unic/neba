@@ -18,7 +18,7 @@ package io.neba.core.blueprint;
 
 import io.neba.core.mvc.MvcServlet;
 import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.selftests.SelftestRegistrar;
+import io.neba.core.selftests.SelfTestRegistrar;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import javax.inject.Inject;
 public abstract class ContextShutdownHandler {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @Inject
-    private SelftestRegistrar selftestRegistrar;
+    private SelfTestRegistrar selfTestRegistrar;
     @Inject
     private ModelRegistrar modelRegistrar;
     @Inject
@@ -52,7 +52,7 @@ public abstract class ContextShutdownHandler {
         this.logger.info("Removing infrastructure for bundle: " + bundle + "...");
         EventhandlingBarrier.begin();
         try {
-            this.selftestRegistrar.unregister(bundle);
+            this.selfTestRegistrar.unregister(bundle);
             this.modelRegistrar.unregister(bundle);
             this.dispatcherServlet.disableMvc(bundle);
         } finally {

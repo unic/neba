@@ -4,7 +4,7 @@
     <packaging>jar</packaging>
     <name>NEBA delivery</name>
 
-    <description>Packages NEBA with its the runtime dependencies not provided by Sling.</description>
+    <description>Packages NEBA with its the runtime dependencies for deployment via the Adobe CRX package manager.</description>
 
     <parent>
         <groupId>io.neba</groupId>
@@ -14,7 +14,7 @@
     </parent>
 
     <properties>
-        <crx.package.description>provides the NEBA core and its runtime dependencies</crx.package.description>
+        <crx.package.description>Provides the NEBA and its runtime dependencies</crx.package.description>
         <crx.package.fixedbugs />
     </properties>
 
