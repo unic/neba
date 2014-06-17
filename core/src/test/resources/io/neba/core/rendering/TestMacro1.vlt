@@ -1,0 +1,4 @@
+#macro(test)
+macro1
+#end
+#test()

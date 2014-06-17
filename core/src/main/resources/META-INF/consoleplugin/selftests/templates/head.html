@@ -1,0 +1,62 @@
+<style type="text/css">
+/*
+   Note: percent signs must be be masked by duplication (%%) as this template
+   is interpreted by the java template formatter.
+ */
+#plugin_table {
+    table-layout: fixed;
+    margin-bottom: 2em;
+}
+
+#plugin_table pre {
+    word-wrap: break-word;
+    padding-right: 1em;
+}
+
+#plugin_table tr td {
+    font-size: 120%%;
+    padding: .4em;
+}
+
+form .buttonGroup {
+    text-align: left;
+}
+
+form .buttonGroup button {
+    padding:5px;
+    margin-left: 10px;
+}
+
+#neba-heading {
+    background-color: #f0f0f0;
+    padding:10px;
+    font-size:140%%;
+    margin:1em 0;
+}
+
+#neba-heading a {
+    color:inherit;
+}
+
+#neba-heading a {
+    text-decoration: none;
+    border-bottom: 1px dashed #000000;
+}
+
+#neba-heading a:hover {
+    border-bottom: 1px solid #000000;
+}
+</style>
+
+<div id="neba-heading">
+    %d test(s) registered.
+    You may <a href="#" title="Run all the tests now." onclick="runAll();return false;">run them all</a>
+    or connect a monitoring tool to the
+    <a title="Open the XML representation of all executed tests." href="selftests/run.xml">XML interface.</a>
+</div>
+
+<form method="post" enctype="multipart/form-data" action="">
+	<div class="ui-widget-header ui-corner-top buttonGroup">
+		<button type="button" onclick="runAll();return false;">Run all</button>
+	</div>
+</form>

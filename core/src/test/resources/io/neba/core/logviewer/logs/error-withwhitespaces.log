@@ -1,0 +1,5 @@
+-- test logs/error-withwhitespaces.log first line --
+06.09.2013 15:03:50.719 *ERROR* error message with stacktrace
+  at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)
+        at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)
+-- test logs/error-withwhitespaces.log last line --

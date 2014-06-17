@@ -1,0 +1,67 @@
+-- test logs/error.log first line --
+
+Test Line 1
+Test Line 2
+Test Line 3
+Test Line 4
+Test Line 5
+Test Line 6
+
+* ERROR*: error message
+* WARN *: warn message
+*INFO*: info message
+*DEBUG *: debug message
+*TRACE *: trace message
+message without level
+06.09.2013 15:03:50.719 *ERROR* error message with stacktrace
+at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)
+at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)
+at ResourceResolvingRowIterable$ResourceResolvingRowIterator.createNext(ResourceResolvingRowIterable.java:44)
+at ResourceResolvingRowIterable$ResourceResolvingRowIterator.hasNext(ResourceResolvingRowIterable.java:36)
+at ResourceUtil$AdaptingIterator.createNext(ResourceUtil.java:43)
+at ResourceUtil$AdaptingIterator.hasNext(ResourceUtil.java:38)
+at MarketingUrlServiceImpl.collectRules(MarketingUrlServiceImpl.java:162)
+at MarketingUrlServiceImpl.getRule(MarketingUrlServiceImpl.java:81)
+at MarketingUrlFilter.findRule(MarketingUrlFilter.java:205)
+at MarketingUrlFilter.doFilter(MarketingUrlFilter.java:72)
+at org.apache.sling.engine.impl.filter.AbstractSlingFilterChain.doFilter(AbstractSlingFilterChain.java:60)
+at io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache.doFilter(RequestScopedResourceModelCache.java:107)
+at org.apache.sling.engine.impl.filter.AbstractSlingFilterChain.doFilter(AbstractSlingFilterChain.java:60)
+at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:83)
+at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:76)
+at org.apache.sling.engine.impl.filter.AbstractSlingFilterChain.doFilter(AbstractSlingFilterChain.java:60)
+at org.apache.sling.bgservlets.impl.BackgroundServletStarterFilter.doFilter(BackgroundServletStarterFilter.java:135)
+at org.apache.sling.engine.impl.filter.AbstractSlingFilterChain.doFilter(AbstractSlingFilterChain.java:60)
+at org.apache.sling.engine.impl.SlingRequestProcessorImpl.processRequest(SlingRequestProcessorImpl.java:171)
+at org.apache.sling.engine.impl.SlingMainServlet.service(SlingMainServlet.java:199)
+at org.apache.felix.http.base.internal.handler.ServletHandler.doHandle(ServletHandler.java:96)
+at org.apache.felix.http.base.internal.handler.ServletHandler.handle(ServletHandler.java:79)
+at org.apache.felix.http.base.internal.dispatch.ServletPipeline.handle(ServletPipeline.java:42)
+at org.apache.felix.http.base.internal.dispatch.InvocationFilterChain.doFilter(InvocationFilterChain.java:49)
+at org.apache.felix.http.base.internal.dispatch.HttpFilterChain.doFilter(HttpFilterChain.java:33)
+at org.apache.sling.security.impl.ReferrerFilter.doFilter(ReferrerFilter.java:249)
+at org.apache.felix.http.base.internal.handler.FilterHandler.doHandle(FilterHandler.java:88)
+at org.apache.felix.http.base.internal.handler.FilterHandler.handle(FilterHandler.java:76)
+at org.apache.felix.http.base.internal.dispatch.InvocationFilterChain.doFilter(InvocationFilterChain.java:47)
+at org.apache.felix.http.base.internal.dispatch.HttpFilterChain.doFilter(HttpFilterChain.java:33)
+at org.apache.felix.http.base.internal.dispatch.FilterPipeline.dispatch(FilterPipeline.java:48)
+at org.apache.felix.http.base.internal.dispatch.Dispatcher.dispatch(Dispatcher.java:39)
+at org.apache.felix.http.base.internal.DispatcherServlet.service(DispatcherServlet.java:67)
+at javax.servlet.http.HttpServlet.service(HttpServlet.java:802)
+at org.apache.felix.http.proxy.ProxyServlet.service(ProxyServlet.java:60)
+at javax.servlet.http.HttpServlet.service(HttpServlet.java:802)
+at org.apache.sling.launchpad.base.webapp.SlingServletDelegate.service(SlingServletDelegate.java:277)
+at org.apache.sling.launchpad.webapp.SlingServlet.service(SlingServlet.java:150)
+at com.day.j2ee.servletengine.ServletRuntimeEnvironment.service(ServletRuntimeEnvironment.java:228)
+at com.day.j2ee.servletengine.RequestDispatcherImpl.doFilter(RequestDispatcherImpl.java:315)
+at com.day.j2ee.servletengine.FilterChainImpl.doFilter(FilterChainImpl.java:74)
+at com.day.crx.launchpad.filters.CRXLaunchpadLicenseFilter.doFilter(CRXLaunchpadLicenseFilter.java:96)
+at com.day.j2ee.servletengine.FilterChainImpl.doFilter(FilterChainImpl.java:72)
+at com.day.j2ee.servletengine.RequestDispatcherImpl.service(RequestDispatcherImpl.java:334)
+at com.day.j2ee.servletengine.RequestDispatcherImpl.service(RequestDispatcherImpl.java:378)
+at com.day.j2ee.servletengine.ServletHandlerImpl.execute(ServletHandlerImpl.java:315)
+at com.day.j2ee.servletengine.DefaultThreadPool$DequeueThread.run(DefaultThreadPool.java:134)
+at java.lang.Thread.run(Thread.java:662)
+*INFO*: another info message
+
+-- test logs/error.log last line --

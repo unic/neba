@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:vlt="http://www.day.com/jcr/vault/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:created="{Date}2014-06-26T09:51:03.892+02:00"
+    jcr:createdBy="admin"
+    jcr:description="${crx.package.description}"
+    jcr:lastModified="{Date}2014-06-26T09:51:03.892+02:00"
+    jcr:lastModifiedBy="admin"
+    jcr:primaryType="vlt:PackageDefinition"
+    sling:resourceType="cq/packaging/components/pack/definition"
+    acHandling="Ignore"
+    buildCount="1"
+    cqVersion="5.3"
+    fixedBugs="${crx.package.fixedbugs}"
+    group="io.neba"
+    lastUnwrapped="{Date}2014-06-26T09:51:03.892+02:00"
+    lastUnwrappedBy="admin"
+    lastWrapped="{Date}2014-06-26T09:51:03.892+02:00"
+    lastWrappedBy="admin"
+    name="io.neba"
+    path="/etc/packages/io/neba/io.neba.neba-${project.version}"
+    providerLink=""
+    providerName="neba.io"
+    providerUrl="http://www.neba.io"
+    requiresRestart="{Boolean}true"
+    requiresRoot="{Boolean}true"
+    testedWith="CQ 5.3, CQ 5.4, CQ 5.5, CQ 5.6, CRX 2.2+"
+    version="${project.version}">
+    <thumbnail.png/>
+    <filter jcr:primaryType="nt:unstructured">
+        <f0
+            jcr:primaryType="nt:unstructured"
+            mode="replace"
+            root="/apps/neba"
+            rules="[]"/>
+    </filter>
+    <thumbnail jcr:primaryType="nt:unstructured">
+        <file/>
+    </thumbnail>
+</jcr:root>
