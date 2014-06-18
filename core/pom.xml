@@ -210,7 +210,6 @@
                             org.springframework.scheduling.config,
                             org.springframework.web.filter,
                             org.aopalliance.aop,
-                            javax.inject;version=0.0.0,
                             *
                         </Import-Package>
                     </instructions>

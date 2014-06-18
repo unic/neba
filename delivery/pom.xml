@@ -98,8 +98,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/main/assembly/aem6.xml</descriptor>
-                        <descriptor>src/main/assembly/aem5.xml</descriptor>
+                        <descriptor>src/main/assembly/aem.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
