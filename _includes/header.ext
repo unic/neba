@@ -1,7 +1,34 @@
-<header>
-  <div class="inner">
-	<a href="{{site.baseurl}}"><img src="{{site.baseurl}}/images/logo.png" class="logo"/></a>
-	<h2>The best of Sling, powered by Spring</h2>
-	<a href="https://github.com/unic/neba" class="button"><small>View project on</small>GitHub</a>
-  </div>
-</header>
+<!-- START HEADER -->
+
+<div id="header-wrapper">
+
+    <div class="header clear">
+
+        <div id="logo">
+            <a href="index.html"><img src="images/neba-logo.png" alt="" /></a>
+        </div><!--END LOGO-->
+
+        <div id="primary-menu">
+
+            <ul class="menu">
+                <li><a href="index.html" class="current">Home</a>
+                </li>
+                <li><a href="quickstart.html">Quickstart</a></li>
+                <li><a href="download.html">Download</a></li>
+                <li><a href="blog-list.html">Documentation</a>
+                    <ul>
+                        <li><a href="userguide.html">User guide</a></li>
+                        <li><a href="architecture.html">Achitecture</a></li>
+                        <li><a href="docs.html">Api docs</a></li>
+                    </ul>
+                </li>
+                <li><a href="contributing.html">Contributing</a></li>
+            </ul><!--END UL-->
+
+        </div><!--END PRIMARY MENU-->
+
+    </div><!--END HEADER-->
+
+</div><!--END HEADER-WRAPPER-->
+
+        <!-- END HEADER -->

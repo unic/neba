@@ -1,1 +1,76 @@
-<footer><div class="inner">neba.io</div></footer>
+<!-- START FOOTER -->
+
+<div id="footer">
+
+    <div id="footer-content">
+
+        <div id="footer-top" class="clear">
+
+            <div class="one-fourth">
+                <h3>About NEBA</h3>
+                <p>NEBA has been developed by <a href="https://www.unic.com/">Unic</a> since 2010, and was published as open source software on June 26, 2014</p><br />
+                <p>
+                    <strong>Unic AG</strong><br />
+                    Belpstrasse 48, 3007 Bern, Switzerland<br />
+                    <strong>Telephone</strong>: +41 31 560 12 12<br />
+                    <strong>Fax</strong>: +41 31 560 12 13
+                </p>
+            </div><!--END ONE-FOURTH-->
+
+
+            <div class="one-fourth">
+                <h3>Latest posts</h3>
+
+                <ul>
+                    <li><a href="#">Praesent convallis metus imperdiet.</a>	</li>
+
+                    <li><a href="#">Curabitur pharetra, ante ac suscipit suscipit.</a></li>
+
+                    <li><a href="#">Imperdiet the dui posuere sollicitudin totam.</a></li>
+                </ul><!--END UL-->
+            </div><!--END ONE-FOURTH-->
+
+
+            <div class="one-fourth">
+                <h3>Dritte Footer-Spalte</h3>
+                <ul>
+                    <li><a href="#">Praesent convallis metus imperdiet.</a>	</li>
+
+                    <li><a href="#">Curabitur pharetra, ante ac suscipit suscipit.</a></li>
+
+                    <li><a href="#">Imperdiet the dui posuere sollicitudin totam.</a></li>
+                </ul><!--END UL-->
+            </div><!--END ONE-FOURTH-->
+
+
+            <div class="one-fourth last">
+                <h3>Vierte Footer-Spalte</h3>
+                <ul>
+                    <li><a href="#">Praesent convallis metus imperdiet.</a>	</li>
+
+                    <li><a href="#">Curabitur pharetra, ante ac suscipit suscipit.</a></li>
+
+                    <li><a href="#">Imperdiet the dui posuere sollicitudin totam.</a></li>
+                </ul><!--END UL-->
+            </div><!--END ONE-FOURTH LAST-->
+
+        </div><!--END FOOTER-TOP-->
+
+
+        <div id="footer-bottom" class="clear">
+
+            <div class="one-half">
+                <p>Copyright &copy; 2014. All rights reserved.</p>
+            </div><!--END ONE-HALF-->
+
+            <div class="one-half text-align-right last">
+                <p>Lorem ipsum ...<a href="#">Link</a></p>
+            </div><!--END ONE-HALF TRIGGER-FOOTER LAST-->
+
+        </div><!--END FOOTER-BOTTOM-->
+
+    </div><!--END FOOTER-CONTENT-->
+
+</div><!--END FOOTER-->
+
+<!-- END FOOTER -->

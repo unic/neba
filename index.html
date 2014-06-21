@@ -2,52 +2,163 @@
 title: neba.io
 ---
 <!DOCTYPE html>
-<html>
-  {% include head.ext %}
+<html xmlns="http://www.w3.org/1999/xhtml">
 
-  <body>
-    {% include header.ext %}
-    {% include navigation.html %}
+{% include head.ext %}
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        
-		<section id="main-content">
-		
-		<h3>Introduction</h3>
+<body id="top">
 
-        <p>NEBA makes an AEM developer's life easier. It provides a model for the current resource as a <code>@ResourceModel</code> to the view, automatically creates AdapterFactories for all resource models. This reduces the amount of boilerplate code that is necessary to write AEM application. And less code is a good thing!</p>
-        <p>NEBA also enables the use of Spring and Spring MVC within Adobe AEM, providing rich IOC capabilities and thereby provides enterprise support.</p>
-        <p>NEBA is an open software project released under the permissive Apache license. We welcome contributions, comments and opinions!</p>
+{% include header.ext %}
 
-		<h3>Posts</h3>
-		<ul>
-			{% for post in site.posts %}
-				<li>
-					<a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
-				</li>
-			{% endfor %}
-		</ul>
-        
-        </section>
+<div id="wrapper">
 
-        <aside id="sidebar">
-          <a href="https://github.com/unic/neba/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/unic/neba/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
+    <!-- START HOME -->
 
-          <p class="repo-owner">NEBA <a href="https://github.com/neba-io/neba"></a> is maintained by {{ site.github.owner_url }}
-		  <a href="https://github.com/unic">Unic</a>.</p>
+    <div class="content-wrapper clear">
 
-        </aside>
-      </div>
-    </div>
+        <div class="section-title text-align-center">
 
-	{% include footer.ext %}
-  </body>
+            <h1 class="title">The best of Sling, powered by Spring.</h1>
+
+        </div><!--END SECTION TITLE-->
+
+
+        <div class="slideshow-container">
+
+            <div class="flexslider" id="index-slider">
+                <ul class="slides">
+                    <li>
+                        <a href="#"><img src="images/slide1.png" alt="" /></a>
+                        <p class="flex-caption">Spring and Sling, integrated by Blueprint. Zero dependencies, all the @Semantics.</p>
+                    </li>
+                    <li>
+                        <a href="#"><img src="images/slide2.png" alt="" /></a>
+                        <p class="flex-caption">Declare resource models with one annotation, navigate resource model mappings directly in Sling</p>
+                    </li>
+                    <li>
+                        <a href="#"><img src="images/slide3.png" alt="" /></a>
+                        <p class="flex-caption">Explore resource model behavior data in real time, visualized with d3</p>
+
+                    </li>
+                </ul><!--END UL SLIDES-->
+
+            </div><!--END FLEXSLIDER-->
+
+        </div><!--END SLIDESHOW-CONTAINER-->
+
+
+        <ul class="grid row4 services">
+            <li>
+                <div>
+                    <h2>TL;DR</h2>
+                    <img src="images/icon1.png" alt="" />
+                    <p>NEBA integrates Sling and Spring in a non-intrusive, standardized manner.</p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h2>Quickstart</h2>
+                    <img src="images/icon2.png" alt="" />
+                    <p><a href="quickstart.html">Get ready in two simple steps: Download &amp; install the CRX package, follow the quickstart guide.</a></p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h2>License</h2>
+                    <img src="images/icon3.png" alt="" />
+                    <p>NEBA is published under the Apache License. It includes works licensed under the ASL, EPL and BSD-3 license.</p>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <h2>Compatibility</h2>
+                    <img src="images/icon4.png" alt="" />
+                    <p>NEBA runs flawlessly on AEM&#8482; 5.3 to 5.6 - and AEM&#8482;6 </p>
+                </div>
+            </li>
+        </ul><!--END GRID SERVICES-->
+
+
+        <div class="divider-border"></div>
+
+
+        <h3 class="title">Unsere derzeitigen Projekte</h3>
+
+        <div class="portfolio-grid">
+
+            <ul id="thumbs">
+
+                <li class="col4 item web">
+                    <img src="images/project-item-01.jpg" alt="" />
+                    <div class="col4 item-info">
+                        <h3 class="title"><a href="blog-single.html">Enter title here</a></h3>
+                    </div><!--END ITEM-INFO-->
+                    <div class="item-info-overlay">
+                        <div>
+                            <h4>Project 01</h4>
+                            <p>Etiam eget mi enim, non ultricies nisi voluptatem, illo inventore veritatis et quasi architecto beatae vitae explicabo.</p>
+                            <a href="blog-single.html" class="view">details</a>
+                            <a href="images/project-item-01.jpg" class="preview" data-rel="prettyPhoto[web]">preview</a>
+                        </div>
+                    </div><!--END ITEM-INFO-OVERLAY-->
+                </li>
+
+                <li class="col4 item web">
+                    <img src="images/project-item-02.jpg" alt="" />
+                    <div class="col4 item-info">
+                        <h3 class="title"><a href="blog-single.html">Enter title here</a></h3>
+                    </div><!--END ITEM-INFO-->
+                    <div class="item-info-overlay">
+                        <div>
+                            <h4>Project 02</h4>
+                            <p>Etiam eget mi enim, non ultricies nisi voluptatem, illo inventore veritatis et quasi architecto beatae vitae explicabo.</p>
+                            <a href="blog-single.html" class="view">details</a>
+                            <a href="images/project-item-02.jpg" class="preview" data-rel="prettyPhoto[web]">preview</a>
+                        </div>
+                    </div><!--END ITEM-INFO-OVERLAY-->
+                </li>
+
+                <li class="col4 item web">
+                    <img src="images/project-item-03.jpg" alt="" />
+                    <div class="col4 item-info">
+                        <h3 class="title"><a href="blog-single.html">Enter title here</a></h3>
+                    </div><!--END ITEM-INFO-->
+                    <div class="item-info-overlay">
+                        <div>
+                            <h4>Project 03</h4>
+                            <p>Etiam eget mi enim, non ultricies nisi voluptatem, illo inventore veritatis et quasi architecto beatae vitae explicabo.</p>
+                            <a href="blog-single.html" class="view">details</a>
+                            <a href="images/project-item-03.jpg" class="preview" data-rel="prettyPhoto[web]">preview</a>
+                        </div>
+                    </div><!--END ITEM-INFO-OVERLAY-->
+                </li>
+
+                <li class="col4 item web">
+                    <img src="images/project-item-04.jpg" alt="" />
+                    <div class="col4 item-info">
+                        <h3 class="title"><a href="blog-single.html">Enter title here</a></h3>
+                    </div><!--END ITEM-INFO-->
+                    <div class="item-info-overlay">
+                        <div>
+                            <h4>Project 04</h4>
+                            <p>Etiam eget mi enim, non ultricies nisi voluptatem, illo inventore veritatis et quasi architecto beatae vitae explicabo.</p>
+                            <a href="blog-single.html" class="view">details</a>
+                            <a href="images/project-item-04.jpg" class="preview" data-rel="prettyPhoto[web]">preview</a>
+                        </div>
+                    </div><!-- END ITEM-INFO-OVERLAY -->
+                </li>
+
+            </ul><!-- END UL THUMBS -->
+
+        </div><!-- END PORTFOLIO-GRID -->
+
+    </div><!-- END CONTENT-WRAPPER -->
+
+    <!-- END HOME -->
+
+</div><!-- END WRAPPER -->
+
+{% include footer.ext %}
+
+</body>
 </html>

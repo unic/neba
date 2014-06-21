@@ -1,0 +1,100 @@
+---
+title: quickstart | neba.io
+layout: fullwidth
+---
+<div class="section-title">
+<h1 class="title">Quickstart <span> Get started with NEBA in three steps</span></h1>
+</div><!--END SECTION TITLE-->
+
+<div class="one">
+    <h3 class="title">Step 1: Download and install NEBA</h3>
+
+    <p><strong>Installation in Sling:</strong> <a href="download.html#plain">Download the plain delivery package</a> and install the bundles contained therein.</p>
+    <p><strong>Installation in AEM:</strong> <a href="download.html#aem">Download the CRX delivery package</a> and install it via the package manager.</p>
+
+    <div class="divider-border"></div>
+
+    <h3 class="title">Step 2: Add a blueprint application context to your bundle(s)</h3>
+    <p><strong>It's a simple convention:</strong> Place a spring application context in the OSGI-INF/blueprint folder of your bundle. That's it. Feel free to use this snippet: </p>
+    <p>
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+   http://www.osgi.org/xmlns/blueprint/v1.0.0
+   http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+    <context:component-scan base-package="bundle.package.impl" />
+</beans>
+{% endhighlight %}
+    </p>
+
+    <div class="trigger-button"><span>Hint: Handy plugins for your IDE</span></div>
+    <div class="accordion">
+        <p><span class="dropcap2">I</span> If you're using Eclipse, it is highly recommended to install the spring IDE
+            plugin (update site: <a href="http://dist.springsource.com/release/TOOLS/update/e4.3">http://dist.springsource.com/release/TOOLS/update/e4.3</a>)
+            and the <a href="http://eclipse.org/m2e/download/">M2eclipse plugin</a>. Note that using the latest Eclipse version available is
+            highly recommended before installing the M2E plugin. If you're using Intellij, it is recommended to use the Ultimate Edition, as it provides
+            great Spring support</p>
+    </div><!--END ACCORDION-->
+
+    <div class="divider-border"></div>
+
+    <h3 class="title">Step 3: Use NEBA</h3>
+
+    <p><strong>Write a resource model:</strong> Create a class anywhere inside the <code>bundle.package.impl</code> namespace and annotate it with <code>@ResourceModel</code>. Look at the <a href="apidocs/ResourceModel.html">@ResourceModel API documentation to find out more</a>. Feel free to use this snippet:</p>
+    <p>
+{% highlight java %}
+@ResourceModel(types = "cq:Page")
+public class PageModel {
+    @Children
+    private List<Page> children;
+
+    public List<Page> getChildren() {
+        return this.children;
+    }
+}
+{% endhighlight %}
+    </p>
+    <p><strong>Use the model:</strong> Once this is deployed, you can see your model in the Sling console /system/console/modelregistry. Now, you
+        may adapt any cq:Page resource to this model. For instance using a Spring controller:</p>
+    <p>
+{% highlight java %}
+@Controller
+public class MyController {
+    @RequestMapping(value = "/page/childcount", produces = "text/plain")
+    @ResponseBody
+    public String getNumberOfChildren(@ResourceParam PageModel page) {
+        return page.getChildren().size();
+    }
+}
+{% endhighlight %}
+    </p>
+    Once deployed, you can invoke this controller like so:
+    <p>
+{% highlight bash %}
+GET <host>/bin/mvc.do/page/childcount?page=/content/geometrixx/en
+{% endhighlight %}
+    </p>
+    <div class="divider-border"></div>
+
+    <div class="two-third">
+        <h3 class="title">More background on blueprint and Spring</h3>
+        <p>Blueprint is part of the OSGi specification. NEBA relies on <a href="http://www.eclipse.org/gemini/blueprint/">gemini-blueprint, the open source reference implementation of this standard</a>.</p>
+        <p>A blueprint XML declaration is simply a <a href="http://docs.spring.io/spring/docs/3.2.x/spring-framework-reference/html/beans.html#beans-factory-xml-import">Spring application context</a> -
+            with an <a href="http://www.eclipse.org/gemini/blueprint/documentation/reference/2.0.0.M02/html/index.html">additional blueprint namespace providing support for
+                OSGi service exports and imports, SCR configuration creation and consumption and much more.</a></p>
+    </div><!--END TWO-THIRD-->
+
+    <div class="one-third last">
+        <h3 class="title">More background on @ResourceModels</h3>
+        <p>Follow the <a href="userguide.html">user guide</a> to find out more about the capabilities of <a href="apidocs/resourcemodel.html">@ResourceModel</a>s</p>
+    </div><!--END ONE-THIRD LAST-->
+
+</div><!--END ONE-->
