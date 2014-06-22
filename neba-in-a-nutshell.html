@@ -1,6 +1,8 @@
 ---
 title: NEBA in a nutshell
 layout: fullwidth
+description: An illustration of the vision, strategy and key features of the NEBA project
+twitterAuthor: deploynix
 ---
 
 <div class="section-title">
@@ -13,15 +15,15 @@ layout: fullwidth
 
     <p>
         <strong>With NEBA, applications build with Sling shall be modular and free of system-level concerns,
-        to allow building stable, changeable and high-performing applications. At the same time,
+        resulting in more stable, changeable and high-performing applications. At the same time,
         using NEBA shall be like using a good DSL: Simple, expressive and fun.</strong></p>
 </div>
 
 <div class="one-half last">
     <h2 class="title">Approach</h2>
 
-    <p>NEBA integrates the Spring framework into Sling, in order to allow using all of it's features to apply best-practice solutions
-    to the majority of system-level concerns, for instance in the area of enterprise application integration. NEBA does so in full compliance with the open core philosophy -
+    <p>NEBA integrates the Spring Framework into Sling. It makes available all of Spring's features to allow using mature, best-practice solutions
+    for the majority of system-level concerns common to Sling-based applications. NEBA does so in full compliance with the open core philosophy -
     using exclusively mature, standardized open source software - gemini blueprint - for the integration into OSGi.</p>
     <p>All Spring and Sling features are accessible to developers using a lightweight, well documented API that does not couple
     the domain -specific implementation code to any implementation details of Sling, Spring or NEBA.</p>
@@ -48,17 +50,20 @@ layout: fullwidth
     <h2 class="title" id="features">Main features</h2>
     <div class="one-half">
         <h3 class="title" id="resourcemodels">Resource models</h3>
+        <p>
         Business logic in Sling is usually written for a specific kind of
         <a href="http://sling.apache.org/documentation/the-sling-engine/resources.html">resource</a>. However, the connection
-        between the resource and it's model is usually unclear - either, code is directly used in views, introducing undesired coupling,
+        between the resource and it's model is usually problematic - either, code is directly used in views, introducing undesired coupling,
         or <a href="http://sling.apache.org/documentation/the-sling-engine/adapters.html">Adapter Factories</a> are written, thus introducing
-        complex system-level code in the domain specific implementations.
-
-        Here, NEBA offers a simple, declarative way to write models for resources: The @ResourceModel annotation. With just one annotations, Java POJO's become
+        complex system-level code in the domain specific implementations.Here, NEBA offers a simple, declarative way to write models for resources: The @ResourceModel annotation.
+        </p>
+        <p>
+        Once annotated, Java POJO's become
         <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-introduction">Spring Beans</a> representing
-        specific resource types. Whenever you adapt a suitable resource to this model - or any of it's interfaces or super classes - the properties
-        of the resource are automatically injected into the module. You can thus use the entire power of Spring and all of the Features of Sling and the JCR - with just
+        specific resource types. Whenever a suitable resource is adapted to this model - or any of it's interfaces or super classes - the properties
+        of the resource are automatically injected into the module. One can thus use the entire power of Spring and all of the Features of Sling and the JCR - with just
         one annotation:
+        </p>
 <p>
 {% highlight java %}
 @ResourceModel(types = "sling/resource/type")
@@ -70,8 +75,8 @@ public class MyModel {
 }
 {% endhighlight %}
 </p>
-        You may write any number of resource models for any number of resource or JCR primary types. For an in-depth documentation of resource model
-        features and mapping support, see the <a href="userguide.html#resourcemodels">user guide on @ResourceModels</a>.
+        It is possible to write any number of resource models for any number of resource or JCR primary types. For an in-depth documentation of resource model
+        features, see the <a href="userguide.html#resourcemodels">user guide on @ResourceModels</a>.
 
     </div>
     <div class="one-half last">
@@ -79,8 +84,8 @@ public class MyModel {
         Sling has excellent support for writing <a href="http://sling.apache.org/documentation/the-sling-engine/servlets.html">Servlets and Scripts</a>
         for resources. However, it does not provide you with an out-of-the box solution for parameter handling, validation, data binding and so forth,
         but instead offers well documented extension points. Spring, on the other hand, offers <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">declarative creation of RESTful controllers</a>.
-        NEBA integrates Spring MVC in a conflict-free fashion. Any Spring controller is automatically available underneath /bin/mvc.do - a Sling servlet -
-        and does thus not interfere with <a href="http://sling.apache.org/documentation/the-sling-engine/url-to-script-resolution.html">Sling's generic MVC concept for resource resolution</a>.
+        NEBA integrates Spring MVC in a conflict-free fashion. All Spring controllers are automatically available underneath /bin/mvc.do - a Sling servlet -
+        and do thus not interfere with <a href="http://sling.apache.org/documentation/the-sling-engine/url-to-script-resolution.html">Sling's generic MVC concept for resource resolution</a>.
 <p>
 {% highlight java %}
 @Controller
@@ -92,10 +97,12 @@ public class MyController {
  }
 {% endhighlight %}
 </p>
+        <p>
         All MVC features are supported - including first-class support for Sling specific request parameters
         such as the Resource resolver. For an in-depth documentation of the Spring MVC support, see the
         <a href="userguide.html#springmvc">user guide on Spring MVC</a> and the
-        <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC documentation</a>
+        <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC documentation</a>.
+        </p>
     </div>
 
     <div class="divider-border"></div>
@@ -103,7 +110,7 @@ public class MyController {
     <div class="one-half" id="resourcemodeltooling">
         <h3 class="title">@ResourceModel tooling</h3>
         <p>
-            To find and analyze resource models, two <a href="http://sling.apache.org/documentation/bundles/web-console-extensions.html">Sling web console extensions</a>
+            To view and analyze resource models, two <a href="http://sling.apache.org/documentation/bundles/web-console-extensions.html">Sling web console extensions</a>
             are provided by NEBA.
         </p>
         <p>
@@ -119,10 +126,23 @@ public class MyController {
     </div>
     <div class="one-half last">
         <h3 class="title">Rendering beyond resources</h3>
+        <p>
         NEBA integrates <a href="http://velocity.apache.org/">Apache Velocity</a> to allow rendering beyond resources. This is useful when rendering things that are not resources -
         for instance database or web service objects - repeatedly in your project. Furthermore, velocity can be used to render
         objects outside the scope of a request.<br />
         For an in-depth documentation of the Velocity integration features and mapping support, see the <a href="userguide.html#usingvelocity">user guide on velocity</a>.
+        </p>
+
+        <h3 class="title">Monitoring and downloading log files</h3>
+        <p>
+        To let engineering analyze issue quickly, NEBA includes a <a href="http://sling.apache.org/documentation/bundles/web-console-extensions.html">Sling web console extensions</a>
+        that allows monitoring, tailing and downloading log files - including filtering and highlighting.
+        Serial access to the machine running your instance is no longer required - authenticated
+        access to the system does suffice.
+        </p>
+        <p>
+        <img src="images/neba-in-a-nutshell/logviewer.png" />
+        </p>
     </div>
 </div>
 
