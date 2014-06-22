@@ -36,7 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Tests {@link SelftestRegistrar} using a bundle mock.
- * @author olaf.otto
+ * @author Olaf Otto
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("SelftestRegistrarTest.xml")

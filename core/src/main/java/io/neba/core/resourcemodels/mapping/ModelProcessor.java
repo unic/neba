@@ -32,7 +32,6 @@ import java.lang.reflect.Method;
  * before and the {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isPostMappingCallback post-mapping methods}
  * after the {@link io.neba.api.annotations.ResourceModel}'s mapping is complete.
  *
- * @author Jens Suhr
  * @author Olaf Otto
  */
 @Service
