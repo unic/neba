@@ -24,21 +24,22 @@
     <meta property="og:description" content="{{page.description}}" />
     <meta property="og:site_name" content="neba.io" />
 
-    <link rel="stylesheet" type="text/css" href="/css/style.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="/css/print.css" media="print" />
-    <link rel="stylesheet" type="text/css" href="/css/blog.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="{{site.contextpath}}/css/style.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="{{site.contextpath}}/css/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="{{site.contextpath}}/css/blog.css" media="screen" />
     <link href='http://fonts.googleapis.com/css?family=Oswald:400,700,300' rel='stylesheet' type='text/css' />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" type="text/css" href="/css/highlight.css"/>
-    <script type="text/javascript" src="/javascript/jquery.min.js"></script>
-    <script type="text/javascript" src="/javascript/custom.js"></script>
-    <script type="text/javascript" src="/javascript/header.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{site.contextpath}}/css/highlight.css"/>
+
+    <script type="text/javascript" src="{{site.contextpath}}/javascript/jquery.min.js"></script>
+    <script type="text/javascript" src="{{site.contextpath}}/javascript/custom.js"></script>
+    <script type="text/javascript" src="{{site.contextpath}}/javascript/header.js"></script>
 
     <!-- PrettyPhoto -->
-    <link rel="stylesheet" href="/css/prettyPhoto.css" type="text/css" media="screen" />
-    <script type="text/javascript" src="/javascript/prettyPhoto.js"></script>
+    <link rel="stylesheet" href="{{site.contextpath}}/css/prettyPhoto.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="{{site.contextpath}}/javascript/prettyPhoto.js"></script>
 
     <!-- Flexslider JavaScript Files -->
-    <script type="text/javascript" src="/javascript/jquery.flexslider.js"></script>
-    <link rel="stylesheet" href="/css/flexslider.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="{{site.contextpath}}/javascript/jquery.flexslider.js"></script>
+    <link rel="stylesheet" href="{{site.contextpath}}/css/flexslider.css" type="text/css" media="screen" />
 </head>

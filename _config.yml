@@ -2,3 +2,4 @@ pygments: true
 github: [Repository metadata]
 markdown: kramdown
 url: http://www.neba.io
+contextpath: /neba

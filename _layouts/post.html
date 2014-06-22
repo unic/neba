@@ -22,7 +22,7 @@
                 <ul class="bra_recent_entries">
                     {% for post in site.posts %}
                     <li>
-                        <a href="{{ post.url }}">{{ post.title }}</a>
+                        <a href="{{site.contextpath}}{{ post.url }}">{{ post.title }}</a>
                         <span class="date">{{post.date | date: "%B %d, %Y" }}</span>
                     </li>
                     {% endfor %}

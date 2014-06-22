@@ -5,25 +5,25 @@
     <div class="header clear">
 
         <div id="logo">
-            <a href="/index.html"><img src="/images/neba-logo.png" alt="" /></a>
+            <a href="{{site.contextpath}}/index.html"><img src="{{site.contextpath}}/images/neba-logo.png" alt="" /></a>
         </div><!--END LOGO-->
 
         <div id="primary-menu">
 
             <ul class="menu">
-                <li><a href="/index.html" class="current">Home</a>
+                <li><a href="{{site.contextpath}}/index.html" class="current">Home</a>
                 </li>
-                <li><a href="/quickstart.html">Quickstart</a></li>
-                <li><a href="/download.html">Download</a></li>
+                <li><a href="{{site.contextpath}}/quickstart.html">Quickstart</a></li>
+                <li><a href="{{site.contextpath}}/download.html">Download</a></li>
                 <li><a href="#">Documentation</a>
                     <ul>
-                        <li><a href="/neba-in-a-nutshell.html">NEBA in a nutshell</a></li>
-                        <li><a href="/userguide.html">User guide</a></li>
-                        <li><a href="/architecture.html">Achitecture</a></li>
-                        <li><a href="/docs.html">API docs</a></li>
+                        <li><a href="{{site.contextpath}}/neba-in-a-nutshell.html">NEBA in a nutshell</a></li>
+                        <li><a href="{{site.contextpath}}/userguide.html">User guide</a></li>
+                        <li><a href="{{site.contextpath}}/architecture.html">Achitecture</a></li>
+                        <li><a href="{{site.contextpath}}/docs.html">API docs</a></li>
                     </ul>
                 </li>
-                <li><a href="/contributing.html">Contributing</a></li>
+                <li><a href="{{site.contextpath}}/contributing.html">Contributing</a></li>
             </ul><!--END UL-->
 
         </div><!--END PRIMARY MENU-->
