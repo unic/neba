@@ -10,7 +10,7 @@ twitterAuthor: deploynix
 </div><!--END SECTION TITLE-->
 
 <div class="one-half">
-    <h2 class="title">Installation in Adobe AEM&#8482;</h2>
+    <h2 class="title" id="installation">Installation in Adobe AEM&#8482;</h2>
 
     <p>The following ZIP file is a CRX package containing both NEBA and the runtime dependencies not provided by Sling,
     e.g. Spring and Gemini Blueprint.</p>
@@ -37,9 +37,10 @@ twitterAuthor: deploynix
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title">Using MAVEN</h2>
+    <h2 class="title" id="integration">Using MAVEN</h2>
 
-    <p>NEBA is build using Maven. Both core and API are available from maven central:</p>
+    <p>NEBA is build using Maven. Both core and API are available from maven central.
+        For developing with NEBA, including the API in your project is all you need to do:</p>
 <p>
 {% highlight xml %}
 <dependency>
@@ -47,6 +48,12 @@ twitterAuthor: deploynix
     <artifactId>io.neba.neba-api</artifactId>
     <version>{{site.nebaVersion}}</version>
 </dependency>
+{% endhighlight %}
+</p>
+
+<p>If you'd also like to browse or debug the core, add it to your project's dependencies like so:</p>
+<p>
+{% highlight xml %}
 <dependency>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-core</artifactId>
@@ -54,6 +61,8 @@ twitterAuthor: deploynix
 </dependency>
 {% endhighlight %}
 </p>
+
+
 
 <p>You may also want to configure the following repositories in your project to obtain the artifacts
 NEBA depends on:</p>
