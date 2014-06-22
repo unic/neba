@@ -11,8 +11,7 @@
         <div id="primary-menu">
 
             <ul class="menu">
-                <li><a href="{{site.contextpath}}/index.html" class="current">Home</a>
-                </li>
+                <li><a href="{{site.contextpath}}/index.html">Home</a></li>
                 <li><a href="{{site.contextpath}}/quickstart.html">Quickstart</a></li>
                 <li><a href="{{site.contextpath}}/download.html">Download</a></li>
                 <li><a href="#">Documentation</a>

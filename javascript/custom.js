@@ -252,3 +252,20 @@ $(function(){
              .css("cursor", "pointer");
     });
 });
+
+
+/***************************************************
+ NAVIGATION HIGHLIGHTING
+ ***************************************************/
+$(function(){
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+
+    $("#primary-menu").find("a").each(function(idx, elem){
+        var $self = $(elem);
+        if (window.location.href.endsWith($self.attr("href"))) {
+            $self.parents("li").children("a").attr("class", "current");
+        }
+    });
+});
