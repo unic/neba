@@ -1,0 +1,79 @@
+---
+title: Download NEBA
+layout: fullwidth
+---
+
+<div class="section-title">
+    <h1 class="title">Download NEBA:<span> Choose your package</span></h1>
+</div><!--END SECTION TITLE-->
+
+<div class="one-half">
+    <h2 class="title">Installation in AEM&#8482;</h2>
+
+    <p>The following ZIP file is a CRX package containing both NEBA and the runtime dependencies not provided by Sling,
+    e.g. Spring and Gemini Blueprint.</p>
+
+    <p>
+        <a href="assets/releases/neba-{{site.nebaVersion}}-crx.zip" class="button large rounded grey">Download the AEM package</a>
+    </p>
+
+    <p>
+        Note this installation package is not (yet) available via maven central,
+        as it essentially re-packages artifacts already available via public maven repositories.
+    </p>
+</div>
+
+<div class="one-half last">
+    <h2 class="title">Installation in Apache Sling</h2>
+
+    <p>
+        We recommend obtaining the AEM package ZIP file and install the bundles contained therein.
+    </p>
+</div>
+
+<div class="divider-border"></div>
+
+<div class="one">
+    <h2 class="title">Using MAVEN</h2>
+
+    <p>NEBA is build using Maven. Both core and API are available from maven central:</p>
+<p>
+{% highlight xml %}
+<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-api</artifactId>
+    <version>{{site.nebaVersion}}</version>
+</dependency>
+<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-core</artifactId>
+    <version>{{site.nebaVersion}}</version>
+</dependency>
+{% endhighlight %}
+</p>
+
+<p>You may also want to configure the following repositories in your project to obtain the artifacts
+NEBA depends on:</p>
+
+<p>
+{% highlight xml %}
+<repositories>
+    <repository>
+        <id>com.springsource.repository.bundles.release</id>
+        <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+        <url>http://repository.springsource.com/maven/bundles/release</url>
+    </repository>
+    <repository>
+        <id>com.springsource.repository.bundles.external</id>
+        <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+        <url>http://repository.springsource.com/maven/bundles/external</url>
+    </repository>
+    <repository>
+        <id>com.springsource.repository.bundles.milestone</id>
+        <name>EBR Spring Milestone Repository</name>
+        <url>http://repository.springsource.com/maven/bundles/milestone</url>
+    </repository>
+</repositories>
+{% endhighlight %}
+</p>
+</div>

@@ -4,7 +4,7 @@ layout: fullwidth
 ---
 
 <div class="section-title">
-    <h1 class="title">NEBA User guide <span>a guide to developing with NEBA</span></h1>
+    <h1 class="title">NEBA User guide:<span> developing with NEBA</span></h1>
 </div>
 
 <div class="one">
@@ -64,10 +64,10 @@ public class Carousel {
 <div class="trigger-button"><span>Hint: Background information on resource models</span></div>
 <div class="accordion">
     <p><span class="dropcap2">C</span>lasses annotated with @ResourceModel are <a
-            href="http://static.springsource.org/spring/docs/3.2.x/spring-framework-reference/html/beans.html#beans-definition">regular
+            href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-definition">regular
         spring beans</a>. If you look at the @ResourceModel annotation, you will notice that it is itself annotated
         with @Component (a spring stereotype) and @Scope(PROTOTYPE). <a
-                href="http://static.springsource.org/spring/docs/3.2.x/spring-framework-reference/html/beans.html#beans-classpath-scanning">With
+                href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-classpath-scanning">With
             these annotations, the class is detected by Spring's classpath scanning</a>. It is entirely possible to
         give your model a different scope (such as singleton) if it represents a &quot;static&quot; piece of
         content, such as configuration content stored under /etc/. Furthermore, all capabilities of the spring
@@ -550,7 +550,7 @@ I contain the following pages:<br />
     resource loading incompatible with OSGi) to enable clean, simple and RESTful MVC with fixed URLs.</p>
 
 <p>To avoid conflict with resource resolution and servlet mappings, <a
-        href="http://static.springsource.org/spring/docs/3.2.x/spring-framework-reference/html/mvc.html">Spring MVC</a>
+        href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC</a>
     is integrated into Sling using a Servlet with the fixed URL &quot;/bin/mvc&quot; (you may use servlet resolver
     mapping to change this path). Since each distinct path in sling mapps to a different resource (Servlets are
     resources, too), the path /bin/mvc/url would not point to the /bin/mvc/ servlet. Thus, to have a request handled by
@@ -604,11 +604,11 @@ public class DemoController {
 <p>Here, a request parameter &quot;page&quot; is expected and treated as a path to a resource. This resource is
     resolved, and is adapted to the parameter type in case the parameter type is not &quot;Resource&quot;. See the
     ResourceParam annotation for details.</p><p>Note that the annotation-driven controllers have a lot more very powerful options. See the <a
-        href="http://docs.spring.io/spring/docs/3.2.x/spring-framework-reference/html/mvc.html">Spring MVC
+        href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC
     documentation</a> for more examples. NEBA also supports Spring&apos;s special view names for redirecting and
     forwarding views: returning &quot;redirect:/some/path&quot; from a controller method will cause a redirect to
     /some/path, returning forward:/some/path will forward the request to /some/path, see also
-    <a href="http://static.springsource.org/spring/docs/3.2.x/spring-framework-reference/html/mvc.html#mvc-redirecting">MVC
+    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-redirecting">MVC
     redirecting</a>.</p><p>You may also directly work with the response. For this, provide your own
     org.springframework.web.servlet.View in the org.springframework.web.servlet.ModelAndView provided by the controller;
     this way, your View's render method is used to render the response. Alternatively, you may also simply write to the
@@ -630,13 +630,13 @@ public class DemoController {
 
 <h3>Customizing the Spring MVC infrastructure</h3>
 <p>You may provide implementations of
-    <a href="http://static.springsource.org/spring/docs/3.2.x/javadoc-api/org/springframework/web/servlet/HandlerAdapter.html">Handler adapters</a>,
-    <a href="http://static.springsource.org/spring/docs/3.2.x/javadoc-api/org/springframework/web/servlet/HandlerExceptionResolver.html">Handler exception resolvers</a>
-    and <a href="http://static.springsource.org/spring/docs/3.2.x/javadoc-api/org/springframework/web/servlet/HandlerMapping.html">Handler mappings</a>
+    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerAdapter.html">Handler adapters</a>,
+    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerExceptionResolver.html">Handler exception resolvers</a>
+    and <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerMapping.html">Handler mappings</a>
     in your application context and / or use Spring's &lt;mvc&gt; XML namespace configuration without
     limitations.</p><p>Lifecycle callbacks</p><p>Additional functionality is usually provided by simply adjusting the
-    spring context configuration to the project needs (i.e. configuring <a href="http://static.springsource.org/spring/docs/3.2.x/spring-framework-reference/html/beans.html">beans</a>
-    and customizing the bean <a href="http://static.springsource.org/spring/docs/3.2.x/spring-framework-reference/html/beans.html#beans-factory-lifecycle">lifecycle</a>).
+    spring context configuration to the project needs (i.e. configuring <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html">beans</a>
+    and customizing the bean <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-factory-lifecycle">lifecycle</a>).
 </p>
 
 <p>However, there is an additional lifecycle phase of @ResourceModels in beans: after creation, dependency injection

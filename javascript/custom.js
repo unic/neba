@@ -241,3 +241,14 @@ $(window).load(function(){
 	var $item_mask = $("<div />", {"class": "item-mask"});
 	$("ul.shaped .item-container, ul.comment-list .avatar").append($item_mask)
 })
+
+/***************************************************
+ LINKS ON <DIV>s
+ ***************************************************/
+$(function(){
+    $("div[data-href]").each(function(idx, elem){
+        var $self = $(elem);
+        $self.click(function() {window.location.href = $self.attr("data-href"); return false;})
+             .css("cursor", "pointer");
+    });
+});
