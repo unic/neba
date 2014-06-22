@@ -22,36 +22,20 @@
                 <h3>Latest posts</h3>
 
                 <ul>
-                    <li><a href="#">Praesent convallis metus imperdiet.</a>	</li>
-
-                    <li><a href="#">Curabitur pharetra, ante ac suscipit suscipit.</a></li>
-
-                    <li><a href="#">Imperdiet the dui posuere sollicitudin totam.</a></li>
+                    {% for post in site.posts %}
+                    <li>
+                        <a href="{{ post.url }}">{{ post.title }}</a>
+                    </li>
+                    {% endfor %}
                 </ul><!--END UL-->
             </div><!--END ONE-FOURTH-->
 
 
             <div class="one-fourth">
-                <h3>Dritte Footer-Spalte</h3>
-                <ul>
-                    <li><a href="#">Praesent convallis metus imperdiet.</a>	</li>
-
-                    <li><a href="#">Curabitur pharetra, ante ac suscipit suscipit.</a></li>
-
-                    <li><a href="#">Imperdiet the dui posuere sollicitudin totam.</a></li>
-                </ul><!--END UL-->
             </div><!--END ONE-FOURTH-->
 
 
             <div class="one-fourth last">
-                <h3>Vierte Footer-Spalte</h3>
-                <ul>
-                    <li><a href="#">Praesent convallis metus imperdiet.</a>	</li>
-
-                    <li><a href="#">Curabitur pharetra, ante ac suscipit suscipit.</a></li>
-
-                    <li><a href="#">Imperdiet the dui posuere sollicitudin totam.</a></li>
-                </ul><!--END UL-->
             </div><!--END ONE-FOURTH LAST-->
 
         </div><!--END FOOTER-TOP-->
@@ -64,7 +48,7 @@
             </div><!--END ONE-HALF-->
 
             <div class="one-half text-align-right last">
-                <p>Lorem ipsum ...<a href="#">Link</a></p>
+                <p>Build with love and <a href="http://jekyllrb.com">Jekyll</a>, hosted on <a href="https://pages.github.com/">GitHub pages</a>.</p>
             </div><!--END ONE-HALF TRIGGER-FOOTER LAST-->
 
         </div><!--END FOOTER-BOTTOM-->

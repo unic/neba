@@ -7,14 +7,16 @@ layout: fullwidth
 </div><!--END SECTION TITLE-->
 
 <div class="one">
-    <h3 class="title">Step 1: Download and install NEBA</h3>
+    <h2 class="title">Step 1: Download and install NEBA</h2>
 
     <p><strong>Installation in Sling:</strong> <a href="download.html#plain">Download the plain delivery package</a> and install the bundles contained therein.</p>
     <p><strong>Installation in AEM:</strong> <a href="download.html#aem">Download the CRX delivery package</a> and install it via the package manager.</p>
+</div>
 
     <div class="divider-border"></div>
 
-    <h3 class="title">Step 2: Add a blueprint application context to your bundle(s)</h3>
+<div class="one">
+    <h2 class="title">Step 2: Add a blueprint application context to your bundle(s)</h2>
     <p><strong>It's a simple convention:</strong> Place a spring application context in the OSGI-INF/blueprint folder of your bundle. That's it. Feel free to use this snippet: </p>
     <p>
 {% highlight xml %}
@@ -43,10 +45,13 @@ layout: fullwidth
             highly recommended before installing the M2E plugin. If you're using Intellij, it is recommended to use the Ultimate Edition, as it provides
             great Spring support</p>
     </div><!--END ACCORDION-->
+</div>
 
-    <div class="divider-border"></div>
+<div class="divider-border"></div>
 
-    <h3 class="title">Step 3: Use NEBA</h3>
+<div class="one">
+
+    <h2 class="title">Step 3: Use NEBA</h2>
 
     <p><strong>Write a resource model:</strong> Create a class anywhere inside the <code>bundle.package.impl</code> namespace and annotate it with <code>@ResourceModel</code>. Look at the <a href="apidocs/ResourceModel.html">@ResourceModel API documentation to find out more</a>. Feel free to use this snippet:</p>
     <p>
@@ -82,10 +87,13 @@ public class MyController {
 GET <host>/bin/mvc.do/page/childcount?page=/content/geometrixx/en
 {% endhighlight %}
     </p>
-    <div class="divider-border"></div>
+</div>
 
+<div class="divider-border"></div>
+
+<div class="one">
     <div class="two-third">
-        <h3 class="title">More background on blueprint and Spring</h3>
+        <h2 class="title">More background on blueprint and Spring</h2>
         <p>Blueprint is part of the OSGi specification. NEBA relies on <a href="http://www.eclipse.org/gemini/blueprint/">gemini-blueprint, the open source reference implementation of this standard</a>.</p>
         <p>A blueprint XML declaration is simply a <a href="http://docs.spring.io/spring/docs/3.2.x/spring-framework-reference/html/beans.html#beans-factory-xml-import">Spring application context</a> -
             with an <a href="http://www.eclipse.org/gemini/blueprint/documentation/reference/2.0.0.M02/html/index.html">additional blueprint namespace providing support for
@@ -93,8 +101,8 @@ GET <host>/bin/mvc.do/page/childcount?page=/content/geometrixx/en
     </div><!--END TWO-THIRD-->
 
     <div class="one-third last">
-        <h3 class="title">More background on @ResourceModels</h3>
-        <p>Follow the <a href="userguide.html">user guide</a> to find out more about the capabilities of <a href="apidocs/resourcemodel.html">@ResourceModel</a>s</p>
+        <h2 class="title">More background on @ResourceModels</h2>
+        <p>Follow the <a href="userguide.html">user guide</a> to find out more about the capabilities of <a href="/apidocs/resourcemodel.html">@ResourceModel</a>s</p>
     </div><!--END ONE-THIRD LAST-->
 
 </div><!--END ONE-->

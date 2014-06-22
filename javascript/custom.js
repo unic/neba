@@ -119,7 +119,6 @@ $(document).ready(function(){
 			$(this).addClass("active");
 		 } 
 	 });
-	$('.accordion').hide();
 });
 
 /***************************************************

@@ -22,7 +22,7 @@ html[xmlns] .slides { display: block; }
 .no-js .slides > li:first-child { display: block; }
 /* FlexSlider Default Theme
 *********************************/
-.flexslider { position: relative; 5px; zoom: 1; }
+.flexslider { position: relative; zoom: 1; }
 .flexslider .slides { zoom: 1;}
 .flexslider .slides > li { position: relative; }
 /* Suggested container for "Slide" animation setups. Can replace this with your own, if you wish */
@@ -30,10 +30,10 @@ html[xmlns] .slides { display: block; }
 /* Caption style */
 /* IE rgba() hack */
 .flex-caption { zoom: 1; }
-.flex-caption {	z-index:500; position:absolute; bottom: 0px; left: 92px; background:#444; color:#fff; max-width: 70%; padding: 14px 20px; margin-bottom:0; }
+.flex-caption {	z-index:500; position:absolute; bottom: 0px; left: 92px; background:#444; color:#fff; max-width: 70%; padding: 12px 20px; margin-bottom:0; }
 /* Direction Nav */
 .flex-direction-nav { height: 0; }
-.flex-direction-nav li a { background: url(../images/sprite.png) no-repeat scroll 0 0 #444; bottom: 0px; width: 45px; height: 45px; position: absolute; text-indent: -999em; }
+.flex-direction-nav li a { background: url(../images/sprite.png) no-repeat scroll 0 0 #444; bottom: 0px; width: 45px; height: 44px; position: absolute; text-indent: -999em; }
 .flex-direction-nav li a:hover { }
 .flex-direction-nav li .prev { left: 0px; background-position: 17px -212px; }
 .flex-direction-nav li .next { left: 46px;background-position: 17px -282px; }

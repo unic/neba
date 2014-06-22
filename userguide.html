@@ -3,6 +3,11 @@ title: NEBA User Guide
 layout: fullwidth
 ---
 
+<div class="section-title">
+    <h1 class="title">NEBA User guide <span>a guide to developing with NEBA</span></h1>
+</div>
+
+<div class="one">
 <h2>Table of contents</h2>
 <ul class="colored-counter-list">
     <li><a href="#installing">Installing NEBA</a></li>
@@ -12,15 +17,20 @@ layout: fullwidth
     <li><a href="#springmvc">Using Spring MVC in Sling</a></li>
     <li><a href="#extending">Extending NEBA</a></li>
 </ul>
+</div>
 
 <div class="divider-border"></div>
 
+<div class="one">
 <h2 id="installing">Installing and integrating NEBA</h2>
 <p>The fastest way to start with NEBA is to follow the
     following <a href="quickstart.html">Quick start guide</a>.</p>
 
+</div>
+
 <div class="divider-border"></div>
 
+<div class="one">
 <h2 id="resourcemodels">Writing @ResourceModels</h2>
 <p>Let's assume we need a simple JAVA model for the geometrixx site, specifically, for the  &quot;carousel&quot; component.
     The carousel has the resource type &quot;foundation/components/carousel&quot;:</p>
@@ -263,7 +273,7 @@ public class MyVariableResolver implements PlaceholderVariableResolver {
 </p>
 
 <p>This tutorial uses &quot;Resource&quot; for simplicity's sale. If you specify a different type, NEBA will
-    automatically try to adapt  the referenced Resource to the target type. Instead of List<Resource&gt; pages in
+    automatically try to adapt  the referenced Resource to the target type. Instead of List&lt;Resource&gt; pages in
     the above example, you could also provide a model for pages and write the following:</p>
 
 <p>
@@ -366,8 +376,11 @@ public class MyModel {
 
 <p>Likewise, @PreMapping allows for method execution before any properties of the resource are mapped.</p>
 
+</div>
+
 <div class="divider-border"></div>
 
+<div class="one">
 <h2 id="beanscopes">Support for web-specific bean scopes</h2>
 <p>Beans in Spring have scopes. By default, beans are application scoped
     (i.e. singletons). @ResourceModels have prototypical scope, i.e. they are re-created every time they are obtained from
@@ -390,8 +403,11 @@ public class MyType {
     inevitable, storing it in a shared data store (e.g. a shared JCR repository or relational DB) and retrieving it upon
     request is a much more scalable, cleaner solution.</p>
 
+</div>
+
 <div class="divider-border"></div>
 
+<div class="one">
 <h2 id="usingvelocity">Rendering beyond resources with velocity</h2>
 
 <p>While JSP provides solid templating for Sling, it's not that great at rendering objects that are not resources. Custom models, e.g.
@@ -446,7 +462,7 @@ public class MyType {
     of the interfaces, it will use the supertype and its interfaces and so on. This way, you can use the type hierarchy
     to define default views for types and provide specialized views for derived types.  NEBA stores the templates in
     a hierarchy matching the object types package name to avoid name collisions. for a type called my.package.Foo, the
-    template is thus <renderer root path&gt;/my/package/Foo.vlt. Try it: create the folder /java/util/ in
+    template is thus &lt;renderer root path&gt;/my/package/Foo.vlt. Try it: create the folder /java/util/ in
     /apps/neba/views/ and place a template called Date.vlt in it:</p>
 
 <p>
@@ -511,7 +527,7 @@ I contain the following pages:<br />
     (this is considered bad practice), i.e. to add scripting context variables, export a Service of the type
     BindingsValuesProvider. The &quot;javax.script.name&quot; service property must either be &quot;all&quot; or &quot;velocity&quot;.
 </p><h3>Providing additional context to velocity scripts</h3><p>Besides the <em>BindingsValuesProvider</em>, you can
-    also add additional key/value pairs to the context of a specific <neba:render ... /&gt; call by adding arbitrary
+    also add additional key/value pairs to the context of a specific &lt;neba:render ... /&gt; call by adding arbitrary
     attributes to the tag, like so:</p>
 <p>
 {% highlight xml %}<neba:render object="${m}" cssClasses="class1 class2" highlight="${highlight}" />{% endhighlight %}
@@ -519,9 +535,11 @@ I contain the following pages:<br />
 
 <p>This will lead to the variables &quot;${cssClasses}&quot; and &quot;${highlight}&quot; to become available in
     the velocity script of the corresponding rendering process.</p>
+</div>
 
 <div class="divider-border"></div>
 
+<div class="one">
 <h2 id="springmvc">Using Spring MVC in Sling</h2>
 
 <p>By default, Sling supports two kinds of scripts: JSPs to render arbitrary JCR resources and <a href="http://sling.apache.org/site/servlets.html">Servlets</a>.
@@ -603,9 +621,11 @@ public class DemoController {
     name, like so:</p>
 
 <img src="images/userguide/mvc-logger-configuration.png" />
+</div>
 
 <div class="divider-border"></div>
 
+<div class="one">
 <h2 id="extending">Extending NEBA</h2>
 
 <h3>Customizing the Spring MVC infrastructure</h3>
@@ -642,3 +662,4 @@ cache.</em>
 This cache can be enabled or disabled via the Felix console (configuration tab). If you would like
 to provide your own caching implementation, consult the Javadoc of the <em>ResourceModelCache</em> <em>for further
 information.</em></p>
+</div>

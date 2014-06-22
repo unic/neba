@@ -19,7 +19,7 @@ $(window).load(function() {
 		animation: "fade",  
 		slideDirection: "",  
 		slideshow: true,              
-		slideshowSpeed: 5000,
+		slideshowSpeed: 8000,
 		animationDuration: 500,
 		directionNav: true, 
 		controlNav: false  
@@ -35,7 +35,7 @@ $(window).load(function() {
 		animation: "fade",  
 		slideDirection: "",  
 		slideshow: true,              
-		slideshowSpeed: 3500,      
+		slideshowSpeed: 5000,
 		animationDuration: 500,
 		directionNav: true, 
 		controlNav: false          

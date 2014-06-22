@@ -25,7 +25,7 @@ CSS overview:
 				      RESET
 ---------------------------------------------------*/
 pre,code{
-	white-space:pre;
+	white-space:pre-wrap;
 	padding:20px;
 }
 pre{
@@ -815,12 +815,14 @@ ul.colored-counter-list > li:before {
 	cursor:pointer;
 }
 .trigger-button span {
-	padding-left: 15px;
+    display: block;
+    margin: 0 20px;
 }
 .trigger-button.active { 
 	background: url(../images/bullet-toggle.png) no-repeat right -20px #f8f8f8;
 }
 .accordion {
+    display: none;
 	float: left;
 	padding: 8px 15px 22px 15px;
 }

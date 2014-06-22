@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+{% include head.ext %}
+
+<body id="top">
+
+{% include header.ext %}
+
+<div id="wrapper">
+
+    <!-- START BLOG -->
+
+    <div class="content-wrapper clear">
+
+        {{content}}
+
+        <div id="sidebar">
+
+            <div class="widget">
+                <h3 class="title">Related posts</h3>
+                <ul class="bra_recent_entries">
+                    {% for post in site.posts %}
+                    <li>
+                        <a href="{{ post.url }}">{{ post.title }}</a>
+                        <span class="date">{{post.date | date: "%B %d, %Y" }}</span>
+                    </li>
+                    {% endfor %}
+                </ul><!--END UL-->
+            </div><!--END WIDGET-->
+
+        </div><!--END SIDEBAR-->
+
+    </div><!--END CONTENT-WRAPPER-->
+
+    <!-- END BLOG -->
+
+</div><!--END WRAPPER-->
+
+{% include footer.ext %}
+
+</body>
+</html>
