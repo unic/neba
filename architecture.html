@@ -49,7 +49,7 @@ twitterAuthor: deploynix
 <div class="one">
     <h2 class="title" id="modules">Modules view</h2>
 
-    <p>NEBA is comprised of the following modules. Each module is represented by a single OSGi artifact (bundle) and a corresponding maven module.</p>
+    <p>NEBA consists of the following modules. Each module is represented by a single OSGi bundle and a corresponding maven module.</p>
 
     <img src="images/architecture/project-modules-overview.png">
 </div>
@@ -59,7 +59,7 @@ twitterAuthor: deploynix
 <div class="one">
     <h2 class="title" id="corepackages">Core packages view</h2>
 
-    <p>Each package of the core represents a semantically grouped amount of distinct features. The following diagram shows the most important feature groups
+    <p>Each package of the core represents a semantically grouped amount of features. The following diagram shows the most important feature groups
     and illustrates the overall design approach of the core</p>
 
     <img src="images/architecture/io.neba.core.png">
@@ -70,7 +70,7 @@ twitterAuthor: deploynix
 <div class="one">
     <h2 class="title" id="postprocessing">Core feature view: Application context post-processing</h2>
 
-    <p>The most central feature of NEBA is the registration of Spring beans annotated with @ResourceModel, @Selftest and so forth. Here, NEBA attaches to the construction process
+    <p>The most central feature of NEBA is the registration of Spring beans using the NEBA API, e.g. beans annotated with @ResourceModel, @Selftest and so forth. Here, NEBA attaches to the construction process
     of Spring application contexts. As soon as all beans are successfully created, but prior to the publication of the context, NEBA post-processes the context
     and looks up beans using NEBA API annotations or implementing NEBA API interfaces.</p>
 
