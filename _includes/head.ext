@@ -13,6 +13,13 @@
     <meta name="twitter:creator" content="@{{page.twitterAuthor}}" />
     {% endif %}
 
+    <!-- Iconography -->
+    <link rel="shortcut icon" type="image/x-icon" href="{{site.url}}{{site.contextpath}}/images/favicons/favicon.ico" />
+
+    <link rel="apple-touch-icon" href="{{site.url}}{{site.contextpath}}/images/favicons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="{{site.url}}{{site.contextpath}}/images/favicons/apple-touch-icon-114x114-precomposed.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="{{site.url}}{{site.contextpath}}/images/favicons/apple-touch-icon-144x144-precomposed.png" />
+
     <!-- Twitter Summary card images must be at least 200x200px -->
     <meta name="twitter:image" content="{{site.url}}{{site.contextpath}}/images/summarycard.png" />
 
