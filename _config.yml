@@ -4,4 +4,4 @@ markdown: kramdown
 url: http://www.neba.io
 nebaVersion: 3.1.0
 springDocumentationVersion: 3.2.x
-contextpath: /neba
+contextpath:
