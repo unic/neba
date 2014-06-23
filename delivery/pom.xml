@@ -4,7 +4,7 @@
     <packaging>jar</packaging>
     <name>NEBA delivery</name>
 
-    <description>Packages NEBA with its the runtime dependencies for deployment via the Adobe CRX package manager.</description>
+    <description>Packages NEBA with runtime dependencies for deployment via the Adobe CRX package manager.</description>
 
     <parent>
         <groupId>io.neba</groupId>
@@ -14,7 +14,7 @@
     </parent>
 
     <properties>
-        <crx.package.description>Provides the NEBA and its runtime dependencies</crx.package.description>
+        <crx.package.description>Contains NEBA and the NEBA runtime dependencies</crx.package.description>
         <crx.package.fixedbugs />
     </properties>
 

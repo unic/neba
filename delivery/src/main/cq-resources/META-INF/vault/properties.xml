@@ -6,7 +6,7 @@
 <entry key="name">io.neba</entry>
 <entry key="lastModified">2014-06-26T09:51:03.892+02:00</entry>
 <entry key="lastModifiedBy">admin</entry>
-<entry key="requiresRestart">true</entry>
+<entry key="requiresRestart">false</entry>
 <entry key="acHandling">Ignore</entry>
 <entry key="created">2014-06-26T09:51:04.472+02:00</entry>
 <entry key="buildCount">1</entry>
