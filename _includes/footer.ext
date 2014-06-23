@@ -9,6 +9,11 @@
             <div class="one-fourth">
                 <h3>About NEBA</h3>
                 <p>NEBA has been developed by <a href="https://www.unic.com/">Unic</a> since 2010, and was published as open source software on June 26, 2014</p><br />
+
+                <h3>Contact</h3>
+                <p>
+                    <strong>E-Mail</strong>: <script>document.write('<a href="mailto:neba' + '@unic.com">neba' + "@unic.com</a>");</script>
+                </p>
                 <p>
                     <strong>Unic AG</strong><br />
                     Belpstrasse 48, 3007 Bern, Switzerland<br />
@@ -32,10 +37,21 @@
 
 
             <div class="one-fourth">
+                <h3>Usage questions</h3>
+                <p>
+                    <a href="http://stackoverflow.com/questions/tagged/neba" class="alignleft"><img src="{{site.contextpath}}/images/stackoverflow.png" alt="Stack overflow: Tagged with NEBA" title="Stack overflow: Tagged with NEBA"/></a>
+                    We recommend asking technical questions on <a href="http://stackoverflow.com/questions/tagged/neba">Stack Overflow</a> - make sure to tag it with NEBA!
+                </p>
             </div><!--END ONE-FOURTH-->
 
 
             <div class="one-fourth last">
+                <h3>Fork me on GitHub</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/tree/develop" class="alignleft"><img src="{{site.contextpath}}/images/github.png" alt="NEBA at GitHub" title="NEBA at GitHub"/></a>
+                    We're using git flow - check out the <a href="https://github.com/unic/neba/tree/develop">develop branch</a> for the latest and greatest version.
+                </p>
+
             </div><!--END ONE-FOURTH LAST-->
 
         </div><!--END FOOTER-TOP-->

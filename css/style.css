@@ -324,6 +324,19 @@ img, iframe {
 	background-color: #4167A0;
 	color: #fff;
 }
+
+#primary-menu ul li.external a:hover{
+    background-color: #fff;
+}
+
+#primary-menu ul li.external a {
+    padding: 10px;
+}
+
+#primary-menu ul li.external a span{
+    display: none;
+}
+
 #primary-menu ul li a.current {
 	color: #fff;
 }
