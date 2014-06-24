@@ -67,7 +67,7 @@ public class CyclicMappingSupportTest {
     }
     
     @Test
-    public void testRemovalOfMapping() throws Exception {
+    public void testMappingCanBeginAgainAfterItHasEnded() throws Exception {
         beginMapping();
         assertMappingWasNotAlreadyStarted();
         endMapping();
@@ -77,13 +77,13 @@ public class CyclicMappingSupportTest {
     }
 
     @Test
-    public void testGetOngoingMappingsAreNotNullWithoutMappings() throws Exception {
+    public void testOngoingMappingsAreEmptyWithoutMappings() throws Exception {
         getOngoingMappings();
         assertOngoingMappingsAreEmpty();
     }
 
     @Test
-    public void testGetOngoingMappingsAreEmptyIfMappingEnds() throws Exception {
+    public void testOngoingMappingsAreEmptyAfterMappingEnds() throws Exception {
         beginMapping();
         endMapping();
         getOngoingMappings();
@@ -91,7 +91,7 @@ public class CyclicMappingSupportTest {
     }
 
     @Test
-    public void testGetOngoingMappingsContainOngoingMapping() throws Exception {
+    public void testOngoingMappingsContainOngoingMapping() throws Exception {
         beginMapping();
         getOngoingMappings();
         assertOngoingMappingsContainMapping();
