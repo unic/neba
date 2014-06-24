@@ -254,9 +254,11 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin impleme
         String modelTypePrefix = req.getParameter(PARAM_TYPENAME);
         String resourcePath = req.getParameter(PARAM_PATH);
 
-        Collection<OsgiBeanSource<?>> types = resolveModelTypesFor(resourcePath);
-        if (types.isEmpty()) {
+        Collection<OsgiBeanSource<?>> types;
+        if (isEmpty(resourcePath)) {
             types = this.registry.getBeanSources();
+        } else {
+            types = resolveModelTypesFor(resourcePath);
         }
 
         Set<String> matchingModelTypeNames = new HashSet<String>(64);
@@ -265,10 +267,15 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin impleme
         boolean exactMatch = !isEmpty(typeNameCandidate) && isUpperCase(typeNameCandidate.charAt(0));
 
         for (OsgiBeanSource<?> source : types) {
-            for (Class<?> type : hierarchyOf(source.getBeanType())) {
-                String typeName = type.getName();
-                if (modelTypePrefix == null || (exactMatch ? typeName.equals(modelTypePrefix) : typeName.startsWith(modelTypePrefix))) {
-                    matchingModelTypeNames.add(source.getBeanType().getName());
+            if (modelTypePrefix == null) {
+                matchingModelTypeNames.add(source.getBeanType().getName());
+            } else {
+                for (Class<?> type : hierarchyOf(source.getBeanType())) {
+                    String typeName = type.getName();
+                    if ((exactMatch ? typeName.equals(modelTypePrefix) : typeName.startsWith(modelTypePrefix))) {
+                        matchingModelTypeNames.add(source.getBeanType().getName());
+                        break;
+                    }
                 }
             }
         }

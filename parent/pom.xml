@@ -31,15 +31,23 @@
             <id>repo.eclipse.org.blueprint.releases</id>
             <name>Project Repository - Releases</name>
             <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-releases/</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>repo.eclipse.org.blueprint.snapshots</id>
             <name>Project Repository - Releases</name>
             <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-snapshots/</url>
-            <releases><enabled>false</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -101,22 +109,18 @@
 
     <profiles>
         <profile>
+            <!-- from http://repo1.maven.org/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom -->
             <id>release</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-source-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
@@ -495,14 +499,9 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.4.1</version>
-                    <configuration>
-                        <remoteTagging>true</remoteTagging>
-                        <preparationGoals>clean install</preparationGoals>
-                        <goals>deploy</goals>
-                        <autoVersionSubmodules>false</autoVersionSubmodules>
-                    </configuration>
+                    <groupId>external.atlassian.jgitflow</groupId>
+                    <artifactId>jgitflow-maven-plugin</artifactId>
+                    <version>1.0-m2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -560,6 +559,20 @@
                             </requireJavaVersion>
                         </rules>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.5</version>
+                    <executions>
+                        <execution>
+                            <id>sign-artifacts</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
