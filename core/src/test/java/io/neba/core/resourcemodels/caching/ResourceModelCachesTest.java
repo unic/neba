@@ -22,6 +22,7 @@ import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -47,12 +48,11 @@ public class ResourceModelCachesTest {
 	private Class<Object> targetType = Object.class;
     private Object model = new Object();
 
+    @InjectMocks
 	private ResourceModelCaches testee;
-
 
     @Before
 	public void prepareTest() {
-		this.testee = new ResourceModelCaches();
 		this.mockedCaches.clear();
 	}
 
@@ -145,5 +145,4 @@ public class ResourceModelCachesTest {
 		this.mockedCaches.add(cache);
 		this.testee.add(cache);
 	}
-
 }
