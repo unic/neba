@@ -28,16 +28,16 @@
 
     <repositories>
         <repository>
-            <id>repo.eclipse.org.releases</id>
+            <id>repo.eclipse.org.blueprint.releases</id>
             <name>Project Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/repositories/project-releases/</url>
+            <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-releases/</url>
             <releases><enabled>true</enabled></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
         <repository>
-            <id>repo.eclipse.org.snapshots</id>
+            <id>repo.eclipse.org.blueprint.snapshots</id>
             <name>Project Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/repositories/project-snapshots/</url>
+            <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-snapshots/</url>
             <releases><enabled>false</enabled></releases>
             <snapshots><enabled>true</enabled></snapshots>
         </repository>
