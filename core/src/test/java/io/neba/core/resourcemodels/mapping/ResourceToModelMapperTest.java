@@ -56,8 +56,6 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceToModelMapperTest {
-
-
     /**
      * @author Christoph Huber
      * @author Olaf Otto

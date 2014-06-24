@@ -88,10 +88,6 @@ public class ModelMetadataConsolePluginTest {
         assertResponseContains("<div id=\"barchart\">        <svg></svg>    </div>");
     }
 
-    private void assertResponseContains(String responseFragment) {
-        assertThat(this.renderedResponse).contains(responseFragment);
-    }
-
     @Test
     public void testRetrievalOfAllStatistics() throws Exception {
         addStatistics("junit.test.type.NameOne", 123456L, 100L, 5, 0, 10, 20, new int[]{1, 2, 4, 8, 16}, new int[]{10, 20, 4, 1, 0});
@@ -149,7 +145,6 @@ public class ModelMetadataConsolePluginTest {
                        "}");
     }
 
-
     @Test
     public void testResetOfStatistics() throws Exception {
         addStatistics("junit.test.type.NameOne", 1, 1L, 1, 1, 1, 1, new int[]{}, new int[]{});
@@ -161,6 +156,10 @@ public class ModelMetadataConsolePluginTest {
         assertResponseIsEqualTo("{\"success\": true}");
 
         assertStatisticsAreReset();
+    }
+
+    private void assertResponseContains(String responseFragment) {
+        assertThat(this.renderedResponse).contains(responseFragment);
     }
 
     private void assertResponseIsEqualTo(String response) {
