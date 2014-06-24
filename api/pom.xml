@@ -64,16 +64,16 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.beans</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
 		</dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>org.springframework.context</artifactId>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>org.springframework.core</artifactId>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
         </dependency>
 		<dependency>
 			<groupId>javax.servlet.jsp</groupId>

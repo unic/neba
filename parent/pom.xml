@@ -13,8 +13,8 @@
     </description>
 
     <properties>
-        <spring.version>3.2.5.RELEASE</spring.version>
-        <gemini.version>2.0.0.M02</gemini.version>
+        <spring.version>3.2.9.RELEASE_1</spring.version>
+        <gemini.version>2.0.0.BUILD-SNAPSHOT</gemini.version>
         <language.level>1.6</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,19 +28,18 @@
 
     <repositories>
         <repository>
-            <id>com.springsource.repository.bundles.release</id>
-            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/release</url>
+            <id>repo.eclipse.org.releases</id>
+            <name>Project Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/project-releases/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
         <repository>
-            <id>com.springsource.repository.bundles.external</id>
-            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/external</url>
-        </repository>
-        <repository>
-            <id>com.springsource.repository.bundles.milestone</id>
-            <name>EBR Spring Milestone Repository</name>
-            <url>http://repository.springsource.com/maven/bundles/milestone</url>
+            <id>repo.eclipse.org.snapshots</id>
+            <name>Project Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/project-snapshots/</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
         </repository>
     </repositories>
 
@@ -147,50 +146,50 @@
             </dependency>
 
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.beans</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.context</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.web</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.web.servlet</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.aop</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.context.support</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.core</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>org.springframework.expression</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
                 <version>${spring.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -214,15 +213,21 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.1.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
                 <version>1.2.2</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>com.springsource.javax.inject</artifactId>
-                <version>1.0.0</version>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+                <version>1_1</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -253,9 +258,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.aopalliance</groupId>
-                <artifactId>com.springsource.org.aopalliance</artifactId>
-                <version>1.0.0</version>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+                <version>1.0_6</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -308,19 +313,19 @@
                     </exclusion>
                     <exclusion>
                         <artifactId>spring-aop</artifactId>
-                        <groupId>org.springframework</groupId>
+                        <groupId>org.apache.servicemix.bundles</groupId>
                     </exclusion>
                     <exclusion>
                         <artifactId>spring-beans</artifactId>
-                        <groupId>org.springframework</groupId>
+                        <groupId>org.apache.servicemix.bundles</groupId>
                     </exclusion>
                     <exclusion>
                         <artifactId>spring-context</artifactId>
-                        <groupId>org.springframework</groupId>
+                        <groupId>org.apache.servicemix.bundles</groupId>
                     </exclusion>
                     <exclusion>
                         <artifactId>spring-core</artifactId>
-                        <groupId>org.springframework</groupId>
+                        <groupId>org.apache.servicemix.bundles</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -370,8 +375,8 @@
 
             <!-- Test dependencies -->
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>
                 <version>${spring.version}</version>
                 <scope>test</scope>
             </dependency>
