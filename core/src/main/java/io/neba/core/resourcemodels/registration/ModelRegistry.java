@@ -207,20 +207,22 @@ public class ModelRegistry {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
 
-        if (isUnmapped(resource)) {
+        final Key key = key(resource);
+
+        if (isUnmapped(key)) {
             return null;
         }
 
-        Collection<LookupResult> sources = lookupFromCache(resource);
+        Collection<LookupResult> sources = lookupFromCache(key);
 
         if (sources == null) {
             final int currentStateId = this.state.get();
             sources = resolveMostSpecificBeanSources(resource);
 
             if (sources.isEmpty()) {
-                markAsUnmapped(resource, currentStateId);
+                markAsUnmapped(key, currentStateId);
             } else {
-                cache(resource, sources, currentStateId);
+                cache(key, sources, currentStateId);
             }
         }
         return nullIfEmpty(sources);
@@ -256,7 +258,7 @@ public class ModelRegistry {
             sources = resolveBeanSources(resource, null, false);
 
             if (sources.isEmpty()) {
-                markAsUnmapped(resource, currentStateId);
+                markAsUnmapped(key, currentStateId);
             } else {
                 cache(key, sources, currentStateId);
             }
@@ -415,10 +417,6 @@ public class ModelRegistry {
         return this.lookupCache.get(key);
     }
 
-    private Collection<LookupResult> lookupFromCache(Resource resource) {
-        return this.lookupCache.get(key(resource));
-    }
-
     private void clearRegisteredModels() {
         this.typeNameToBeanSourcesMap.clear();
         this.logger.debug("Registry cleared.");
@@ -499,25 +497,9 @@ public class ModelRegistry {
      * this entire hierarchy each time the model is resolved by remembering a found
      * resource type -&gt; model relationship.
      */
-    private void cache(final Resource resource, final Collection<LookupResult> sources, final int stateId) {
-        Key key = key(resource);
-        if (stateId == this.state.get()) {
-            this.lookupCache.put(key, sources);
-        }
-    }
-
-    /**
-     * @see #cache(Resource, Collection, int)
-     */
     private void cache(final Key key, final Collection<LookupResult> sources, final int stateId) {
         if (stateId == this.state.get()) {
             this.lookupCache.put(key, sources);
-        }
-    }
-
-    private void markAsUnmapped(final Resource resource, final int stateId) {
-        if (stateId == this.state.get()) {
-            this.unmappedTypesCache.put(key(resource), NULL_VALUE);
         }
     }
 
