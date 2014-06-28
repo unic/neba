@@ -92,6 +92,20 @@ public class Carousel {
 </p>
 
 <p>
+    The <em>most specific model</em> is the one that is targeted to the closest resource's type within a resources
+    hierarchy. For example, of the resource has the type "cq:Page" and the super type "nt:base", a  model
+    for "cq:Page" is <em>more specific</em> than one for "nt:base". If there are more than one most specific models, e.g. two models
+    for "cq:Page", the neba:defineObjectsTag will not provide the model automatically. Then, you can explicity specify the desired model's
+    bean name (you can lookup the bean name in the <a href="http://localhost:4502/system/console/modelregistry">model registry</a>):
+</p>
+
+<p>
+{% highlight java %}
+<neba:defineObjects useModelNamed="carousel"/>
+{% endhighlight %}
+</p>
+
+<p>
     To make it more interesting, we can now add some of the resource's properties to the model. You can see the
     properties e.g. in the CRXDE light.</p>
 <p>
