@@ -106,9 +106,23 @@ h1.title, h2.title, h3.title, h4.title, h5.title, h6.title {
 	line-height: 20px;
 	font-weight: 300;
 }
+
+.intersection {
+    border-bottom: 1px solid #e3e3e3;
+    margin-bottom: 30px;
+}
+
+.intersection  span {
+    position: relative;
+    top: 9px;
+    background-color: white;
+    padding: 0 10px;
+    left: 45px;
+}
+
 ul, ol	{
 	display: block;
-	padding: 0px;
+	padding: 0;
 	margin: 0 0 14px 17px;
 }
 blockquote {
@@ -558,8 +572,7 @@ img, iframe {
 ---------------------------------------------------*/
 .grid {
 	list-style: none;
-	margin: 0;
-	padding: 0;
+	margin: 0 0 20px 0;
 	float: left;
 }
 .grid li {
@@ -1042,6 +1055,47 @@ ul.item-nav li.next a {
 }
 ul.item-nav li.all a {
     background-position: 12px -247px;
+}
+
+/*--------------------------------------------------
+				ACTIVITIES
+---------------------------------------------------*/
+.activity img {
+    height:40px;
+}
+
+.activity {
+    padding-top: 5px;
+    text-align: center;
+}
+
+a.activity-link {
+    display: block;
+    height: 40px;
+    margin-bottom: 5px;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.issue a.activity-link {
+    background-image: url("../images/todo.png");
+}
+
+.commit-unic-neba-gh-pages a.activity-link {
+    background-image: url("../images/documentation.png");
+}
+
+.commit-unic-neba-develop a.activity-link {
+    background-image: url("../images/code.png");
+}
+
+.tweet a.activity-link {
+    background-image: url("../images/twitter.png");
+}
+
+.issue a.activity-link {
+    background-image: url("../images/todo.png");
 }
 
 /*---------------iPad portrait from 768px to 959px ---------------*/
