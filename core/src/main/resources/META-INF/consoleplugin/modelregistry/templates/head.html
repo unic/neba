@@ -1,0 +1,86 @@
+<style type="text/css">
+/*
+   Note: percent signs must be be masked by duplication (%%) as this template
+   is interpreted by the java template formatter.
+ */
+span.unresolved {
+    background:url("modelregistry/static/unresolved.png") no-repeat;
+    padding-left: 20px;
+}
+
+form #unresolvedToggle {
+    margin-left: 10px;
+}
+
+form button, form input {
+    padding:5px;
+}
+
+form #filters input {
+    width: 18%%;
+    margin-left: 5px;
+}
+
+form #filters {
+    margin-left: 30px;
+}
+
+#plugin_table {
+    margin-bottom: 2em;
+}
+
+#plugin_table tr th {
+    padding-right: 2em;
+}
+
+#plugin_table tr td {
+    font-size: 120%%;
+    padding: .4em;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+form .buttonGroup {
+    text-align: left;
+}
+
+.ui-autocomplete {
+    max-height: 20em;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#neba-heading {
+    background-color: #f0f0f0;
+    padding:10px;
+    font-size:140%%;
+    margin:1em 0;
+}
+
+img.componentIcon {
+    margin-right:5px;
+    vertical-align:middle;
+}
+
+#fromResource {
+    margin-right: 5px;
+}
+
+</style>
+<div id="neba-heading">%d Model(s) registered. You may use the filters to explore resource model mapping behavior.</div>
+
+<!-- top header -->
+<form method="post" enctype="multipart/form-data" action="">
+	<div class="ui-widget-header ui-corner-top buttonGroup">
+        <button type="button"
+                id="unresolvedToggle">Only show mappings to unresolvable resource types</button>
+        <span id="filters">
+            Filter:
+            <label for="fromResource">mapping to</label>
+            <input type="text" id="fromResource" title="Only show resource models mapping to the following resource.">
+            <label for="toType">compatible to</label>
+            <input type="text" id="toType" title="Only show resource models compatible to the specified type or any type in the specified package.">
+            <button type="button" id="applyFilter">Apply filter</button>
+        </span>
+	</div>
+</form>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>FileVault Package Properties</comment>
+<entry key="createdBy">admin</entry>
+<entry key="name">io.neba</entry>
+<entry key="lastModified">2014-06-26T09:51:03.892+02:00</entry>
+<entry key="lastModifiedBy">admin</entry>
+<entry key="requiresRestart">true</entry>
+<entry key="acHandling">Ignore</entry>
+<entry key="created">2014-06-26T09:51:04.472+02:00</entry>
+<entry key="buildCount">1</entry>
+<entry key="version">${project.version}</entry>
+<entry key="requiresRoot">true</entry>
+<entry key="dependencies"/>
+<entry key="packageFormatVersion">2</entry>
+<entry key="description">${crx.package.description}</entry>
+<entry key="group">io.neba</entry>
+<entry key="lastWrapped">2014-06-26T09:51:03.892+02:00</entry>
+<entry key="lastWrappedBy">admin</entry>
+<entry key="path">/etc/packages/io/neba/io.neba.neba-${project.version}</entry>
+</properties>

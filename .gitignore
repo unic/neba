@@ -1,5 +1,21 @@
+# Temporary maven artifacts
 target/
 pom.xml.tag
 pom.xml.releaseBackup
+pom.xml.versionsBackup
 pom.xml.next
 release.properties
+
+# Temporary jekyll artifacts
+_site/
+Gemfile.lock
+
+# IDEs
+
+# IntelliJ IDEA
+.idea/
+atlassian-ide-plugin.xml
+*.iml
+
+# Eclipse
+.eclipse/

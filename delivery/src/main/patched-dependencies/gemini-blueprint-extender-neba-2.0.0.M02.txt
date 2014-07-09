@@ -1,0 +1,5 @@
+In this bundle, an explicit export of the package "io.neba.core.tags" was added.
+This package is usually provided and exported by the NEBA core fragment bundle, but is ignored due to the Apache Felix issue
+https://issues.apache.org/jira/browse/FELIX-3239. In addition, the symbolic name is modified to reflect that this
+is a NEBA-specific version of this bundle. Also, the fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=403628
+is contained in this bundle.

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:compendium="http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util-3.2.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task-3.2.xsd
+           http://www.osgi.org/xmlns/blueprint/v1.0.0
+           http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.2.xsd
+           http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium
+           http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd">
+
+	<context:component-scan base-package="io.neba.core" />
+	
+	<task:annotation-driven  proxy-target-class="true"/>
+
+    <task:executor id="singlethreaded" pool-size="1" queue-capacity="1" rejection-policy="DISCARD_OLDEST" />
+	
+	<util:constant
+		static-field="io.neba.core.selftests.SelftestConsolePlugin.LABEL"
+		id="selftestLabel" />
+	<util:constant
+		static-field="io.neba.core.resourcemodels.registration.ModelRegistryConsolePlugin.LABEL"
+		id="modelRegistryLabel" />
+
+    <!-- A java.util.Properties instance called "extenderProperties" is automatically used by blueprint extender (naming convention) -->
+    <util:properties id="extenderProperties" location="io/neba/core/blueprint/extender.properties" />
+
+	<bp:blueprint>
+		<!-- References to other OSGi services -->
+		<bp:reference interface="org.apache.sling.api.resource.ResourceResolverFactory" id="resourceResolverFactory" >
+            <bp:reference-listener ref="administrativeResourceResolver" bind-method="bind" unbind-method="unbind"/>
+		</bp:reference>
+
+        <bp:reference interface="org.osgi.service.cm.ConfigurationAdmin" id="configurationAdmin"/>
+
+		<!-- Only bindings values providers for all scripts or explicitly for velocity are considered. -->
+		<bp:reference-list interface="org.apache.sling.scripting.api.BindingsValuesProvider" availability="optional" filter="(|(javax.script.name=any)(javax.script.name=velocity))">
+			<bp:reference-listener ref="beanRendererFactory" bind-method="add" unbind-method="remove" />
+		</bp:reference-list>
+		<!-- All post processors are used by the mapper -->
+		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelPostProcessor" availability="optional">
+			<bp:reference-listener ref="resourceToModelMapper" bind-method="add" unbind-method="remove" />
+		</bp:reference-list>
+		<!-- All caches are used by the adapter factory -->
+		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelCache" availability="optional">
+			<bp:reference-listener ref="resourceModelCaches" bind-method="add" unbind-method="remove" />
+		</bp:reference-list>
+
+		<!-- Beans not providable by classpath scanning -->
+		<bp:bean class="org.springframework.web.filter.RequestContextFilter" id="requestContextFilter" />
+
+		<bp:bean class="io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache" id="requestScopedResourceModelCache">
+			<compendium:managed-properties persistent-id="io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration" autowire-on-update="true" />
+		</bp:bean>
+
+		<bp:bean class="io.neba.core.rendering.BeanRendererFactoryImpl" id="beanRendererFactory">
+			<compendium:managed-properties persistent-id="io.neba.core.rendering.BeanRendererFactoryConfiguration" update-method="refresh" autowire-on-update="true" />
+		</bp:bean>
+
+		<!-- Beans exported as OSGi services -->
+		<bp:service ref="requestScopedResourceModelCache" ranking="-9999">
+            <bp:interfaces>
+                <bp:value>io.neba.api.resourcemodels.ResourceModelCache</bp:value>
+                <bp:value>javax.servlet.Filter</bp:value>
+            </bp:interfaces>
+			<bp:service-properties>
+                <entry key="sling.filter.scope">
+                    <array value-type="java.lang.String">
+                        <value>REQUEST</value>
+                        <value>ERROR</value>
+                    </array>
+                </entry>
+                <entry key="service.description" value="A request-scoped resource model cache." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
+		
+		<bp:service ref="beanRendererFactory" interface="io.neba.api.rendering.BeanRendererFactory">
+			<bp:service-properties>
+				<entry key="service.description" value="A factory for configurable bean renderers." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
+
+		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" ranking="-10000">
+			<bp:service-properties>
+				<entry key="sling.filter.scope">
+					<array value-type="java.lang.String">
+						<value>REQUEST</value>
+						<value>ERROR</value>
+					</array>
+				</entry>
+				<entry key="service.description" value="Exposes HTTP requests and their attributes via a ThreadLocal." />
+				<entry key="service.vendor" value="Springsource" />
+			</bp:service-properties>
+		</bp:service>
+
+		<bp:service interface="javax.servlet.Servlet" ref="mvcServlet">
+			<bp:service-properties>
+				<entry key="sling.servlet.paths">
+                    <array value-type="java.lang.String">
+                        <value>/mvc</value>
+                        <value>/bin/mvc</value>
+                    </array>
+				</entry>
+				<entry key="service.description" value="A generic servlet that handles all requests using Spring MVC." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
+
+		<bp:service ref="selftestConsolePlugin" interface="javax.servlet.Servlet">
+			<bp:service-properties>
+				<entry key="felix.webconsole.label" value-ref="selftestLabel" />
+				<entry key="service.description" value="Provides a felix console plugin to execute and list @SelfTest's" />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
+
+		<bp:service ref="modelRegistryConsolePlugin" interface="javax.servlet.Servlet">
+			<bp:service-properties>
+				<entry key="felix.webconsole.label" value-ref="modelRegistryLabel" />
+				<entry key="service.description" value="Provides a felix console plugin listing all registered @ResourceModel's." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
+
+        <bp:service ref="logfileViewerConsolePlugin" interface="javax.servlet.Servlet" ranking="0">
+            <bp:service-properties>
+                <bp:entry key="felix.webconsole.label" value="logviewer"/>
+                <bp:entry key="service.vendor" value="neba.io"/>
+                <bp:entry key="service.description"
+                          value="Provides a Felix console plugin for monitoring and downloading Sling logfiles."/>
+            </bp:service-properties>
+        </bp:service>
+
+        <bp:service ref="modelMetadataConsolePlugin" interface="javax.servlet.Servlet" ranking="0">
+            <bp:service-properties>
+                <bp:entry key="felix.webconsole.label" value="modelmetadata"/>
+                <bp:entry key="service.vendor" value="neba.io"/>
+                <bp:entry key="service.description"
+                          value="Provides a Felix console plugin visualizing resource @ResourceModel metadata."/>
+            </bp:service-properties>
+        </bp:service>
+	</bp:blueprint>
+</beans>

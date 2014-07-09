@@ -1,0 +1,24 @@
+<div id="offsetDiv">
+    <h2 class="ui-widget-header">Model instantiations and complexity</h2>
+    <div id="scatterplot" class="chartWrap">
+        <svg></svg>
+    </div>
+
+    <div class="legend">
+        Less is better. Models in the upper right corner of this plot combine frequent instantiations (usage) with a high number of subsequent mappings, i.e.
+        further resource models mapped to the model. The size of the circle corresponds to the average execution time of a single mapping.
+        Models with frequent instantiations, a lot of mappings and a high average mapping time are the most costly - and potential candidates for refactorings,
+        e.g. by breaking up the model into smaller models representing the various aspects of the original model.
+    </div>
+
+    <h2 class="ui-widget-header">Mapping durations of <span id="selected-model-name">selected model</span></h2>
+    <div id="barchart">
+        <svg></svg>
+    </div>
+
+    <div class="legend">
+        Less is better. This frequency table shows the distribution of the mapping times, grouped in intervals. Usually, the mapping times should be relatively low and
+        quite constant, i.e. only appear in 1-6 neighboring intervals. If you experience long mapping time occurrences (on the far right), investigating the issues leading to these
+        exceptional mapping times is highly recommended.
+    </div>
+</div>
