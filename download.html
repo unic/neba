@@ -57,28 +57,17 @@ twitterAuthor: deploynix
 {% endhighlight %}
 </p>
 
-
-
-<p>You may also want to configure the following repositories in your project to obtain the artifacts,
-    including those NEBA depends on:</p>
+<p>You may also want to configure the following repository for the eclipse artifacts NEBA depends on:</p>
 
 <p>
 {% highlight xml %}
 <repositories>
     <repository>
-        <id>oss.sonatype.snapshots</id>
-        <name>Sonatype OSS Maven Repository - Snapshots</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </repository>
-    <repository>
-        <id>repo.eclipse.org.blueprint.releases</id>
-        <name>Project Repository - Releases</name>
-        <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-releases/</url>
-    </repository>
-    <repository>
-        <id>repo.eclipse.org.blueprint.snapshots</id>
-        <name>Project Repository - Releases</name>
-        <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-snapshots/</url>
+        <id>eclipse-gemini</id>
+        <name>Eclipse Gemini Maven repository</name>
+        <url>http://download.eclipse.org/gemini/mvn/</url>
+        <releases><enabled>true</enabled></releases>
+        <snapshots><enabled>false</enabled></snapshots>
     </repository>
 </repositories>
 {% endhighlight %}
