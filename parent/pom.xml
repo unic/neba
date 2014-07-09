@@ -9,8 +9,55 @@
     <packaging>pom</packaging>
 
     <description>
-        Provides central build configuration for all NEBA modules.
+        NEBA integrates the Spring Framework into Sling. It makes available all of Spring's features to allow using mature, best-practice solutions for the majority of system-level concerns common to Sling-based applications.
     </description>
+
+    <url>http://www.neba.io</url>
+
+    <inceptionYear>2014</inceptionYear>
+
+    <issueManagement>
+        <url>https://github.com/unic/neba/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>olaf-otto</id>
+            <name>Olaf Otto</name>
+            <email>olaf.otto@unic.com</email>
+            <organization>Unic AG</organization>
+            <organizationUrl>http://www.unic.com</organizationUrl>
+        </developer>
+        <developer>
+            <id>huberchrigu</id>
+            <name>Christoph Huber</name>
+            <email>christoph.huber@unic.com</email>
+            <organization>Unic AG</organization>
+            <organizationUrl>http://www.unic.com</organizationUrl>
+        </developer>
+        <developer>
+            <id>DaniRey</id>
+            <name>Daniel Rey</name>
+            <email>daniel.rey@unic.com</email>
+            <organization>Unic AG</organization>
+            <organizationUrl>http://www.unic.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>mistertakai</name>
+            <email>daniel.takai@unic.com</email>
+            <organization>Unic AG</organization>
+            <organizationUrl>http://www.unic.com</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <spring.version>3.2.9.RELEASE_1</spring.version>
@@ -60,7 +107,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-
     </repositories>
 
     <distributionManagement>
@@ -73,51 +119,6 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
-    <inceptionYear>2014</inceptionYear>
-
-    <issueManagement>
-        <url>https://github.com/unic/neba/issues</url>
-        <system>GitHub Issues</system>
-    </issueManagement>
-
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>olaf.otto</id>
-            <name>Olaf Otto</name>
-            <email>olaf.otto@unic.com</email>
-            <organization>Unic AG</organization>
-            <organizationUrl>http://www.unic.com</organizationUrl>
-        </developer>
-        <developer>
-            <id>christoph.huber</id>
-            <name>Christoph Huber</name>
-            <email>christoph.huber@unic.com</email>
-            <organization>Unic AG</organization>
-            <organizationUrl>http://www.unic.com</organizationUrl>
-        </developer>
-        <developer>
-            <id>daniel.rey</id>
-            <name>Daniel Rey</name>
-            <email>daniel.rey@unic.com</email>
-            <organization>Unic AG</organization>
-            <organizationUrl>http://www.unic.com</organizationUrl>
-        </developer>
-        <developer>
-            <name>Daniel Takai</name>
-            <email>daniel.takai@unic.com</email>
-            <organization>Unic AG</organization>
-            <organizationUrl>http://www.unic.com</organizationUrl>
-        </developer>
-    </developers>
 
     <profiles>
         <profile>
