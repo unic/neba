@@ -34,7 +34,7 @@ twitterAuthor: deploynix
 <div class="one">
     <h2 class="title" id="integration">Using MAVEN</h2>
 
-    <p>NEBA is build using Maven. Both core and API are available from maven central.
+    <p>NEBA is build using Maven. Core, API and a delivery package containing NEBA and it's runtime dependencies are available from maven central.
         For developing with NEBA, including the API in your project is all you need to do:</p>
 <p>
 {% highlight xml %}
@@ -53,6 +53,20 @@ twitterAuthor: deploynix
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-core</artifactId>
     <version>{{site.nebaVersion}}</version>
+</dependency>
+{% endhighlight %}
+</p>
+
+<p>Finally, you can reference the deployment package like so:</p>
+
+<p>
+{% highlight xml %}
+<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-delivery</artifactId>
+    <version>{{site.nebaVersion}}</version>
+    <classifier>aem</classifier>
+    <type>zip</type>
 </dependency>
 {% endhighlight %}
 </p>
