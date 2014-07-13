@@ -91,7 +91,7 @@ public class MyModel {
 @Controller
 public class MyController {
  @RequestMapping("/something")
- @ResponeBody
+ @ResponseBody
  public String handle(@RequestParam String param) {
    return "redirect:/success.html";
  }
