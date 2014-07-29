@@ -13,7 +13,16 @@ twitterAuthor: deploynix
 <h2>Table of contents</h2>
 <ul class="colored-counter-list">
     <li><a href="#installing">Installing NEBA</a></li>
-    <li><a href="#resourcemodels">Writing @ResourceModels</a></li>
+    <li>
+        <a href="#resourcemodels">Writing @ResourceModels</a>
+        <ul class="colored-counter-list">
+            <li><a href="#resourceModelDefinition">Resources, resource types and resource models</a></li>
+            <li><a href="#nebaDefineObjects">The neba:defineObjects tag</a></li>
+            <li><a href="#resourceToModelMapping">Mapping properties and resources to models</a></li>
+            <li><a href="#resourceAnnotations">Annotations for advanced resource to model mapping</a></li>
+            <li><a href="#modelInitialization">Performing additional initializations</a></li>
+        </ul>
+    </li>
     <li><a href="#beanscopes">Support for web-specific bean scopes</a></li>
     <li><a href="#usingvelocity">Rendering beyond resources with Velocity</a></li>
     <li><a href="#springmvc">Using Spring MVC in Sling</a></li>
@@ -32,6 +41,9 @@ twitterAuthor: deploynix
 
 <div class="one">
 <h2 id="resourcemodels">Writing @ResourceModels</h2>
+
+<h3 id="resourceModelDefinition">Resources, resource types and resource models</h3>
+
 <p>Let's assume we need a simple JAVA model for the geometrixx site, specifically, for the  &quot;carousel&quot; component.
     The carousel has the resource type &quot;foundation/components/carousel&quot;:</p>
 <p><img src="images/userguide/geometrixx-carousel.png"></p>
@@ -63,7 +75,7 @@ public class Carousel {
 
 <div class="trigger-button"><span>Hint: Background information on resource models</span></div>
 <div class="accordion">
-    <p><span class="dropcap2">C</span>lasses annotated with @ResourceModel are <a
+    <p><span class="dropcap2">I</span> Classes annotated with @ResourceModel are <a
             href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-definition">regular
         spring beans</a>. If you look at the @ResourceModel annotation, you will notice that it is itself annotated
         with @Component (a spring stereotype) and @Scope(PROTOTYPE). <a
@@ -76,9 +88,12 @@ public class Carousel {
         annotations such as @PostConstruct and @PreDestroy, @Scheduled methods and so forth.</p>
 </div><!--END ACCORDION-->
 
-<p>To use this model in a JSP, add the following to the carousel script <a
+<p>To use this model in a JSP, add the neba:defineObjects tag to the carousel script: <a
         href="http://localhost:4502/crx/de/index.jsp#/crx.default/jcr%3aroot/libs/foundation/components/carousel/carousel.jsp">/libs/foundation/components/carousel/carousel.jsp</a>:
 </p>
+
+<h3 id="nebaDefineObjects">The neba:defineObjects tag</h3>
+
 <p>
 {% highlight java %}<%@taglib prefix="neba" uri="http://www.neba.io/taglibs/cq/neba/core/1.0"%>
 <neba:defineObjects />
@@ -104,6 +119,8 @@ public class Carousel {
 <neba:defineObjects useModelNamed="carousel"/>
 {% endhighlight %}
 </p>
+
+<h3 id="resourceToModelMapping">Mapping properties and resources to models</h3>
 
 <p>
     To make it more interesting, we can now add some of the resource's properties to the model. You can see the
@@ -149,6 +166,8 @@ Trans time: 1000
 Pages:
 {% endhighlight %} 
 </p>
+
+<h3 id="resourceAnnotations">Annotations for advanced resource to model mapping</h3>
 
 <p>NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
     annotated with @Unmapped.  Notice that play speed and trans time are Strings in this example, whereas one would
@@ -318,7 +337,7 @@ private Resource resource;
 
 <div class="trigger-button"><span>Hint: Models for crosscutting concerns</span></div>
 <div class="accordion">
-    <p><span class="dropcap2">I</span>A @ResourceModel is not restricted to sling:resourceType's - you can also map
+    <p><span class="dropcap2">I</span> A @ResourceModel is not restricted to sling:resourceType's - you can also map
         it to the JCR primary node type or any of the mixin types of a Node.  For example, let's assume that you
         have a requirement to implement a custom access protection of <em>arbitrary</em> content. IN addition, an editor may configure
         access restriction to any content (e.g. pages or a DAM assets). In this case we neither know the resource
@@ -366,7 +385,7 @@ public class AccessRestricted {
         it with the resource's sling:resourceType or the resource's JCR type. This association is represented using a @ResourceModel
         annotation.</p></div><!--END ACCORDION-->
 
-<h5>Performing additional initializations</h5>
+<h3 id="modelInitialization">Performing additional initializations</h3>
 
 <p>It is often required to perform some additional initializations
     after all properties of a @ResourceModel are mapped. NEBA supports this use case with the @PostMapping and

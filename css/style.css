@@ -764,11 +764,18 @@ img, iframe {
 .star-list li {
 	background: url(../images/bullet-ul.png) no-repeat scroll 0px -82px transparent;
 }
+
 ul.colored-counter-list {
 	counter-reset:li;
-	margin-left:0; 
+	margin-left:0;
 	padding-left:0; 
 }
+
+ul.colored-counter-list ul.colored-counter-list {
+    counter-reset:none;
+    margin-top: 10px;
+}
+
 ul.colored-counter-list > li {
 	position:relative; 
 	list-style:none;
@@ -777,7 +784,7 @@ ul.colored-counter-list > li {
 }
 ul.colored-counter-list > li:before {
 	content:counter(li); 
-	counter-increment:li; 
+	counter-increment:li;
 	position:absolute;
 	top:0;
 	left:0;

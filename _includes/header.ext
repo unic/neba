@@ -17,7 +17,7 @@
                     <ul>
                         <li><a href="{{site.contextpath}}/neba-in-a-nutshell.html">NEBA in a nutshell</a></li>
                         <li><a href="{{site.contextpath}}/userguide.html">User guide</a></li>
-                        <li><a href="{{site.contextpath}}/architecture.html">Achitecture</a></li>
+                        <li><a href="{{site.contextpath}}/architecture.html">Architecture</a></li>
                         <li><a href="{{site.contextpath}}/apidocs.html">API docs</a></li>
                     </ul>
                 </li>
