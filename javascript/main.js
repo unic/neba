@@ -333,12 +333,10 @@ jQuery(document).ready(function ($) {
         $("<option />", {"value": menu_url, "text": menu_text}).appendTo($menu_select)
     });
 
-    field_id = "#primary-menu select";
-    $(field_id).change(function () {
-        value = $(this).attr('value');
-        window.location = value;
-        //go
-
+    $("#primary-menu").find("select").change(function () {
+        var location = $(this).find("option:selected").attr("value");
+        window.location = location;
+        return false;
     });
 });
 
