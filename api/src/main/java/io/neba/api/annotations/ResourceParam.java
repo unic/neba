@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  *  </pre>
  *
  *  In the above example, a request parameter "page" is expected. The parameter value is regarded as a
- *  resource path and the corresponding resource is {@link org.apache.sling.api.resource.ResourceResolver#resolve(String) resolved}.
+ *  resource path and the corresponding resource is {@link org.apache.sling.api.resource.ResourceResolver#resolve(javax.servlet.http.HttpServletRequest, String) resolved}.
  *  The resolved resource is subsequently adapted to "Page":
  *
  *  <pre>GET /bin/mvc.do/echoTitle?path=/content/site/en: "English page title".</pre>
