@@ -91,7 +91,7 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
 
         // We must resolve (and not use getResource()) as the resource path may be mapped.
         ResourceResolver resolver = request.getResourceResolver();
-        Resource resource = resolver.resolve(resourcePath);
+        Resource resource = resolver.resolve(request, resourcePath);
 
         if (resource == null || isNonExistingResource(resource)) {
             if (resourceParam.required()) {
