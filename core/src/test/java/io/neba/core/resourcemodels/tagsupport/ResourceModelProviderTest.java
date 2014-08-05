@@ -21,12 +21,14 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiBeanSource;
+
 import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -84,7 +86,7 @@ public class ResourceModelProviderTest {
         this.osgiBeanSource = mock(OsgiBeanSource.class);
         lookupResults.add(this.lookupResult);
         doReturn(this.osgiBeanSource).when(this.lookupResult).getSource();
-        when(this.osgiBeanSource.getBean()).thenReturn(this.model);
+        Mockito.<Object>when(this.osgiBeanSource.getBean()).thenReturn(this.model);
         when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(lookupResults);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), anyString())).thenReturn(lookupResults);
     }
