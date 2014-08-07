@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.neba.neba-delivery</artifactId>
-    <packaging>pom</packaging>
+    <packaging>content-package</packaging>
     <name>NEBA delivery</name>
 
     <description>Packages NEBA with runtime dependencies for deployment via the Adobe CRX package manager.</description>
@@ -105,6 +105,7 @@
             <plugin>
                 <groupId>com.day.jcr.vault</groupId>
                 <artifactId>content-package-maven-plugin</artifactId>
+				<extensions>true</extensions>
                 <configuration>
                     <failOnMissingEmbed>true</failOnMissingEmbed>
                     <embeddeds>
@@ -191,14 +192,6 @@
                         </filter>
                     </filters>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <!-- Resources are not considered when <packaging> is "pom" - re-enable resource processing. -->
