@@ -453,7 +453,7 @@ $(function () {
                 $.each(data, function (_, issue) {
                     result.push({
                         type: "issue",
-                        message: '<a href="' + issue.url + '">' + issue.state + ' issue #' + issue.number + ": " + issue.title + '</a>',
+                        message: '<a href="' + issue.html_url + '">' + issue.state + ' issue #' + issue.number + ": " + issue.title + '</a>',
                         url: issue.url,
                         time: parseTime(PATTERN_GITHUB_TIMESTAMP, issue.updated_at)
                     });
