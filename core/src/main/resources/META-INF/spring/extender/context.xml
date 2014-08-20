@@ -152,5 +152,7 @@
                           value="Provides a Felix console plugin visualizing resource @ResourceModel metadata."/>
             </bp:service-properties>
         </bp:service>
+
+        <bp:service ref="resourceModelProviderImpl" interface="io.neba.api.resourcemodels.ResourceModelProvider" />
 	</bp:blueprint>
 </beans>

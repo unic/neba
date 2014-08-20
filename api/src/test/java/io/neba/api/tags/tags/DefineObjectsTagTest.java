@@ -14,15 +14,15 @@
  * limitations under the License.
 **/
 
-package io.neba.core.tags;
+package io.neba.api.tags.tags;
 
 import io.neba.api.Constants;
-import io.neba.core.resourcemodels.tagsupport.ResourceModelProvider;
+import io.neba.api.resourcemodels.ResourceModelProvider;
+import io.neba.api.tags.DefineObjectsTag;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +35,7 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.TagSupport;
 import java.util.Map;
 
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -70,21 +71,12 @@ public class DefineObjectsTagTest {
     private DefineObjectsTag testee;
 
     @Before
-    public void injectResourceModelProvider() {
-        DefineObjectsTag.setModelProvider(this.resourceModelProvider);
-    }
-
-    @After
-    public void removeResourceModelProvider() {
-        DefineObjectsTag.unsetModelProvider();
-    }
-
-    @Before
     public void prepareTag() {
         doReturn(this.resource).when(this.request).getResource();
         doReturn(this.request).when(this.context).getRequest();
-        doReturn(this.sling).when(this.bindings).getSling();
+        doReturn(this.sling).when(this.bindings).get(eq(SLING));
 
+        doReturn(this.resourceModelProvider).when(this.sling).getService(eq(ResourceModelProvider.class));
         doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModel(eq(this.resource));
         doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
         doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModelWithBeanName(eq(this.resource), anyString());
@@ -101,13 +93,6 @@ public class DefineObjectsTagTest {
         executeTag();
 
         verifyAllBindingsAreCopiedIntoPageContext();
-        assertTagEvaluationReturnsContinueWithPage();
-    }
-
-    @Test
-    public void testNullBindingsIsTolerated() throws Exception {
-        withBindings(null);
-        executeTag();
         assertTagEvaluationReturnsContinueWithPage();
     }
     
@@ -144,8 +129,12 @@ public class DefineObjectsTagTest {
 
     @Test(expected = IllegalStateException.class)
     public void testHandlingOfMissingProvider() throws Exception {
-        DefineObjectsTag.unsetModelProvider();
+        withMissingProviderService();
         executeTag();
+    }
+
+    private void withMissingProviderService() {
+        doReturn(null).when(this.sling).getService(eq(ResourceModelProvider.class));
     }
 
     private void verifyResourceIsAdaptedToMostSpecificModelWithProvidedBeanName() {

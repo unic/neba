@@ -25,6 +25,6 @@
         shortName = "neba",
         description = "NEBA core tag library",
         libraryVersion = "1.0")
-package io.neba.core.tags;
+package io.neba.api.tags;
 
 import tldgen.TagLibrary;

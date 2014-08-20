@@ -31,7 +31,8 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
 					<instructions>
-						<Bundle-Name>NEBA API</Bundle-Name>
+                        <Include-Resource>{maven-resources}, META-INF/=${project.build.directory}/classes/META-INF/</Include-Resource>
+                        <Bundle-Name>NEBA API</Bundle-Name>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Category>neba</Bundle-Category>
 						<Export-Package>
@@ -100,5 +101,13 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>com.google.code.tld-generator</groupId>
+            <artifactId>tld-generator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
 	</dependencies>
 </project>

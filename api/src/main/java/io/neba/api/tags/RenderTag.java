@@ -14,11 +14,10 @@
  * limitations under the License.
  **/
 
-package io.neba.core.tags;
+package io.neba.api.tags;
 
 import io.neba.api.rendering.BeanRenderer;
 import io.neba.api.rendering.BeanRendererFactory;
-import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import tldgen.Tag;
 import tldgen.TagAttribute;
@@ -100,23 +99,6 @@ public final class RenderTag extends TagWithBindings implements DynamicAttribute
             write(renderedObject);
         }
         return EVAL_PAGE;
-    }
-
-    private SlingScriptHelper getScriptHelper() {
-        SlingBindings bindings = getBindings();
-
-        if (bindings == null) {
-            throw new IllegalStateException("No " + SlingBindings.class.getName() +
-                    " was found in the request, got null.");
-        }
-
-        SlingScriptHelper scriptHelper = (SlingScriptHelper) bindings.get(SlingBindings.SLING);
-
-        if (scriptHelper == null) {
-            throw new IllegalStateException("No " + SlingScriptHelper.class.getName() +
-                    " was found in the sling bindings, got null.");
-        }
-        return scriptHelper;
     }
 
     private void write(String renderedObject) {
