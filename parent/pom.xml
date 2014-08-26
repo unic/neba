@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>3.2.1-SNAPSHOT</version>
+    <version>3.2.0</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
