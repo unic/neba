@@ -16,16 +16,6 @@
 
 package io.neba.core.mvc;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.request.RequestParameter;
@@ -35,6 +25,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -82,7 +81,7 @@ public class SlingMultipartFileTest {
         this.destinationFile.createNewFile();
     }
 
-    private void assertDestinationFileContentIsMultiPartContent() throws FileNotFoundException, IOException {
+    private void assertDestinationFileContentIsMultiPartContent() throws IOException {
         String destinationFileContent = IOUtils.toString(new FileReader(this.destinationFile));
         assertThat(destinationFileContent, is(this.multipartContent));
     }

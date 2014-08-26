@@ -105,7 +105,7 @@ public class BeanRendererFactoryImpl implements BeanRendererFactory {
         rebuildBeanRenderers();
     }
 
-    private void prepareTemplateEngine() throws LoginException {
+    private void prepareTemplateEngine() {
         VelocityEngine engine = new VelocityEngine();
         engine.setProperty(RESOURCE_LOADER, RESOURCELOADER_NAME);
         engine.setProperty(RESOURCELOADER_NAME + "." + RESOURCE_LOADER + ".instance", this.resourceLoader);

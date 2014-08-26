@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-	<artifactId>io.neba.neba-delivery</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>io.neba.neba-delivery</artifactId>
+    <packaging>content-package</packaging>
     <name>NEBA delivery</name>
 
     <description>Packages NEBA with runtime dependencies for deployment via the Adobe CRX package manager.</description>
@@ -9,17 +9,16 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <properties>
-        <crx.package.description>Contains NEBA and the NEBA runtime dependencies</crx.package.description>
-        <crx.package.fixedbugs />
+        <neba.installation.path>/apps/neba/install</neba.installation.path>
     </properties>
 
     <dependencies>
-        <!-- NEBA internal dependencies -->
+        <!-- Internal dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>io.neba.neba-core</artifactId>
@@ -86,28 +85,126 @@
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>com.day.jcr.vault</groupId>
                 <artifactId>content-package-maven-plugin</artifactId>
+				<extensions>true</extensions>
                 <configuration>
-                    <packageFile>target/${project.build.finalName}-crx.zip</packageFile>
+                    <failOnMissingEmbed>true</failOnMissingEmbed>
+                    <embeddeds>
+                        <embedded>
+                            <groupId>org.apache.velocity</groupId>
+                            <artifactId>velocity</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.eclipse.gemini.blueprint</groupId>
+                            <artifactId>gemini-blueprint-core</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.eclipse.gemini.blueprint</groupId>
+                            <artifactId>gemini-blueprint-io</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>io.neba.neba-core</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>io.neba.neba-api</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                    </embeddeds>
+                    <filters>
+                        <filter>
+                            <mode>replace</mode>
+                            <root>/apps/neba</root>
+                        </filter>
+                    </filters>
                 </configuration>
             </plugin>
+
+            <!-- Resources are not considered when <packaging> is "pom" - re-enable resource processing. -->
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/aem.xml</descriptor>
-                    </descriptors>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>resources</goal>
                         </goals>
+                        <phase>prepare-package</phase>
                     </execution>
                 </executions>
             </plugin>

@@ -15,7 +15,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -159,10 +159,6 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.tld-generator</groupId>
-            <artifactId>tld-generator</artifactId>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -194,7 +190,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Include-Resource>{maven-resources}, META-INF/=${project.build.directory}/classes/META-INF/</Include-Resource>
                         <Bundle-Name>NEBA core</Bundle-Name>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Category>neba</Bundle-Category>
@@ -202,14 +197,6 @@
                         <!-- Legacy support: Embed dependencies not available on older sling platforms -->
                         <Embed-Dependency>commons-lang3</Embed-Dependency>
                         <Embed-Directory>lib</Embed-Directory>
-                        <!--
-                        Commented due to https://issues.apache.org/jira/browse/FELIX-3239:
-                        This export is done directly in the patched host bundle.
-
-						<Export-Package>
-                            io.neba.core.tags
-						</Export-Package>
-						-->
                         <Private-Package>
                             io.neba.core.*
                         </Private-Package>

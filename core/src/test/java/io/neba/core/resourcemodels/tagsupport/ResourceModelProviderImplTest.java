@@ -16,9 +16,9 @@
 
 package io.neba.core.resourcemodels.tagsupport;
 
-import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
+import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.Resource;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.when;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ResourceModelProviderTest {
+public class ResourceModelProviderImplTest {
 	@Mock
 	private ModelRegistry registry;
 	@Mock
@@ -64,7 +64,7 @@ public class ResourceModelProviderTest {
     private final Object model = new Object();
 
 	@InjectMocks
-	private ResourceModelProvider testee;
+	private ResourceModelProviderImpl testee;
 
     @Before
 	@SuppressWarnings("unchecked")

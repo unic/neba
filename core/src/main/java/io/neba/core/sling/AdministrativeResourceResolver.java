@@ -16,6 +16,7 @@
 
 package io.neba.core.sling;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -60,6 +61,14 @@ public class AdministrativeResourceResolver {
     public Resource resolve(String path) {
         ensureInitialization();
         return this.resolver.resolve(path);
+    }
+
+    /**
+     * @see org.apache.sling.api.resource.ResourceResolver#resolve(javax.servlet.http.HttpServletRequest, String)
+     */
+    public Resource resolve(SlingHttpServletRequest request, String path) {
+        ensureInitialization();
+        return this.resolver.resolve(request, path);
     }
 
     /**

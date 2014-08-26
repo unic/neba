@@ -14,11 +14,14 @@
  * limitations under the License.
 **/
 
-package io.neba.core.tags;
+package io.neba.api.tags;
 
 import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 
 import javax.servlet.jsp.tagext.TagSupport;
+
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 /**
  * @author Olaf Otto
@@ -26,5 +29,22 @@ import javax.servlet.jsp.tagext.TagSupport;
 abstract class TagWithBindings extends TagSupport {
     protected SlingBindings getBindings() {
         return (SlingBindings) this.pageContext.getRequest().getAttribute(SlingBindings.class.getName());
+    }
+
+    protected SlingScriptHelper getScriptHelper() {
+        SlingBindings bindings = getBindings();
+
+        if (bindings == null) {
+            throw new IllegalStateException("No " + SlingBindings.class.getName() +
+                    " was found in the request, got null.");
+        }
+
+        SlingScriptHelper scriptHelper = (SlingScriptHelper) bindings.get(SLING);
+
+        if (scriptHelper == null) {
+            throw new IllegalStateException("No " + SlingScriptHelper.class.getName() +
+                    " was found in the sling bindings, got null.");
+        }
+        return scriptHelper;
     }
 }

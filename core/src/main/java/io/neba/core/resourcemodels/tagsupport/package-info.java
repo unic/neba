@@ -15,7 +15,7 @@
 **/
 
 /**
- * The {@link io.neba.core.tags.DefineObjectsTag} provides models for resource without adaptation
+ * The {@link io.neba.api.tags.DefineObjectsTag} provides models for resource without adaptation
  * as the desired model target type is not known by a view. Supporting implementations for such use cases
  * are contained in this package.
  */

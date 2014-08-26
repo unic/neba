@@ -419,7 +419,7 @@ public class RequestScopedResourceModelCacheTest {
         assertThat(this.cachedModel).isEqualTo(this.model);
     }
 
-    private void putModelInCache() throws Exception {
+    private void putModelInCache() {
         testee.put(this.resource, this.model, new Key(this.resource.getPath(), this.modelType));
     }
 

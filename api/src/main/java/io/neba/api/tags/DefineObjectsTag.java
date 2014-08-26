@@ -14,11 +14,12 @@
  * limitations under the License.
 **/
 
-package io.neba.core.tags;
+package io.neba.api.tags;
 
-import io.neba.core.resourcemodels.tagsupport.ResourceModelProvider;
+import io.neba.api.resourcemodels.ResourceModelProvider;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.scripting.SlingScriptHelper;
 import tldgen.Tag;
 import tldgen.TagAttribute;
 
@@ -34,15 +35,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
                    " for the current resource under the key \"m\", if such a model exists.")
 public final class DefineObjectsTag extends TagWithBindings {
     private static final long serialVersionUID = 3746304163438347809L;
-    private static volatile ResourceModelProvider modelProvider;
-
-    public static void setModelProvider(ResourceModelProvider provider) {
-        modelProvider = provider;
-    }
-
-    public static void unsetModelProvider() {
-        modelProvider = null;
-    }
 
     private boolean includeGenericBaseTypes = false;
     private String modelBeanName;
@@ -73,6 +65,9 @@ public final class DefineObjectsTag extends TagWithBindings {
     }
 
     private void provideMostSpecificResourceModel() {
+        SlingScriptHelper scriptHelper = getScriptHelper();
+        ResourceModelProvider modelProvider = scriptHelper.getService(ResourceModelProvider.class);
+
         if (modelProvider == null) {
             // Can be the case if called before / after provider lifetime, e.g.
             // when the application context is stopped. Fail fast.

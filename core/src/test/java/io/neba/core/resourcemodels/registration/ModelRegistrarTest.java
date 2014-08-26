@@ -144,7 +144,7 @@ public class ModelRegistrarTest {
         return type;
     }
 
-    private void registerResourceModels() throws Exception {
+    private void registerResourceModels() {
         this.testee.registerModels(this.context, this.factory);
     }
 

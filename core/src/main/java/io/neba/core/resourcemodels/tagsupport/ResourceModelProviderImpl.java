@@ -16,18 +16,16 @@
 
 package io.neba.core.resourcemodels.tagsupport;
 
+import io.neba.api.resourcemodels.ResourceModelProvider;
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.tags.DefineObjectsTag;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.Resource;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import java.util.Collection;
 
@@ -47,7 +45,7 @@ import static io.neba.core.util.Key.toKey;
  * @author Olaf Otto
  */
 @Service
-public class ResourceModelProvider  {
+public class ResourceModelProviderImpl implements ResourceModelProvider {
 	@Inject
 	private ModelRegistry registry;
 	@Inject
@@ -55,44 +53,30 @@ public class ResourceModelProvider  {
 	@Inject
 	private ResourceModelCaches caches;
 
-    @PostConstruct
-    public void injectSelfIntoDefineObjectsTag() {
-        DefineObjectsTag.setModelProvider(this);
-    }
-
-    @PreDestroy
-    public void removeSelfFromDefineObjectsTag() {
-        DefineObjectsTag.unsetModelProvider();
-    }
-
-    /**
-     * @param resource must not be <code>null</code>
-     * @param beanName must not be <code>null</code>
-     * @return the most specific model bean instance compatible with the
-     *         given resource's resource type, or <code>null</code>. The
-     *         model stems from a bean who's name matches the given bean name.
-     */
+    @Override
     public Object resolveMostSpecificModelWithBeanName(Resource resource, String beanName) {
+        if (resource == null) {
+            throw new IllegalArgumentException("Method argument resource must not be null.");
+        }
+        if (beanName == null) {
+            throw new IllegalArgumentException("Method argument beanName must not be null.");
+        }
         return resolveMostSpecificModelForResource(resource, true, beanName);
     }
 
-    /**
-     * @param resource must not be <code>null</code>.
-     * @return the most specific model for the given resource, or <code>null</code> if
-     *         there is no unique most specific model. Models for base types such as nt:usntructured
-     *         or nt:base are not considered.
-     */
+    @Override
     public Object resolveMostSpecificModel(Resource resource) {
+        if (resource == null) {
+            throw new IllegalArgumentException("Method argument resource must not be null.");
+        }
         return resolveMostSpecificModelForResource(resource, false, null);
     }
 
-    /**
-     * @param resource must not be <code>null</code>.
-     * @return the most specific model for the given resource, or <code>null</code> if
-     *         there is no unique most specific model. Models for base types such as nt:unstructured
-     *         or nt:base are considered.
-     */
+    @Override
     public Object resolveMostSpecificModelIncludingModelsForBaseTypes(Resource resource) {
+        if (resource == null) {
+            throw new IllegalArgumentException("Method argument resource must not be null.");
+        }
         return resolveMostSpecificModelForResource(resource, true, null);
     }
 

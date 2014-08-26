@@ -17,5 +17,39 @@ Gemfile.lock
 atlassian-ide-plugin.xml
 *.iml
 
-# Eclipse
-.eclipse/
+# Eclipse (source: https://github.com/github/gitignore/blob/master/Global/Eclipse.gitignore)
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+.settings/
+.loadpath
+.project
+.classpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+# TeXlipse plugin
+.texlipse
+
+# Checkstyle plugin
+.checkstyle
+
+# Unknown plugin
+*/.cache
+

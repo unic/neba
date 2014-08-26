@@ -14,10 +14,11 @@
  * limitations under the License.
 **/
 
-package io.neba.core.tags;
+package io.neba.api.tags.tags;
 
 import io.neba.api.rendering.BeanRenderer;
 import io.neba.api.rendering.BeanRendererFactory;
+import io.neba.api.tags.RenderTag;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
@@ -37,6 +38,7 @@ import javax.servlet.jsp.PageContext;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.MapAssert.entry;
 import static org.mockito.Matchers.anyObject;
@@ -87,7 +89,7 @@ public class RenderTagTest {
         when(this.pageContext.getRequest()).thenReturn(this.request);
         when(this.pageContext.getOut()).thenReturn(this.writer);
         when(this.request.getAttribute(eq(SlingBindings.class.getName()))).thenReturn(this.bindings);
-        when(this.bindings.get(eq(SlingBindings.SLING))).thenReturn(this.helper);
+        when(this.bindings.get(eq(SLING))).thenReturn(this.helper);
         when(this.helper.getService(eq(BeanRendererFactory.class))).thenReturn(this.factory);
         when(this.factory.get(anyString())).thenReturn(this.renderer);
         doAnswer(new Answer<String>() {

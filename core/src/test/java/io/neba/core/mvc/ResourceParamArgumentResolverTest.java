@@ -16,7 +16,18 @@
 
 package io.neba.core.mvc;
 
+import static org.apache.sling.api.resource.Resource.RESOURCE_TYPE_NON_EXISTING;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import io.neba.api.annotations.ResourceParam;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -32,16 +43,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
-import javax.servlet.http.HttpServletRequest;
-
-import static org.apache.sling.api.resource.Resource.RESOURCE_TYPE_NON_EXISTING;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -211,7 +212,7 @@ public class ResourceParamArgumentResolverTest {
     }
 
     private void withResolvedResource() {
-        doReturn(this.resource).when(this.resolver).resolve(anyString());
+        doReturn(this.resource).when(this.resolver).resolve(any(HttpServletRequest.class), anyString());
     }
 
     private void withRequiredParameter() {
