@@ -1,6 +1,6 @@
 jQuery(document).ready(function ($) {
     var color = "neba";
-    var css_url = "css/colors/colors-" + color + ".css";
+    var css_url = "/css/colors/colors-" + color + ".css";
     $('head').append('<link rel="stylesheet" href="' + css_url + '" type="text/css" />');
 });
 
@@ -15,7 +15,7 @@ $(document).ready(function () {
     var header_h = $("#header-wrapper").height() + 0;
     var menu_h = $("#menu").height();
     var speed = 500;
-    var logo2_url = "images/logo-min.png";
+    var logo2_url = "/images/logo-min.png";
 
     var scroll_critical = parseInt(header_h - menu_h);
     var window_y = 0;

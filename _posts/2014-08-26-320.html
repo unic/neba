@@ -1,0 +1,88 @@
+---
+title: NEBA 3.2.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.2.0 Release notes
+---
+<div class="section-title">
+
+    <h1 class="title">NEBA <span>Release 3.2.0</span></h1>
+
+</div><!--END SECTION TITLE-->
+
+<div id="inner-content" class="blog1">
+
+    <div class="post">
+
+        <div class="post-info">
+            <div class="date"><span class="month">Aug</span><span class="day">26</span><span class="month">2014</span></div>
+        </div><!--END POST-INFO-->
+
+        <div class="post-content">
+
+            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
+
+            <div class="post-title">
+                <h2 class="title">Release 3.2.0</h2>
+            </div><!--END POST-TITLE-->
+
+            <div class="post-meta">
+                <ul>
+                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
+                </ul>
+            </div><!--END POST-META-->
+            <p>
+                This release hardenes the NEBA taglib in AEM 5.6.x against issues with fragment bundles in Felix and features a delivery package that can automatically be deployed using
+                <a href="http://dev.day.com/docs/en/cq/current/core/how_to/how_to_use_the_vlttool/vlt-mavenplugin.html">the content-package-maven-plugin</a>.
+            </p>
+
+            <h3>Change requests</h3>
+            <p>
+            <a href="https://github.com/unic/neba/issues/4">#4 Remove classifier (-aem) from delivery artifact</a><br/>
+            <a href="https://github.com/unic/neba/issues/9">#9 Change the taglib URI to match the fact that it is published via the API bundle</a>
+            </p>
+
+            <h3>Fixed bugs</h3>
+            <p>
+            <a href="https://github.com/unic/neba/issues/8">#8 NEBA core tag library may not be found during JSP compilation even though it is registered</a>
+            </p>
+
+            <div class="divider-border"></div>
+
+            <h3>Upgrading from 3.1.0</h3>
+
+            <p>
+            This release features a new URI for the neba tag library. To move to the new tag library, Update the taglib URI from
+            </p>
+<p>
+{% highlight java %}
+<%@taglib prefix="neba" uri="http://www.neba.io/core/1.0"%>
+{% endhighlight %}
+</p>
+<p>
+            to
+</p>
+<p>
+{% highlight java %}
+<%@taglib prefix="neba" uri="http://neba.io/1.0"%>
+{% endhighlight %}
+</p>
+            <p>and subsequently delete the /var/classes folder in Sling to enforce re-compilation.</p>
+            <p>If you are using the delivery package, note that the classifier "aem" was removed from the artifact. The dependency is thus:</p>
+
+            <p>
+{% highlight xml %}
+<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-delivery</artifactId>
+    <version>3.2.0</version>
+    <type>zip</type>
+</dependency>
+{% endhighlight %}
+            </p>
+
+        </div><!--END POST-CONTENT -->
+
+    </div><!--END POST-->
+
+</div><!--END INNER-CONTENT-->
