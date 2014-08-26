@@ -17,7 +17,6 @@
 package io.neba.core.util;
 
 import org.junit.Test;
-import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -27,7 +26,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static io.neba.core.util.ReflectionUtil.getCollectionComponentType;
+import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
+import static io.neba.core.util.ReflectionUtil.isInstantiableCollectionType;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.springframework.util.ReflectionUtils.findField;
 
 /**
  * @author Olaf Otto
@@ -131,9 +134,9 @@ public class ReflectionUtilTest {
 
     @Test
     public void testDetectionOfInstantiableCollectionType() throws Exception {
-        assertThat(ReflectionUtil.isInstantiableCollectionType(Collection.class));
-        assertThat(ReflectionUtil.isInstantiableCollectionType(Set.class));
-        assertThat(ReflectionUtil.isInstantiableCollectionType(List.class));
+        assertThat(isInstantiableCollectionType(Collection.class));
+        assertThat(isInstantiableCollectionType(Set.class));
+        assertThat(isInstantiableCollectionType(List.class));
     }
 
     @Test
@@ -159,20 +162,20 @@ public class ReflectionUtilTest {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <T extends Collection> void instantiate(Class<T> collectionType) {
-        this.collectionInstance = ReflectionUtil.instantiateCollectionType(collectionType);
+        this.collectionInstance = instantiateCollectionType(collectionType);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <T extends Collection> void instantiate(Class<T> collectionType, int length) {
-        this.collectionInstance = ReflectionUtil.instantiateCollectionType(collectionType, length);
+        this.collectionInstance = instantiateCollectionType(collectionType, length);
     }
 
     private void getComponentTypeOf(String name) throws NoSuchFieldException {
-        this.componentType = ReflectionUtil.getCollectionComponentType(this.type, getField(name));
+        this.componentType = getCollectionComponentType(this.type, getField(name));
     }
 
-    private Field getField(String name) throws NoSuchFieldException {
-        return ReflectionUtils.findField(this.type, name);
+    private Field getField(String name) {
+        return findField(this.type, name);
     }
 
     private void assertComponentTypeIs(Class<?> expected) {

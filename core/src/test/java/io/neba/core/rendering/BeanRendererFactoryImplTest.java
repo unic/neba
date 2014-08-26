@@ -247,7 +247,7 @@ public class BeanRendererFactoryImplTest {
         this.renderer = this.testee.get("junit");
     }
 
-    private void createFactory() throws Exception {
+    private void createFactory() {
         this.testee = new BeanRendererFactoryImpl();
         this.testee.setRenderers(new String[]{"junit:/junit/test"});
     }

@@ -64,7 +64,7 @@ public class AdministrativeResourceResolver {
     }
 
     /**
-     * @see ResourceResolver#resolve(SlingHttpServletRequest, String)
+     * @see org.apache.sling.api.resource.ResourceResolver#resolve(javax.servlet.http.HttpServletRequest, String)
      */
     public Resource resolve(SlingHttpServletRequest request, String path) {
         ensureInitialization();

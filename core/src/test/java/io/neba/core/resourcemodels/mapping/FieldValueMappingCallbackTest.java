@@ -19,7 +19,6 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -28,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
@@ -902,7 +900,7 @@ public class FieldValueMappingCallbackTest {
         this.targetValue = propertyValue;
         ValueMap properties = mock(ValueMap.class);
         when(this.parentOfResourceTargetedByMapping.adaptTo(eq(ValueMap.class))).thenReturn(properties);
-        Mockito.<Object>when(properties.get(eq(propertyName), eq(propertyValue.getClass()))).thenReturn(propertyValue);
+        when(properties.get(eq(propertyName), eq(propertyValue.getClass()))).thenReturn(propertyValue);
     }
 
     private void assertMappedFieldIsCollectionContainingTargetValue() {

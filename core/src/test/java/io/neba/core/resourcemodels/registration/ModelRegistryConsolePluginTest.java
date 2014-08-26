@@ -359,7 +359,7 @@ public class ModelRegistryConsolePluginTest {
         this.renderedResponse = this.internalWriter.toString().replaceAll("[\\n\\r]", "");
     }
 
-    private void getResource(String resource) throws ServletException, IOException {
+    private void getResource(String resource) {
         String resourcePath = "/" + ModelRegistryConsolePlugin.LABEL + "/static/" + resource;
         this.resourceUrl = this.testee.getResource(resourcePath);
     }
