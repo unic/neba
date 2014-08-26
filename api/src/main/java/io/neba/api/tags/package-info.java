@@ -20,10 +20,11 @@
  * of project-specific implementations to the NEBA core, i.e. to prevent
  * project code to inherit from these tag implementations.
  */
-@TagLibrary(value = "http://www.neba.io/core/1.0",
+@TagLibrary(
+        value = "http://neba.io/1.0",
         descriptorFile = "neba.tld",
         shortName = "neba",
-        description = "NEBA core tag library",
+        description = "NEBA tag library",
         libraryVersion = "1.0")
 package io.neba.api.tags;
 
