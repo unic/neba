@@ -3,3 +3,4 @@ io.neba.api.annotations
 io.neba.api.configuration
 io.neba.api.rendering
 io.neba.api.resourcemodels
+io.neba.api.tags
