@@ -80,14 +80,12 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         final ResourceParam resourceParam = getParameterAnnotation(parameter);
         final String parameterName = resolveParameterName(parameter, resourceParam);
 
-        boolean hasDefaultValue = !isEmpty(resourceParam.defaultValue());
-
         String resourcePath = request.getParameter(parameterName);
-        if (hasDefaultValue && isEmpty(resourcePath)) {
+        if (isEmpty(resourcePath)) {
             resourcePath = resourceParam.defaultValue();
         }
 
-        boolean required = resourceParam.required() && !hasDefaultValue;
+        boolean required = resourceParam.required() && isEmpty(resourceParam.defaultValue());
 
         if (isEmpty(resourcePath)) {
             if (required) {
