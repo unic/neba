@@ -58,7 +58,9 @@ import java.lang.annotation.Target;
  * Accordingly, the parameter provided to the controller method is guaranteed not to be <code>null</code> if it is required.
  * Consequently, the parameter may be null if either the parameter value is missing, cannot
  * be resolved to an existing resource or if the resolved resource cannot be adapted to the required target type
- * when the parameter is not {@link ResourceParam#required() required}.
+ * when the parameter is not {@link ResourceParam#required() required}. If a {@link #defaultValue() default value} is provided,
+ * the parameter is always optional, regardless whether it is {@link #required() required}.
+ * If the default value cannot be resolved, the parameter provided to the method is <code>null</code>.
  *
  * @author Olaf Otto
  */
@@ -76,4 +78,10 @@ public @interface ResourceParam {
      * @return when <code>true</code>, the resolved parameter is guaranteed not to be <code>null</code>.
      */
     boolean required() default true;
+
+    /**
+     * @return if not <code>null</code> or empty, this default value is used in case no value is provided for this request parameter.
+     *         Providing a default value implies {@link #required()} = false.
+     */
+    String defaultValue();
 }

@@ -79,10 +79,18 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         final SlingHttpServletRequest request = (SlingHttpServletRequest) nativeRequest;
         final ResourceParam resourceParam = getParameterAnnotation(parameter);
         final String parameterName = resolveParameterName(parameter, resourceParam);
-        final String resourcePath = request.getParameter(parameterName);
+
+        boolean hasDefaultValue = !isEmpty(resourceParam.defaultValue());
+
+        String resourcePath = request.getParameter(parameterName);
+        if (hasDefaultValue && isEmpty(resourcePath)) {
+            resourcePath = resourceParam.defaultValue();
+        }
+
+        boolean required = resourceParam.required() && !hasDefaultValue;
 
         if (isEmpty(resourcePath)) {
-            if (resourceParam.required()) {
+            if (required) {
                 throw new MissingServletRequestParameterException(parameterName, String.class.getSimpleName());
             }
             return null;
@@ -94,7 +102,7 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         Resource resource = resolver.resolve(request, resourcePath);
 
         if (resource == null || isNonExistingResource(resource)) {
-            if (resourceParam.required()) {
+            if (required) {
                 throw new UnresolvableResourceException("Unable to resolve resource " + resourcePath +
                                                         " for the required parameter '" + parameterName + "'.");
             }
@@ -107,7 +115,7 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
 
         Object adapted = resource.adaptTo(parameter.getParameterType());
         if (adapted == null) {
-            if (resourceParam.required()) {
+            if (required) {
                 throw new MissingAdapterException("Unable to adapt " + resource + " to " + parameter.getParameterType() +
                                                   " for required parameter '" + parameterName + "'.");
             }
