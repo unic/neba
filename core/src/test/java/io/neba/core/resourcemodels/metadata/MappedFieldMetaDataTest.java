@@ -62,9 +62,35 @@ public class MappedFieldMetaDataTest {
 
 		assertFieldIsNotCollectionType();
 		assertFieldIsNotThisReference();
-	}
+    }
 
-	@Test
+    @Test
+    public void testAppendRelativePathOnReference() throws Exception {
+        createMetadataForTestModelFieldWithName("referencedResourceModelWithAppendedReferencePath");
+        assertReferenceHasAppendPath();
+        assertReferenceAppendPathIs("/jcr:content");
+    }
+
+    @Test
+    public void testNoAppendPathOnReference() throws Exception {
+        createMetadataForTestModelFieldWithName("referencedResource");
+        assertNoAppendPathIsPresentOnReference();
+    }
+
+    @Test
+    public void testResolveBelowEveryChildOnChildren() throws Exception {
+        createMetadataForTestModelFieldWithName("childContentResourcesAsResources");
+        assertChildrenHasResolveBelowEveryChildPath();
+        assertChildrenResolveBelowEveryChildPathIs("jcr:content");
+    }
+
+    @Test
+    public void testNoResolveBelowEveryChildOnChildren() throws Exception {
+        createMetadataForTestModelFieldWithName("childrenAsResources");
+        assertChildrenDoesNotHaveResolveBelowEveryChildPath();
+    }
+
+    @Test
 	public void testComponentTypeExtraction() throws Exception {
 		createMetadataForTestModelFieldWithName("referencedResourcesListWithSimpleTypeParameter");
 
@@ -76,7 +102,7 @@ public class MappedFieldMetaDataTest {
 	@Test
 	public void testThisReferenceDetection() throws Exception {
 		createMetadataForTestModelFieldWithName("resource");
-		assertFielIsThisReference();
+		assertFieldIsThisReference();
 
 		assertFieldIsNotPropertyType();
 		assertFieldIsNotCollectionType();
@@ -180,6 +206,18 @@ public class MappedFieldMetaDataTest {
         assertThat(testResourceModel.getStringField()).isEqualTo("JunitTest");
     }
 
+    private void assertChildrenHasResolveBelowEveryChildPath() {
+        assertThat(this.testee.isResolveBelowEveryChildPathPresentOnChildren()).isTrue();
+    }
+
+    private void assertChildrenDoesNotHaveResolveBelowEveryChildPath() {
+        assertThat(this.testee.isResolveBelowEveryChildPathPresentOnChildren()).isFalse();
+    }
+
+    private void assertChildrenResolveBelowEveryChildPathIs(String path) {
+        assertThat(this.testee.getResolveBelowEveryChildPathOnChildren()).isEqualTo(path);
+    }
+
     private void assertFieldHasPathExpression() {
         assertThat(this.testee.isPathExpressionPresent()).isTrue();
     }
@@ -200,7 +238,7 @@ public class MappedFieldMetaDataTest {
 		assertThat(this.testee.isPathAnnotationPresent()).isFalse();
 	}
 
-	private void assertFielIsThisReference() {
+	private void assertFieldIsThisReference() {
 		assertThat(this.testee.isThisReference()).isTrue();
 	}
 
@@ -232,7 +270,19 @@ public class MappedFieldMetaDataTest {
 		assertThat(this.testee.isReference()).isFalse();
 	}
 
-	private void assertFieldIsPropertyType() {
+    private void assertNoAppendPathIsPresentOnReference() {
+        assertThat(this.testee.isAppendPathPresentOnReference()).isFalse();
+    }
+
+    private void assertReferenceHasAppendPath() {
+        assertThat(this.testee.isAppendPathPresentOnReference()).isTrue();
+    }
+
+    private void assertReferenceAppendPathIs(String path) {
+        assertThat(this.testee.getAppendPathOnReference()).isEqualTo(path);
+    }
+
+    private void assertFieldIsPropertyType() {
 		assertThat(this.testee.isPropertyType()).isTrue();
 	}
 
