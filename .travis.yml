@@ -1,5 +1,5 @@
 language: java
 after_success:
-- mvn clean test jacoco:report coveralls:report
+- mvn clean jacoco:report coveralls:report
 dd:
   secure: flYk55lsmdHQvWG0sfx1tZW1TFtfdBXuyB8Cm13BRPf15E3e4fQhfdtBU0Qd0l1+rJ9y7hVmv/bIt2cFGgwQenZ2WmvU4DpLH2hG+4H0yTw2hHGJVB5/df0b4OsxJH0cRgcA9FqgQ25nbgRjgm6/ABdKVv+HokKuZsoH8z/jYcU=
