@@ -16,18 +16,7 @@
 
 package io.neba.core.mvc;
 
-import static org.apache.sling.api.resource.Resource.RESOURCE_TYPE_NON_EXISTING;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import io.neba.api.annotations.ResourceParam;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -43,6 +32,17 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.apache.sling.api.resource.Resource.RESOURCE_TYPE_NON_EXISTING;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -85,47 +85,53 @@ public class ResourceParamArgumentResolverTest {
     @Test(expected = IllegalStateException.class)
     public void testHandlingOfUnexpectedRequestType() throws Exception {
         withNonSlingRequest();
+
         resolveArgument();
     }
 
     @Test(expected = MissingServletRequestParameterException.class)
     public void testHandlingOfMissingRequiredResourceParameter() throws Exception {
-        withRequiredParameter();
+        withParameterRequired();
         resolveArgument();
     }
 
     @Test
     public void testHandlingOfMissingOptionalResourceParameter() throws Exception {
         resolveArgument();
+
         assertResolvedArgumentIsNull();
     }
 
     @Test(expected = UnresolvableResourceException.class)
     public void testHandlingOfUnresolvableRequiredResource() throws Exception {
-        withRequiredParameter();
+        withParameterRequired();
         withResourceParameter("/junit/test/path");
+
         resolveArgument();
     }
 
     @Test(expected = UnresolvableResourceException.class)
     public void testHandlingOfNonExistingRequiredResource() throws Exception {
-        withRequiredParameter();
+        withParameterRequired();
         withResourceParameter("/junit/test/path");
         withResolvedResource();
         withResourceTypeNonExisting();
+
         resolveArgument();
     }
 
     @Test
     public void testHandlingOfUnresolvableOptionalResource() throws Exception {
         withResourceParameter("/junit/test/path");
+
         resolveArgument();
+
         assertResolvedArgumentIsNull();
     }
 
     @Test(expected = MissingAdapterException.class)
     public void testHandlingOfUnAdaptableRequiredType() throws Exception {
-        withRequiredParameter();
+        withParameterRequired();
         withResourceParameter("/junit/test/path");
         withResolvedResource();
         resolveArgument();
@@ -135,6 +141,7 @@ public class ResourceParamArgumentResolverTest {
     public void testHandlingOfUnAdaptableOptionalType() throws Exception {
         withResourceParameter("/junit/test/path");
         withResolvedResource();
+
         resolveArgument();
 
         assertResolvedArgumentIsNull();
@@ -145,7 +152,9 @@ public class ResourceParamArgumentResolverTest {
         withResourceParameter("/junit/test/path");
         withResolvedResource();
         withParameterType(Resource.class);
+
         resolveArgument();
+
         assertResourceIsResolvedAsArgument();
     }
 
@@ -155,7 +164,9 @@ public class ResourceParamArgumentResolverTest {
         withResolvedResource();
         withParameterType(ValueMap.class);
         withResourceAdaptingTo(ValueMap.class);
+
         resolveArgument();
+
         assertResolvedArgumentIsA(ValueMap.class);
     }
 
@@ -163,7 +174,9 @@ public class ResourceParamArgumentResolverTest {
     public void testResolverUsesParameterNameOfAnnotationByDefault() throws Exception {
         withResourceParamValue("parameterName");
         withDefaultParameterName("defaultName");
+
         resolveArgument();
+
         verifyResolverLooksUpParameter("parameterName");
     }
 
@@ -171,8 +184,43 @@ public class ResourceParamArgumentResolverTest {
     public void testResolverFallsBackToParameterNameIfAnnotationHasNoValue() throws Exception {
         withResourceParamValue("");
         withDefaultParameterName("defaultName");
+
         resolveArgument();
+
         verifyResolverLooksUpParameter("defaultName");
+    }
+
+    @Test
+    public void testParametersAreOptionalIfDefaultValueIsProvided() throws Exception {
+        withDefaultValue("/default/value");
+        withDefaultParameterName("defaultName");
+        withParameterRequired();
+
+        resolveArgument();
+
+        assertResolvedArgumentIsNull();
+    }
+
+    @Test
+    public void testDefaultValueIsResolvedIfNoRequestParameterIsPresent() throws Exception {
+        withDefaultValue("/default/value");
+        withDefaultParameterName("defaultName");
+        withParameterType(Resource.class);
+        withResolvedResource();
+
+        resolveArgument();
+
+        verifyDefaultResourceIsResolved();
+        assertResourceIsResolvedAsArgument();
+    }
+
+    private void verifyDefaultResourceIsResolved() {
+        String defaultValue = this.resourceParam.defaultValue();
+        verify(this.resolver).resolve(eq(this.slingRequest), eq(defaultValue));
+    }
+
+    private void withDefaultValue(String defaultValue) {
+        doReturn(defaultValue).when(this.resourceParam).defaultValue();
     }
 
     private void withDefaultParameterName(String parameterName) {
@@ -215,7 +263,7 @@ public class ResourceParamArgumentResolverTest {
         doReturn(this.resource).when(this.resolver).resolve(any(HttpServletRequest.class), anyString());
     }
 
-    private void withRequiredParameter() {
+    private void withParameterRequired() {
         doReturn(true).when(this.resourceParam).required();
     }
 

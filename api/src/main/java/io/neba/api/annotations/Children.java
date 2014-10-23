@@ -18,19 +18,22 @@ package io.neba.api.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * <p>
  * Provides a {@link java.util.Collection}, {@link java.util.List} or {@link java.util.Set}
  * of children of the resource. The resource might be the current resource itself,
- * a resource designated by a {@link io.neba.api.annotations.Path} annotation,
+ * a resource designated by a {@link io.neba.api.annotations.Path} annotation
  * or a {@link io.neba.api.annotations.Reference referenced} resource.
  * </p>
- * <br/>
+ *
+ * <p>
+*     Examples
+ * </p>
  *
  * Children of the current resource
  * <pre>
@@ -38,7 +41,7 @@ import static java.lang.annotation.ElementType.FIELD;
  * private List&lt;Resource&gt; children;
  * </pre>
  *
- * Children of the current resource adapted to Page
+ * Children of the current resource as Pages
  * <pre>
  * &#64;{@link Children}
  * private List&lt;Page&gt; pages;
@@ -66,11 +69,23 @@ import static java.lang.annotation.ElementType.FIELD;
  * private List&lt;Page&gt; pages;
  * </pre>
  *
+ * The "jcr:content" node of Children of the current resource,
+ * adapted to "PageContent".
+ * <pre>
+ * &#64;{@link Children}(resolveBelowEveryChild = "/jcr:content")
+ * private List&lt;PageContent&gt; pageContents;
+ * </pre>
+ *
  * @author Olaf Otto
  * @author Daniel Rey
  */
 @Documented
 @Target(FIELD)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RUNTIME)
 public @interface Children {
+    /**
+     * @return the relative path to use to resolve a resource below each child instead
+     * of using the child directly.
+     */
+    String resolveBelowEveryChild() default "";
 }

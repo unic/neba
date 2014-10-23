@@ -16,12 +16,12 @@
 
 package io.neba.api.annotations;
 
-import static java.lang.annotation.ElementType.FIELD;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.FIELD;
 
 /**
  * Marks a field as containing a reference, i.e. a path to another resource.
@@ -156,11 +156,28 @@ import java.lang.annotation.Target;
  * </pre>
  * 
  * </p>
- * 
+ *
+ * In case you want to alter the reference prior to resolution, e.g. to obtain specific children of the referenced resource,
+ * you can modify the reference path(s) by providing a path segment that is appended to all reference paths, like so:
+ *
+ * <p>
+ *
+ * <pre>
+ * ...
+ * &#64;{@link Reference}(append = "/jcr:content")
+ * private List&lt;PageContent&gt; pageContents;
+ * </pre>
+ *
+ * </p>
+ *
+ * Thus, if the reference(s) point to pages, e.g. /content/page/a, /jcr:content would be appended to the reference path, resulting in
+ * /content/page/a/jcr:content to be resolved. The appended path is relative, thus appending a path of the form "../../xyz" is supported as well.
+ *
  * @author Olaf Otto
  */
 @Documented
 @Target(FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Reference {
+    String append() default "";
 }

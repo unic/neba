@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
+import static io.neba.core.util.StringUtil.append;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.springframework.util.ReflectionUtils.getField;
 import static org.springframework.util.ReflectionUtils.setField;
@@ -205,24 +206,11 @@ public class FieldValueMappingCallback {
      * @return the resolved value, or <code>null</code>.
      */
     private Object resolveValueOfField(FieldData field) {
-        Object value = null;
-
         final Class<?> fieldType = field.metaData.getType();
+        Object value;
 
         if (field.metaData.isReference()) {
-            // Regardless of its path, the field references another resource.
-            // fetch the field value (the path(s) to the referenced resource(s)) and resolve these resources.
-            if (field.metaData.isCollectionType()) {
-                String[] referencedResourcePaths = resolvePropertyTypedValue(field, String[].class);
-                if (referencedResourcePaths != null) {
-                    value = resolveCollectionOfReferences(field, referencedResourcePaths);
-                }
-            } else {
-                String referencedResourcePath = resolvePropertyTypedValue(field, String.class);
-                if (referencedResourcePath != null) {
-                    value = resolveResource(referencedResourcePath, fieldType);
-                }
-            }
+            value = resolveReferenceValueOfField(field, fieldType);
         } else if (field.metaData.isPropertyType()) {
             // The field points to a property as it is not adaptable from a resource
             value = resolvePropertyTypedValue(field);
@@ -234,22 +222,47 @@ public class FieldValueMappingCallback {
         return value;
     }
 
+    private Object resolveReferenceValueOfField(FieldData field, Class<?> fieldType) {
+        Object value = null;
+        // Regardless of its path, the field references another resource.
+        // fetch the field value (the path(s) to the referenced resource(s)) and resolve these resources.
+        if (field.metaData.isCollectionType()) {
+            String[] referencedResourcePaths = resolvePropertyTypedValue(field, String[].class);
+            if (referencedResourcePaths != null) {
+                value = resolveCollectionOfReferences(field, referencedResourcePaths);
+            }
+        } else {
+            String referencedResourcePath = resolvePropertyTypedValue(field, String.class);
+            if (referencedResourcePath != null) {
+                if (field.metaData.isAppendPathPresentOnReference()) {
+                    referencedResourcePath += field.metaData.getAppendPathOnReference();
+                }
+                value = resolveResource(referencedResourcePath, fieldType);
+            }
+        }
+        return value;
+    }
+
     /**
      * This method resolves and converts
      * all references of the given array of paths. <br />
      * Afterwards, the resulting instances are stored in a {@link Collection} compatible to the
      * collection type of the given {@link MappedFieldMetaData}.
      *
-     * @param pathsToReferencedResources relative or absolute paths to resources.
+     * @param paths relative or absolute paths to resources.
      * @return never <code>null</code> but rather an empty collection.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Collection resolveCollectionOfReferences(FieldData field, String[] pathsToReferencedResources) {
-        Class<Collection> collectionType = (Class<Collection>) field.metaData.getType();
-        final Collection values = instantiateCollectionType(collectionType, pathsToReferencedResources.length);
+    private Collection resolveCollectionOfReferences(FieldData field, String[] paths) {
+        final Class<Collection> collectionType = (Class<Collection>) field.metaData.getType();
+        final Collection values = instantiateCollectionType(collectionType, paths.length);
+
+        if (field.metaData.isAppendPathPresentOnReference()) {
+            paths = append(field.metaData.getAppendPathOnReference(), paths);
+        }
 
         final Class<?> componentClass = field.metaData.getComponentType();
-        for (String resourcePath : pathsToReferencedResources) {
+        for (String resourcePath : paths) {
             Object element = resolveResource(resourcePath, componentClass);
             if (element != null) {
                 values.add(element);
@@ -264,10 +277,18 @@ public class FieldValueMappingCallback {
         final Collection values = instantiateCollectionType(collectionType);
 
         final Class<?> componentClass = field.metaData.getComponentType();
-        Iterator<Resource> childrenIterator = resource.listChildren();
+        Iterator<Resource> children = resource.listChildren();
 
-        while (childrenIterator.hasNext()) {
-            Object adapted = convert(childrenIterator.next(), componentClass);
+        while (children.hasNext()) {
+            Resource child = children.next();
+            if (field.metaData.isResolveBelowEveryChildPathPresentOnChildren()) {
+                // @Children(resolveBelowEveryChild = "...")
+                child = child.getChild(field.metaData.getResolveBelowEveryChildPathOnChildren());
+                if (child == null) {
+                    continue;
+                }
+            }
+            Object adapted = convert(child, componentClass);
             if (adapted != null) {
                 values.add(adapted);
             }

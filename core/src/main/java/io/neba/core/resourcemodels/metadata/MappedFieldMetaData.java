@@ -1,10 +1,10 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.metadata;
 
@@ -41,21 +41,24 @@ import static org.springframework.util.ReflectionUtils.makeAccessible;
  * @author Olaf Otto
  */
 public class MappedFieldMetaData {
+
     /**
      * Whether a property cannot be represented by a resource but must stem
      * from a value map representing the properties of a resource.
      */
     private static boolean isPropertyType(Class<?> type) {
         return type.isPrimitive() ||
-               type == String.class ||
-               type == Date.class ||
-               type == Calendar.class ||
-               ClassUtils.wrapperToPrimitive(type) != null;
+                type == String.class ||
+                type == Date.class ||
+                type == Calendar.class ||
+                ClassUtils.wrapperToPrimitive(type) != null;
     }
 
     private final Field field;
     private final String path;
     private final boolean isReference;
+    private final boolean isAppendPathPresentOnReference;
+    private final String appendPathOnReference;
     private final boolean isThisReference;
     private final boolean isPathAnnotationPresent;
     private final boolean isPathExpressionPresent;
@@ -63,6 +66,9 @@ public class MappedFieldMetaData {
     private final boolean isCollectionType;
     private final boolean isInstantiableCollectionType;
     private final boolean isChildrenAnnotationPresent;
+    private final boolean isResolveBelowEveryChildPathPresentOnChildren;
+    private final String resolveBelowEveryChildPathOnChildren;
+
     private final Class<?> componentType;
     private final Class<?> arrayTypeOfComponentType;
     private final Class<?> fieldType;
@@ -92,6 +98,10 @@ public class MappedFieldMetaData {
         this.isChildrenAnnotationPresent = field.isAnnotationPresent(Children.class);
 
         // The following initializations are not atomic but order-sensitive.
+        this.isAppendPathPresentOnReference = isAppendPathPresentOnReferenceInternal(field);
+        this.appendPathOnReference = getAppendPathFromReference(field);
+        this.isResolveBelowEveryChildPathPresentOnChildren = isResolveBelowEveryChildPathPresentOnChildrenInternal(field);
+        this.resolveBelowEveryChildPathOnChildren = getResolveBelowEveryChildPathFromChildren(field);
         this.componentType = resolveComponentType();
         this.arrayTypeOfComponentType = resolveArrayTypeOfComponentType();
         this.path = getPathInternal();
@@ -103,9 +113,38 @@ public class MappedFieldMetaData {
         makeAccessible(field);
     }
 
+    private String getAppendPathFromReference(Field field) {
+        return this.isAppendPathPresentOnReference ? getAppendPathOfReference(field) : null;
+    }
+
+    private boolean isAppendPathPresentOnReferenceInternal(Field field) {
+        return isReference && !isBlank(getAppendPathOfReference(field));
+    }
+
+    private String getAppendPathOfReference(Field field) {
+        return field.getAnnotation(Reference.class).append();
+    }
+
+    private boolean isResolveBelowEveryChildPathPresentOnChildrenInternal(Field field) {
+        return this.isChildrenAnnotationPresent && !isBlank(getResolveBelowEveryChildPathOfChildren(field));
+    }
+
+    private String getResolveBelowEveryChildPathFromChildren(Field field) {
+        return this.isResolveBelowEveryChildPathPresentOnChildren ?
+                getResolveBelowEveryChildPathOfChildren(field) : null;
+    }
+
+    private String getResolveBelowEveryChildPathOfChildren(Field field) {
+        String relativePath = field.getAnnotation(Children.class).resolveBelowEveryChild();
+        // The path must be relative, otherwise resource#getChild will be equivalent to
+        // resolver.getResource("/..."), i.e. the resolution will not be relative.
+        return isResolveBelowEveryChildPathPresentOnChildren &&
+               relativePath.charAt(0) == '/' ? relativePath.substring(1) : relativePath;
+    }
+
     /**
      * @return Whether the path name contains an expression.
-     *         An expression has the form ${value}, e.g. &#64;Path("/content/${language}/homepage").
+     * An expression has the form ${value}, e.g. &#64;Path("/content/${language}/homepage").
      */
     private boolean isPathExpressionPresentInternal() {
         return this.isPathAnnotationPresent && this.path.contains("$");
@@ -173,7 +212,7 @@ public class MappedFieldMetaData {
 
     /**
      * @return The {@link org.springframework.util.ReflectionUtils#makeAccessible(java.lang.reflect.Field) accessible}
-     *         {@link java.lang.reflect.Field} represented by this meta data.
+     * {@link java.lang.reflect.Field} represented by this meta data.
      */
     public Field getField() {
         return this.field;
@@ -187,6 +226,23 @@ public class MappedFieldMetaData {
     }
 
     /**
+     * @return Whether this field has a {@link io.neba.api.annotations.Reference} annotation with a  non-empty
+     * {@link io.neba.api.annotations.Reference#append() append path}.
+     */
+    public boolean isAppendPathPresentOnReference() {
+        return isAppendPathPresentOnReference;
+    }
+
+    /**
+     * @return the {@link io.neba.api.annotations.Reference#append() append path} of the
+     * {@link io.neba.api.annotations.Reference} annotation, or <code>null</code> if either
+     * the annotation or the value for the append path are not present.
+     */
+    public String getAppendPathOnReference() {
+        return appendPathOnReference;
+    }
+
+    /**
      * @return Whether this field is annotated with {@link io.neba.api.annotations.This}.
      */
     public boolean isThisReference() {
@@ -195,7 +251,7 @@ public class MappedFieldMetaData {
 
     /**
      * @return The path from which this field's value shall be mapped; may stem
-     *         from the field name or a {@link io.neba.api.annotations.Path} annotation.
+     * from the field name or a {@link io.neba.api.annotations.Path} annotation.
      */
     public String getPath() {
         return this.path;
@@ -240,7 +296,7 @@ public class MappedFieldMetaData {
 
     /**
      * @return whether this field {@link #isCollectionType() is a collection type}
-     *         that can be {@link io.neba.core.util.ReflectionUtil#instantiateCollectionType(Class) instantiated}.
+     * that can be {@link io.neba.core.util.ReflectionUtil#instantiateCollectionType(Class) instantiated}.
      */
     public boolean isInstantiableCollectionType() {
         return isInstantiableCollectionType;
@@ -254,9 +310,25 @@ public class MappedFieldMetaData {
     }
 
     /**
+     * @return whether a {@link io.neba.api.annotations.Children} annotation is present with a non-empty
+     * {@link io.neba.api.annotations.Children#resolveBelowEveryChild()} path.
+     */
+    public boolean isResolveBelowEveryChildPathPresentOnChildren() {
+        return isResolveBelowEveryChildPathPresentOnChildren;
+    }
+
+    /**
+     * @return the {@link io.neba.api.annotations.Children#resolveBelowEveryChild()} path, or
+     * <code>null</code> if no such annotation or path exist.
+     */
+    public String getResolveBelowEveryChildPathOnChildren() {
+        return resolveBelowEveryChildPathOnChildren;
+    }
+
+    /**
      * @return The component (generic) type of this collection if this field
-     *         {@link #isCollectionType()} with one defined component type,
-     *         or <code>null</code>.
+     * {@link #isCollectionType()} with one defined component type,
+     * or <code>null</code>.
      */
     public Class<?> getComponentType() {
         return this.componentType;
