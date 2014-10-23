@@ -70,6 +70,25 @@ twitterAuthor: deploynix
 {% endhighlight %}
 </p>
 
+<p>For instance in order to <a href="http://dev.day.com/docs/en/cq/current/core/how_to/how_to_use_the_vlttool/vlt-mavenplugin.html#install">install it with the Content Package Maven Plugin</a>:</p>
+
+<p>
+{% highlight xml %}
+<plugin>
+    <groupId>com.day.jcr.vault</groupId>
+    <artifactId>content-package-maven-plugin</artifactId>
+    <version>0.0.20</version>
+    <configuration>
+        <groupId>io.neba</groupId>
+        <artifactId>io.neba.neba-delivery</artifactId>
+        <packaging>zip</packaging>
+        <targetURL>http://localhost:4502/crx/packmgr/service.jsp</targetURL>
+    </configuration>
+</plugin>
+{% endhighlight %}
+</p>
+
+
 <p>You may also want to configure the following repository for the eclipse artifacts NEBA depends on:</p>
 
 <p>

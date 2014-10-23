@@ -100,6 +100,7 @@ h6{
 	font-size:14px;
 	line-height: 17px;
 }
+
 h1.title, h2.title, h3.title, h4.title, h5.title, h6.title {
 	font-family: 'Open Sans', sans-serif;
 	font-size:22px;
@@ -745,12 +746,25 @@ img, iframe {
 /*--------------------------------------------------
 			DIFFERENT UL STYLES
 ---------------------------------------------------*/
-.check-list, .arrow-list, .star-list {
+
+.check-list, .arrow-list, .star-list, .plain-list {
 	list-style-type:none;
-	margin: 0px;
-	padding: 0px;
+	margin: 0;
+	padding: 0;
 	display: block;
 }
+
+.plain-list li {
+    margin-bottom: 5px;
+    padding-left: 0;
+}
+.plain-list {
+    margin: 10px 0;
+}
+.plain-list .plain-list {
+    padding-left: 20px;
+}
+
 .check-list li, .arrow-list li, .star-list li {
 	margin-bottom: 5px;
 	padding-left: 20px;
@@ -1104,6 +1118,17 @@ a.activity-link {
 .issue a.activity-link {
     background-image: url("../images/todo.png");
 }
+
+ @media only screen and (min-width: 959px) {
+     /** Virtually Move targets of anchor links down by the fixed menu height  **/
+     h2[id],
+     h3[id],
+     h4[id],
+     p[id] {
+         padding-top: 70px;
+         margin-top: -70px;
+     }
+ }
 
 /*---------------iPad portrait from 768px to 959px ---------------*/
 @media only screen and (min-width: 768px) and (max-width: 959px) {

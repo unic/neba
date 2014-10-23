@@ -1,0 +1,74 @@
+---
+title: NEBA 3.3.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.3.0 Release notes
+---
+<div class="section-title">
+
+    <h1 class="title">NEBA <span>Release 3.3.0</span></h1>
+
+</div><!--END SECTION TITLE-->
+
+<div id="inner-content" class="blog1">
+
+    <div class="post">
+
+        <div class="post-info">
+            <div class="date"><span class="month">Oct</span><span class="day">23</span><span class="month">2014</span></div>
+        </div><!--END POST-INFO-->
+
+        <div class="post-content">
+
+            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
+
+            <div class="post-title">
+                <h2 class="title">Release 3.3.0</h2>
+            </div><!--END POST-TITLE-->
+
+            <div class="post-meta">
+                <ul>
+                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
+                </ul>
+            </div><!--END POST-META-->
+            <p>
+                Since 3.2.0, we've added new features to the annotations <a href="/userguide.html#api/@Children">@Children</a> (resolveBelowEveryChild),
+                <a href="/userguide.html#api/@Reference">@Reference</a> (append) and <a href="/userguide.html#api/@ResourceParam">@ResourceParam</a> (defaultValue)
+                to allow even more efficient declarative use of the resource hierarchy. Furthermore, this release updates the Spring version
+                shipped with the delivery package to 3.2.11, thus you benefit from <a href="http://docs.spring.io/spring/docs/3.2.x/changelog.txt">
+                all fixes and improvements added since 3.2.9</a> (shipped with NEBA 3.2.0).
+            </p>
+            <p>
+                Along with this release, the documentation - most importantly the <a href="/userguide.html">NEBA user guide</a> - was updated and improved.
+            </p>
+
+            <h3>Improvements</h3>
+            <p>
+                <a href="https://github.com/unic/neba/issues/10">#10 Add support for a default value to the @ResourceParam tag</a><br/>
+                <a href="https://github.com/unic/neba/issues/11">#11 Support declarative sub-path resolution in @Reference and @Children</a><br/>
+                <a href="https://github.com/unic/neba/issues/13">#13 Update documentation with regard to changes in neba-11</a><br/>
+                <a href="https://github.com/unic/neba/issues/14">#14 Update to Spring 3.2.11, the current 3.2.x Spring version</a><br/>
+            </p>
+
+            <h3>Fixed bugs</h3>
+            <p>
+             -
+            </p>
+
+            <h3>Internal improvements</h3>
+            <p>
+                <a href="https://github.com/unic/neba/issues/12">#12 Integrate coveralls into the travic-ci build</a><br/>
+            </p>
+
+            <div class="divider-border"></div>
+
+            <h3>Upgrading from 3.2.0</h3>
+
+            <p>
+                Simply upgrade your dependencies and re-deploy NEBA - there are no incompatible API changes in this release.
+            </p>
+        </div><!--END POST-CONTENT -->
+
+    </div><!--END POST-->
+
+</div><!--END INNER-CONTENT-->
