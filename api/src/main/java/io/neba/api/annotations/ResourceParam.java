@@ -83,5 +83,5 @@ public @interface ResourceParam {
      * @return if not <code>null</code> or empty, this default value is used in case no value is provided for this request parameter.
      *         Providing a default value implies {@link #required()} = false.
      */
-    String defaultValue();
+    String defaultValue() default "";
 }
