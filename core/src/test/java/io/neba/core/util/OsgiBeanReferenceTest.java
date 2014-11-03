@@ -16,13 +16,13 @@
 
 package io.neba.core.util;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
+
+import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
@@ -35,41 +35,64 @@ public class OsgiBeanReferenceTest {
 	private long bundleId = 123L;
 
 	@Test
-	public void testEqualsHandHashCodeForBundleId() throws Exception {
+	public void testEqualsAndHashCodeForBundleId() throws Exception {
 		OsgiBeanReference<Object> referenceOne = createReference();
 		OsgiBeanReference<Object> referenceTwo = createReference();
 		
-		assertThat(referenceOne).isEqualTo(referenceTwo);
-		assertThat(referenceTwo).isEqualTo(referenceOne);
+		assertThat(referenceOne.equals(referenceTwo)).isTrue();
+		assertThat(referenceTwo.equals(referenceOne)).isTrue();
 		assertThat(referenceOne.hashCode()).isEqualTo(referenceTwo.hashCode());
 		
 		withBundleId(100L); 
 		referenceTwo = createReference();
 
-		assertThat(referenceOne).isNotEqualTo(referenceTwo);
-		assertThat(referenceTwo).isNotEqualTo(referenceOne);
+		assertThat(referenceOne.equals(referenceTwo)).isFalse();
+		assertThat(referenceTwo.equals(referenceOne)).isFalse();
 		assertThat(referenceOne.hashCode()).isNotEqualTo(referenceTwo.hashCode());
 	}
 
 	@Test
-	public void testEqualsHandHashCodedependsOnBeanTypeAndNotOnInstance() throws Exception {
+	public void testEqualsHandHashCodeDependsOnBeanTypeAndNotOnInstance() throws Exception {
 		OsgiBeanReference<Object> referenceOne = createReference();
 		
 		withNewBean(); 
 		OsgiBeanReference<Object> referenceTwo = createReference();
 
-		assertThat(referenceOne).isEqualTo(referenceTwo);
-		assertThat(referenceTwo).isEqualTo(referenceOne);
+		assertThat(referenceOne.equals(referenceTwo)).isTrue();
+		assertThat(referenceTwo.equals(referenceOne));
 		assertThat(referenceOne.hashCode()).isEqualTo(referenceTwo.hashCode());
 		
 		withStringBean();
 		referenceTwo = createReference();
-		assertThat(referenceOne).isNotEqualTo(referenceTwo);
-		assertThat(referenceTwo).isNotEqualTo(referenceOne);
+		assertThat(referenceOne.equals(referenceTwo)).isFalse();
+		assertThat(referenceTwo.equals(referenceOne)).isFalse();
 		assertThat(referenceOne.hashCode()).isNotEqualTo(referenceTwo.hashCode());
 	}
 
-	private void withStringBean() {
+    @Test
+    public void testEqualsSelf() throws Exception {
+        OsgiBeanReference<Object> reference = createReference();
+        assertThat(reference.equals(reference)).isTrue();
+    }
+
+    @Test
+    public void testEqualsWithOtherType() throws Exception {
+        OsgiBeanReference<Object> reference = createReference();
+        assertThat(reference.equals("")).isFalse();
+    }
+
+    @Test
+    public void testEqualsToNull() throws Exception {
+        OsgiBeanReference<Object> reference = createReference();
+        assertThat(reference.equals(null)).isFalse();
+    }
+
+    @Test
+    public void testToStringRepresentation() throws Exception {
+        assertThat(createReference().toString()).isEqualTo("Bean with type \"java.lang.Object\" from bundle with id 123");
+    }
+
+    private void withStringBean() {
 		this.bean = "";
 	}
 
