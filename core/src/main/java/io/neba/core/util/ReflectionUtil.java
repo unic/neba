@@ -1,10 +1,10 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.util;
 
@@ -33,25 +33,31 @@ import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
  */
 public class ReflectionUtil {
     /**
-     * Resolves the generic type of a {@link Collection} from a {@link Field}, e.g.
-     *
+     * Resolves the generic type of a {@link Field}, e.g.
+     * <p/>
      * <pre>
-     * private List&lt;MyModel&gt; myModel -&gt; MyModel.
+     *   private List&lt;MyModel&gt; myModel -&gt; MyModel.
+     *   private Optional&lt;MyModel&gt; myModel -&gt; MyModel.
      * </pre>
      *
-     * @param field must not be <code>null</code>.
+     * @param field        must not be <code>null</code>.
+     * @param definingType Used to resolve type variable names, in case
+     *                     they are defined in a super class. Must not be <code>null</code>.
      * @return never null.
      */
-    public static Class<?> getCollectionComponentType(Class<?> definingType, Field field) {
+    public static Class<?> getRawTypeFromSingleTypeParameter(Class<?> definingType, Field field) {
         if (field == null) {
             throw new IllegalArgumentException("Method parameter field must not be null.");
+        }
+        if (definingType == null) {
+            throw new IllegalArgumentException("Method argument definingType must not be null.");
         }
 
         // The generic type may contain the generic type declarations, e.g. List<String>.
         Type type = field.getGenericType();
         if (!(type instanceof ParameterizedType)) {
             throw new IllegalArgumentException("Cannot obtain the component type of " + field +
-            		", it does not declare generic type parameters.");
+                    ", it does not declare generic type parameters.");
         }
 
         // Only the ParametrizedType contains reflection information about the actual type.
@@ -65,29 +71,29 @@ public class ReflectionUtil {
             signalUnsupportedNumberOfTypeDeclarations(field);
         }
 
-        Type componentType = typeArguments[0];
+        Type typeArgument = typeArguments[0];
 
         // Wildcard type <X ... Y>
-        if (componentType instanceof WildcardType) {
-            WildcardType wildcardType = (WildcardType) componentType;
+        if (typeArgument instanceof WildcardType) {
+            WildcardType wildcardType = (WildcardType) typeArgument;
             Type[] lowerBounds = wildcardType.getLowerBounds();
             if (lowerBounds.length == 0) {
-                throw new IllegalArgumentException("Cannot obtain the component type of " + field +
-                                                   ", it has a wildcard declaration with an upper" +
-                                                   " bound (<? extends Y>) and is thus read-only." +
-                                                   " Only simple type parameters (e.g. List<MyType>)" +
-                                                   " or lower bound wildcards (e.g. List<? super MyModel>)" +
-                                                   " are supported.");
+                throw new IllegalArgumentException("Cannot obtain the generic type of " + field +
+                        ", it has a wildcard declaration with an upper" +
+                        " bound (<? extends Y>) and is thus read-only." +
+                        " Only simple type parameters (e.g. <MyType>)" +
+                        " or lower bound wildcards (e.g. <? super MyModel>)" +
+                        " are supported.");
             }
-            componentType = lowerBounds[0];
+            typeArgument = lowerBounds[0];
         }
 
-        return getRawType(componentType, definingType);
+        return getRawType(typeArgument, definingType);
     }
 
     private static void signalUnsupportedNumberOfTypeDeclarations(Field field) {
         throw new IllegalArgumentException("Cannot obtain the component type of " + field +
-                ", it must have exactly one parameter type, e.g. List<MyModel>.");
+                ", it must have exactly one parameter type, e.g. <MyModel>.");
     }
 
     /**
@@ -96,7 +102,7 @@ public class ReflectionUtil {
      *
      * @param collectionType must not be <code>null</code>.
      * @return never <code>null</code>. Throws an {@link IllegalStateException}
-     *         if the collection type is not supported.
+     * if the collection type is not supported.
      */
     @SuppressWarnings("unchecked")
     public static <K, T extends Collection<K>> Collection<K> instantiateCollectionType(Class<T> collectionType, int length) {
@@ -112,8 +118,8 @@ public class ReflectionUtil {
             collection = (T) new LinkedHashSet<K>(length);
         } else {
             throw new IllegalArgumentException("Unable to instantiate a collection compatible to " + collectionType +
-            		                           ". Only " + List.class + ", " + Set.class + " or " +
-            		                           Collection.class + " are supported.");
+                    ". Only " + List.class + ", " + Set.class + " or " +
+                    Collection.class + " are supported.");
         }
         return collection;
     }
@@ -138,11 +144,11 @@ public class ReflectionUtil {
 
     /**
      * @return an array of the types a collection type
-     *         must be {@link Class#isAssignableFrom(Class) assignable from} in order to be
-     *         {@link #isInstantiableCollectionType(Class) instantiable}.
+     * must be {@link Class#isAssignableFrom(Class) assignable from} in order to be
+     * {@link #isInstantiableCollectionType(Class) instantiable}.
      */
     public static Class<?>[] getInstantiableCollectionTypes() {
-        return new Class[]{ List.class, Set.class };
+        return new Class[]{List.class, Set.class};
     }
 
     /**
@@ -154,6 +160,7 @@ public class ReflectionUtil {
         return instantiateCollectionType(collectionType, 32);
     }
 
-    private ReflectionUtil() {}
+    private ReflectionUtil() {
+    }
 
 }

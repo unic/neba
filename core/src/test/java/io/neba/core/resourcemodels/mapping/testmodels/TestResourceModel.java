@@ -22,6 +22,7 @@ import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.annotations.This;
 import io.neba.api.annotations.Unmapped;
+import io.neba.api.resourcemodels.Optional;
 import org.apache.sling.api.resource.Resource;
 
 import javax.inject.Inject;
@@ -78,6 +79,11 @@ public class TestResourceModel {
 
     @Children(resolveBelowEveryChild = "/jcr:content")
     private List<Resource> childContentResourcesAsResources;
+
+    @Reference
+    private Optional<OtherTestResourceModel> lazyReferenceToOtherModel;
+
+    private Optional<OtherTestResourceModel> lazyReferenceToChildAsOtherModel;
 
     private Collection<String> collectionOfStrings;
 

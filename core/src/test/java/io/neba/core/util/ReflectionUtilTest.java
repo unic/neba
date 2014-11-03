@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static io.neba.core.util.ReflectionUtil.getCollectionComponentType;
+import static io.neba.core.util.ReflectionUtil.getRawTypeFromSingleTypeParameter;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.ReflectionUtil.isInstantiableCollectionType;
 import static org.fest.assertions.Assertions.assertThat;
@@ -72,35 +72,35 @@ public class ReflectionUtilTest {
     @SuppressWarnings("unused")
     private Collection<? super ReflectionUtilTest> boundCollection;
 
-    private Class<?> componentType;
+    private Class<?> TypeParameter;
     private Object collectionInstance;
     private Class type = getClass();
 
     @Test(expected = IllegalArgumentException.class)
     public void testResolutionOfRawCollectionType() throws Exception {
-        getComponentTypeOf("rawCollection");
+        getGenericTypeParameterOf("rawCollection");
     }
 
     @Test
     public void testResolutionOfSimpleCollectionType() throws Exception {
-        getComponentTypeOf("stringCollection");
-        assertComponentTypeIs(String.class);
+        getGenericTypeParameterOf("stringCollection");
+        assertTypeParameterIs(String.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testResolutionOfReadOnlyCollectionType() throws Exception {
-        getComponentTypeOf("readOnlyCollection");
+        getGenericTypeParameterOf("readOnlyCollection");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testResolutionOfUnknownCollectionType() throws Exception {
-        getComponentTypeOf("unknownCollection");
+        getGenericTypeParameterOf("unknownCollection");
     }
 
     @Test
     public void testResolutionOfBoundCollectionType() throws Exception {
-        getComponentTypeOf("boundCollection");
-        assertComponentTypeIs(ReflectionUtilTest.class);
+        getGenericTypeParameterOf("boundCollection");
+        assertTypeParameterIs(ReflectionUtilTest.class);
     }
 
     @Test
@@ -140,24 +140,24 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testResolutionOfComponentTypeWithTypeVariableInParent() throws Exception {
+    public void testResolutionOfTypeParameterWithTypeVariableInParent() throws Exception {
         this.type = GenericModelImpl.class;
-        getComponentTypeOf("genericModelList");
-        assertComponentTypeIs(Boolean.class);
+        getGenericTypeParameterOf("genericModelList");
+        assertTypeParameterIs(Boolean.class);
     }
 
     @Test
-    public void testResolutionOfComponentTypeWithTypeVariableInParentsParent() throws Exception {
+    public void testResolutionOfTypeParameterWithTypeVariableInParentsParent() throws Exception {
         this.type = GenericModelImpl.class;
-        getComponentTypeOf("rootList");
-        assertComponentTypeIs(Integer.class);
+        getGenericTypeParameterOf("rootList");
+        assertTypeParameterIs(Integer.class);
     }
 
     @Test
-    public void testResolutionOfComponentTypeWithTypeVariableInDeclaringClass() throws Exception {
+    public void testResolutionOfTypeParameterWithTypeVariableInDeclaringClass() throws Exception {
         this.type = GenericModelImpl.class;
-        getComponentTypeOf("booleans");
-        assertComponentTypeIs(Boolean.class);
+        getGenericTypeParameterOf("booleans");
+        assertTypeParameterIs(Boolean.class);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -170,16 +170,16 @@ public class ReflectionUtilTest {
         this.collectionInstance = instantiateCollectionType(collectionType, length);
     }
 
-    private void getComponentTypeOf(String name) throws NoSuchFieldException {
-        this.componentType = getCollectionComponentType(this.type, getField(name));
+    private void getGenericTypeParameterOf(String name) throws NoSuchFieldException {
+        this.TypeParameter = getRawTypeFromSingleTypeParameter(this.type, getField(name));
     }
 
     private Field getField(String name) {
         return findField(this.type, name);
     }
 
-    private void assertComponentTypeIs(Class<?> expected) {
-        assertThat(this.componentType).isEqualTo(expected);
+    private void assertTypeParameterIs(Class<?> expected) {
+        assertThat(this.TypeParameter).isEqualTo(expected);
     }
 
     private void assertInstanceIsOfType(Class<?> type) {

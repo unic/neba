@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.mapping;
 
+import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
@@ -23,10 +24,12 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.cglib.proxy.LazyLoader;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
@@ -87,6 +90,67 @@ public class FieldValueMappingCallback {
     }
 
     /**
+     * Implements lazy-loading of 1:1 relationships. Leverages the internal
+     * {@link #resolveValueOfField(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData)}
+     * method and {@link io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData} for this purpose.
+     *
+     * @author Olaf Otto
+     */
+    private static class OptionalFieldValue implements Optional {
+        private static final Object NULL = new Object();
+        private final FieldData fieldData;
+        private final FieldValueMappingCallback callback;
+        private Object value = NULL;
+
+        public OptionalFieldValue(FieldData fieldData, FieldValueMappingCallback callback) {
+            this.fieldData = fieldData;
+            this.callback = callback;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Object get() throws NoSuchElementException {
+            Object o = load();
+            if (o == null) {
+                throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
+            }
+            return o;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Object orElse(Object defaultValue) {
+            Object o = load();
+            return o == null ? defaultValue : o;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isPresent() {
+            return orElse(null) != null;
+        }
+
+        /**
+         * The semantics of the value holder must adhere to the semantics of a non-lazy-loaded field value:
+         * The value is loaded exactly once, subsequent or concurrent access to the field value means accessing the
+         * same value. Thus, the value is retained and this method is thread-safe.
+         */
+        @SuppressWarnings("unchecked")
+        private synchronized Object load() {
+            if (this.value == NULL) {
+                this.value = this.callback.resolveValueOfField(this.fieldData);
+            }
+            return this.value;
+        }
+    }
+
+    /**
      * Provides the properties of the resource as a {@link PrimitiveSupportingValueMap}.
      *
      * @param resource must not be <code>null</code>.
@@ -120,9 +184,15 @@ public class FieldValueMappingCallback {
 
     /**
      * Invoked for each field of a resource model type.
+     *
+     * @param metaData must not be <code>null</code>.
      */
-    public final void doWith(MappedFieldMetaData metaData) {
-        FieldData fieldData = new FieldData(metaData, evaluateFieldPath(metaData));
+    public final void doWith(final MappedFieldMetaData metaData) {
+        if (metaData == null) {
+            throw new IllegalArgumentException("Method argument metaData must not be null.");
+        }
+
+        final FieldData fieldData = new FieldData(metaData, evaluateFieldPath(metaData));
         if (isMappable(fieldData)) {
 
             Object value;
@@ -132,7 +202,12 @@ public class FieldValueMappingCallback {
             } else if (metaData.isChildrenAnnotationPresent()) {
                 value = resolveChildren(fieldData);
             } else {
-                value = resolveValueOfField(fieldData);
+                if (metaData.isOptional()) {
+                    // Lazy loading: Allow the field value to call back later, if it is requested.
+                    value = new OptionalFieldValue(fieldData, this);
+                } else {
+                    value = resolveValueOfField(fieldData);
+                }
             }
 
             if (value != null) {
@@ -143,6 +218,10 @@ public class FieldValueMappingCallback {
         }
     }
 
+    /**
+     * For convenience, NEBA guarantees that any mappable collection typed field is never null but rather
+     * an empty collection, in case no non-null default value was provided.
+     */
     private void preventNullValueInMappableCollectionField(MappedFieldMetaData metaData) {
         Object fieldValue = getField(metaData.getField(), this.model);
         if (fieldValue == null) {
@@ -206,23 +285,28 @@ public class FieldValueMappingCallback {
      * @return the resolved value, or <code>null</code>.
      */
     private Object resolveValueOfField(FieldData field) {
-        final Class<?> fieldType = field.metaData.getType();
+        final Class<?> targetType = field.metaData.isOptional() ? field.metaData.getTypeParameter() : field.metaData.getType();
         Object value;
 
         if (field.metaData.isReference()) {
-            value = resolveReferenceValueOfField(field, fieldType);
+            value = resolveReferenceValueOfField(field, targetType);
         } else if (field.metaData.isPropertyType()) {
             // The field points to a property as it is not adaptable from a resource
             value = resolvePropertyTypedValue(field);
         } else {
             // The field must point to a resource as it is not resolvable from a property
-            value = resolveResource(field.path, fieldType);
+            value = resolveResource(field.path, targetType);
         }
 
         return value;
     }
 
-    private Object resolveReferenceValueOfField(FieldData field, Class<?> fieldType) {
+    /**
+     * Resolves the String path(s) stored in the current field to the respective resources and adapts
+     * them, if necessary. May provide a single adapted value or a collection of references,
+     * with regard to the field's meta data.
+     */
+    private Object resolveReferenceValueOfField(FieldData field, Class<?> targetType) {
         Object value = null;
         // Regardless of its path, the field references another resource.
         // fetch the field value (the path(s) to the referenced resource(s)) and resolve these resources.
@@ -237,64 +321,75 @@ public class FieldValueMappingCallback {
                 if (field.metaData.isAppendPathPresentOnReference()) {
                     referencedResourcePath += field.metaData.getAppendPathOnReference();
                 }
-                value = resolveResource(referencedResourcePath, fieldType);
+                value = resolveResource(referencedResourcePath, targetType);
             }
         }
         return value;
     }
 
     /**
-     * This method resolves and converts
-     * all references of the given array of paths. <br />
+     * This method resolves and converts all references of the given array of paths. <br />
      * Afterwards, the resulting instances are stored in a {@link Collection} compatible to the
      * collection type of the given {@link MappedFieldMetaData}.
      *
      * @param paths relative or absolute paths to resources.
      * @return never <code>null</code> but rather an empty collection.
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Collection resolveCollectionOfReferences(FieldData field, String[] paths) {
-        final Class<Collection> collectionType = (Class<Collection>) field.metaData.getType();
-        final Collection values = instantiateCollectionType(collectionType, paths.length);
+    @SuppressWarnings({"unchecked"})
+    private Collection resolveCollectionOfReferences(final FieldData field, final String[] paths) {
+        // Create a lazy loading proxy for the collection
+        return (Collection) field.metaData.getCollectionProxyFactory().newInstance(new LazyLoader() {
+            @Override
+            public Object loadObject() throws Exception {
+                final Class<Collection> collectionType = (Class<Collection>) field.metaData.getType();
+                final Collection values = instantiateCollectionType(collectionType, paths.length);
+                String[] resourcePaths = paths;
+                if (field.metaData.isAppendPathPresentOnReference()) {
+                    resourcePaths = append(field.metaData.getAppendPathOnReference(), paths);
+                }
 
-        if (field.metaData.isAppendPathPresentOnReference()) {
-            paths = append(field.metaData.getAppendPathOnReference(), paths);
-        }
-
-        final Class<?> componentClass = field.metaData.getComponentType();
-        for (String resourcePath : paths) {
-            Object element = resolveResource(resourcePath, componentClass);
-            if (element != null) {
-                values.add(element);
+                final Class<?> componentClass = field.metaData.getTypeParameter();
+                for (String path : resourcePaths) {
+                    Object element = resolveResource(path, componentClass);
+                    if (element != null) {
+                        values.add(element);
+                    }
+                }
+                return values;
             }
-        }
-        return values;
+        });
     }
 
     @SuppressWarnings("unchecked")
-    private Collection createCollectionOfChildren(FieldData field, Resource resource) {
-        Class<Collection> collectionType = (Class<Collection>) field.metaData.getType();
-        final Collection values = instantiateCollectionType(collectionType);
+    private Collection createCollectionOfChildren(final FieldData field, final Resource resource) {
+        // Create a lazy loading proxy for the collection
+        return (Collection) field.metaData.getCollectionProxyFactory().newInstance(new LazyLoader() {
+            @Override
+            public Object loadObject() throws Exception {
+                final Class<Collection> collectionType = (Class<Collection>) field.metaData.getType();
+                final Collection values = instantiateCollectionType(collectionType);
 
-        final Class<?> componentClass = field.metaData.getComponentType();
-        Iterator<Resource> children = resource.listChildren();
+                final Class<?> targetType = field.metaData.getTypeParameter();
+                Iterator<Resource> children = resource.listChildren();
 
-        while (children.hasNext()) {
-            Resource child = children.next();
-            if (field.metaData.isResolveBelowEveryChildPathPresentOnChildren()) {
-                // @Children(resolveBelowEveryChild = "...")
-                child = child.getChild(field.metaData.getResolveBelowEveryChildPathOnChildren());
-                if (child == null) {
-                    continue;
+                while (children.hasNext()) {
+                    Resource child = children.next();
+                    if (field.metaData.isResolveBelowEveryChildPathPresentOnChildren()) {
+                        // @Children(resolveBelowEveryChild = "...")
+                        child = child.getChild(field.metaData.getResolveBelowEveryChildPathOnChildren());
+                        if (child == null) {
+                            continue;
+                        }
+                    }
+                    Object adapted = convert(child, targetType);
+                    if (adapted != null) {
+                        values.add(adapted);
+                    }
                 }
-            }
-            Object adapted = convert(child, componentClass);
-            if (adapted != null) {
-                values.add(adapted);
-            }
-        }
 
-        return values;
+                return values;
+            }
+        });
     }
 
     /**
@@ -306,9 +401,9 @@ public class FieldValueMappingCallback {
      *
      * @return the resolved and converted resource, or <code>null</code>.
      */
-    private <T> T resolveResource(final String resourcePath, final Class<T> fieldType) {
+    private <T> T resolveResource(final String resourcePath, final Class<T> targetType) {
         Resource absoluteResource = this.resource.getResourceResolver().getResource(this.resource, resourcePath);
-        return convert(absoluteResource, fieldType);
+        return convert(absoluteResource, targetType);
     }
 
     /**
@@ -340,17 +435,14 @@ public class FieldValueMappingCallback {
      * @return the resolved value, or <code>null</code>.
      */
     private <T> T resolvePropertyTypedValue(FieldData field, Class<T> propertyType) {
-        T value;
         if (field.isAbsolute() || field.isRelative()) {
-            value = resolvePropertyTypedValueFromForeignResource(field, propertyType);
-        } else  {
-            if (this.properties == null) {
-                throw new IllegalStateException("Tried to map the property " + field +
-                                                " even though the resource has no properties.");
-            }
-            value = this.properties.get(field.path, propertyType);
+            return resolvePropertyTypedValueFromForeignResource(field, propertyType);
         }
-        return  value;
+        if (this.properties == null) {
+            throw new IllegalStateException("Tried to map the property " + field +
+                                            " even though the resource has no properties.");
+        }
+        return this.properties.get(field.path, propertyType);
     }
 
     /**
@@ -395,7 +487,7 @@ public class FieldValueMappingCallback {
      */
     @SuppressWarnings("unchecked")
     private <T> T getArrayPropertyAsCollection(FieldData field) {
-        Class<?> arrayType = field.metaData.getArrayTypeOfComponentType();
+        Class<?> arrayType = field.metaData.getArrayTypeOfTypeParameter();
         Object[] elements = (Object[]) resolvePropertyTypedValue(field, arrayType);
 
         if (elements != null) {
@@ -415,15 +507,13 @@ public class FieldValueMappingCallback {
      */
     @SuppressWarnings("unchecked")
     private <T> T convert(final Resource resource, final Class<T> targetType) {
-        T value = null;
-        if (resource != null) {
-            if (targetType.isAssignableFrom(resource.getClass())) {
-                value = (T) resource;
-            } else {
-                value = resource.adaptTo(targetType);
-            }
+        if (resource == null) {
+            return null;
         }
-        return value;
+        if (targetType.isAssignableFrom(resource.getClass())) {
+            return (T) resource;
+        }
+        return resource.adaptTo(targetType);
     }
 
     private Object convertThisResourceToFieldType(FieldData field) {

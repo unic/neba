@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidGenericFieldDeclaration;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidPathDeclaration;
@@ -91,12 +92,12 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
-	public void testComponentTypeExtraction() throws Exception {
+	public void testTypeParameterDetection() throws Exception {
 		createMetadataForTestModelFieldWithName("referencedResourcesListWithSimpleTypeParameter");
 
 		assertFieldIsPropertyType();
 		assertFieldIsCollectionType();
-		assertComponentTypeIs(Resource.class);
+		assertTypeParameterIs(Resource.class);
 	}
 
 	@Test
@@ -193,6 +194,32 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
+    public void testDetectionOfOptionalFieldWithReferenceAnnotation() throws Exception {
+        createMetadataForTestModelFieldWithName("lazyReferenceToOtherModel");
+        assertOptionalFieldIsDetected();
+        assertTypeParameterIs(OtherTestResourceModel.class);
+    }
+
+    @Test
+    public void testDetectionOfOptionalFieldWithPointingToChildResource() throws Exception {
+        createMetadataForTestModelFieldWithName("lazyReferenceToChildAsOtherModel");
+        assertOptionalFieldIsDetected();
+        assertTypeParameterIs(OtherTestResourceModel.class);
+    }
+
+    @Test
+    public void testProvisioningOfLazyLoadingFactoryForChildrenCollection() throws Exception {
+        createMetadataForTestModelFieldWithName("childrenAsResources");
+        assertLazyLoadingCollectionFactoryIsCreated();
+    }
+
+    @Test
+    public void testProvisioningOfLazyLoadingFactoryForReferenceCollection() throws Exception {
+        createMetadataForTestModelFieldWithName("referencedResourcesListWithSimpleTypeParameter");
+        assertLazyLoadingCollectionFactoryIsCreated();
+    }
+
+    @Test
     public void testResolutionOfArrayComponentType() throws Exception {
         createMetadataForTestModelFieldWithName("collectionOfStrings");
         assertArrayTypeOfComponentTypeIs(String[].class);
@@ -204,6 +231,14 @@ public class MappedFieldMetaDataTest {
         createMetadataForTestModelFieldWithName("stringField");
         setField(this.testee.getField(), testResourceModel, "JunitTest");
         assertThat(testResourceModel.getStringField()).isEqualTo("JunitTest");
+    }
+
+    private void assertLazyLoadingCollectionFactoryIsCreated() {
+        assertThat(this.testee.getCollectionProxyFactory()).isNotNull();
+    }
+
+    private void assertOptionalFieldIsDetected() {
+        assertThat(this.testee.isOptional()).isTrue();
     }
 
     private void assertChildrenHasResolveBelowEveryChildPath() {
@@ -246,12 +281,12 @@ public class MappedFieldMetaDataTest {
 		assertThat(this.testee.isThisReference()).isFalse();
 	}
 
-	private void assertComponentTypeIs(Class<?> type) {
-		assertThat(this.testee.getComponentType()).isEqualTo(type);
+	private void assertTypeParameterIs(Class<?> type) {
+		assertThat(this.testee.getTypeParameter()).isEqualTo(type);
 	}
 
     private void assertArrayTypeOfComponentTypeIs(Class<?> type) {
-        assertThat(this.testee.getArrayTypeOfComponentType()).isEqualTo(type);
+        assertThat(this.testee.getArrayTypeOfTypeParameter()).isEqualTo(type);
     }
 
     private void assertFieldIsCollectionType() {
