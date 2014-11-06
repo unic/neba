@@ -16,7 +16,6 @@
 
 package io.neba.core.util;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
@@ -26,37 +25,32 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
-
 /**
  * @author Olaf Otto
  */
-public class ReflectionUtil {
+public final class ReflectionUtil {
+    private static final int DEFAULT_COLLECTION_SIZE = 32;
+
     /**
-     * Resolves the generic type of a {@link Field}, e.g.
+     * Resolves the {@link Type} of the lower bound of a single type argument of a
+     * {@link ParameterizedType}.
      * <p/>
      * <pre>
      *   private List&lt;MyModel&gt; myModel -&gt; MyModel.
      *   private Optional&lt;MyModel&gt; myModel -&gt; MyModel.
      * </pre>
      *
-     * @param field        must not be <code>null</code>.
-     * @param definingType Used to resolve type variable names, in case
-     *                     they are defined in a super class. Must not be <code>null</code>.
+     * @param type        must not be <code>null</code>.
      * @return never null.
      */
-    public static Class<?> getRawTypeFromSingleTypeParameter(Class<?> definingType, Field field) {
-        if (field == null) {
-            throw new IllegalArgumentException("Method parameter field must not be null.");
-        }
-        if (definingType == null) {
-            throw new IllegalArgumentException("Method argument definingType must not be null.");
+    public static Type getLowerBoundOfSingleTypeParameter(Type type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Method parameter type must not be null.");
         }
 
         // The generic type may contain the generic type declarations, e.g. List<String>.
-        Type type = field.getGenericType();
         if (!(type instanceof ParameterizedType)) {
-            throw new IllegalArgumentException("Cannot obtain the component type of " + field +
+            throw new IllegalArgumentException("Cannot obtain the component type of " + type +
                     ", it does not declare generic type parameters.");
         }
 
@@ -68,7 +62,7 @@ public class ReflectionUtil {
 
         // We expect exactly one argument representing the model type.
         if (typeArguments.length != 1) {
-            signalUnsupportedNumberOfTypeDeclarations(field);
+            signalUnsupportedNumberOfTypeDeclarations(type);
         }
 
         Type typeArgument = typeArguments[0];
@@ -78,7 +72,7 @@ public class ReflectionUtil {
             WildcardType wildcardType = (WildcardType) typeArgument;
             Type[] lowerBounds = wildcardType.getLowerBounds();
             if (lowerBounds.length == 0) {
-                throw new IllegalArgumentException("Cannot obtain the generic type of " + field +
+                throw new IllegalArgumentException("Cannot obtain the generic type of " + type +
                         ", it has a wildcard declaration with an upper" +
                         " bound (<? extends Y>) and is thus read-only." +
                         " Only simple type parameters (e.g. <MyType>)" +
@@ -87,12 +81,11 @@ public class ReflectionUtil {
             }
             typeArgument = lowerBounds[0];
         }
-
-        return getRawType(typeArgument, definingType);
+        return typeArgument;
     }
 
-    private static void signalUnsupportedNumberOfTypeDeclarations(Field field) {
-        throw new IllegalArgumentException("Cannot obtain the component type of " + field +
+    private static void signalUnsupportedNumberOfTypeDeclarations(Type type) {
+        throw new IllegalArgumentException("Cannot obtain the component type of " + type +
                 ", it must have exactly one parameter type, e.g. <MyModel>.");
     }
 
@@ -157,7 +150,7 @@ public class ReflectionUtil {
      * @see #instantiateCollectionType(Class, int)
      */
     public static <K, T extends Collection<K>> Collection<K> instantiateCollectionType(Class<T> collectionType) {
-        return instantiateCollectionType(collectionType, 32);
+        return instantiateCollectionType(collectionType, DEFAULT_COLLECTION_SIZE);
     }
 
     private ReflectionUtil() {

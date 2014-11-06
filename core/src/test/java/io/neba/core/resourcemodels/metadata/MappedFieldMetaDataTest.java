@@ -25,6 +25,7 @@ import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.springframework.util.ReflectionUtils.findField;
@@ -197,14 +198,14 @@ public class MappedFieldMetaDataTest {
     public void testDetectionOfOptionalFieldWithReferenceAnnotation() throws Exception {
         createMetadataForTestModelFieldWithName("lazyReferenceToOtherModel");
         assertOptionalFieldIsDetected();
-        assertTypeParameterIs(OtherTestResourceModel.class);
+        assertFieldTypeIs(OtherTestResourceModel.class);
     }
 
     @Test
     public void testDetectionOfOptionalFieldWithPointingToChildResource() throws Exception {
         createMetadataForTestModelFieldWithName("lazyReferenceToChildAsOtherModel");
         assertOptionalFieldIsDetected();
-        assertTypeParameterIs(OtherTestResourceModel.class);
+        assertFieldTypeIs(OtherTestResourceModel.class);
     }
 
     @Test
@@ -226,11 +227,23 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
+    public void testOptionalFieldsAreTransparentlyTreatedLikeTheirTargetType() throws Exception {
+        createMetadataForTestModelFieldWithName("optionalChildContentResourcesAsResources");
+        assertFieldIsInstantiableCollectionType();
+        assertFieldTypeIs(List.class);
+        assertTypeParameterIs(Resource.class);
+    }
+
+    @Test
     public void testMetadataMakesFieldAccessible() throws Exception {
         TestResourceModel testResourceModel = new TestResourceModel();
         createMetadataForTestModelFieldWithName("stringField");
         setField(this.testee.getField(), testResourceModel, "JunitTest");
         assertThat(testResourceModel.getStringField()).isEqualTo("JunitTest");
+    }
+
+    private void assertFieldTypeIs(Class<?> type) {
+        assertThat(this.testee.getType()).isEqualTo(type);
     }
 
     private void assertLazyLoadingCollectionFactoryIsCreated() {

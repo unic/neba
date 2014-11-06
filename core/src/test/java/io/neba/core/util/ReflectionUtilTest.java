@@ -26,9 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static io.neba.core.util.ReflectionUtil.getRawTypeFromSingleTypeParameter;
+import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.ReflectionUtil.isInstantiableCollectionType;
+import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.springframework.util.ReflectionUtils.findField;
 
@@ -72,7 +73,7 @@ public class ReflectionUtilTest {
     @SuppressWarnings("unused")
     private Collection<? super ReflectionUtilTest> boundCollection;
 
-    private Class<?> TypeParameter;
+    private Class<?> typeParameter;
     private Object collectionInstance;
     private Class type = getClass();
 
@@ -171,7 +172,7 @@ public class ReflectionUtilTest {
     }
 
     private void getGenericTypeParameterOf(String name) throws NoSuchFieldException {
-        this.TypeParameter = getRawTypeFromSingleTypeParameter(this.type, getField(name));
+        this.typeParameter = getRawType(getLowerBoundOfSingleTypeParameter(getField(name).getGenericType()), this.type);
     }
 
     private Field getField(String name) {
@@ -179,7 +180,7 @@ public class ReflectionUtilTest {
     }
 
     private void assertTypeParameterIs(Class<?> expected) {
-        assertThat(this.TypeParameter).isEqualTo(expected);
+        assertThat(this.typeParameter).isEqualTo(expected);
     }
 
     private void assertInstanceIsOfType(Class<?> type) {
