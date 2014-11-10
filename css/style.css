@@ -1083,7 +1083,7 @@ ul.item-nav li.all a {
 ---------------------------------------------------*/
 
 #activities {
-    height: 300px;
+    padding-bottom: 50px;
 }
 
 .activity img {
