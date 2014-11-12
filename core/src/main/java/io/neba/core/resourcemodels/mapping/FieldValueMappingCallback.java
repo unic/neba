@@ -131,7 +131,7 @@ public class FieldValueMappingCallback {
      * <li>The current resource, if no {@link io.neba.api.annotations.Path} or
      * {@link io.neba.api.annotations.Reference} annotations are present</li>
      * <li>A resource designated by an absolute or relative path of a path annotation</li>
-     * <li>A referenced resource (which may be combined with a path annotation)</li>
+     * <li>A referenced resource (which may be combined with a {@link io.neba.api.annotations.Path} annotation)</li>
      * </ul>
      */
     private Collection<?> resolveChildren(FieldData field) {
@@ -295,8 +295,8 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * For convenience, NEBA guarantees that any mappable collection typed field is never null but rather
-     * an empty collection, in case no non-null default value was provided.
+     * For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
+     * an empty collection, in case no non-<code>null</code> default value was provided.
      */
     private void preventNullValueInMappableCollectionField(MappedFieldMetaData metaData) {
         Object fieldValue = getField(metaData.getField(), this.model);
@@ -333,7 +333,7 @@ public class FieldValueMappingCallback {
     /**
      * Uses the current resource's {@link org.apache.sling.api.resource.ResourceResolver}
      * to obtain the resource with the given path.
-     * The path can be absolute or relative  to the current resource.
+     * The path can be absolute or relative to the current resource.
      * {@link #convert(org.apache.sling.api.resource.Resource, Class) Converts} the resolved resource
      * to the given field type if necessary.
      *
@@ -347,7 +347,7 @@ public class FieldValueMappingCallback {
     /**
      * Resolves a property via a property {@link Resource}. This is used to retrieve relative or absolute references to
      * the properties of resources other than the current resource. Such references cannot be reliably retrieved from the current
-     * resource's {@link ValueMap} as it may be <code>null</code> and does not support access to properties from parent resources.
+     * resource's {@link ValueMap} as the value map may be <code>null</code> and does not support access to properties from parent resources.
      *
      * @return the resolved value, or <code>null</code>.
      */
@@ -377,10 +377,10 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * The fieldType is a collection type; however the component type of
-     * the collection is a property type. Example: List<String>. We must
-     * fetch the property with the array-type of the component type (e.g. String[]).
-     * and register the values into a new instance of Collection<T>.
+     * The fieldType is a collection. However, the component type of
+     * the collection is a property type, e.g. List&lt;String&gt;. We must
+     * fetch the property with the array-type of the component type (e.g. String[])
+     * and add the values to a new instance of Collection&lt;T&gt;.
      *
      * @return a collection of the resolved values, or <code>null</code> if no value could be resolved.
      */
