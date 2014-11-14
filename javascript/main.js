@@ -468,6 +468,7 @@ $(function () {
     // this means we have to parse the widget HTML to retrieve data.
     var TweetsForWidget = function (widgetId) {
         var result = [];
+        var knownTweets = [];
 
         loadTweets.push(function (data) {
             $(data.body).find("li.tweet").each(function (_, elem) {
@@ -475,11 +476,20 @@ $(function () {
                     type: "tweet"
                 };
                 var $elem = $(elem);
+                var tweetPermalink;
+                $elem.find("a.u-url.permalink").each(function (_, elem) {
+                    tweetPermalink = elem.href;
+                });
+
+                if (knownTweets[tweetPermalink]) {
+                    return;
+                }
+
+                knownTweets[tweetPermalink] = true;
+                tweet.url = tweetPermalink;
+
                 $elem.find("time.dt-updated").each(function (_, elem) {
                     tweet.time = parseTime(PATTERN_TWITTER_TIMESTAMP, elem.getAttribute("datetime"));
-                });
-                $elem.find("a.u-url").each(function (_, elem) {
-                    tweet.url = elem.href;
                 });
                 $elem.find("p.e-entry-title").each(function (_, elem) {
                     tweet.message = elem.innerHTML;
