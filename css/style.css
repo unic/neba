@@ -35,23 +35,22 @@ code{
 	-moz-border-radius: 2px;
 	-webkit-border-radius:2px;
 	border-radius:2px;
-	background:#fff;
 	font-size:15px;
 	color: #666666;
-	padding: 3px;
-	padding-left: 0;
-	background-color: #f8f8f8;
+	padding: 3px 3px 3px 0;
 }
+
 .clear:after {
     clear: both;
     content: "";
     display: block;
 }
-html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite,  del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {	margin:0px; 
-	padding:0px; 
-	border:0px; 
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite,  del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {	margin:0; 
+	padding:0; 
+	border:0; 
 	border-collapse:separate; 
-	border-spacing:0px;
+	border-spacing:0;
 	font-weight: inherit;
 	font-style: inherit;
 	font-size: 100%;
@@ -63,6 +62,7 @@ html, body {
 }
 ::-moz-selection{ color: #fff; background: #707070; }
 ::selection { color: #fff; background: #707070; }
+
 body {
 	font-family: 'Open Sans', sans-serif;
 	font-weight: 300;
@@ -72,10 +72,13 @@ body {
 	background: #fff;
 	border-top: 7px solid #f5f5f5;
 }
+
 h1,h2,h3,h4,h5,h6 {
 	margin-bottom: 15px;
+	width: 100%;
 	font-weight: normal;
 }
+
 h1{
 	font-size:42px;
 	line-height: 44px;
@@ -87,10 +90,20 @@ h2{
 h3{
 	font-size:24px;
 	line-height: 29px;
+	padding-top: 30px;
 }
+
+h2+h3 {
+	padding-top: 0;
+}
+h3+h4 {
+	padding-top: 0;
+}
+
 h4{
+	padding-top: 20px;
 	font-size:20px;
-	line-height: 25px;	
+	line-height: 25px;
 }
 h5{
 	font-size:16px;
@@ -204,9 +217,7 @@ a {
 	-o-transition:all 0.14s ease 0s; 
 	outline:none;
 }
-a:hover {
-	color: #444;
-}
+
 .title, .title a { 
 	text-decoration: none;
 }
@@ -242,11 +253,43 @@ img, iframe {
 	height: 70px;
 }
 .divider-border {
-	border-top: 2px solid #eee;
+	border-top: 1px solid #eee;
+	height: 4px;
+	border-bottom: 1px solid #eee;
 	float: left;
 	width: 100%;
 	margin: 40px 0;
 }
+
+table {
+	width: 100%;
+	border-bottom: 1px solid #e8e8e8;
+	margin-bottom: 14px;
+}
+
+thead tr th {
+	border-bottom: 1px solid gray;
+	font-weight: bold;
+}
+
+tbody th {
+	font-weight: bolder;
+}
+
+th.rowhead {
+	text-align: center;
+	border-bottom: 1px solid #e8e8e8;
+	background-color: #f8f8f8;
+	border-top: 1px solid white;
+}
+
+td, th {
+	padding: 3px;
+	text-align: center;
+}
+
+
+
 /*--------------------------------------------------
 			MAIN CONTENT
 ---------------------------------------------------*/
@@ -280,8 +323,7 @@ img, iframe {
 #logo, #logo a {
 	float: left;
 }
-#logo a {
-}	
+
 /*--------------------------------------------------
 			PRIMARY MENU 
 ---------------------------------------------------*/
@@ -300,9 +342,9 @@ img, iframe {
     width: 100%;
 	padding: 7px;
 	margin: 38px 0;
-	box-shadow:0 0 0 rgba();
-	-moz-box-shadow:0 0 0 rgba();
-	-webkit-box-shadow:0 0 0 rgba();
+	box-shadow:0 0 0;
+	-moz-box-shadow:0 0 0;
+	-webkit-box-shadow:0 0 0;
 	color: #676767;
 }
 #primary-menu ul {
@@ -402,11 +444,11 @@ img, iframe {
 #primary-menu ul li:hover ul li a:hover { 
     color: #fff; 
 }
-.fixed { position: fixed; top: 0px; background-color: #f7f7f5; z-index:999; height: 59px; box-shadow: 0 0 3px rgba(0, 0, 0, 0.1); }
+.fixed { position: fixed; top: 0; background-color: #f7f7f5; z-index:999; height: 59px; box-shadow: 0 0 3px rgba(0, 0, 0, 0.1); }
 #header-wrapper .fixed { }
 .fixed .header { border-bottom: none; }
 .fixed #logo { display:none; }
-.fixed .logo2 { position:absolute; left: 0px; top:12px; }
+.fixed .logo2 { position:absolute; left: 0; top:12px; }
 .fixed #primary-menu ul { padding: 0; }
 .fixed #primary-menu ul li { background: url(../images/sprite.png) no-repeat scroll right -149px transparent; }
 .fixed #primary-menu ul li:last-child {  background: none; }
@@ -524,8 +566,7 @@ img, iframe {
 .photostream ul, #footer .photostream ul, .widget .photostream ul {
 	list-style-type: none;
 	padding: 0;
-	margin: 0;
-	margin-left: -10px;
+	margin: 0 0 0 -10px;
 }
 .photostream ul li, #footer .photostream ul li, .widget .photostream ul li {
 	width: auto;
@@ -776,7 +817,7 @@ img, iframe {
 	background: url(../images/bullet-ul.png) no-repeat scroll -42px -45px transparent;
 }
 .star-list li {
-	background: url(../images/bullet-ul.png) no-repeat scroll 0px -82px transparent;
+	background: url(../images/bullet-ul.png) no-repeat scroll 0 -82px transparent;
 }
 
 ul.colored-counter-list {
@@ -820,12 +861,9 @@ ul.colored-counter-list > li:before {
 	width: 100%;
 	margin-bottom: 6px;
 }
-.trigger {
-}
 .trigger a {
 	display: block;
-	padding: 10px;
-	padding-left: 15px;
+	padding: 10px 10px 10px 15px;
 	text-decoration: none;
 	font-weight: bold;
 	color: #676767;
@@ -972,7 +1010,7 @@ ul.colored-counter-list > li:before {
 }	
 .item-info-overlay a.preview, .item-info-overlay a.view {
 	position: absolute;
-	bottom: 0px;
+	bottom: 0;
 	-webkit-transition-duration: 0s; 
 	-moz-transition-duration: 0s; 
 	-o-transition-duration: 0s; 
@@ -983,7 +1021,7 @@ ul.colored-counter-list > li:before {
 }
 .item-info-overlay a.view {
 	background: url(../images/sprite.png) no-repeat scroll 11px 13px #333;
-	right: 0px;
+	right: 0;
 }
 .item-info-overlay a.view:hover {
 	background: url(../images/sprite.png) no-repeat scroll 11px -18px #333;
@@ -1100,8 +1138,7 @@ a.activity-link {
     height: 40px;
     margin-bottom: 5px;
     width: 100%;
-    background-repeat: no-repeat;
-    background-position: center;
+	background: no-repeat center;
 }
 
 .issue a.activity-link {
@@ -1133,6 +1170,21 @@ a.activity-link {
          padding-top: 70px;
          margin-top: -70px;
      }
+
+	 h3[id] {
+		 padding-top: 100px;
+	 }
+
+	 h4[id] {
+		 padding-top: 90px;
+	 }
+
+	 h2+h3[id] {
+		 padding-top: 70px;
+	 }
+	 h3+h4[id] {
+		 padding-top: 70px;
+	 }
  }
 
 /*---------------iPad portrait from 768px to 959px ---------------*/
@@ -1181,7 +1233,7 @@ a.activity-link {
 .portfolio-grid { width: 100%; margin: 0; }
 .portfolio-grid ul li.col2, .portfolio-grid ul li.col3, .portfolio-grid ul li.col4 {  width: 100%;  margin: 0 0 6px 0; }
 .portfolio-grid ul.shaped.hexagon li { margin: 0 32px 20px 32px; }
-.portfolio-grid ul.shaped.triangle li { margin: 0 0px 20px 0; }
+.portfolio-grid ul.shaped.triangle li { margin: 0 0 20px 0; }
 .triangle .item-container, .triangle .item-mask { width: 300px; height: 263px; }
 .triangle .item-mask, .triangle .item-info-overlay { background: url(../images/mask-triangle-portrait.png) no-repeat 0 0 transparent; }
 .triangle .item-container img {	height: 263px; }

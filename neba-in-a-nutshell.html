@@ -11,7 +11,7 @@ twitterAuthor: deploynix
 
 
 <div class="one-half">
-    <h2 class="title">Vision</h2>
+    <h2>Vision</h2>
 
     <p>
         <strong>With NEBA, applications built with Sling shall be modular and free of system-level concerns,
@@ -20,7 +20,7 @@ twitterAuthor: deploynix
 </div>
 
 <div class="one-half last">
-    <h2 class="title">Approach</h2>
+    <h2>Approach</h2>
 
     <p>NEBA integrates the Spring Framework into Sling. It makes available all of Spring's features to allow using mature, best-practice solutions
     for the majority of system-level concerns common to Sling-based applications. NEBA does so in full compliance with the open core philosophy -
@@ -32,7 +32,7 @@ twitterAuthor: deploynix
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title">Principles</h2>
+    <h2>Principles</h2>
 
     <ul class="colored-counter-list">
         <li>Zero interference: Do not alter any Sling or system behavior</li>
@@ -47,9 +47,9 @@ twitterAuthor: deploynix
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title" id="features">Main features</h2>
+    <h2 id="features">Main features</h2>
     <div class="one-half">
-        <h3 class="title" id="resourcemodels">Resource models</h3>
+        <h3 id="resourcemodels">Resource models</h3>
         <p>
         Business logic in Sling is usually written for a specific kind of
         <a href="http://sling.apache.org/documentation/the-sling-engine/resources.html">resource</a>. However, the connection
@@ -80,13 +80,13 @@ public class MyModel {
 
     </div>
     <div class="one-half last">
-        <h3 class="title" id="springmvc">Spring MVC</h3>
+        <h3 id="springmvc">Spring MVC</h3>
         Sling has excellent support for writing <a href="http://sling.apache.org/documentation/the-sling-engine/servlets.html">Servlets and Scripts</a>
         for resources. However, it does not provide you with an out-of-the box solution for parameter handling, validation, data binding and so forth,
         but instead offers well documented extension points. Spring, on the other hand, offers <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">declarative creation of RESTful controllers</a>.
         NEBA integrates Spring MVC in a conflict-free fashion. All Spring controllers are automatically available underneath /bin/mvc.do - a Sling servlet -
         and do thus not interfere with <a href="http://sling.apache.org/documentation/the-sling-engine/url-to-script-resolution.html">Sling's generic MVC concept for resource resolution</a>.
-<p>
+
 {% highlight java %}
 @Controller
 public class MyController {
@@ -96,7 +96,7 @@ public class MyController {
    return "redirect:/success.html";
  }
 {% endhighlight %}
-</p>
+
         <p>
         All MVC features are supported - including first-class support for Sling specific request parameters
         such as the Resource resolver. For an in-depth documentation of the Spring MVC support, see the
@@ -108,7 +108,7 @@ public class MyController {
     <div class="divider-border"></div>
 
     <div class="one-half" id="resourcemodeltooling">
-        <h3 class="title">@ResourceModel tooling</h3>
+        <h3>@ResourceModel tooling</h3>
         <p>
             To view and analyze resource models, two <a href="http://sling.apache.org/documentation/bundles/web-console-extensions.html">Sling web console extensions</a>
             are provided by NEBA.
@@ -125,7 +125,7 @@ public class MyController {
         <img src="images/neba-in-a-nutshell/modelmetadata.png" />
     </div>
     <div class="one-half last">
-        <h3 class="title">Rendering beyond resources</h3>
+        <h3>Rendering beyond resources</h3>
         <p>
         NEBA integrates <a href="http://velocity.apache.org/">Apache Velocity</a> to allow rendering beyond resources. This is useful when rendering things that are not resources -
         for instance database or web service objects - repeatedly in your project. Furthermore, velocity can be used to render
@@ -133,7 +133,7 @@ public class MyController {
         For an in-depth documentation of the Velocity integration features and mapping support, see the <a href="userguide.html#using-velocity">user guide on velocity</a>.
         </p>
 
-        <h3 class="title">Monitoring and downloading log files</h3>
+        <h3>Monitoring and downloading log files</h3>
         <p>
         To let engineering analyze issue quickly, NEBA includes a <a href="http://sling.apache.org/documentation/bundles/web-console-extensions.html">Sling web console extensions</a>
         that allows monitoring, tailing and downloading log files - including filtering and highlighting.

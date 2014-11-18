@@ -1,0 +1,95 @@
+---
+title: NEBA 3.4.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.4.0 Release notes
+---
+<div class="section-title">
+
+    <h1 class="title">NEBA <span>Release 3.4.0</span></h1>
+
+</div><!--END SECTION TITLE-->
+
+<div id="inner-content" class="blog1">
+
+    <div class="post">
+
+        <div class="post-info">
+            <div class="date"><span class="month">Nov</span><span class="day">18</span><span class="month">2014</span></div>
+        </div><!--END POST-INFO-->
+
+        <div class="post-content">
+
+            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
+
+            <div class="post-title">
+                <h2 class="title">Release 3.4.0</h2>
+            </div><!--END POST-TITLE-->
+
+            <div class="post-meta">
+                <ul>
+                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
+                </ul>
+            </div><!--END POST-META-->
+
+            <h3>Introducing: Lazy loading</h3>
+            <p>
+                A key focus of NEBA has been - and always will be - performance. NEBA drives dynamic, high volume sites with vast amounts of content and strives to
+                eliminate any overhead.
+            </p>
+
+            <p>We are proud to make another addition to better performing websites through the introduction of <a href="/userguide.html#lazyLoading">lazy loading for resource models</a>.</p>
+
+            <p>
+                Starting with release 3.4.0, reference collections - such as <a href="/userguide.html#api/@Children">@Children</a> of a resource or
+                lists of <a href="/userguide.html#api/@Children">@References</a> - are automatically and transparently lazy-loading.
+                Furthermore, any mapped field can now be explicitly lazy-loading using the new <a href="/userguide.html#api/Optional">Optional&lt;T&gt; interface</a>.
+            </p>
+
+            <h3>Immediate performance gains</h3>
+            <p>As one of the test beds for lazy loading, we used a complex AEM&trade; project featuring 100.000+ pages and high-volume traffic.
+            An immediate performance gain resulted from upgrading to NEBA 3.4.0 - without a single line of code changed in the project itself:</p>
+
+            <table>
+                <thead>
+                    <tr><th></th><th>NEBA 3.3.0</th><th>NEBA 3.4.0</th><th>Performance gain</th></tr>
+                </thead>
+                <tbody>
+                    <tr><th colspan="4" class="rowhead">Publishing environment</th></tr>
+                    <tr><th>Average page load time (ms)</th><td>285</td><td>217</td><td>31%</td></tr>
+                    <tr><th colspan="4" class="rowhead">Authoring environment</th></tr>
+                    <tr><th>Average page load time (ms)</th><td>286</td><td>236</td><td>21%</td></tr>
+                </tbody>
+            </table>
+
+            <p>Release 3.4.0 has no API changes - simply update to this NEBA version to benefit from the changes.</p>
+
+            <h2>Release notes</h2>
+
+            <h3>Improvements</h3>
+            <p>
+                <a href="https://github.com/unic/neba/issues/15">#15 Add lazy loading support to fields referencing other resources</a><br/>
+            </p>
+
+            <h3>Fixed bugs</h3>
+            <p>
+             -
+            </p>
+
+            <h3>Internal improvements</h3>
+            <p>
+                <a href="https://github.com/unic/neba/issues/17">#17 Increase the unit test coverage &gt; 90%</a><br/>
+            </p>
+
+            <div class="divider-border"></div>
+
+            <h3>Upgrading from 3.3.0</h3>
+
+            <p>
+                Simply upgrade your dependencies and re-deploy NEBA - there are no incompatible API changes in this release.
+            </p>
+        </div><!--END POST-CONTENT -->
+
+    </div><!--END POST-->
+
+</div><!--END INNER-CONTENT-->

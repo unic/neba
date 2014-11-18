@@ -20,6 +20,7 @@ twitterAuthor: deploynix
             <li><a href="#nebaDefineObjects">The neba:defineObjects tag</a></li>
             <li><a href="#resourceToModelMapping">Mapping properties and resources to models</a></li>
             <li><a href="#resourceAnnotations">Annotations for advanced resource to model mapping</a></li>
+            <li><a href="#lazyLoading">Lazy loading</a></li>
             <li><a href="#api/@PreMapping and @PostMapping">Performing additional initializations</a></li>
         </ul>
     </li>
@@ -61,6 +62,7 @@ twitterAuthor: deploynix
     <div class="one-half last">
         <h3>Interfaces</h3>
         <ul class="plain-list">
+            <li><a href="#api/Optional">Optional&lt;T&gt;</a></li>
             <li><a href="#path-placeholders">PlaceholderVariableResolver</a></li>
             <li><a href="#configuring-velocity">BeanRenderer, BeanRendererFactory</a></li>
             <li><a href="#cache-extension">ResourceModelCache</a></li>
@@ -123,13 +125,12 @@ twitterAuthor: deploynix
 
 <p>Create the following class in your bundle package (i.e. within or below the &quot;my.bundle.namespace&quot;
     package)</p>
-<p>
+
 {% highlight java %}
 @ResourceModel(types = "foundation/components/carousel")
 public class Carousel {
 }
 {% endhighlight %} 
-</p>
 
 <p>Build it and install the bundle in the OSGi container. Make sure the bundle is active. Now open the <a
         href="http://localhost:4502/system/console/modelregistry">NEBA model registry</a> tab in the sling console.
@@ -157,17 +158,13 @@ public class Carousel {
 
 <h3 id="nebaDefineObjects">The neba:defineObjects tag</h3>
 
-<p>
 {% highlight java %}<%@taglib prefix="neba" uri="http://neba.io/1.0"%>
 <neba:defineObjects />
 {% endhighlight %} 
-</p>
 
 <p>neba:defineObjects looks up the most specific model for the current resource and publishes it into the JSP context under the key &quot;m&quot;.  You may now output the model like so:</p>
 
-<p>
-{% highlight java %}${m}{% endhighlight %} 
-</p>
+{% highlight java %}${m}{% endhighlight %}
 
 <p>
     The <em>most specific model</em> is the one who's <em>type</em> attribute points to the closest type within a resource's type
@@ -177,11 +174,9 @@ public class Carousel {
     bean name (you can lookup the bean name in the <a href="http://localhost:4502/system/console/modelregistry">model registry</a>):
 </p>
 
-<p>
 {% highlight java %}
 <neba:defineObjects useModelNamed="carousel"/>
 {% endhighlight %}
-</p>
 
 <h3 id="resourceToModelMapping">Mapping properties and resources to models</h3>
 
@@ -192,7 +187,6 @@ public class Carousel {
     <img src="images/userguide/geometrixx-carousel.png">
 </p><p>Let's take &quot;pages&quot;, &quot;playSpeed&quot;, &quot;transTime&quot; and add them to the model:</p>
 
-<p>
 {% highlight java %}
 @ResourceModel(types = "foundation/components/carousel")
 public class Carousel {
@@ -211,24 +205,20 @@ public class Carousel {
     }
 }
 {% endhighlight %} 
-</p>
 
 <p>Now build and deploy your bundle again and output the properties in the JSP like so:
-<p>
+
 {% highlight java %}Play speed: ${m.playSpeed}<br />
 Trans time: ${m.transTime}<br />
 Pages: ${m.pages}
 {% endhighlight %} 
-</p>
 
 <p>You will see the following output:</p>
 
-<p>
 {% highlight java %}Play speed: 6000
 Trans time: 1000
 Pages:
 {% endhighlight %} 
-</p>
 
 <h3 id="resourceAnnotations">Annotations for advanced resource to model mapping</h3>
 
@@ -242,21 +232,17 @@ Pages:
     should also be of type String[] and not List&lt;Resource&gt;. However, NEBA offers a simple way to declare that a
     field contains one ore more <em>references</em> to other Resources. Simply add the @Reference annotation like so:</p>
 
-<p>
 {% highlight java %}
 @Reference
 private List<Resource> pages;
 {% endhighlight %} 
-</p>
 
 <p>Deploy, and load the page again. Now all referenced pages get listed:</p>
 
-<p>
 {% highlight java %}Play speed: 6000
 Trans time: 1000
 Pages: [JcrNodeResource, type=cq:Page, superType=null, path=/content/geometrixx/en/events/techsummit, JcrNodeResource, type=cq:Page, superType=null, path=/content/geometrixx/en/events/userconf, JcrNodeResource, type=cq:Page, superType=null, path=/content/geometrixx/en/events/shapecon, JcrNodeResource, type=cq:Page, superType=null, path=/content/geometrixx/en/events/dsc]
 {% endhighlight %} 
-</p>
 
 <p>When NEBA detects a @Reference annotation, it assumes that the <em>value</em> of the corresponding property
     (here: &quot;pages&quot;) is one or more resource paths. It obtains the corresponding resources and provides them as
@@ -264,23 +250,19 @@ Pages: [JcrNodeResource, type=cq:Page, superType=null, path=/content/geometrixx/
     to using &quot;Resource&quot; for your reference. The following also works, provided there is a &quot;Page&quot;
     model the referenced resources can be adapted to:</p>
 
-<p>
 {% highlight java %}@Reference
 private List<Page> pages;
 {% endhighlight %} 
-</p>
 
 <p>Here, NEBA loads the resource referenced in the &quot;pages&quot; property, adapts each resource to &quot;Page&quot;
     and returns a collection containing the resulting Page instances.</p>
 
 One can also alter the path of the reference prior to resolution by appending a relative path segment to the reference(s), like so:
 
-<p>
 {% highlight java %}@Reference(append = "/jcr:content")
 @Path("pages")
 private List<PageContent> pageContents;
 {% endhighlight %}
-</p>
 
 <p>
 Here, instead of resolving and adapting the paths in the property "pages" directly, "/jcr:content" is appended to all of the paths prior to resolution.
@@ -295,26 +277,21 @@ Here, instead of resolving and adapting the paths in the property "pages" direct
     (similar to the @Reference-annotation). Then, NEBA injects the children of either the current resource (if no other
     annotation is present), or of the resource defined by the @Reference or @Path of the field:</p>
 
-<p>
 {% highlight java %}@Children
 private List<Resource> children;
 {% endhighlight %} 
-</p>
 
 <p>Of course, NEBA will also automatically adapt the children to the generic type of the list - for instance,
     you could write:</p>
 
-<p>
 {% highlight java %}
 @Children
 private List<Page> childPages;
 {% endhighlight %} 
-</p>
 
 <p>@Children can be combined with both @Reference and @Path to even fetch the children of a reference resource
     or a resource designated by a specific path, i.e. the following works as well:</p>
 
-<p>
 {% highlight java %}
 @Path("/content/site")
 @Children
@@ -329,7 +306,6 @@ private List<Page> linkChildren;
 @Children
 private List<Page> link;
 {% endhighlight %} 
-</p>
 
 <p>
     Furthermore, you may specify a relative path to be resolved below every child using the property "resolveBelowEveryChild"
@@ -337,57 +313,46 @@ private List<Page> link;
     For example, you could obtain all nodes called "jcr:content" underneath all children of the current resource, like so:
 </p>
 
-<p>
 {% highlight java %}
 @Children(resolveBelowEveryChild = "jcr:content")
 private List<PageContent> childPageContents;
 {% endhighlight %}
-</p>
 
 <h4 id="api/@Resource">Using the @Path annotation to specify property names or resource paths</h4>
 
 <p>Now, lets add another property to the model, jcr:lastModified.</p>
 
-<p>
-{% highlight java %}private Date lastModified;{% endhighlight %} 
-</p>
+{% highlight java %}private Date lastModified;{% endhighlight %}
 
 <p>This will not yet work - NEBA mapps the properties by <em>name</em>, in this case the name contains
     characters (&quot;jcr:&quot;) unsuitable for a field name.  In this case, use the @Path annotation to specify
     the property from which the field's value shall be obtained:</p>
 
-<p>
 {% highlight java %}
 @Path("jcr:lastModified")
 private Date lastModified;
 {% endhighlight %} 
-</p>
 
 <p>Now the property is mapped!  @Path has even more interesting features, for instance allowing absolute and
     relative paths.  Try this:</p>
 
-<p>
 {% highlight java %}
 @Path("/content/geometrixx/en")
 private Resource en;
 {% endhighlight %} 
-</p>
 
 <p id="path-placeholders">While specifying path is nice, it is often undesirable. Thus, it is possible to use placeholders in the @Path
     mappings to dynamically provide path elements. A better version of above code might be:</p>
 
-<p>
 {% highlight java %}
 @Path("/content/geometrixx/${language}")
 private Resource homepage;
 {% endhighlight %} 
-</p>
 
 <p>To resolve ${language} placeholder, one simply provides a bean implementing the PlaceholderVariableResolver
     interface. Such a bean instance will be asked  to resolve the value for a placeholder key, i.e. &quot;language&quot;
     in the above example. A completely hardcoded example would be:</p>
 
-<p>
 {% highlight java %}
 @Service
 public class MyVariableResolver implements PlaceholderVariableResolver {
@@ -399,39 +364,32 @@ public class MyVariableResolver implements PlaceholderVariableResolver {
     }
 }
 {% endhighlight %} 
-</p>
 
 <p>This tutorial uses &quot;Resource&quot; for simplicity's sale. If you specify a different type, NEBA will
     automatically try to adapt  the referenced Resource to the target type. Instead of List&lt;Resource&gt; pages in
     the above example, you could also provide a model for pages and write the following:</p>
 
-<p>
 {% highlight java %}
 @Reference
 private List<Page> pages;
 {% endhighlight %} 
-</p>
 
 <h4>The @This annotation</h4>
 
 <p id="api/@This">The same applies to members injected with an absolute @Path and the @This annotation; if you have multiple
     models compatible  to your resource, you may also write:</p>
 
-<p>
 {% highlight java %}
 @This
 private OtherModel resource;
 {% endhighlight %} 
-</p>
 
 <p>You can also use the @This annotation to obtain the Resource that is mapped onto the model:</p>
 
-<p>
 {% highlight java %}
 @This
 private Resource resource;
 {% endhighlight %} 
-</p>
 
 <div class="trigger-button"><span>Hint: Models for crosscutting concerns</span></div>
 <div class="accordion">
@@ -445,14 +403,14 @@ private Resource resource;
         on the node, such as a set of properties defining how an access restriction is configured. Let us
         assume a protected content is assigned the mixin &quot;myProject:AccessRestricted&quot;. You may then create
         a model for any access restricted content like so:</p>
-<p>
+
 {% highlight java %}
 @ResourceModel(types = "myProject:AccessRestricted")
 public class AccessRestricted {
  ....
 }
-{% endhighlight %} 
-</p>
+{% endhighlight %}
+
 <p>Finally, you could adapt to this model (e.g., in a view or filter) to determine whether the
     corresponding resource has restricted access, and what the restrictions are.</p>
 
@@ -460,6 +418,106 @@ public class AccessRestricted {
     spec</a>, <a href="http://dev.day.com/docs/en/crx/current/using_crx/nodetype_administration.html">administering
     node types</a>.</p>
 </div><!--END ACCORDION-->
+
+<h3 id="lazyLoading">Lazy loading</h3>
+
+<h4>Lazy loading collections of references</h4>
+
+<p>
+All collection-typed references are automatically provided as lazy-loading proxies, for example in case of
+<a href="#api/@Children">@Children</a> and <a href="#api/@Reference">@Reference</a> collections:
+</p>
+
+{% highlight java %}
+@ResourceModel(types = "...")
+public class MyModel {
+  @Children
+  private List<Page> children; // Provided as a lazy-loading proxy
+  @Reference
+  private Collection<Page> pages; // Provided as a lazy-loading proxy as well
+}
+{% endhighlight %}
+
+<p>
+The contents of these collection are loaded as soon as a collection method - such as get, size, isEmpty, iterator - is called.
+The lazy-loading behavior for collections is thus completely transparent.
+</p>
+
+<h4 id="api/Optional">Declaring lazy-loading relationships using the Optional&lt;T&gt; interface</h4>
+
+<p>
+1:1 relationships are not automatically lazy. In order to make them lazy-loading,
+NEBA provides the <a href="apidocs/neba-api/io/neba/api/resourcemodels/Optional.html">Optional</a> interface:
+</p>
+
+{% highlight java %}
+@ResourceModel(types = "...")
+public class MyModel {
+  @Reference
+  private Optional<Page> page;
+  @Path("/content/path")
+  private Optional<Resource> otherResource;
+}
+{% endhighlight %}
+
+<div class="trigger-button"><span>Background: Why 1:1 relationships are not lazy by default</span></div>
+<div class="accordion">
+<p>
+    Let us assume there is a resource model that references resource "r":
+</p>
+
+{% highlight java %}
+@ResourceModel(types = "...")
+public class MyModel {
+  @Reference
+  private Resource r;
+
+  public void doSomething() {
+      if (r != null) {
+         // work with r
+      }
+  }
+}
+{% endhighlight %}
+
+<p>
+   Of course, any client working with "r" must know whether r exists. However, there is no natural "empty" representation for r.
+   It is either null or it exists. However, if r was provided as a lazy-loading proxy it could never be null - since determining whether r exists (is not null)
+   would mean loading it, which directly contradicts the idea of lazy-loading.
+</p>
+<p>
+    A user of "r" would only find out that "r" does not exist when accessing a method of the "r" lazy-loading proxy (which is never null)  - and receiving an
+    unfriendly unchecked exception in return, since the proxy cannot dispatch the method call as the loaded "r" is null.
+</p>
+<p>
+    Consequently, lazy 1:1 relationships <em>must</em> be explicit to allow clients to determine whether the relationship exists. This is not the case for
+    collection-typed references, since collections have a natural "empty" state (isEmpty()) and are guaranteed not to be null by NEBA.
+</p>
+
+</div>
+    <!--END ACCORDION-->
+
+<p>
+The Optional&lt;T&gt; interface is an extract of the <a href="http://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">JAVA 8 "Optional" interface</a>. NEBA
+automatically provides an implementation that will load the reference upon request. Of course, you may also use the interface for collection-typed references:
+</p>
+
+{% highlight java %}
+@ResourceModel(types = "...")
+public class MyModel {
+  @Children
+  private Optional<Collection<Page>> children;
+  @Reference
+  private Optional<Collection<Page>> pages;
+}
+{% endhighlight %}
+
+<p>
+    In this case, NEBA will not provide the collection as a lazy-loading proxy, but simply load it when requested via
+    the Optional interface implementation.
+</p>
+
+
 
 <h3 id="api/@PreMapping and @PostMapping">Performing additional initializations</h3>
 
@@ -469,7 +527,6 @@ public class AccessRestricted {
     invoked after all properties of a resource model are mapped from its resource:</p>
 
 
-<p>
 {% highlight java %}@ResourceModel(types = "my/model/type")
 public class MyModel {
    @This
@@ -481,11 +538,11 @@ public class MyModel {
    }
 }
 {% endhighlight %} 
-</p>
 
 <p>Likewise, @PreMapping allows for method execution before any properties of the resource are mapped.</p>
 
 </div>
+
 
 <div class="divider-border"></div>
 
@@ -510,18 +567,15 @@ public class MyModel {
     supported.  The purpose of this controller is to echo a parameter that we provide in a RESTful way, i.e. as a
     path element (this allows caching!).</p>
 
-<p>
 {% highlight java %}
 @Controller
 public class DemoController {
 }
 {% endhighlight %}
-</p>
 
 <p>A @Controller is automatically detected and registered (as a singleton) by Spring's classpath scanning.
     Let's use Spring's REST support to both define the URL the controller listens to and the parameter we expect:</p>
 
-<p>
 {% highlight java %}
 @Controller
 public class DemoController {
@@ -532,14 +586,12 @@ public class DemoController {
     }
 }
 {% endhighlight %}
-</p>
 
 <p>That's it. You may now call your controller e.g. with /bin/mvc.do/echo/HelloWorld.txt.</p>
 
 <p>Furthermore, NEBA automatically provides <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/new-in-3.1.html#new-in-3.1-handler-method-controller-processing">handler method argument resolvers</a>
     for Sling-specific request elements, SlingHttpServletRequest and -Response, RequestPathInfo and ResourceResolver, like so:</p>
 
-<p>
 {% highlight java %}
 @Controller
 public class DemoController {
@@ -556,7 +608,6 @@ public class DemoController {
     }
 }
 {% endhighlight %}
-</p>
 
 <p>It is thus not necessary to obtain these elements from the request.</p>
 
@@ -575,7 +626,6 @@ and thus discouraged.</p>
 
 <p>NEBA supports the common use case of handling resource paths in controllers with a convenience annotation:</p>
 
-<p>
 {% highlight java %}
 @Controller
 public class DemoController {
@@ -586,7 +636,6 @@ public class DemoController {
     }
 }
 {% endhighlight %}
-</p>
 
 <p>Here, a request parameter &quot;page&quot; is expected to contain a path to a resource. This resource is
     resolved and adapted to the parameter type in case the parameter type is not &quot;Resource&quot;.
@@ -594,7 +643,6 @@ public class DemoController {
     be used in case the parameter is not present or empty:
 </p>
 
-<p>
 {% highlight java %}
 @Controller
 public class DemoController {
@@ -605,7 +653,6 @@ public class DemoController {
     }
 }
 {% endhighlight %}
-</p>
 
 <p>Here, "page" is implicitly considered option (since there is a default value)</p>
 
@@ -630,7 +677,6 @@ public class DemoController {
     the bean factory. In a web context, objects may also be scoped to the current request or the current session.<br/>
     NEBA provides support for the request scope, i.e. a bean may be defined like so:</p>
 
-<p>
 {% highlight java %}
 @Component
 @Scope(WebApplicationContext.SCOPE_REQUEST)
@@ -638,7 +684,6 @@ public class MyType {
   ...
 }
 {% endhighlight %} 
-</p>
 
 <p>However, the session scope is currently not supported since it leads to a lot of issues (lack of scalability
     due to the need of session stickiness to an instance, high memory usage, serialisation etc.) In a RESTful
@@ -672,32 +717,24 @@ public class MyType {
     following line to the configuration:</p>
 
 
-<p>
 {% highlight java %}default:/apps/neba/views/{% endhighlight %}
-</p>
 
 <h3>Using Velocity templates with the NEBA taglib in JSP</h3><p>Let's continue by editing carousel JSP template
     (/libs/foundation/components/carousel/carousel.jsp). Replace the ${m.lastModified} with the following JSP tag:</p>
 
-<p>
 {% highlight xml %}<neba:render object="${m.lastModified}" />{% endhighlight %}
-</p>
 
 <p>If you have no model for the current resource, you may also simply use the properties object (a Map) provided
     by sling, like so:</p>
 
 
-<p>
 {% highlight xml %}<neba:render object="${properties['jcr:lastModified'].time}" />{% endhighlight %}
-</p>
 
 <p>Reload - you will see no output. Let's create a template. Open <a
         href="http://localhost:4502/crx/de/">CRXDE</a> and create the folder /apps/neba/views.  In this folder,
     create the folder /java/lang/. In there, create a file named &quot;Object.vlt&quot; like so:</p>
 
-<p>
-{% highlight java %}Hello, I am: $m{% endhighlight %} 
-</p>
+{% highlight java %}Hello, I am: $m{% endhighlight %}
 
 <p>Reload. You will see something like &quot;Hello, I am: Tue Dec 05 14:14:27 CEST 2011&quot;. How did this
     happen? NEBA uses the type hierarchy of every object it renders to derive a template name. If no template exists for
@@ -708,9 +745,7 @@ public class MyType {
     template is thus &lt;renderer root path&gt;/my/package/Foo.vlt. Try it: create the folder /java/util/ in
     /apps/neba/views/ and place a template called Date.vlt in it:</p>
 
-<p>
-{% highlight java %}I am the date: $m{% endhighlight %} 
-</p>
+{% highlight java %}I am the date: $m{% endhighlight %}
 
 <p>Reload - NEBA will now use you Date.vlt template. Sweet - now no matter where you output a date you can
     always use the render tag and thus re-use the same template. This mechanism can be used for any JAVA object!<br/>
@@ -718,15 +753,11 @@ public class MyType {
     with regard to the current locale.  For this, the render tag allows the specification of a <em>viewHint</em>.
     Create the following a templated called "Date-US.vlt" in the java/util folder:</p>
 
-<p>
-{% highlight java %}I am a US date: $m{% endhighlight %} 
-</p>
+{% highlight java %}I am a US date: $m{% endhighlight %}
 
 <p>You can now use this view like so:</p>
 
-<p>
 {% highlight xml %}<neba:render object="${m.lastModified}" viewHint="US" />{% endhighlight %}
-</p>
 
 <div class="trigger-button"><span>Hint: Configuring the velocity rendering</span></div>
 <div class="accordion">
@@ -741,11 +772,10 @@ public class MyType {
     rendering objects that are composed of several other objects. You may, for example, render our Carousel model like
     so:</p>
 
-<p>
 {% highlight xml %}<neba:render object="${m}" />{% endhighlight %}
-</p>
+
 <p>With a velocity template like so:</p>
-<p>
+
 {% highlight xml %}
 I am a Carousel. I was last modified at $renderer.render($m.lastModified)<br />
 I contain the following pages:<br />
@@ -755,13 +785,10 @@ I contain the following pages:<br />
 #end
 </ul>
 {% endhighlight %} 
-</p>
 
 <p>Thus, each page resource would be rendered using the template "Resource-listitem.vlt":</p>
 
-<p>
 {% highlight xml %}<li>$m.path</li>{% endhighlight %}
-</p>
 
 <p>This yields optimal re-use of views per type.</p><p>You may also want to add additional utilities to the
     rendering context to access using ${somekey}, such as a tool for message formatting and the like. For this, NEBA
@@ -772,9 +799,8 @@ I contain the following pages:<br />
 </p><h3>Providing additional context to velocity scripts</h3><p>Besides the <em>BindingsValuesProvider</em>, you can
     also add additional key/value pairs to the context of a specific &lt;neba:render ... /&gt; call by adding arbitrary
     attributes to the tag, like so:</p>
-<p>
+
 {% highlight xml %}<neba:render object="${m}" cssClasses="class1 class2" highlight="${highlight}" />{% endhighlight %}
-</p>
 
 <p>This will lead to the variables &quot;${cssClasses}&quot; and &quot;${highlight}&quot; to become available in
     the velocity script of the corresponding rendering process.</p>
@@ -788,7 +814,7 @@ I contain the following pages:<br />
         NEBA supports the notion of <em>self-testing applications</em> via the @SelfTest annotation. This annotation can be used on any number of methods
         of singleton Spring beans. Methods annotated with @SelfTest must be public, void and must not expect an argument.
     </p>
-<p>
+
 {% highlight java %}
 @Service
 public class SomeSpringSingleton {
@@ -803,7 +829,6 @@ public class SomeSpringSingleton {
 
 }
 {% endhighlight %}
-</p>
 
     <p>Following, the method is regarded as a self-test
        and is made available via the NEBA self-test console (/system/console/selftests).

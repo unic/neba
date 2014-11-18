@@ -12,7 +12,7 @@ function is_touch_device() {
  HEADER
  ---------------------------------------------------*/
 $(document).ready(function () {
-    var header_h = $("#header-wrapper").height() + 0;
+    var header_h = $("#header-wrapper").height();
     var menu_h = $("#menu").height();
     var speed = 500;
     var logo2_url = "/images/logo-min.png";
@@ -225,6 +225,8 @@ $(document).ready(function () {
             $(this).addClass("active");
         }
     });
+
+    $(".accordion").after('<div style="clear:both"></div>');
 });
 
 /***************************************************
@@ -385,6 +387,9 @@ $(function () {
  ***************************************************/
 
 $(function () {
+    // Prevent loading of activities stream of no activities container is present
+    if(!$("#activities").length) {return}
+
     // Global for JSONP tweet callback
     window.loadTweets = window.loadTweets || [];
 
@@ -512,7 +517,7 @@ $(function () {
                 success: function () {
                     callback(result);
                 },
-                error: function () {
+                error: function (script) {
                     throw new Error("Could not load script " + script);
                 }
             });
@@ -533,20 +538,17 @@ $(function () {
         return {
             expected: i,
             count: 0,
-            done: function () {
+            done: function (data) {
                 ++this.count;
                 if (this.count == this.expected) {
-                    callback()
+                    callback(data)
                 }
             }
         };
     };
 
-    // Will contain a (sorted) list of activities
-    var activities = [];
-
     // New barrier instance. Callback sorts and renders the activities.
-    var b = Barrier(providers.length, function () {
+    var b = Barrier(providers.length, function (activities) {
         var $ul = $('<ul class="slides"></ul>');
         var $li = $("<li>");
 
@@ -581,11 +583,14 @@ $(function () {
         });
     });
 
+    // Global list of all collected activities
+    var activities = [];
+
     // Invoke all providers, using the barrier created above
     $.each(providers, function (_, provider) {
         provider.load(function (a) {
             activities = activities.concat(a);
-            b.done();
+            b.done(activities);
         });
     });
 

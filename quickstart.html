@@ -9,19 +9,19 @@ twitterAuthor: deploynix
 </div><!--END SECTION TITLE-->
 
 <div class="one">
-    <h2 class="title">Step 1: Download and integrate NEBA</h2>
+    <h2>Step 1: Download and integrate NEBA</h2>
     <p>
-        <a href="download.html#installation">install the delivery package</a> and
-        <a href="download.html#integration">integrate the NEBA API into your project</a>
+        <a href="download.html">install the delivery package</a> and
+        integrate the NEBA API into your project.
     </p>
 </div>
 
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title">Step 2: Add a blueprint application context to your bundle(s)</h2>
+    <h2>Step 2: Add a blueprint application context to your bundle(s)</h2>
     <p><strong>It's a simple convention:</strong> Place a spring application context in the OSGI-INF/blueprint folder of your bundle. That's it. Feel free to use this snippet: </p>
-    <p>
+
 {% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -38,7 +38,6 @@ twitterAuthor: deploynix
     <context:component-scan base-package="bundle.package.impl" />
 </beans>
 {% endhighlight %}
-    </p>
 
     <div class="trigger-button"><span>Hint: Handy plugins for your IDE</span></div>
     <div class="accordion">
@@ -54,10 +53,12 @@ twitterAuthor: deploynix
 
 <div class="one">
 
-    <h2 class="title">Step 3: Use NEBA</h2>
+    <h2>Step 3: Use NEBA</h2>
 
-    <p><strong>Write a resource model:</strong> Create a class anywhere inside the <code>bundle.package.impl</code> namespace and annotate it with <code>@ResourceModel</code>. Look at the <a href="apidocs/ResourceModel.html">@ResourceModel API documentation to find out more</a>. Feel free to use this snippet:</p>
-    <p>
+    <p><strong>Write a resource model:</strong> Create a class anywhere inside the <code>bundle.package.impl</code> package namespace and annotate it with <code>@ResourceModel</code>.
+        Cou may consult the <a href="apidocs/ResourceModel.html">@ResourceModel API docs</a> or <a href="userguide.html#api/@ResourceModel">user guide on @ResourceModels</a>
+        to find out more. Feel free to use this snippet:</p>
+
 {% highlight java %}
 @ResourceModel(types = "cq:Page")
 public class PageModel {
@@ -69,10 +70,10 @@ public class PageModel {
     }
 }
 {% endhighlight %}
-    </p>
-    <p><strong>Use the model:</strong> Once this is deployed, you can see your model in the Sling console /system/console/modelregistry. Now, you
-        may adapt any cq:Page resource to this model. For instance using a Spring controller:</p>
-    <p>
+
+    <p><strong>Use the model:</strong> Once your bundle is deployed, you can see your model in NEBA's model registry console in the Felix web console (/system/console/modelregistry).
+        <br />Now, you can adapt any cq:Page resource to this model - for instance using a Spring controller:</p>
+
 {% highlight java %}
 @Controller
 public class MyController {
@@ -83,20 +84,18 @@ public class MyController {
     }
 }
 {% endhighlight %}
-    </p>
-    Once deployed, you can invoke this controller like so:
-    <p>
+
+    <p>Once deployed, you can invoke this controller like so:</p>
+
 {% highlight bash %}
 GET <host>/bin/mvc.do/page/childcount?page=/content/geometrixx/en
 {% endhighlight %}
-    </p>
-</div>
 
-<div class="divider-border"></div>
+</div>
 
 <div class="one">
     <div class="two-third">
-        <h2 class="title">More background on blueprint and Spring</h2>
+        <h3>More information on blueprint and Spring</h3>
         <p>Blueprint is part of the OSGi specification. NEBA relies on <a href="http://www.eclipse.org/gemini/blueprint/">gemini-blueprint, the open source reference implementation of this standard</a>.</p>
         <p>A blueprint XML declaration is simply a <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-factory-xml-import">Spring application context</a> -
             with an <a href="http://www.eclipse.org/gemini/blueprint/documentation/reference/2.0.0.M02/html/index.html">additional blueprint namespace providing support for
@@ -104,8 +103,8 @@ GET <host>/bin/mvc.do/page/childcount?page=/content/geometrixx/en
     </div><!--END TWO-THIRD-->
 
     <div class="one-third last">
-        <h2 class="title">More background on @ResourceModels</h2>
-        <p>Follow the <a href="userguide.html">user guide</a> to find out more about the capabilities of <a href="apidocs/resourcemodel.html">@ResourceModel</a>s</p>
+        <h3>More information on @ResourceModels</h3>
+        <p>Follow the <a href="userguide.html#api/@ResourceModel">user guide to find out more about the capabilities of @ResourceModel</a>s</p>
     </div><!--END ONE-THIRD LAST-->
 
 </div><!--END ONE-->

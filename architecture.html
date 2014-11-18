@@ -11,7 +11,7 @@ twitterAuthor: deploynix
 
 
 <div class="one">
-    <h2 class="title">About this documentation</h2>
+    <h2>About this documentation</h2>
 
     <p>The following documentation is not meant to be complete in a sense of covering every implementation detail. It strives to illustrate
     the core design ideas, as well as the most important components and processes of NEBA.</p>
@@ -27,16 +27,16 @@ twitterAuthor: deploynix
     <ul class="colored-counter-list">
         <li><a href="#containerview">Container view</a></li>
         <li><a href="#modules">Modules view</a></li>
-        <li><a href="#corepackages">Core packages view</a></li>
-        <li><a href="#postprocessing">Core feature view: Application context post-processing</a></li>
-        <li><a href="#modelregistration">Core feature view: Resource model registration and adapter factory provisioning</a></li>
+        <li><a href="#corepackages">Core packages</a></li>
+        <li><a href="#postprocessing">Application context post-processing</a></li>
+        <li><a href="#modelregistration">Resource model registration and adapter factory provisioning</a></li>
     </ul>
 </div>
 
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title" id="containerview">Container view</h2>
+    <h2 id="containerview">Container view</h2>
 
     <p>NEBA amends Sling's open core with further open source software, which in turn is internally structured in modules. We will refer to such
     component compositions using the generic term <em>container</em>. NEBA is comprised of the following containers:</p>
@@ -47,7 +47,7 @@ twitterAuthor: deploynix
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title" id="modules">Modules view</h2>
+    <h2 id="modules">Modules view</h2>
 
     <p>NEBA consists of the following modules. Each module is represented by a single OSGi bundle and a corresponding maven module.</p>
 
@@ -57,7 +57,7 @@ twitterAuthor: deploynix
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title" id="corepackages">Core packages view</h2>
+    <h2 id="corepackages">Core packages view</h2>
 
     <p>Each package of the core represents a semantically grouped amount of features. The following diagram shows the most important feature groups
     and illustrates the overall design approach of the core</p>
@@ -68,7 +68,7 @@ twitterAuthor: deploynix
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 class="title" id="postprocessing">Core feature view: Application context post-processing</h2>
+    <h2 id="postprocessing">Application context post-processing</h2>
 
     <p>The most central feature of NEBA is the registration of Spring beans using the NEBA API, e.g. beans annotated with @ResourceModel, @Selftest and so forth. Here, NEBA attaches to the construction process
     of Spring application contexts. As soon as all beans are successfully created, but prior to the publication of the context, NEBA post-processes the context
@@ -77,8 +77,10 @@ twitterAuthor: deploynix
     <img src="images/architecture/abstract-registration-process.png">
 </div>
 
+<div class="divider-border"></div>
+
 <div class="one">
-    <h2 class="title" id="modelregistration">Core feature view: Resource model registration and adapter factory provisioning</h2>
+    <h2 id="modelregistration">Resource model registration and adapter factory provisioning</h2>
 
     <p>The registration of resource models and the subsequent management of the resource model metadata for mapping purposes
     account for the most valuable NEBA features. Likewise, they require a well-designed collaboration of context post-processing, metadata creation and -storage
