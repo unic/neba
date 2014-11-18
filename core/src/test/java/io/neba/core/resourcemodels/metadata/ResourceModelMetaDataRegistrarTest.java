@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.util.OsgiBeanSource;
 import org.junit.Test;
@@ -24,6 +25,8 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.springframework.cglib.proxy.NoOp;
+
+import java.util.Collection;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -37,6 +40,8 @@ import static org.springframework.cglib.proxy.Enhancer.create;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceModelMetaDataRegistrarTest {
     private ResourceModelMetaData metadata;
+    private Collection<ResourceModelMetaData> allMetaData;
+
     private long bundleId = 123L;
 
     @InjectMocks
@@ -94,6 +99,39 @@ public class ResourceModelMetaDataRegistrarTest {
         assertMetadataIsNotNull();
     }
 
+    @Test
+    public void testRetrievalOfAllRegisteredMetaData() throws Exception {
+        addModelType(TestResourceModel.class);
+        addModelType(OtherTestResourceModel.class);
+        getAllMetadata();
+
+        assertAllMetadataConsistsOfMetadataFor(TestResourceModel.class, OtherTestResourceModel.class);
+    }
+
+    @Test
+    public void testRetrievalOfAllRegisteredMetaDataIsShallowCopy() throws Exception {
+        addModelType(TestResourceModel.class);
+        addModelType(OtherTestResourceModel.class);
+
+        getAllMetadata();
+        clearAllMetaData();
+        getAllMetadata();
+
+        assertAllMetadataConsistsOfMetadataFor(TestResourceModel.class, OtherTestResourceModel.class);
+    }
+
+    private void clearAllMetaData() {
+        this.allMetaData.clear();
+    }
+
+    private void assertAllMetadataConsistsOfMetadataFor(Class<?>... types) {
+        assertThat(this.allMetaData).onProperty("typeName").containsOnly(typeNamesOf(types));
+    }
+
+    private void getAllMetadata() {
+        this.allMetaData = this.testee.get();
+    }
+
     private Class<?> createCglibProxy(Class<TestResourceModel> modelType) {
         return create(modelType, NoOp.INSTANCE).getClass();
     }
@@ -123,4 +161,17 @@ public class ResourceModelMetaDataRegistrarTest {
     private void getMetaDataFor(Class<?> modelType) {
         this.metadata = this.testee.get(modelType);
     }
+
+    private String[] typeNamesOf(Class... types) {
+        if (types == null) {
+            return null;
+        }
+
+        String[] names = new String[types.length];
+        for (int i = 0; i < types.length; ++i) {
+            names[i] = types[i].getCanonicalName();
+        }
+        return names;
+    }
 }
+

@@ -16,6 +16,7 @@
 
 package io.neba.core.sling;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -41,10 +42,13 @@ public class AdministrativeResourceResolverTest {
     private ResourceResolverFactory factory;
     @Mock
     private ResourceResolver resolver;
+    @Mock
+    private SlingHttpServletRequest request;
 
     private AdministrativeResourceResolver testee;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         this.testee = new AdministrativeResourceResolver();
 
@@ -82,6 +86,49 @@ public class AdministrativeResourceResolverTest {
         withClosedResourceResolver();
         unbindFactory();
         verifyResolverIsNotClosed();
+    }
+
+    @Test
+    public void testDelegationOfResolveWithPathOnly() throws Exception {
+        bindFactory();
+
+        resolve("/junit/test");
+
+        verifyAdministrativeResolverResolves("/junit/test");
+    }
+
+    @Test
+    public void testDelegationOfResolveWithPathAndRequest() throws Exception {
+        bindFactory();
+
+        resolveWithRequest("/junit/test");
+
+        verifyAdministrativeResolverResolvesWithRequest("/junit/test");
+    }
+
+    @Test
+    public void testDelegationOfGet() throws Exception {
+        bindFactory();
+
+        get("/junit/test");
+
+        verifyAdministrativeResolverGets("/junit/test");
+    }
+
+    private void verifyAdministrativeResolverGets(String path) {
+        verify(this.resolver).getResource(path);
+    }
+
+    private void verifyAdministrativeResolverResolvesWithRequest(String path) {
+        verify(this.resolver).resolve(this.request, path);
+    }
+
+    private void resolveWithRequest(String path) {
+        this.testee.resolve(this.request, path);
+    }
+
+    private void verifyAdministrativeResolverResolves(String path) {
+        verify(this.resolver).resolve(path);
     }
 
     private void withClosedResourceResolver() {

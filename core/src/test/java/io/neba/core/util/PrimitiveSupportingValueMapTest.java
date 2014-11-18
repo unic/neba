@@ -130,6 +130,36 @@ public class PrimitiveSupportingValueMapTest {
         assertResultIsNull();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullArgumentToConstructor() throws Exception {
+        new PrimitiveSupportingValueMap(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullArgumentKeyToGetWithClass() throws Exception {
+        this.testee.get(null, String.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullArgumentClassToGetWithClass() throws Exception {
+        this.testee.get("test", null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullArgumentKeyToGetWithDefaultValue() throws Exception {
+        this.testee.get(null, "defaultValue");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullArgumentDefaultValueKeyToGetWithDefaultValue() throws Exception {
+        this.testee.get("test", (Object) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullArgumentToSimpleGet() throws Exception {
+        this.testee.get(null);
+    }
+
     private void assertResultIsNull() {
         assertThat(this.result).isNull();
     }

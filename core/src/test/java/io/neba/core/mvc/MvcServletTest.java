@@ -31,6 +31,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -60,6 +61,8 @@ public class MvcServletTest {
     private SlingHttpServletRequest request;
     @Mock
     private SlingHttpServletResponse response;
+    @Mock
+    private ServletConfig servletConfig;
 
     private MvcContext injectedContext;
 
@@ -112,6 +115,37 @@ public class MvcServletTest {
 
         handleRequest();
         verifyMvcContextServicedRequestOnce();
+    }
+
+    @Test
+    public void testLazyInitializationOfDispatcherServlet() throws Exception {
+        enableMvc();
+        withDispatcherServletInitializationPending();
+
+        handleRequest();
+
+        verifyDispatcherServletIsInitializedWithServletConfig();
+    }
+
+    @Test
+    public void testDispatcherServletIsNotInitializedWhenAlreadyInitialized() throws Exception {
+        enableMvc();
+
+        handleRequest();
+
+        verifyDispatcherServletIsNotInitializedWithServletConfig();
+    }
+
+    private void verifyDispatcherServletIsNotInitializedWithServletConfig() {
+        verify(this.mvcContext, never()).initializeDispatcherServlet(this.servletConfig);
+    }
+
+    private void verifyDispatcherServletIsInitializedWithServletConfig() {
+        verify(this.mvcContext).initializeDispatcherServlet(this.servletConfig);
+    }
+
+    private void withDispatcherServletInitializationPending() {
+        doReturn(true).when(this.mvcContext).mustInitializeDispatcherServlet();
     }
 
     private void disableMvc() {
