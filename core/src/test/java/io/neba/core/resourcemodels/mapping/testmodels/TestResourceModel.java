@@ -22,6 +22,7 @@ import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.annotations.This;
 import io.neba.api.annotations.Unmapped;
+import io.neba.api.resourcemodels.Optional;
 import org.apache.sling.api.resource.Resource;
 
 import javax.inject.Inject;
@@ -38,7 +39,7 @@ import java.util.List;
  */
 @ResourceModel(types = "ignored/junit/test/type")
 public class TestResourceModel {
-    private static String STATIC_FIELD;
+    private static String staticField;
     private final String finalField = "finalValue";
     private String stringField;
     private int primitiveIntField;
@@ -78,6 +79,14 @@ public class TestResourceModel {
 
     @Children(resolveBelowEveryChild = "/jcr:content")
     private List<Resource> childContentResourcesAsResources;
+
+    @Children
+    private Optional<List<Resource>> optionalChildContentResourcesAsResources;
+
+    @Reference
+    private Optional<OtherTestResourceModel> lazyReferenceToOtherModel;
+
+    private Optional<OtherTestResourceModel> lazyReferenceToChildAsOtherModel;
 
     private Collection<String> collectionOfStrings;
 

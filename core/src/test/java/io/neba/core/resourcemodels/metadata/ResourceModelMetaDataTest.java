@@ -47,7 +47,7 @@ public class ResourceModelMetaDataTest {
 	
     @Test
     public void testMappingOfStaticField() throws Exception {
-    	assertMappableFieldsDoesNotContain("STATIC_FIELD");
+    	assertMappableFieldsDoesNotContain("staticField");
     }
 
 	@Test
@@ -90,6 +90,7 @@ public class ResourceModelMetaDataTest {
 
 	private void assertMappableFieldsDoesNotContain(String name) {
     	Field field = findField(this.modelType, name);
+		assertThat(field).overridingErrorMessage("Field " + this.modelType.getSimpleName() + "." + name + " does not exist.").isNotNull();
 		for (MappedFieldMetaData fm : this.testee.getMappableFields()) {
 			assertThat(fm.getField()).isNotEqualTo(field);
 		}

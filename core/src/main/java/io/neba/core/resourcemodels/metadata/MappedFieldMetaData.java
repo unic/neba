@@ -20,18 +20,25 @@ import io.neba.api.annotations.Children;
 import io.neba.api.annotations.Path;
 import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.This;
+import io.neba.api.resourcemodels.Optional;
 import io.neba.core.util.ReflectionUtil;
 import org.apache.commons.lang.ClassUtils;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.Factory;
+import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
+import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.springframework.util.ReflectionUtils.makeAccessible;
 
 /**
@@ -41,7 +48,6 @@ import static org.springframework.util.ReflectionUtils.makeAccessible;
  * @author Olaf Otto
  */
 public class MappedFieldMetaData {
-
     /**
      * Whether a property cannot be represented by a resource but must stem
      * from a value map representing the properties of a resource.
@@ -68,11 +74,15 @@ public class MappedFieldMetaData {
     private final boolean isChildrenAnnotationPresent;
     private final boolean isResolveBelowEveryChildPathPresentOnChildren;
     private final String resolveBelowEveryChildPathOnChildren;
+    private final boolean isOptional;
 
-    private final Class<?> componentType;
+    private final Class<?> typeParameter;
     private final Class<?> arrayTypeOfComponentType;
+    private final Type genericFieldType;
     private final Class<?> fieldType;
     private final Class<?> modelType;
+    private final Factory collectionProxyFactory;
+
 
     /**
      * Immediately extracts all metadata for the provided field.
@@ -90,8 +100,12 @@ public class MappedFieldMetaData {
         // Atomic initialization
         this.modelType = modelType;
         this.field = field;
-        this.fieldType = field.getType();
-        this.isCollectionType = Collection.class.isAssignableFrom(field.getType());
+        this.isOptional = field.getType() == Optional.class;
+        // Treat Optional<X> fields transparently like X fields: This way, anyone operating on the metadata is not
+        // forced to be aware of the lazy-loading value holder indirection but can operate on the target type directly.
+        this.genericFieldType = this.isOptional ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
+        this.fieldType = this.isOptional ? getRawType(this.genericFieldType, this.modelType) : field.getType();
+        this.isCollectionType = Collection.class.isAssignableFrom(this.fieldType);
         this.isPathAnnotationPresent = field.isAnnotationPresent(Path.class);
         this.isReference = field.isAnnotationPresent(Reference.class);
         this.isThisReference = field.isAnnotationPresent(This.class);
@@ -102,15 +116,51 @@ public class MappedFieldMetaData {
         this.appendPathOnReference = getAppendPathFromReference(field);
         this.isResolveBelowEveryChildPathPresentOnChildren = isResolveBelowEveryChildPathPresentOnChildrenInternal(field);
         this.resolveBelowEveryChildPathOnChildren = getResolveBelowEveryChildPathFromChildren(field);
-        this.componentType = resolveComponentType();
+        this.typeParameter = resolveTypeParameter();
         this.arrayTypeOfComponentType = resolveArrayTypeOfComponentType();
         this.path = getPathInternal();
         this.isPathExpressionPresent = isPathExpressionPresentInternal();
         this.isPropertyType = isPropertyTypeInternal();
-        this.isInstantiableCollectionType = ReflectionUtil.isInstantiableCollectionType(getType());
+        this.isInstantiableCollectionType = ReflectionUtil.isInstantiableCollectionType(this.fieldType);
 
         enforceInstantiableCollectionTypeForExplicitlyMappedFields();
+        this.collectionProxyFactory = prepareProxyFactoryForCollectionTypes();
+
         makeAccessible(field);
+    }
+
+    /**
+     * Wraps {@link io.neba.core.util.ReflectionUtil#getLowerBoundOfSingleTypeParameter(java.lang.reflect.Type)}
+     * in order to provide a field-related error message to signal users which field is affected.
+     */
+    private Type getParameterTypeOf(Type type) {
+        try {
+            return getLowerBoundOfSingleTypeParameter(type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to resolve a generic parameter type of the mapped field " + this.field + ".", e);
+        }
+    }
+
+    /**
+     * Prepares a proxy instance of a collection type for use as a {@link org.springframework.cglib.proxy.Factory}.
+     * Proxy instances are always {@link org.springframework.cglib.proxy.Factory factories}.
+     * Using {@link org.springframework.cglib.proxy.Factory#newInstance(org.springframework.cglib.proxy.Callback)}
+     * is significantly more efficient than using {@link org.springframework.cglib.proxy.Enhancer#create(Class, org.springframework.cglib.proxy.Callback)}.
+     */
+    private Factory prepareProxyFactoryForCollectionTypes() {
+        if (this.isInstantiableCollectionType) {
+            return (Factory) Enhancer.create(this.fieldType, new LazyLoader() {
+                @Override
+                public Object loadObject() throws Exception {
+                    return null;
+                }
+            });
+        }
+        return null;
+    }
+
+    public Factory getCollectionProxyFactory() {
+        return this.collectionProxyFactory;
     }
 
     private String getAppendPathFromReference(Field field) {
@@ -150,19 +200,19 @@ public class MappedFieldMetaData {
         return this.isPathAnnotationPresent && this.path.contains("$");
     }
 
-    private Class<?> resolveComponentType() {
-        Class<?> componentType = null;
+    private Class<?> resolveTypeParameter() {
+        Class<?> typeParameter = null;
         if (this.isCollectionType) {
-            componentType = ReflectionUtil.getCollectionComponentType(this.modelType, this.field);
+            typeParameter = getRawType(getParameterTypeOf(this.genericFieldType), this.modelType);
         } else if (getType().isArray()) {
-            componentType = getType().getComponentType();
+            typeParameter = getType().getComponentType();
         }
-        return componentType;
+        return typeParameter;
     }
 
     private Class<?> resolveArrayTypeOfComponentType() {
-        if (this.componentType != null) {
-            return Array.newInstance(componentType, 0).getClass();
+        if (this.typeParameter != null) {
+            return Array.newInstance(typeParameter, 0).getClass();
         }
         return null;
     }
@@ -206,8 +256,8 @@ public class MappedFieldMetaData {
         return
                 // References are always contained in properties of type String or String[].
                 isReference()
-                        || isPropertyType(type)
-                        || (type.isArray() || isCollectionType) && isPropertyType(getComponentType());
+                    || isPropertyType(type)
+                    || (type.isArray() || isCollectionType) && isPropertyType(getTypeParameter());
     }
 
     /**
@@ -326,20 +376,26 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * @return The component (generic) type of this collection if this field
-     * {@link #isCollectionType()} with one defined component type,
-     * or <code>null</code>.
+     * @return The generic type of this field if it has a generic type declaration, such as <code>List&lt;MyModel&gt; field;</code>
+     * or <code>Optional&lt;MyModel&gt; field;</code>
      */
-    public Class<?> getComponentType() {
-        return this.componentType;
+    public Class<?> getTypeParameter() {
+        return this.typeParameter;
     }
 
     /**
-     * @return the array type representation of the {@link #getComponentType() component type},
+     * @return the array type representation of the {@link #getTypeParameter() component type},
      * or <code>null</code> if the component type is <code>null</code>.
      */
-    public Class<?> getArrayTypeOfComponentType() {
+    public Class<?> getArrayTypeOfTypeParameter() {
         return arrayTypeOfComponentType;
+    }
+
+    /**
+     * @return whether the field is of type {@link io.neba.api.resourcemodels.Optional}.
+     */
+    public boolean isOptional() {
+        return isOptional;
     }
 
     @Override
