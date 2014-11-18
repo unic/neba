@@ -72,14 +72,23 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String suffix = substringAfter(req.getRequestURI(), req.getServletPath() + "/" + getLabel());
         if (!isBlank(suffix) && suffix.startsWith(STATISTICS_API_PATH)) {
+            setNoCacheHeaders(res);
             getModelMetadata(suffix.substring(STATISTICS_API_PATH.length()), res);
             return;
         }
         if (!isBlank(suffix) && suffix.startsWith(RESET_API_PATH)) {
+            setNoCacheHeaders(res);
             resetStatistics(res);
             return;
         }
         super.doGet(req, res);
+    }
+
+    private void setNoCacheHeaders(HttpServletResponse res) {
+        res.setHeader("Expires", "Sat, 6 May 1970 12:00:00 GMT");
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        res.addHeader("Cache-Control", "post-check=0, pre-check=0");
+        res.setHeader("Pragma", "no-cache");
     }
 
     private void resetStatistics(HttpServletResponse res) {
