@@ -13,7 +13,7 @@
 		<groupId>io.neba</groupId>
 		<artifactId>io.neba.neba-parent</artifactId>
 		<relativePath>parent/pom.xml</relativePath>
-		<version>3.4.0-SNAPSHOT</version>
+		<version>3.4.1-SNAPSHOT</version>
 	</parent>
 
 	<modules>
