@@ -530,7 +530,7 @@ $(function () {
         GitHubCommit("unic", "neba", "develop"),
         GitHubCommit("unic", "neba", "gh-pages"),
         GitHubIssueChange("unic", "neba"),
-        TweetsForWidget("479283277933457408")
+        TweetsForWidget("535389938054094848")
     ];
 
     // Invokes a callback once a certain number of operations have finished
