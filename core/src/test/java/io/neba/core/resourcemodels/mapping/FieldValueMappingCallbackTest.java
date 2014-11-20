@@ -106,6 +106,38 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
+     * The factory must not accept null arguments to its constructor.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullModelInConstructor() throws Exception {
+        new FieldValueMappingCallback(null, this.resource, this.factory);
+    }
+
+    /**
+     * The factory must not accept null arguments to its constructor.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullResourceInConstructor() throws Exception {
+        new FieldValueMappingCallback(this.model, null, this.factory);
+    }
+
+    /**
+     * The factory must not accept null arguments to its constructor.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullFactoryInConstructor() throws Exception {
+        new FieldValueMappingCallback(this.model, this.resource, null);
+    }
+
+    /**
+     * The factory must not accept null arguments to its callback method.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullFactoryInMapping() throws Exception {
+        new FieldValueMappingCallback(this.model, this.resource, this.factory).doWith(null);
+    }
+
+    /**
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {

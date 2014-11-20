@@ -58,6 +58,16 @@ public class FieldValueMappingCallback {
      * @param factory  must not be null.
      */
     public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory) {
+        if (model == null) {
+            throw new IllegalArgumentException("Constructor parameter model must not be null.");
+        }
+        if (resource == null) {
+            throw new IllegalArgumentException("Constructor parameter resource must not be null.");
+        }
+        if (factory == null) {
+            throw new IllegalArgumentException("Constructor parameter factory must not be null.");
+        }
+
         this.model = model;
         this.properties = toValueMap(resource);
         this.resource = resource;
@@ -65,7 +75,9 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Invoked for each field of a resource model type.
+     * Invoked for each {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData#getMappableFields() mappable field}
+     * of a {@link io.neba.api.annotations.ResourceModel} to map the {@link MappedFieldMetaData#getField() corresponding field's}
+     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory) constructor}.
      *
      * @param metaData must not be <code>null</code>.
      */
@@ -74,12 +86,14 @@ public class FieldValueMappingCallback {
             throw new IllegalArgumentException("Method argument metaData must not be null.");
         }
 
+        // Prepare the dynamic contextual data of this mapping
         final FieldData fieldData = new FieldData(metaData, evaluateFieldPath(metaData));
 
         if (isMappable(fieldData)) {
             Object value;
 
             if (metaData.isOptional()) {
+                // Explicit lazy loading
                 value = new OptionalFieldValue(fieldData, this);
             } else {
                 value = resolve(fieldData);
@@ -125,7 +139,7 @@ public class FieldValueMappingCallback {
     /**
      * <p>
      * Resolves the {@link org.apache.sling.api.resource.Resource#listChildren() children}
-     * of a targeted resource. This parent resource may be either:
+     * of a parent resource. This parent resource may be either:
      * </p>
      * <ul>
      * <li>The current resource, if no {@link io.neba.api.annotations.Path} or
@@ -166,7 +180,7 @@ public class FieldValueMappingCallback {
     @SuppressWarnings("unchecked")
     private Collection createCollectionOfChildren(final FieldData field, final Resource parent) {
         if (field.metaData.isOptional()) {
-            // The field was already lazy-loaded - no not lazy-load again.
+            // The field was already lazy-loaded - do not lazy-load again.
             return loadChildren(field, parent);
         }
 
@@ -265,6 +279,7 @@ public class FieldValueMappingCallback {
         final Collection values = instantiateCollectionType(collectionType, paths.length);
         String[] resourcePaths = paths;
         if (field.metaData.isAppendPathPresentOnReference()) {
+            // @Reference(append = "...")
             resourcePaths = append(field.metaData.getAppendPathOnReference(), paths);
         }
 
@@ -513,7 +528,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Implements lazy-loading of 1:1 relationships. Leverages the internal
+     * Implements explicit lazy-loading via {@link io.neba.api.resourcemodels.Optional}. Leverages the internal
      * {@link #resolve(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData)}
      * method and {@link io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData} for this purpose.
      *

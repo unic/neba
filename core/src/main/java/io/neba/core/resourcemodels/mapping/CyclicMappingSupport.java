@@ -37,14 +37,14 @@ public class CyclicMappingSupport {
     private final ThreadLocal<Map<Mapping, Mapping>> ongoingMappings = new ThreadLocal<Map<Mapping, Mapping>>();
 
     /**
-     * Contract: When invoked and <code>true</code> is returned,
+     * Contract: When invoked and <code>null</code> is returned,
      * one <em>must</em> invoke {@link #end(Mapping)} after the corresponding mapping was executed.<br />
      * Otherwise, a leak in the form of persisting thread-local attributes is introduced.
      *
      * @param mapping must not be <code>null</code>.
-     * @return <code>true</code> if the mapping may be executed,
-     *         <code>false</code> if the execution of the mapping would result
-     *         in an infinite loop.
+     * @return The already ongoing mapping, or <code>null</code> if the given mapping has not occurred
+     *         yet. The provided mapping <em>must</em> only be executed if this emthod returns <code>null</code>.
+     *         Otherwise, the execution results in an infinite loop.
      */
     public <T> Mapping<T> begin(Mapping<T> mapping) {
         notNull(mapping, "Method argument mapping must not be null.");

@@ -110,9 +110,8 @@ public final class ReflectionUtil {
         } else if (collectionType.isAssignableFrom(Set.class)) {
             collection = (T) new LinkedHashSet<K>(length);
         } else {
-            throw new IllegalArgumentException("Unable to instantiate a collection compatible to " + collectionType +
-                    ". Only " + List.class + ", " + Set.class + " or " +
-                    Collection.class + " are supported.");
+            throw new IllegalArgumentException("Unable to instantiate a collection of type " + collectionType +
+                    ". Only collections assignable from " + List.class + " or " + Set.class + " are supported.");
         }
         return collection;
     }
