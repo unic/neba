@@ -18,6 +18,7 @@ package io.neba.core.resourcemodels.mapping;
 
 import io.neba.api.annotations.PostMapping;
 import io.neba.api.annotations.PreMapping;
+import io.neba.api.resourcemodels.fieldprocessor.CustomFieldProcessor;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
@@ -28,6 +29,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.BeanFactory;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
@@ -37,6 +41,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class ModelProcessorTest {
     private boolean throwExceptionDuringPreMapping;
     private boolean throwExceptionDuringPostMapping;
+    private List<CustomFieldProcessor> customFieldProcessors = new LinkedList<CustomFieldProcessor>();
 
     /**
      * @author Olaf Otto
@@ -150,7 +155,7 @@ public class ModelProcessorTest {
 
     private void withModel(final TestModel testModel) {
         this.model = testModel;
-        this.metadata = new ResourceModelMetaData(this.model.getClass());
+        this.metadata = new ResourceModelMetaData(this.model.getClass(), customFieldProcessors);
     }
 
     private void processBeforeMapping() {

@@ -16,15 +16,18 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.core.resourcemodels.fieldprocessor.FieldProcessorRegistrar;
 import io.neba.core.util.OsgiBeanSource;
 import org.osgi.framework.Bundle;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.util.ClassUtils.getUserClass;
@@ -39,6 +42,10 @@ import static org.springframework.util.ClassUtils.getUserClass;
  */
 @Service
 public class ResourceModelMetaDataRegistrar {
+
+    @Inject
+    private FieldProcessorRegistrar fieldProcessorRegistrar;
+
     /**
      * @author Olaf Otto
      */
@@ -84,7 +91,7 @@ public class ResourceModelMetaDataRegistrar {
 
     public ResourceModelMetaData register(OsgiBeanSource<?> beanSource) {
         Class<?> beanType = beanSource.getBeanType();
-        ResourceModelMetaData modelMetaData = new ResourceModelMetaData(beanType);
+        ResourceModelMetaData modelMetaData = new ResourceModelMetaData(beanType, this.fieldProcessorRegistrar.addModel(beanType));
         ResourceModelMetadataHolder holder = new ResourceModelMetadataHolder(beanSource, modelMetaData);
 
         Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
@@ -92,6 +99,18 @@ public class ResourceModelMetaDataRegistrar {
 
         this.cache = newCache;
         return modelMetaData;
+    }
+    public void invalidate(List<Class<?>> beanTypes) {
+        Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
+        for (Class<?> beanType : beanTypes) {
+            ResourceModelMetadataHolder holder = this.cache.get(beanType);
+            if (holder == null) {
+                throw new IllegalStateException("Cannot invalidate " + beanType.getName() + ", it is not cached yet");
+            }
+            ResourceModelMetaData metaData = new ResourceModelMetaData(beanType, this.fieldProcessorRegistrar.getProcessors(beanType));
+            newCache.put(beanType, new ResourceModelMetadataHolder(holder.source, metaData));
+        }
+        this.cache = newCache;
     }
 
     public void remove(Bundle bundle) {
@@ -101,6 +120,7 @@ public class ResourceModelMetaDataRegistrar {
             OsgiBeanSource<?> source = it.next().getValue().source;
             if (source.getBundleId() == bundle.getBundleId()) {
                 it.remove();
+                this.fieldProcessorRegistrar.removeModel(source.getBeanType());
             }
         }
         this.cache = newCache;

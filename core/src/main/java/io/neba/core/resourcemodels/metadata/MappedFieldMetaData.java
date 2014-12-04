@@ -20,6 +20,7 @@ import io.neba.api.annotations.Children;
 import io.neba.api.annotations.Path;
 import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.This;
+import io.neba.api.resourcemodels.fieldprocessor.CustomFieldProcessor;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.util.ReflectionUtil;
 import org.apache.commons.lang.ClassUtils;
@@ -33,6 +34,7 @@ import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
@@ -48,6 +50,7 @@ import static org.springframework.util.ReflectionUtils.makeAccessible;
  * @author Olaf Otto
  */
 public class MappedFieldMetaData {
+
     /**
      * Whether a property cannot be represented by a resource but must stem
      * from a value map representing the properties of a resource.
@@ -75,6 +78,8 @@ public class MappedFieldMetaData {
     private final boolean isResolveBelowEveryChildPathPresentOnChildren;
     private final String resolveBelowEveryChildPathOnChildren;
     private final boolean isOptional;
+    private final boolean isCustomProcessorPresent;
+    private CustomFieldProcessor customFieldProcessor;
 
     private final Class<?> typeParameter;
     private final Class<?> arrayTypeOfComponentType;
@@ -89,7 +94,8 @@ public class MappedFieldMetaData {
      *
      * @param field must not be <code>null</code>.
      */
-    public MappedFieldMetaData(Field field, Class<?> modelType) {
+    public MappedFieldMetaData(Field field, Class<?> modelType,
+                               List<CustomFieldProcessor> customFieldProcessors) {
         if (field == null) {
             throw new IllegalArgumentException("Constructor parameter field must not be null.");
         }
@@ -110,6 +116,18 @@ public class MappedFieldMetaData {
         this.isReference = field.isAnnotationPresent(Reference.class);
         this.isThisReference = field.isAnnotationPresent(This.class);
         this.isChildrenAnnotationPresent = field.isAnnotationPresent(Children.class);
+
+        for (CustomFieldProcessor customFieldProcessor : customFieldProcessors) {
+            if (customFieldProcessor.accept(field, modelType)) {
+                if (this.customFieldProcessor != null) {
+                    throw new IllegalStateException("There are multiple processors accepting field " + field.getName() +
+                        " in " + modelType.getName() + ": " + this.customFieldProcessor.getClass().getName() + " and " +
+                        customFieldProcessor.getClass().getName());
+                }
+                this.customFieldProcessor = customFieldProcessor;
+            }
+        }
+        isCustomProcessorPresent = customFieldProcessor != null;
 
         // The following initializations are not atomic but order-sensitive.
         this.isAppendPathPresentOnReference = isAppendPathPresentOnReferenceInternal(field);
@@ -219,7 +237,8 @@ public class MappedFieldMetaData {
 
 
     private void enforceInstantiableCollectionTypeForExplicitlyMappedFields() {
-        if (((this.isReference && this.isCollectionType) || this.isChildrenAnnotationPresent)
+        if (((this.isReference && this.isCollectionType) || this.isChildrenAnnotationPresent
+            || (this.isCustomProcessorPresent && this.isCollectionType))
                 && !this.isInstantiableCollectionType) {
             throw new IllegalArgumentException("Unsupported type of field " +
                     this.field + ": Only " + join(getInstantiableCollectionTypes(), ", ") + " are supported.");
@@ -297,6 +316,13 @@ public class MappedFieldMetaData {
      */
     public boolean isThisReference() {
         return this.isThisReference;
+    }
+
+    public boolean isCustomProcessorPresent() {
+        return this.isCustomProcessorPresent;
+    }
+    public CustomFieldProcessor getCustomFieldProcessor() {
+        return this.customFieldProcessor;
     }
 
     /**

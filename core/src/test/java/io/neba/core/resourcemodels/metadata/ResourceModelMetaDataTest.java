@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.api.resourcemodels.fieldprocessor.CustomFieldProcessor;
 import io.neba.core.resourcemodels.mapping.testmodels.ExtendedTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import org.fest.assertions.Assertions;
@@ -25,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.springframework.util.ReflectionUtils.findField;
@@ -39,6 +42,8 @@ public class ResourceModelMetaDataTest {
 	private Class<?> modelType;
 	
 	private ResourceModelMetaData testee;
+
+	private List<CustomFieldProcessor> customFieldProcessors = new LinkedList<CustomFieldProcessor>();
 
 	@Before
 	public void prepare() {
@@ -76,7 +81,7 @@ public class ResourceModelMetaDataTest {
         MethodMetaData[] preMappingMethods = this.testee.getPreMappingMethods();
 		MethodMetaData[] postMappingMethods = this.testee.getPostMappingMethods();
 		
-		ResourceModelMetaData other = new ResourceModelMetaData(otherModel);
+		ResourceModelMetaData other = new ResourceModelMetaData(otherModel, customFieldProcessors);
 		
 		Assertions.assertThat(mappableFields).isEqualTo(other.getMappableFields());
 		Assertions.assertThat(postMappingMethods).isEqualTo(other.getPostMappingMethods());
@@ -85,7 +90,7 @@ public class ResourceModelMetaDataTest {
 
 	private void createMetadataFor(Class<?> modelType) {
 		this.modelType = modelType;
-		this.testee = new ResourceModelMetaData(modelType);
+		this.testee = new ResourceModelMetaData(modelType, customFieldProcessors);
 	}
 
 	private void assertMappableFieldsDoesNotContain(String name) {

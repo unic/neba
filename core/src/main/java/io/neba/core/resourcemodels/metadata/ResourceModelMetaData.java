@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.Unmapped;
+import io.neba.api.resourcemodels.fieldprocessor.CustomFieldProcessor;
 import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
@@ -25,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static org.springframework.util.ReflectionUtils.doWithFields;
 import static org.springframework.util.ReflectionUtils.doWithMethods;
@@ -72,18 +74,21 @@ public class ResourceModelMetaData {
     private static class FieldMetadataCreator implements ReflectionUtils.FieldCallback {
         private final Collection<MappedFieldMetaData> mappableFields = new ArrayList<MappedFieldMetaData>();
         private final Class<?> modelType;
+        private final List<CustomFieldProcessor> customFieldProcessors;
 
-        public FieldMetadataCreator(Class<?> modelType) {
+        public FieldMetadataCreator(Class<?> modelType, List<CustomFieldProcessor> customFieldProcessors) {
             if (modelType == null) {
                 throw new IllegalArgumentException("Constructor parameter modelType must not be null.");
             }
             this.modelType = modelType;
+            this.customFieldProcessors = customFieldProcessors;
         }
 
         @Override
         public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
             if (isMappingCandidate(field)) {
-                MappedFieldMetaData fieldMetaData = new MappedFieldMetaData(field, this.modelType);
+                MappedFieldMetaData fieldMetaData = new MappedFieldMetaData(field, this.modelType,
+                        this.customFieldProcessors);
                 this.mappableFields.add(fieldMetaData);
             }
         }
@@ -128,8 +133,8 @@ public class ResourceModelMetaData {
 
     private final ResourceModelStatistics statistics = new ResourceModelStatistics();
 
-    public ResourceModelMetaData(Class<?> modelType) {
-        FieldMetadataCreator fc = new FieldMetadataCreator(modelType);
+    public ResourceModelMetaData(Class<?> modelType, List<CustomFieldProcessor> customFieldProcessors) {
+        FieldMetadataCreator fc = new FieldMetadataCreator(modelType, customFieldProcessors);
         doWithFields(modelType, fc);
 
         MethodMetadataCreator mc = new MethodMetadataCreator();

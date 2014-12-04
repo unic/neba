@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.mapping;
 
+import io.neba.api.resourcemodels.fieldprocessor.CustomFieldProcessor;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
@@ -118,7 +119,9 @@ public class FieldValueMappingCallback {
      */
     private Object resolve(FieldData fieldData) {
         Object value;
-        if (fieldData.metaData.isThisReference()) {
+        if (fieldData.metaData.isCustomProcessorPresent()) {
+           value = processCustomProcessor(fieldData);
+        } else if (fieldData.metaData.isThisReference()) {
             // The field is a @This reference
             value = convertThisResourceToFieldType(fieldData);
         } else if (fieldData.metaData.isChildrenAnnotationPresent()) {
@@ -135,6 +138,21 @@ public class FieldValueMappingCallback {
             value = resolveResource(fieldData.path, fieldData.metaData.getType());
         }
         return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object processCustomProcessor(FieldData fieldData) {
+        CustomFieldProcessor processor = fieldData.metaData.getCustomFieldProcessor();
+        if (fieldData.metaData.isCollectionType()) {
+            Class<Collection> collectionType = (Class<Collection>) fieldData.metaData.getType();
+            final Collection collection = instantiateCollectionType(collectionType);
+            processor.processCollection(fieldData.metaData.getField(), collection,
+                    fieldData.metaData.getTypeParameter(), this.model, this.resource, this.beanFactory);
+            return collection;
+        } else {
+            return processor.processField(fieldData.metaData.getField(), fieldData.metaData.getTypeParameter(),
+                    this.model, this.resource, this.beanFactory);
+        }
     }
 
     private Object convertThisResourceToFieldType(FieldData field) {

@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.api.resourcemodels.fieldprocessor.CustomFieldProcessor;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidGenericFieldDeclaration;
@@ -25,9 +26,13 @@ import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.util.ReflectionUtils.findField;
 import static org.springframework.util.ReflectionUtils.setField;
 
@@ -38,6 +43,7 @@ public class MappedFieldMetaDataTest {
 	private Class<?> modelType = TestResourceModel.class;
 
 	private MappedFieldMetaData testee;
+    private List<CustomFieldProcessor> customFieldProcessors = new LinkedList<CustomFieldProcessor>();
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullField() throws Exception {
@@ -242,6 +248,14 @@ public class MappedFieldMetaDataTest {
         assertThat(testResourceModel.getStringField()).isEqualTo("JunitTest");
     }
 
+    @Test
+    public void testCustomFieldProcessor() throws Exception {
+        withFieldProcessorAcceptingAllFields();
+        createMetadataForTestModelFieldWithName("stringField");
+        assertFieldTypeIs(String.class);
+        assertFieldHasCustomProcessor();
+    }
+
     private void assertFieldTypeIs(Class<?> type) {
         assertThat(this.testee.getType()).isEqualTo(type);
     }
@@ -338,10 +352,21 @@ public class MappedFieldMetaDataTest {
 		assertThat(this.testee.isPropertyType()).isFalse();
 	}
 
+    private void assertFieldHasCustomProcessor() {
+        assertThat(this.testee.isCustomProcessorPresent()).isTrue();
+        assertThat(this.testee.getCustomFieldProcessor()).isEqualTo(customFieldProcessors.get(0));
+    }
+
 	private void createMetadataForTestModelFieldWithName(String fieldName) {
 		Field field = findField(this.modelType, fieldName);
-		this.testee = new MappedFieldMetaData(field, this.modelType);
+		this.testee = new MappedFieldMetaData(field, this.modelType, this.customFieldProcessors);
 	}
+
+    private void withFieldProcessorAcceptingAllFields() {
+        CustomFieldProcessor processor = mock(CustomFieldProcessor.class);
+        when(processor.accept(any(Field.class), any())).thenReturn(true);
+        this.customFieldProcessors.add(processor);
+    }
 
 	private void withModelType(Class<?> type) {
 		modelType = type;
