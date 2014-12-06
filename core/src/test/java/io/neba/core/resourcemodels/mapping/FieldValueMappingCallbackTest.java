@@ -1128,6 +1128,19 @@ public class FieldValueMappingCallbackTest {
     }
 
     @Test
+    public void testPreventionOfNullValuesInMappableCollectionFieldOfSyntheticResource() throws Exception {
+        withField(Collection.class);
+        withInstantiableCollectionTypedField();
+        withPropertyTypedField();
+        withTypeParameter(String.class);
+        withNullValueMap();
+
+        mapField();
+
+        assertMappedFieldValueIsEmptyCollection();
+    }
+
+    @Test
     public void testDefaultValueOfMappableCollectionTypedFieldIsNotOverwritten() throws Exception {
         withField(Collection.class);
         withInstantiableCollectionTypedField();

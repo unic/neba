@@ -89,8 +89,9 @@ public class FieldValueMappingCallback {
         // Prepare the dynamic contextual data of this mapping
         final FieldData fieldData = new FieldData(metaData, evaluateFieldPath(metaData));
 
+        Object value = null;
+
         if (isMappable(fieldData)) {
-            Object value;
 
             if (metaData.isOptional()) {
                 // Explicit lazy loading
@@ -101,11 +102,15 @@ public class FieldValueMappingCallback {
 
             if (value != null) {
                 setField(metaData.getField(), this.model, value);
-            } else if (metaData.isInstantiableCollectionType()){
-                preventNullValueInMappableCollectionField(metaData);
             }
         }
+
+        if (value == null && metaData.isInstantiableCollectionType()){
+            preventNullValueInMappableCollectionField(metaData);
+        }
     }
+
+
 
     /**
      * Resolves the field's value with regard to the {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData}
