@@ -41,7 +41,7 @@ twitterAuthor: deploynix
 
     <div class="trigger-button"><span>Hint: Handy plugins for your IDE</span></div>
     <div class="accordion">
-        <p><span class="dropcap2">I</span> If you're using Eclipse, it is highly recommended to install the spring IDE
+        <p>If you're using Eclipse, it is highly recommended to install the spring IDE
             plugin (update site: <a href="http://dist.springsource.com/release/TOOLS/update/e4.3">http://dist.springsource.com/release/TOOLS/update/e4.3</a>)
             and the <a href="http://eclipse.org/m2e/download/">M2eclipse plugin</a>. Note that using the latest Eclipse version available is
             highly recommended before installing the M2E plugin. If you're using Intellij, it is recommended to use the Ultimate Edition, as it provides
@@ -53,11 +53,12 @@ twitterAuthor: deploynix
 
 <div class="one">
 
-    <h2>Step 3: Use NEBA</h2>
+<h2>Step 3: Use NEBA</h2>
 
-    <p><strong>Write a resource model:</strong> Create a class anywhere inside the <code>bundle.package.impl</code> package namespace and annotate it with <code>@ResourceModel</code>.
-        Cou may consult the <a href="apidocs/ResourceModel.html">@ResourceModel API docs</a> or <a href="userguide.html#api/@ResourceModel">user guide on @ResourceModels</a>
-        to find out more. Feel free to use this snippet:</p>
+<h3>Write a @ResourceModel</h3>
+<p>Create a class anywhere inside the <code>bundle.package.impl</code> package namespace and annotate it with <code>@ResourceModel</code>.
+    Cou may consult the <a href="apidocs/neba-api/io/neba/api/annotations/class-use/ResourceModel.html">@ResourceModel API docs</a> or <a href="userguide.html#api/@ResourceModel">user guide on @ResourceModels</a>
+    to find out more. Feel free to use this snippet:</p>
 
 {% highlight java %}
 @ResourceModel(types = "cq:Page")
@@ -71,8 +72,10 @@ public class PageModel {
 }
 {% endhighlight %}
 
-    <p><strong>Use the model:</strong> Once your bundle is deployed, you can see your model in NEBA's model registry console in the Felix web console (/system/console/modelregistry).
-        <br />Now, you can adapt any cq:Page resource to this model - for instance using a Spring controller:</p>
+<h3>Use the model in application mode</h3>
+<p>
+Once your bundle is deployed, you can see your model in NEBA's model registry console in the Felix web console (/system/console/modelregistry).
+Now, you can adapt any cq:Page resource to this model - for instance in a Spring controller:</p>
 
 {% highlight java %}
 @Controller
@@ -80,17 +83,54 @@ public class MyController {
     @RequestMapping(value = "/page/childcount", produces = "text/plain")
     @ResponseBody
     public String getNumberOfChildren(@ResourceParam PageModel page) {
-        return page.getChildren().size();
+        return "number of children: " + page.getChildren().size();
     }
 }
 {% endhighlight %}
 
-    <p>Once deployed, you can invoke this controller like so:</p>
+<p>(Once deployed, you can invoke this controller using <code>/bin/mvc.do/page/childcount?page=/content/geometrixx/en</code>)</p>
 
-{% highlight bash %}
-GET <host>/bin/mvc.do/page/childcount?page=/content/geometrixx/en
+
+<p>
+    Or in a Sling servlet:
+</p>
+{% highlight java %}
+@SlingServlet(paths = "/bin/page/childcount")
+public class MyServlet extends SlingSafeMethodsServlet {
+    @Override
+    public void doGet(SlingHttpServletRequest req, SlingHttpServletResponse res) {
+        String page = req.getParameter("page");
+        Resource pageResource = req.getResourceResolver().getResource(page);
+        PageModel pageModel = pageResource.adaptTo(PageModel.class);
+        res.getWriter().write("number of children: " + pageModel.getChildren().size());
+    }
+}
 {% endhighlight %}
 
+<h3>Use the model in views</h3>
+<p><a href="http://neba.io/userguide.html#nebaDefineObjects">The neba:defineObjects tag</a> automatically provides the suitable model
+    for the current resource in JSP views:
+{% highlight java %}
+<%@taglib prefix="neba" uri="http://neba.io/1.0"%>
+<neba:defineObjects />
+{% endhighlight %}
+
+Which makes the model available under the key ${m}.
+</p>
+<p>
+Since every resource is adaptable to its model(s), using a NEBA @ResourceModel in
+<a href="http://docs.adobe.com/docs/de/aem/6-0/develop/sightly.html">Sling Sightly</a> is easy, too. Simply
+provide the name of the model class - or any of it's super type(s) or interface(s) - in the "data-sly-use" attribute,
+like so (the corresponding package must be exported by the containing bundle):
+
+{% highlight java %}
+<section data-sly-use.myModel="bundle.package.impl.PageModel">
+    <h1>
+        ${myModel.children.size}
+    </h1>
+</section>
+{% endhighlight %}
+</p>
 </div>
 
 <div class="one">
