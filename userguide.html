@@ -341,16 +341,17 @@ private Date lastModified;
 private Resource en;
 {% endhighlight %} 
 
-<p id="path-placeholders">While specifying path is nice, it is often undesirable. Thus, it is possible to use placeholders in the @Path
-    mappings to dynamically provide path elements. A better version of above code might be:</p>
+<p id="path-placeholders">Furthermore, one can use placeholders in the @Path to dynamically provide path elements.
+    A better version of above example is:</p>
 
 {% highlight java %}
 @Path("/content/geometrixx/${language}")
 private Resource homepage;
 {% endhighlight %} 
 
-<p>To resolve ${language} placeholder, one simply provides a bean implementing the PlaceholderVariableResolver
-    interface. Such a bean instance will be asked  to resolve the value for a placeholder key, i.e. &quot;language&quot;
+<p>To resolve the ${language} placeholder, one simply provides a bean implementing the
+    <a href="apidocs/neba-api/io/neba/api/configuration/class-use/PlaceholderVariableResolver.html">PlaceholderVariableResolver interface</a>.
+    Such a bean instance will be asked to resolve the value for a placeholder key, i.e. &quot;language&quot;
     in the above example. A completely hardcoded example would be:</p>
 
 {% highlight java %}
@@ -358,21 +359,12 @@ private Resource homepage;
 public class MyVariableResolver implements PlaceholderVariableResolver {
     public String resolve(String variableName) {
         if ("language".equals(variableName)) {
-            return en;
+            return "en";
         }
         return null;
     }
 }
-{% endhighlight %} 
-
-<p>This tutorial uses &quot;Resource&quot; for simplicity's sale. If you specify a different type, NEBA will
-    automatically try to adapt  the referenced Resource to the target type. Instead of List&lt;Resource&gt; pages in
-    the above example, you could also provide a model for pages and write the following:</p>
-
-{% highlight java %}
-@Reference
-private List<Page> pages;
-{% endhighlight %} 
+{% endhighlight %}
 
 <h4>The @This annotation</h4>
 
