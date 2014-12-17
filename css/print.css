@@ -1,6 +1,7 @@
 .accordion {
     display: block;
 }
+
 .trigger-button span {
     font-weight: bold;
 }
