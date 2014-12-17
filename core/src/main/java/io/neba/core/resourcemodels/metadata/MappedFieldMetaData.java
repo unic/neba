@@ -34,6 +34,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
+import static io.neba.core.util.MetaAnnotationUtil.getAnnotation;
+import static io.neba.core.util.MetaAnnotationUtil.isAnnotationPresent;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -106,10 +108,10 @@ public class MappedFieldMetaData {
         this.genericFieldType = this.isOptional ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
         this.fieldType = this.isOptional ? getRawType(this.genericFieldType, this.modelType) : field.getType();
         this.isCollectionType = Collection.class.isAssignableFrom(this.fieldType);
-        this.isPathAnnotationPresent = field.isAnnotationPresent(Path.class);
-        this.isReference = field.isAnnotationPresent(Reference.class);
-        this.isThisReference = field.isAnnotationPresent(This.class);
-        this.isChildrenAnnotationPresent = field.isAnnotationPresent(Children.class);
+        this.isPathAnnotationPresent = isAnnotationPresent(field, Path.class);
+        this.isReference = isAnnotationPresent(field, Reference.class);
+        this.isThisReference = isAnnotationPresent(field, This.class);
+        this.isChildrenAnnotationPresent = isAnnotationPresent(field, Children.class);
 
         // The following initializations are not atomic but order-sensitive.
         this.isAppendPathPresentOnReference = isAppendPathPresentOnReferenceInternal(field);
@@ -172,7 +174,7 @@ public class MappedFieldMetaData {
     }
 
     private String getAppendPathOfReference(Field field) {
-        return field.getAnnotation(Reference.class).append();
+        return getAnnotation(field, Reference.class).append();
     }
 
     private boolean isResolveBelowEveryChildPathPresentOnChildrenInternal(Field field) {
@@ -185,7 +187,7 @@ public class MappedFieldMetaData {
     }
 
     private String getResolveBelowEveryChildPathOfChildren(Field field) {
-        String relativePath = field.getAnnotation(Children.class).resolveBelowEveryChild();
+        String relativePath = getAnnotation(field, Children.class).resolveBelowEveryChild();
         // The path must be relative, otherwise resource#getChild will be equivalent to
         // resolver.getResource("/..."), i.e. the resolution will not be relative.
         return isResolveBelowEveryChildPathPresentOnChildren &&
@@ -234,7 +236,7 @@ public class MappedFieldMetaData {
     private String getPathInternal() {
         String resolvedPath;
         if (isPathAnnotationPresent()) {
-            Path path = field.getAnnotation(Path.class);
+            Path path = getAnnotation(field, Path.class);
             if (isBlank(path.value())) {
                 throw new IllegalArgumentException("The value of the @" + Path.class.getSimpleName() +
                         " annotation on " + field + " must not be empty");

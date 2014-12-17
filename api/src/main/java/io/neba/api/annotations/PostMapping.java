@@ -17,10 +17,12 @@
 package io.neba.api.annotations;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Methods of a {@link ResourceModel} with this annotation are invoked after
@@ -50,7 +52,7 @@ import java.lang.annotation.Target;
  * @author Olaf Otto
  */
 @Documented
-@Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = ElementType.METHOD)
+@Retention(RUNTIME)
+@Target({METHOD, ANNOTATION_TYPE})
 public @interface PostMapping {
 }

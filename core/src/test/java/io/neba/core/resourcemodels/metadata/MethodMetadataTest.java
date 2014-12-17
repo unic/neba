@@ -16,32 +16,30 @@
 
 package io.neba.core.resourcemodels.metadata;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.springframework.util.ReflectionUtils.findMethod;
+import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithLifecycleCallbacks;
+import org.junit.Test;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithLifecycleCallbacks;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.springframework.util.ReflectionUtils.findMethod;
 
 /**
  * @author Olaf Otto
  */
 public class MethodMetadataTest {
-	private Class<?> modelType;
-	
 	private MethodMetaData testee;
-
-	@Before
-	public void prepare() {
-		withModelType(TestResourceModelWithLifecycleCallbacks.class);
-	}
 
 	@Test
 	public void testDetectionOfPreMappingAnnotation() throws Exception {
 		createMetadataForTestModelMethodWithName("beforeMapping");
+		assertMappingIsPreMappingCallback();
+		assertMappingIsNotPostMappingCallback();
+	}
+
+	@Test
+	public void testDetectionOfMetaPreMappingAnnotation() throws Exception {
+		createMetadataForTestModelMethodWithName("beforeMappingWithMetaAnnotation");
 		assertMappingIsPreMappingCallback();
 		assertMappingIsNotPostMappingCallback();
 	}
@@ -53,9 +51,16 @@ public class MethodMetadataTest {
 		assertMappingIsNotPreMappingCallback();
 	}
 
-    @Test
+	@Test
+	public void testDetectionOfMetaPostMappingAnnotation() throws Exception {
+		createMetadataForTestModelMethodWithName("afterMappingWithMetaAnnotation");
+		assertMappingIsPostMappingCallback();
+		assertMappingIsNotPreMappingCallback();
+	}
+
+	@Test
     public void testHashCodeAndEquals() throws Exception {
-        Method method = findMethod(this.modelType, "beforeMapping");
+        Method method = findMethod(TestResourceModelWithLifecycleCallbacks.class, "beforeMapping");
 
         MethodMetaData one = new MethodMetaData(method);
         MethodMetaData two = new MethodMetaData(method);
@@ -64,7 +69,7 @@ public class MethodMetadataTest {
         assertThat(one).isEqualTo(two);
         assertThat(two).isEqualTo(one);
 
-        method = findMethod(this.modelType, "afterMapping");
+        method = findMethod(TestResourceModelWithLifecycleCallbacks.class, "afterMapping");
         two = new MethodMetaData(method);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
@@ -89,11 +94,7 @@ public class MethodMetadataTest {
 	}
 
 	private void createMetadataForTestModelMethodWithName(String name) {
-		Method method = findMethod(this.modelType, name);
+		Method method = findMethod(TestResourceModelWithLifecycleCallbacks.class, name);
 		this.testee = new MethodMetaData(method);
-	}
-
-	private void withModelType(Class<?> type) {
-		this.modelType = type;
 	}
 }

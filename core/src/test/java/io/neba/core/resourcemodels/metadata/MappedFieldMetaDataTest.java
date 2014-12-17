@@ -67,6 +67,17 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
+    public void testPathAnnotationOnComplexReferenceFieldWithMetaAnnotation() throws Exception {
+        createMetadataForTestModelFieldWithName("referencedResourceWithMetaAnnotation");
+        assertFieldHasPathAnnotation();
+        assertFieldIsReference();
+        assertFieldIsPropertyType();
+
+        assertFieldIsNotCollectionType();
+        assertFieldIsNotThisReference();
+    }
+
+    @Test
     public void testAppendRelativePathOnReference() throws Exception {
         createMetadataForTestModelFieldWithName("referencedResourceModelWithAppendedReferencePath");
         assertReferenceHasAppendPath();
@@ -103,7 +114,7 @@ public class MappedFieldMetaDataTest {
 
 	@Test
 	public void testThisReferenceDetection() throws Exception {
-		createMetadataForTestModelFieldWithName("resource");
+		createMetadataForTestModelFieldWithName("thisResource");
 		assertFieldIsThisReference();
 
 		assertFieldIsNotPropertyType();
@@ -112,7 +123,18 @@ public class MappedFieldMetaDataTest {
 		assertFieldHasNoPathAnnotation();
 	}
 
-	@Test
+    @Test
+    public void testThisReferenceDetectionWithMetaAnnotation() throws Exception {
+        createMetadataForTestModelFieldWithName("thisResourceWithMetaAnnotation");
+        assertFieldIsThisReference();
+
+        assertFieldIsNotPropertyType();
+        assertFieldIsNotCollectionType();
+        assertFieldIsNotReference();
+        assertFieldHasNoPathAnnotation();
+    }
+
+    @Test
 	public void testPathRetrievalFromPathAnnotation() throws Exception {
 		createMetadataForTestModelFieldWithName("stringFieldWithAbsolutePathAnnotation");
 
@@ -120,7 +142,15 @@ public class MappedFieldMetaDataTest {
 		assertFieldHasPath("/absolute/path");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+    @Test
+    public void testPathRetrievalFromPathMetaAnnotation() throws Exception {
+        createMetadataForTestModelFieldWithName("stringFieldWithPathMetaAnnotation");
+
+        assertFieldHasPathAnnotation();
+        assertFieldHasPath("/absolute/path");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
 	public void testTreatmentOfInvalidGenericsUsage() throws Exception {
 		withModelType(TestResourceModelWithInvalidGenericFieldDeclaration.class);
 		createMetadataForTestModelFieldWithName("readOnlyList");
@@ -141,6 +171,12 @@ public class MappedFieldMetaDataTest {
     @Test
     public void testChildrenAsResources() throws Exception {
         createMetadataForTestModelFieldWithName("childrenAsResources");
+        assertThat(this.testee.isChildrenAnnotationPresent()).isTrue();
+    }
+
+    @Test
+    public void testChildrenAsResourcesWithMetaAnnotation() throws Exception {
+        createMetadataForTestModelFieldWithName("childrenAsResourcesWithMetaAnnotation");
         assertThat(this.testee.isChildrenAnnotationPresent()).isTrue();
     }
 

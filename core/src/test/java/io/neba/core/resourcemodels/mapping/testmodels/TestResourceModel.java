@@ -52,11 +52,18 @@ public class TestResourceModel {
     private Calendar calendarField;
 
     @This
-    private Resource resource;
+    private Resource thisResource;
+
+    @CustomAnnotationWithThisMetaAnnotation
+    private Resource thisResourceWithMetaAnnotation;
 
     @Reference
     @Path("resourcePath")
     private Resource referencedResource;
+
+    @CustomAnnotationWithReferenceMetaAnnotation
+    @Path("resourcePath")
+    private Resource referencedResourceWithMetaAnnotation;
 
     @Reference
     @Path("listResourcePathsWithSimpleTypeParameter")
@@ -71,11 +78,17 @@ public class TestResourceModel {
     @Path("/absolute/path")
     private String stringFieldWithAbsolutePathAnnotation;
 
+    @CustomAnnotationWithPathMetaAnnotation
+    private String stringFieldWithPathMetaAnnotation;
+
     @Path("titleText${language}")
     private String stringFieldWithPlaceholder;
 
     @Children
     private List<Resource> childrenAsResources;
+
+    @CustomAnnotationWithChildrenMetaAnnotation
+    private List<Resource> childrenAsResourcesWithMetaAnnotation;
 
     @Children(resolveBelowEveryChild = "/jcr:content")
     private List<Resource> childContentResourcesAsResources;
@@ -93,6 +106,9 @@ public class TestResourceModel {
     @Unmapped
     private String transientStringField;
 
+    @CustomAnnotationWithUnmappedMetaAnnotation
+    private String transientStringFieldWithUnmappedMetaAnnotation;
+
     @Inject
     private String injectedField;
 
@@ -101,6 +117,6 @@ public class TestResourceModel {
     }
 
     public Resource getResource() {
-        return resource;
+        return thisResource;
     }
 }
