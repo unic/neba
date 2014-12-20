@@ -1,23 +1,32 @@
+/**
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 the "License";
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 package io.neba.core.util;
 
 import org.junit.Test;
-import org.junit.runners.model.TestClass;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Map;
 
-import static io.neba.core.util.MetaAnnotationUtil.getAnnotation;
-import static io.neba.core.util.MetaAnnotationUtil.getAnnotations;
-import static io.neba.core.util.MetaAnnotationUtil.isAnnotationPresent;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
  */
-public class MetaAnnotationUtilTest {
+public class MetaAnnotatedElementTest {
     @TestAnnotation
     private static class TestType {
     }
@@ -37,6 +46,8 @@ public class MetaAnnotationUtilTest {
     @CyclicAnnotation
     private static @interface CyclicAnnotation {
     }
+
+    private MetaAnnotatedElement testee = new MetaAnnotatedElement(TestType.class);
 
     @Test
     public void testDetectionOfDirectAnnotation() throws Exception {
@@ -58,43 +69,37 @@ public class MetaAnnotationUtilTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullElementArgumentForLookup() throws Exception {
-        getAnnotation(TestClass.class, null);
+        this.testee.getAnnotation(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullElementArgumentForExistenceTest() throws Exception {
-        isAnnotationPresent(TestClass.class, null);
+        this.testee.isAnnotatedWith(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullTypeArgumentForLookup() throws Exception {
-        getAnnotation(null, MetaAnnotation.class);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullTypeArgumentForExistenceTest() throws Exception {
-        isAnnotationPresent(null, MetaAnnotation.class);
+    public void testHandlingOfNullTypeArgumentForConstructor() throws Exception {
+        new MetaAnnotatedElement(null);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testGetAnnotations() throws Exception {
-        assertAnnotationsAre(TestType.class, TestAnnotation.class, MetaAnnotation.class, CyclicAnnotation.class);
+        assertAnnotationsAre(MetaAnnotation.class, CyclicAnnotation.class);
     }
 
-    private void assertAnnotationsAre(AnnotatedElement type, Class<? extends Annotation>... annotations) {
-        Map<Class<? extends Annotation>, Annotation> detectedAnnotations = getAnnotations(type);
+    private void assertAnnotationsAre(Class<? extends Annotation>... annotations) {
         for (Class<? extends Annotation> annotationType : annotations) {
-            assertThat(detectedAnnotations.keySet()).contains(annotationType);
-            assertThat(detectedAnnotations.get(annotationType)).isInstanceOf(annotationType);
+            assertThat(this.testee.isAnnotatedWith(annotationType)).isTrue();
+            assertThat(this.testee.getAnnotation(annotationType)).isNotNull();
         }
     }
 
     private void assertAnnotationInstanceCanBeObtained(Class<? extends Annotation> type) {
-        assertThat(getAnnotation(TestType.class, type)).isInstanceOf(type);
+        assertThat(this.testee.getAnnotation(type)).isInstanceOf(type);
     }
 
     private void assertAnnotationIsPresent(Class<? extends Annotation> type) {
-        assertThat(isAnnotationPresent(TestType.class, type)).isTrue();
+        assertThat(this.testee.isAnnotatedWith(type)).isTrue();
     }
 }

@@ -17,18 +17,17 @@
 package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.Unmapped;
+import io.neba.core.util.MetaAnnotatedElement;
 import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
-import static io.neba.core.util.MetaAnnotationUtil.getAnnotations;
+import static io.neba.core.util.MetaAnnotatedElement.annotatedElement;
 import static org.springframework.util.ReflectionUtils.doWithFields;
 import static org.springframework.util.ReflectionUtils.doWithMethods;
 
@@ -119,8 +118,8 @@ public class ResourceModelMetaData {
          * @return whether the field is explicitly excluded from OCM, e.g. via &#64;{@link Unmapped}.
          */
         private boolean isUnmapped(Field field) {
-            Map<Class<? extends Annotation>, Annotation> annotations = getAnnotations(field);
-            return annotations.containsKey(Unmapped.class) || annotations.containsKey(Inject.class);
+            final MetaAnnotatedElement element = annotatedElement(field);
+            return element.isAnnotatedWith(Unmapped.class) || element.isAnnotatedWith(Inject.class);
         }
     }
 
