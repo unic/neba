@@ -16,12 +16,14 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.core.resourcemodels.fieldprocessor.FieldProcessorRegistrar;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.util.OsgiBeanSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.springframework.cglib.proxy.NoOp;
@@ -32,6 +34,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.springframework.cglib.proxy.Enhancer.create;
 
 /**
@@ -41,6 +44,9 @@ import static org.springframework.cglib.proxy.Enhancer.create;
 public class ResourceModelMetaDataRegistrarTest {
     private ResourceModelMetaData metadata;
     private Collection<ResourceModelMetaData> allMetaData;
+
+    @Mock
+    private FieldProcessorRegistrar fieldProcessorRegistrar;
 
     private long bundleId = 123L;
 
@@ -120,6 +126,18 @@ public class ResourceModelMetaDataRegistrarTest {
         assertAllMetadataConsistsOfMetadataFor(TestResourceModel.class, OtherTestResourceModel.class);
     }
 
+    @Test
+    public void testProcessorRegistrarIsNotifiedWhenModelsAreAddedOrRemoved() {
+        addModelType(TestResourceModel.class);
+        addModelType(OtherTestResourceModel.class);
+        removeBundle();
+
+        assertFieldProcessorRegistrarNotifiedForAddedModel(TestResourceModel.class);
+        assertFieldProcessorRegistrarNotifiedForAddedModel(OtherTestResourceModel.class);
+        assertFieldProcessorRegistrarNotifiedForRemovedModel(OtherTestResourceModel.class);
+        assertFieldProcessorRegistrarNotifiedForRemovedModel(TestResourceModel.class);
+    }
+
     private void clearAllMetaData() {
         this.allMetaData.clear();
     }
@@ -156,6 +174,13 @@ public class ResourceModelMetaDataRegistrarTest {
         doReturn(modelType).when(source).getBeanType();
         doReturn(this.bundleId).when(source).getBundleId();
         this.testee.register(source);
+    }
+
+    private void assertFieldProcessorRegistrarNotifiedForAddedModel(Class<?> modelType) {
+        verify(this.fieldProcessorRegistrar).addModel(modelType);
+    }
+    private void assertFieldProcessorRegistrarNotifiedForRemovedModel(Class<?> modelType) {
+        verify(this.fieldProcessorRegistrar).removeModel(modelType);
     }
 
     private void getMetaDataFor(Class<?> modelType) {

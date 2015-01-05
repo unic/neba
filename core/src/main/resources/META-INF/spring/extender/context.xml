@@ -52,6 +52,10 @@
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelPostProcessor" availability="optional">
 			<bp:reference-listener ref="resourceToModelMapper" bind-method="add" unbind-method="remove" />
 		</bp:reference-list>
+		<!-- All custom field processors are used by the field processor registrar -->
+		<bp:reference-list interface="io.neba.api.resourcemodels.fieldprocessor.CustomFieldProcessor" availability="optional">
+			<bp:reference-listener ref="fieldProcessorRegistrar" bind-method="add" unbind-method="remove" />
+		</bp:reference-list>
 		<!-- All caches are used by the adapter factory -->
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelCache" availability="optional">
 			<bp:reference-listener ref="resourceModelCaches" bind-method="add" unbind-method="remove" />
