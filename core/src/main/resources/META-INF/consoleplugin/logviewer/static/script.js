@@ -36,6 +36,18 @@ $(function() {
 	adjustTailWindowToScreenHeight();
 	observeFollowMode();
 
+	// Load a pre-selected logfile (#file:numberOfLines)
+	var href = document.location.href;
+	var stateHash = href.indexOf("#");
+	if (stateHash != -1) {
+		var spec = href.substr(stateHash + 1, href.length - stateHash).split(":");
+		var file = spec[0];
+		var numberOfLines = spec[1];
+		$("#numberOfLines").val(numberOfLines);
+		$("#logfile").find("option[value = '" + file +  "']").attr("selected", "true");
+		updateSelectedLogExcerpt();
+	}
+
 	function toggleFollowMode() {
 		if($("#followButton").toggleClass("ui-state-active").hasClass("ui-state-active")) {
             $("#tail").each(function(idx, elem) {
@@ -60,6 +72,11 @@ $(function() {
 	function updateSelectedLogExcerpt(callback) {
 	    var file = $("#logfile").val();
 	    var numberOfLines = $("#numberOfLines").val();
+		var href = document.location.href;
+		var anchorPos = href.indexOf("#");
+        var endPos = anchorPos == -1 ? href.length : anchorPos;
+		document.location.href =  href.substr(0, endPos) + "#" + file + ":" + numberOfLines;
+
 	    $.ajax({
 	        url: pluginRoot + "/tail/" + numberOfLines + "/" + file,
 	        cache: false,
