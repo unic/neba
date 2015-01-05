@@ -16,7 +16,9 @@
 
 package io.neba.api.annotations;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.*;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -43,7 +45,7 @@ import java.lang.annotation.Target;
  * @author Olaf Otto
  */
 @Documented
-@Target(FIELD)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RUNTIME)
+@Target({FIELD, ANNOTATION_TYPE})
 public @interface Unmapped {
 }
