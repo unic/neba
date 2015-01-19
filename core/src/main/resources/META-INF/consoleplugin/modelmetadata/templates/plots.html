@@ -1,24 +1,27 @@
-<div id="offsetDiv">
-    <h2 class="ui-widget-header">Model instantiations and complexity</h2>
-    <div id="scatterplot" class="chartWrap">
-        <svg></svg>
+<div id="plotarea">
+    <form>
+        <input type="text" id="filter" data-default-value="Begin typing to create a filter expression" />
+    </form>
+    <div id="expressionHelp">
+        <h2>Writing expressions</h2>
+        An expression filters the list of resource models. It allows finding models with specific performance characteristics. For instance,
+        in order to find resource models who's average mapping duration is higher than the average mapping duration of all resource models, type
+        <span class="expressionExample">totalTime > average(totalTime)</span>. You can also employ sub clauses and arithmetic expressions. For instance,
+        in order to find models that are responsible for more than 5% of the entire mapping time, write <span class="expressionExample">totalTime > entire(totalTime) * 0.05</span>
+        <h2>The model visualization</h2>
+        The models are ordered by their total mapping time (totalTime). Each graph exhibits the following dimensions;
+        <table>
+            <tbody>
+                <tr><th>Instantiations</th><td>The number of times the model was instantiated</td></tr>
+                <tr><th>Subsequent mappings</th><td>The total number of resource to model mappings initiated by a resource model, i.e. the subsequently used resource models.</td></tr>
+                <tr><th>&#x00D8; duration</th><td>The average duration of one resource to model mapping for this type</td></tr>
+                <tr><th>median</th><td>The median duration of one resource to model mapping for this type</td></tr>
+                <tr><th>Lazy fields</th><td>The number of lazy fields (Optional fields or lazy-loading collections) of this resource model</td></tr>
+                <tr><th>Greedy fields</th><td>The number of non-lazy fields (neither Optional nor lazy-loading collection) of this resource model</td></tr>
+                <tr><th>Greedy fields</th><td>The number of non-lazy fields (neither Optional nor lazy-loading collection) of this resource model</td></tr>
+                <tr><th>Total time</th><td>The total time spend mapping this model</td></tr>
+            </tbody>
+        </table>
     </div>
-
-    <div class="legend">
-        Less is better. Models in the upper right corner of this plot combine frequent instantiations (usage) with a high number of subsequent mappings, i.e.
-        further resource models mapped to the model. The size of the circle corresponds to the average execution time of a single mapping.
-        Models with frequent instantiations, a lot of mappings and a high average mapping time are the most costly - and potential candidates for refactorings,
-        e.g. by breaking up the model into smaller models representing the various aspects of the original model.
-    </div>
-
-    <h2 class="ui-widget-header">Mapping durations of <span id="selected-model-name">selected model</span></h2>
-    <div id="barchart">
-        <svg></svg>
-    </div>
-
-    <div class="legend">
-        Less is better. This frequency table shows the distribution of the mapping times, grouped in intervals. Usually, the mapping times should be relatively low and
-        quite constant, i.e. only appear in 1-6 neighboring intervals. If you experience long mapping time occurrences (on the far right), investigating the issues leading to these
-        exceptional mapping times is highly recommended.
-    </div>
+    <div id="target"></div>
 </div>

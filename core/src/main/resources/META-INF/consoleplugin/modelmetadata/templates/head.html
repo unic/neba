@@ -1,49 +1,100 @@
-<script src="modelmetadata/static/lib/d3.v3.min.js"></script>
-<script src="modelmetadata/static/nv.d3.min.js"></script>
-<script src="modelmetadata/static/src/tooltip.js"></script>
-<script src="modelmetadata/static/src/utils.js"></script>
-<script src="modelmetadata/static/src/models/legend.js"></script>
-<script src="modelmetadata/static/src/models/axis.js"></script>
-<script src="modelmetadata/static/src/models/distribution.js"></script>
-<script src="modelmetadata/static/src/models/scatter.js"></script>
-<script src="modelmetadata/static/src/models/scatterChart.js"></script>
-<script src="modelmetadata/static/src/models/discreteBar.js"></script>
-<script src="modelmetadata/static/src/models/discreteBarChart.js"></script>
-
-<link href="modelmetadata/static/src/nv.d3.css" rel="stylesheet" type="text/css" />
-<script src="modelmetadata/static/script.js"></script>
-
-<style type="text/css">
-    /*
-       Note: percent signs must be be masked by duplication (%%) as this template
-       is interpreted by the java template formatter.
-     */
-    body {
-        margin-bottom: 3em;
+<script src="modelmetadata/static/lib/jquery-2.1.3.min.js" charset="utf-8"></script>
+<script src="modelmetadata/static/lib/d3.v3.min.js" charset="utf-8"></script>
+<script src="modelmetadata/static/lib/d3-star-plot-0.0.2.min.js" charset="utf-8"></script>
+<script src="modelmetadata/static/lib/parser.js" charset="utf-8"></script>
+<script src="modelmetadata/static/script.js" charset="utf-8"></script>
+<style>
+    #target {
+        margin: 40px 0;
+    }
+    #plotarea .wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    #plotarea .chart {
+        margin-bottom: 40px;
+    }
+    #plotarea .star-title {
+        font-size: 12px;
+    }
+    #plotarea .star-label {
+        font-size: 11px;
+        pointer-events: none;
+    }
+    #plotarea .star-origin {
+        fill: #333;
+    }
+    #plotarea .star-axis {
+        stroke: #ccc;
+        stroke-width: 2px;
+        stroke-dasharray: 4 5;
+    }
+    #plotarea .star-path {
+        stroke: #888;
+        stroke-width: 1px;
+        fill: #709CB1;
+        fill-opacity: 0.6;
     }
 
-    svg {
-        padding-bottom: 20px;
-        overflow: hidden;
+    #plotarea .star-interaction {
+        opacity: 0;
     }
 
-    #scatterplot svg {
-        padding-left: 10px;
-    }
-
-    #scatterplot, #barchart {
+    #filter {
         width: 100%%;
-        height: 450px;
-        padding-bottom: 30px;
-        background-color: #ebebeb;
+        padding: 5pt 4pt 4pt 29px;
+        box-sizing: border-box;
+        font-size: 100%%;
+        border: 1px solid #bfbfbf;
+        background: url("modelmetadata/static/valid.png") no-repeat 4pt center;
     }
 
-    #scatterplot svg, #barchart svg {
-        width: 100%%;
+    #plotarea .ui-helper-hidden-accessible {
+        display: none;
     }
 
-    #offsetDiv {
+    #plotarea ul.ui-autocomplete.ui-widget {
+        font-size:120%%;
+        background-color: white;
+        padding: 0;
+        border: 1px solid gray;
+        box-shadow: 0 3px 5px 0 rgba(0,0,0,0.75);
+    }
+
+    #plotarea ul.ui-autocomplete.ui-widget li {
+        padding: 3pt;
+        border-bottom: 1px solid #efefef;
+        list-style: none;
+        margin: 0;
+    }
+
+    #plotarea ul.ui-autocomplete.ui-widget li span {
+        color: #405ba1;
+        font-size: 90%%;
+    }
+
+    #plotarea .ui-state-hover,
+    #plotarea .ui-widget-content .ui-state-hover,
+    #plotarea .ui-widget-header .ui-state-hover,
+    #plotarea .ui-state-focus,
+    #plotarea .ui-widget-content .ui-state-focus,
+    #plotarea .ui-widget-header .ui-state-focus {
+        font-weight: normal;
+        color: #212121;
+        background-color: #e0e0e0;
+    }
+
+    #plotarea .ui-menu .ui-menu-item {
+        width:auto;
+    }
+
+    #plotarea .ui-menu .ui-state-focus {
+        border:none;
+    }
+
+    #plotarea {
         margin-top:1em;
+        font-size:120%%;
     }
 
     #neba-heading {
@@ -57,40 +108,62 @@
         text-align: left;
     }
 
-    #resetStatistics {
+    #resetStatistics, #helpWithExpressions {
         padding:5px;
         margin-left: 10px;
     }
 
-    h2.ui-widget-header {
-        padding:5px;
-        margin-top: 2em;
+    #expressionHelp {
+        display: none;
+        border:1px solid gray;
+        background-color: #f3f3f3;
+        margin: 1em 0 0 0;
+        padding: 0 1em 1em 1em;
     }
 
-    div.legend {
-        font-size: 110%%;
-        margin: 0.5em 0;
+    #expressionHelp h2 {
+        font-size: 120%%;
+        font-weight: bold;
+        margin: 1em 0;
     }
 
-    span.modelReference {
-        border-bottom: 1px dashed #000000;
-    }
-
-    span.modelReference:hover {
-        border-bottom: 1px solid #000000;
+    #expressionHelp .expressionExample {
+        border-bottom: 1px dashed #000;
+        font-family: Lucida Console, monospace;
         cursor: pointer;
+    }
+
+    #expressionHelp table {
+        margin-top: 1em;
+    }
+
+    #expressionHelp table tr {
+        border-bottom: 1px solid white;
+    }
+
+    #expressionHelp table th,
+    #expressionHelp table td {
+        padding: 0.3em;
+    }
+
+    #expressionHelp table th {
+        font-weight: bold;
+        padding-right: 2em;
     }
 </style>
 
 <div id="neba-heading">
     %d Model(s) used.
-    Highest mapping duration: %d ms (<span class="modelReference">%s</span>),
+    Highest average mapping duration: %d ms (<span class="modelReference">%s</span>),
     greatest number of fields: %d (<span class="modelReference">%s</span>)
 </div>
 
 <form method="post" enctype="multipart/form-data" action="">
 	<div class="ui-widget-header ui-corner-top buttonGroup">
-        <button type="button" onclick="resetResourceModelStatistics()" id="resetStatistics"
+        <button type="button" id="resetStatistics"
                 title="Discards all model statistics collected so far.">Reset statistics</button>
+
+        <button type="button" id="helpWithExpressions"
+                title="Displays a help text underneath the filter expression input field">Help</button>
 	</div>
 </form>

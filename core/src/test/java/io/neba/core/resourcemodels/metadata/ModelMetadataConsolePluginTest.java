@@ -83,9 +83,11 @@ public class ModelMetadataConsolePluginTest {
         withRequestPath("/system/console/modelmetadata");
         doGet();
 
-        assertResponseContains("<button type=\"button\" onclick=\"resetResourceModelStatistics()\"");
-        assertResponseContains("<div id=\"scatterplot\" class=\"chartWrap\">        <svg></svg>    </div>");
-        assertResponseContains("<div id=\"barchart\">        <svg></svg>    </div>");
+        assertResponseContains("<button type=\"button\" id=\"resetStatistics\"");
+        assertResponseContains("<button type=\"button\" id=\"helpWithExpressions\"");
+        assertResponseContains("<div id=\"plotarea\">");
+        assertResponseContains("<input type=\"text\" id=\"filter\" data-default-value=\"Begin typing to create a filter expression\" />");
+        assertResponseContains("<div id=\"target\"></div>");
     }
 
     @Test
@@ -99,6 +101,8 @@ public class ModelMetadataConsolePluginTest {
                                     "\"type\":\"junit.test.type.NameOne\"," +
                                     "\"since\":123456," +
                                     "\"mappableFields\":0," +
+                                    "\"lazyFields\":0," +
+                                    "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":100," +
                                     "\"averageMappingDuration\":10," +
@@ -111,6 +115,8 @@ public class ModelMetadataConsolePluginTest {
                                     "\"type\":\"junit.test.type.NameTwo\"," +
                                     "\"since\":234567," +
                                     "\"mappableFields\":0," +
+                                    "\"lazyFields\":0," +
+                                    "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":200," +
                                     "\"averageMappingDuration\":20," +
@@ -127,8 +133,11 @@ public class ModelMetadataConsolePluginTest {
         withRequestPath("/system/console/modelmetadata/api/statistics/junit.test.type.NameOne");
         doGet();
         assertResponseIsEqualTo("{" +
-                        "\"age\":123456," +
+                        "\"type\":\"junit.test.type.NameOne\"," +
+                        "\"since\":123456," +
                         "\"mappableFields\":0," +
+                        "\"lazyFields\":0," +
+                        "\"greedyFields\":0," +
                         "\"instantiations\":0," +
                         "\"mappings\":100," +
                         "\"averageMappingDuration\":10," +
