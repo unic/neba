@@ -45,8 +45,8 @@ import static org.apache.commons.lang.StringUtils.substringAfter;
  * @author Olaf Otto
  */
 @Service
-public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
-    public static final String LABEL = "modelmetadata";
+public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
+    public static final String LABEL = "modelstatistics";
     private static final long serialVersionUID = -8676958166611686979L;
     private static final String STATISTICS_API_PATH = "/api/statistics";
     private static final String RESET_API_PATH = "/api/reset";
@@ -65,7 +65,7 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
 
     @Override
     public String getTitle() {
-        return "Model metadata";
+        return "Model statistics";
     }
 
     @Override
@@ -210,7 +210,7 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
         URL url = null;
         String internalPath = substringAfter(path, "/" + getLabel());
         if (startsWith(internalPath, "/static/")) {
-            url = getClass().getResource("/META-INF/consoleplugin/modelmetadata" + internalPath);
+            url = getClass().getResource("/META-INF/consoleplugin/modelstatistics" + internalPath);
         }
         return url;
     }
@@ -238,7 +238,7 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
             }
         }
 
-        String template = readTemplateFile("/META-INF/consoleplugin/modelmetadata/templates/head.html");
+        String template = readTemplateFile("/META-INF/consoleplugin/modelstatistics/templates/head.html");
         response.getWriter().printf(template,
                 numberOfModelsWithInstantiations,
                 round(highestAverageMappingDuration),
@@ -248,7 +248,7 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private void writeBody(HttpServletResponse response) throws IOException {
-        String template = readTemplateFile("/META-INF/consoleplugin/modelmetadata/templates/plots.html");
+        String template = readTemplateFile("/META-INF/consoleplugin/modelstatistics/templates/plots.html");
         response.getWriter().print(template);
     }
 }

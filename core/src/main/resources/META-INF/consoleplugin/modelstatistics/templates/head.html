@@ -1,14 +1,13 @@
-<script src="modelmetadata/static/lib/jquery-2.1.3.min.js" charset="utf-8"></script>
-<script src="modelmetadata/static/lib/d3.v3.min.js" charset="utf-8"></script>
-<script src="modelmetadata/static/lib/d3-star-plot-0.0.2.min.js" charset="utf-8"></script>
-<script src="modelmetadata/static/lib/parser.js" charset="utf-8"></script>
-<script src="modelmetadata/static/script.js" charset="utf-8"></script>
+<script src="modelstatistics/static/lib/jquery-2.1.3.min.js" charset="utf-8"></script>
+<script src="modelstatistics/static/lib/d3.v3.min.js" charset="utf-8"></script>
+<script src="modelstatistics/static/lib/d3-star-plot-0.0.3.min.js" charset="utf-8"></script>
+<script src="modelstatistics/static/lib/parser.js" charset="utf-8"></script>
+<script src="modelstatistics/static/script.js" charset="utf-8"></script>
 <style>
     #target {
         margin: 40px 0;
     }
     #plotarea .wrapper {
-        position: relative;
         display: inline-block;
     }
     #plotarea .chart {
@@ -46,7 +45,7 @@
         box-sizing: border-box;
         font-size: 100%%;
         border: 1px solid #bfbfbf;
-        background: url("modelmetadata/static/valid.png") no-repeat 4pt center;
+        background: url("modelstatistics/static/valid.png") no-repeat 4pt center;
     }
 
     #plotarea .ui-helper-hidden-accessible {
@@ -128,9 +127,12 @@
     }
 
     #expressionHelp .expressionExample {
-        border-bottom: 1px dashed #000;
+        color: #0000b0;
         font-family: Lucida Console, monospace;
         cursor: pointer;
+    }
+    #expressionHelp .expressionExample:hover {
+        color: #0000ff;
     }
 
     #expressionHelp table {

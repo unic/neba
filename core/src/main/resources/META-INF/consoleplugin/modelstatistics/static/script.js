@@ -45,11 +45,11 @@
                 "a number" : {hint: "Enter a number e.g. 0 or 0.5", order:0}
             },
             valid = function() {
-                filter.css("background", "url('modelmetadata/static/valid.png') no-repeat 4pt center");
+                filter.css("background", "url('modelstatistics/static/valid.png') no-repeat 4pt center");
                 filter.valid = true;
             },
             invalid = function() {
-                filter.css("background", "url('modelmetadata/static/invalid.png') no-repeat 4pt center");
+                filter.css("background", "url('modelstatistics/static/invalid.png') no-repeat 4pt center");
                 filter.valid = false;
             },
             provideDefaultValue = function() {
@@ -108,21 +108,21 @@
                         width = 320 - margin.left - margin.right,
                         height = 320 - margin.top - margin.bottom,
                         labelMargin = 8,
-                       // Defines the fields for which the maxima are calculated. If the field has a label, it is also
-                       // considered in the diagram.
+                       // Defines the fields include in entire.modelData. If the field has a label, it is also
+                       // diagram dimension.
                         fields = [
-                            {name: "averageMappingDuration", max: 0, label: '\u00D8 duration (ms)'},
-                            {name: "mappingDurationMedian", max: 0, label: 'median (ms)'},
+                            {name: "averageMappingDuration", max: 0, label: '\u00D8 duration', unit: "ms"},
+                            {name: "mappingDurationMedian", max: 0, label: 'Median', unit: "ms"},
                             {name: "lazyFields", max: 0, label: 'Lazy fields'},
                             {name: "greedyFields", max: 0, label: 'Greedy fields'},
-                            {name: "totalTime", max: 0, label: 'Total time (ms'},
+                            {name: "totalTime", max: 0, label: 'Total time', unit: "ms"},
                             {name: "instantiations", max: 0, label: 'Instantiations'},
                             {name: "mappings", max: 0, label: 'Subsequent mappings'},
                             {name: "mappableFields", max: 0},
                             {name: "minimumMappingDuration", max: 0},
                             {name: "maximumMappingDuration", max: 0}
                         ],
-                        // Used to store overall property metadata, such as the total maximum, average
+                        // Used to store property metadata, such as the sum, average
                         // and occurrences of a property for all models
                         entire = {
                             modelData: {
@@ -161,7 +161,7 @@
                             return d3.scale.linear().domain([0, field.max]).range([0, 100]);
                         }))
                         .labels(function (d, i) {
-                            return fields[i].label + ": " + d[fields[i].name].toFixed(1);
+                            return fields[i].label + ": " + parseFloat(d[fields[i].name].toFixed(1)) + " " + (fields[i].unit || "");
                         })
                         .title(function (d) {
                             var idx = d.type.lastIndexOf(".");
@@ -204,12 +204,12 @@
                 // create and fade-in the new diagrams.
                 var existingPlots = d3.selectAll(".wrapper");
                 if (existingPlots.empty()) {
-                    d3.json("modelmetadata/api/statistics", visualizeData);
+                    d3.json("modelstatistics/api/statistics", visualizeData);
                 } else {
                     var n = 0;
                     existingPlots.transition().style("opacity", 0).remove().each(function() { ++n}).each("end", function() {
                         if (!--n) {
-                            d3.json("modelmetadata/api/statistics", visualizeData);
+                            d3.json("modelstatistics/api/statistics", visualizeData);
                         }
                     });
                 }
@@ -322,7 +322,7 @@
 
         $("#resetStatistics").click(function() {
             $.ajax({
-                url: "modelmetadata/api/reset",
+                url: "modelstatistics/api/reset",
                 dataType: 'json',
                 success: function() { processFilterExpression(true) }
             });
@@ -330,8 +330,8 @@
 
         $("#helpWithExpressions")
         .click(function() {
-            $("#expressionHelp").toggle(500, function() {
-                $("#helpWithExpressions").text($(this).attr("display") == "none" ? "Help" : "Close help");
+            $("#expressionHelp").slideToggle(500, function() {
+                $("#helpWithExpressions").text($(this).css("display") == "none" ? "Help" : "Close help");
             });
         });
 
