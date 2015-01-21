@@ -80,6 +80,8 @@ public class ResourceToModelMapperTest {
     @Mock
     private ResourceModelStatistics resourceModelStatistics;
     @Mock
+    private CustomFieldMappers customFieldMappers;
+    @Mock
     private Mapping<Object> ongoingMapping;
 
     private TestModel model;

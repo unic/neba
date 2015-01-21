@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.mapping;
 
+import io.neba.api.resourcemodels.FieldMapper;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
@@ -26,11 +27,15 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cglib.proxy.LazyLoader;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
+import static io.neba.core.resourcemodels.mapping.CustomFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -51,13 +56,15 @@ public class FieldValueMappingCallback {
     private final ValueMap properties;
     private final Resource resource;
     private final ConfigurableBeanFactory beanFactory;
+    private final CustomFieldMappers customFieldMappers;
 
     /**
      * @param model    the model to be mapped. Must not be null.
      * @param resource the source of property values for the model. Must not be null.
      * @param factory  must not be null.
+     * @param customFieldMappers  must not be null.
      */
-    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory) {
+    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory, CustomFieldMappers customFieldMappers) {
         if (model == null) {
             throw new IllegalArgumentException("Constructor parameter model must not be null.");
         }
@@ -67,17 +74,21 @@ public class FieldValueMappingCallback {
         if (factory == null) {
             throw new IllegalArgumentException("Constructor parameter factory must not be null.");
         }
+        if (customFieldMappers == null) {
+            throw new IllegalArgumentException("Method argument customFieldMappers must not be null.");
+        }
 
         this.model = model;
         this.properties = toValueMap(resource);
         this.resource = resource;
         this.beanFactory = factory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) factory : null;
+        this.customFieldMappers = customFieldMappers;
     }
 
     /**
      * Invoked for each {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData#getMappableFields() mappable field}
      * of a {@link io.neba.api.annotations.ResourceModel} to map the {@link MappedFieldMetaData#getField() corresponding field's}
-     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory) constructor}.
+     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory, CustomFieldMappers) constructor}.
      *
      * @param metaData must not be <code>null</code>.
      */
@@ -98,6 +109,7 @@ public class FieldValueMappingCallback {
                 value = new OptionalFieldValue(fieldData, this);
             } else {
                 value = resolve(fieldData);
+                value = applyCustomFieldMappings(metaData, fieldData, value);
             }
 
             if (value != null) {
@@ -110,7 +122,17 @@ public class FieldValueMappingCallback {
         }
     }
 
-
+    /**
+     * Applies all {@link io.neba.api.resourcemodels.FieldMapper registered field mappers}
+     * to the provided value and returns the result.
+     */
+    @SuppressWarnings("unchecked")
+    private Object applyCustomFieldMappings(MappedFieldMetaData metaData, FieldData fieldData, Object value) {
+        for (final AnnotationMapping mapping : this.customFieldMappers.get(metaData)) {
+            value = mapping.getMapper().map(new OngoingFieldMapping(this.model, value, mapping, fieldData, this.resource, this.properties));
+        }
+        return value;
+    }
 
     /**
      * Resolves the field's value with regard to the {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData}
@@ -636,6 +658,80 @@ public class FieldValueMappingCallback {
         @Override
         public Object loadObject() throws Exception {
             return this.callback.loadReferences(field, paths);
+        }
+    }
+
+    /**
+     * @author Olaf Otto
+     */
+    private static class OngoingFieldMapping implements FieldMapper.OngoingMapping {
+        private final Object resolvedValue;
+        private final AnnotationMapping mapping;
+        private final FieldData fieldData;
+        private final Object model;
+        private final Resource resource;
+        private final ValueMap properties;
+        private final MappedFieldMetaData metaData;
+
+        public OngoingFieldMapping(Object model,
+                                   Object resolvedValue,
+                                   AnnotationMapping mapping,
+                                   FieldData fieldData,
+                                   Resource resource,
+                                   ValueMap properties) {
+
+            this.model = model;
+            this.resolvedValue = resolvedValue;
+            this.mapping = mapping;
+            this.metaData = fieldData.metaData;
+            this.fieldData = fieldData;
+            this.resource = resource;
+            this.properties = properties;
+        }
+
+        @Override
+        public Object getResolvedValue() {
+            return resolvedValue;
+        }
+
+        @Override
+        public Object getAnnotation() {
+            return mapping.getAnnotation();
+        }
+
+        @Override
+        public Object getModel() {
+            return model;
+        }
+
+        @Override
+        public Field getField() {
+            return metaData.getField();
+        }
+
+        @Override
+        public Map<Class<? extends Annotation>, Annotation> getAnnotationsOfField() {
+            return metaData.getAnnotations().getAnnotations();
+        }
+
+        @Override
+        public Class<?> getFieldType() {
+            return metaData.getType();
+        }
+
+        @Override
+        public String getFieldPath() {
+            return fieldData.path;
+        }
+
+        @Override
+        public Resource getResource() {
+            return resource;
+        }
+
+        @Override
+        public ValueMap getProperties() {
+            return properties;
         }
     }
 }

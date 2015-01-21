@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import static java.lang.Boolean.FALSE;
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.fest.assertions.Assertions.assertThat;
@@ -72,6 +73,8 @@ public class FieldValueMappingCallbackTest {
     private MappedFieldMetaData mappedFieldMetadata;
     @Mock
     private Factory lazyLoadingCollectionFactory;
+    @Mock
+    private CustomFieldMappers customFieldMappers;
 
     private LazyLoader lazyLoadingCollectionCallback;
 
@@ -105,12 +108,17 @@ public class FieldValueMappingCallbackTest {
         doReturn(lazyLoadingCollectionFactory).when(this.mappedFieldMetadata).getCollectionProxyFactory();
     }
 
+    @Before
+    public void prepareCustomFieldMappers() throws Exception {
+        doReturn(emptyList()).when(this.customFieldMappers).get(isA(MappedFieldMetaData.class));
+    }
+
     /**
      * The factory must not accept null arguments to its constructor.
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullModelInConstructor() throws Exception {
-        new FieldValueMappingCallback(null, this.resource, this.factory);
+        new FieldValueMappingCallback(null, this.resource, this.factory, this.customFieldMappers);
     }
 
     /**
@@ -118,7 +126,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullResourceInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, null, this.factory);
+        new FieldValueMappingCallback(this.model, null, this.factory, this.customFieldMappers);
     }
 
     /**
@@ -126,7 +134,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, null);
+        new FieldValueMappingCallback(this.model, this.resource, null, this.customFieldMappers);
     }
 
     /**
@@ -134,7 +142,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInMapping() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, this.factory).doWith(null);
+        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.customFieldMappers).doWith(null);
     }
 
     /**
@@ -1401,7 +1409,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void mapField() {
-        this.testee = new FieldValueMappingCallback(this.model, this.resource, this.factory);
+        this.testee = new FieldValueMappingCallback(this.model, this.resource, this.factory, this.customFieldMappers);
         this.testee.doWith(this.mappedFieldMetadata);
     }
 

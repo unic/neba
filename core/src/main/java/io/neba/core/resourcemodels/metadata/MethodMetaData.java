@@ -18,11 +18,11 @@ package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.PostMapping;
 import io.neba.api.annotations.PreMapping;
-import io.neba.core.util.MetaAnnotatedElement;
+import io.neba.core.util.Annotations;
 
 import java.lang.reflect.Method;
 
-import static io.neba.core.util.MetaAnnotatedElement.annotatedElement;
+import static io.neba.core.util.Annotations.annotations;
 
 /**
  * Represents method meta-data extracted from a {@link io.neba.api.annotations.ResourceModel}.
@@ -40,9 +40,9 @@ public class MethodMetaData {
             throw new IllegalArgumentException("Constructor parameter method must not be null.");
         }
         this.method = method;
-        final MetaAnnotatedElement element  = annotatedElement(method);
-        this.isPreMappingCallback = element.isAnnotatedWith(PreMapping.class);
-        this.isPostMappingCallback = element.isAnnotatedWith(PostMapping.class);
+        final Annotations element  = annotations(method);
+        this.isPreMappingCallback = element.contains(PreMapping.class);
+        this.isPostMappingCallback = element.contains(PostMapping.class);
     }
 
     public boolean isPreMappingCallback() {
