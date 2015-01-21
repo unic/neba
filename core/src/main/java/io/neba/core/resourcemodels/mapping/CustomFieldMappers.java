@@ -61,11 +61,17 @@ public class CustomFieldMappers {
           = new ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, FieldMapper>();
 
     public synchronized void add(FieldMapper<?, ?> mapper) {
+        if (mapper == null) {
+            throw new IllegalArgumentException("Method argument mapper must not be null.");
+        }
         this.fieldMappers.put(mapper.getAnnotationType(), mapper);
         this.cache.clear();
     }
 
     public synchronized void remove(FieldMapper<?, ?> mapper) {
+        if (mapper == null) {
+            throw new IllegalArgumentException("Method argument mapper must not be null.");
+        }
         this.fieldMappers.remove(mapper.getAnnotationType());
         this.cache.clear();
     }
@@ -92,7 +98,7 @@ public class CustomFieldMappers {
                 continue; // with next element
             }
             for (FieldMapper<?, ?> mapper:  mappersForAnnotation) {
-                if (metaData.getType().isAssignableFrom(mapper.getFieldType())) {
+                if (mapper.getFieldType().isAssignableFrom(metaData.getType())) {
                     compatibleMappers.add(new AnnotationMapping(annotation, mapper));
                 }
             }

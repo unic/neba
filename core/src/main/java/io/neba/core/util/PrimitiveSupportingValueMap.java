@@ -81,22 +81,22 @@ public class PrimitiveSupportingValueMap implements ValueMap {
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        return this.map.size();
     }
 
     @Override
     public boolean isEmpty() {
-        throw new UnsupportedOperationException();
+        return this.map.isEmpty();
     }
 
     @Override
     public boolean containsKey(Object key) {
-        throw new UnsupportedOperationException();
+        return this.map.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        throw new UnsupportedOperationException();
+        return this.map.containsValue(value);
     }
 
     @Override
@@ -121,16 +121,16 @@ public class PrimitiveSupportingValueMap implements ValueMap {
 
     @Override
     public Set<String> keySet() {
-        throw new UnsupportedOperationException();
+        return this.map.keySet();
     }
 
     @Override
     public Collection<Object> values() {
-        throw new UnsupportedOperationException();
+        return this.map.values();
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        throw new UnsupportedOperationException();
+        return this.map.entrySet();
     }
 }

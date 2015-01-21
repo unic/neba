@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.mapping;
 
+import io.neba.api.resourcemodels.FieldMapper;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
@@ -37,12 +38,15 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Vector;
 
+import static io.neba.api.resourcemodels.FieldMapper.OngoingMapping;
+import static io.neba.core.resourcemodels.mapping.CustomFieldMappers.AnnotationMapping;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
@@ -83,12 +87,23 @@ public class FieldValueMappingCallbackTest {
     private Resource resourceTargetedByMapping;
 
     @SuppressWarnings("unused")
-    private Object mappedFieldValue;
+    private Object mappedFieldOfTypeObject;
+    @SuppressWarnings("unused")
+    private String mappedFieldOfTypeString;
+
+    private Field mappedField;
 
     private Object targetValue;
     private Object model = this;
 
+    private OngoingMapping ongoingMapping;
+
     private FieldValueMappingCallback testee;
+
+    @Before
+    public void prepareMappedField() throws Exception {
+        withmappedField("mappedFieldOfTypeObject");
+    }
 
     @Before
     public void prepareTestResource() {
@@ -1112,6 +1127,10 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIsNull();
     }
 
+    /**
+     * NEBA guarantees that Collection-typed mappable fields are not null. This
+     * shall hold true regardless of the field semantics.
+     */
     @Test
     public void testPreventionOfNullValuesInReferenceCollectionFieldWithoutDefaultValue() throws Exception {
         withField(Collection.class);
@@ -1123,6 +1142,10 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIsEmptyCollection();
     }
 
+    /**
+     * NEBA guarantees that Collection-typed mappable fields are not null. This
+     * shall hold true regardless of the field semantics.
+     */
     @Test
     public void testPreventionOfNullValuesInMappableCollectionFieldWithoutDefaultValue() throws Exception {
         withField(Collection.class);
@@ -1135,6 +1158,10 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIsEmptyCollection();
     }
 
+    /**
+     * NEBA guarantees that Collection-typed mappable fields are not null. This
+     * shall hold true regardless of the field semantics.
+     */
     @Test
     public void testPreventionOfNullValuesInMappableCollectionFieldOfSyntheticResource() throws Exception {
         withField(Collection.class);
@@ -1148,6 +1175,11 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIsEmptyCollection();
     }
 
+    /**
+     * NEBA guarantees that Collection-typed mappable fields are not null. This
+     * shall hold true regardless of the field semantics. However, if the field already has a non-null default
+     * value, this value must not be overwritten.
+     */
     @Test
     public void testDefaultValueOfMappableCollectionTypedFieldIsNotOverwritten() throws Exception {
         withField(Collection.class);
@@ -1163,6 +1195,11 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIs(defaultValue);
     }
 
+    /**
+     * NEBA guarantees that Collection-typed mappable fields are not null. This
+     * shall hold true regardless of the field semantics. However, if the field already has a non-null default
+     * value, this value must not be overwritten.
+     */
     @Test
     public void testDefaultValueOfMappableCollectionTypedReferenceFieldIsNotOverwritten() throws Exception {
         withField(Collection.class);
@@ -1177,8 +1214,137 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIs(defaultValue);
     }
 
+    /**
+     * {@link io.neba.api.resourcemodels.FieldMapper Field mappers}
+     * are applied to all field mappings after the field value was resolved by NEBA,
+     * i.e. they may override the resolved value. This test scenario verifies that
+     * a field mapper is applied and can override an already resolved value.
+     */
+    @Test
+    public void testApplicationOfFieldMappersToResoledFieldValue() throws Exception {
+        withCustomFieldMapperMappingTo("CustomMappedValue");
+
+        mapPropertyField(String.class, "PropertyValue");
+
+        assertMappedFieldValueIs("CustomMappedValue");
+    }
+
+    /**
+     * {@link io.neba.api.resourcemodels.FieldMapper Field mappers} receive extensive
+     * contextual mapping data, such as the current field, the value that was resolved for it,
+     * the model, resource and so forth. This test verifies that this contextual data is correct.
+     */
+    @Test
+    public void testOngoingMappingContainsAccurateMappingData() throws Exception {
+        withCustomFieldMapperMappingTo("CustomMappedValue");
+
+        mapPropertyField(String.class, "PropertyValue");
+
+        assertOngoingMappinDataIsAccurate();
+    }
+
+    /**
+     * To prevent implementations of field mappers from having to worry about instantiating
+     * suitable collection types for collection-typed fields, NEBA extends its guarantee (mappable collection-typed
+     * members are never null) to the {@link io.neba.api.resourcemodels.FieldMapper field mappers}.
+     * This test verifies that field mappers do not receive null for such a collection, even if no value could be resolved.
+     * Instead, they should receive an empty default value.
+     */
+    @Test
+    public void testNullCollectionValuesAreSetToDefaultValueBeforeInvokingFieldMappers() throws Exception {
+        withField(Collection.class);
+        withInstantiableCollectionTypedField();
+        withPropertyTypedField();
+        withTypeParameter(String.class);
+
+        withCustomFieldMapperMappingTo(new ArrayList<String>());
+
+        mapField();
+        assertOngoingMappingsResolvedValueIsNotNull();
+    }
+
+    /**
+     * While NEBA guarantees non-null collections, no such guarantee exists for any other
+     * field types. This test verifies that null values for non-collection typed fields
+     * are passed to the {@link io.neba.api.resourcemodels.FieldMapper field mappers}.
+     */
+    @Test
+    public void testNullNonCollectionValuesAreNullWhenInvokingFieldMappers() throws Exception {
+        withCustomFieldMapperMappingTo("CustomMappedValue");
+        mapPropertyField(String.class, null);
+        assertOngoingMappingsResolvedValueIsNull();
+    }
+
+    /**
+     * A {@link io.neba.api.resourcemodels.FieldMapper} implementation must take
+     * care to return an assignment-compatible value as a mapping result. However,
+     * there are no enforce this at compile time. This test verifies that a suitable exception
+     * is thrown in case a field mapper returns an incompatible value at runtime.
+     */
+    @Test
+    public void testHandlingOfIncompatibleReturnValueFromCustomFieldMapper() throws Exception {
+        withCustomFieldMapperMappingTo(new ArrayList<String>());
+        withmappedField("mappedFieldOfTypeString");
+
+        Exception e = null;
+        try {
+            mapPropertyField(String.class, null);
+        } catch (Exception ex) {
+            e = ex;
+        }
+
+        assertThat(e)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Can not set java.lang.String field " +
+                "io.neba.core.resourcemodels.mapping.FieldValueMappingCallbackTest.mappedFieldOfTypeString " +
+                "to java.util.ArrayList");
+    }
+
+    private void assertOngoingMappingsResolvedValueIsNull() {
+        assertThat(this.ongoingMapping.getResolvedValue()).isNull();
+    }
+
+    private void assertOngoingMappingsResolvedValueIsNotNull() {
+        assertThat(this.ongoingMapping.getResolvedValue()).isNotNull();
+    }
+
+    private void assertOngoingMappinDataIsAccurate() {
+        assertThat(this.ongoingMapping.getField()).isEqualTo(this.mappedField);
+        assertThat(this.ongoingMapping.getFieldPath()).isEqualTo("field");
+        assertThat(this.ongoingMapping.getFieldType()).isEqualTo(this.mappedFieldMetadata.getType());
+        assertThat(this.ongoingMapping.getModel()).isEqualTo(this.model);
+        assertThat(this.ongoingMapping.getProperties()).isNotNull();
+        assertThat(this.ongoingMapping.getResolvedValue()).isEqualTo(this.targetValue);
+        assertThat(this.ongoingMapping.getResource()).isSameAs(this.resource);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void withCustomFieldMapperMappingTo(final Object value) {
+        AnnotationMapping mapping = mock(AnnotationMapping.class);
+        FieldMapper mapper = mock(FieldMapper.class);
+        doReturn(mapper).when(mapping).getMapper();
+
+        Collection<AnnotationMapping> mappings = new ArrayList<AnnotationMapping>();
+        mappings.add(mapping);
+
+        doReturn(mappings).when(this.customFieldMappers).get(isA(MappedFieldMetaData.class));
+
+        Answer retainMappingContext = new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                ongoingMapping = (OngoingMapping) invocationOnMock.getArguments()[0];
+                return value;
+            }
+        };
+        doAnswer(retainMappingContext).when(mapper).map(isA(OngoingMapping.class));
+    }
+
+    private void withmappedField(String fieldName) throws NoSuchFieldException {
+        this.mappedField = getClass().getDeclaredField(fieldName);
+    }
+
     private void withDefaultFieldValue(Object value) {
-        this.mappedFieldValue = value;
+        this.mappedFieldOfTypeObject = value;
     }
 
     private void withInstantiableCollectionTypedField() {
@@ -1401,9 +1567,8 @@ public class FieldValueMappingCallbackTest {
     }
 
     private <T> void withField(Class<T> fieldType) throws NoSuchFieldException {
-        Field field = getClass().getDeclaredField("mappedFieldValue");
-        field.setAccessible(true);
-        doReturn(field).when(this.mappedFieldMetadata).getField();
+        mappedField.setAccessible(true);
+        doReturn(mappedField).when(this.mappedFieldMetadata).getField();
         doReturn("field").when(this.mappedFieldMetadata).getPath();
         doReturn(fieldType).when(this.mappedFieldMetadata).getType();
     }
@@ -1419,11 +1584,11 @@ public class FieldValueMappingCallbackTest {
 
     @SuppressWarnings("unchecked")
     private void loadOptionalField() {
-        this.mappedFieldValue = ((Optional) this.mappedFieldValue).orElse(null);
+        this.mappedFieldOfTypeObject = ((Optional) this.mappedFieldOfTypeObject).orElse(null);
     }
 
     private void assertMappedFieldValueIsOptional() {
-        assertThat(this.mappedFieldValue).isInstanceOf(Optional.class);
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
     }
 
     private void assertNoLazyLoadingProxyIsCreated() {
@@ -1436,27 +1601,27 @@ public class FieldValueMappingCallbackTest {
 
     @SuppressWarnings("unchecked")
     private void assertOptionalFieldHasValue(Resource expected) {
-        assertThat(this.mappedFieldValue).isInstanceOf(Optional.class);
-        assertThat(((Optional) this.mappedFieldValue).orElse(null)).isEqualTo(expected);
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
+        assertThat(((Optional) this.mappedFieldOfTypeObject).orElse(null)).isEqualTo(expected);
     }
 
     private void assertOptionalValueIsPresent() {
-        assertThat(((Optional) this.mappedFieldValue).isPresent()).isTrue();
+        assertThat(((Optional) this.mappedFieldOfTypeObject).isPresent()).isTrue();
     }
 
     private void assertOptionalValueIsNotPresent() {
-        assertThat(((Optional) this.mappedFieldValue).isPresent()).isFalse();
+        assertThat(((Optional) this.mappedFieldOfTypeObject).isPresent()).isFalse();
     }
 
     private void getOptionalValue() {
-        assertThat(this.mappedFieldValue).isInstanceOf(Optional.class);
-        ((Optional) this.mappedFieldValue).get();
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
+        ((Optional) this.mappedFieldOfTypeObject).get();
     }
 
     private void assertMappedFieldValueIsCollectionWithResourcesWithPaths(String... referencedResources) {
-        assertThat(this.mappedFieldValue).isInstanceOf(Collection.class);
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
         @SuppressWarnings("unchecked")
-        Collection<Resource> resources = (Collection<Resource>) this.mappedFieldValue;
+        Collection<Resource> resources = (Collection<Resource>) this.mappedFieldOfTypeObject;
         assertArrayHoldsResourcesWithPaths(resources.toArray(new Resource[resources.size()]), referencedResources);
     }
 
@@ -1482,11 +1647,11 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertMappedFieldValueIs(Object value) {
-        assertThat(this.mappedFieldValue).isEqualTo(value);
+        assertThat(this.mappedFieldOfTypeObject).isEqualTo(value);
     }
 
     private void assertMappedFieldValueIsNull() {
-        assertThat(this.mappedFieldValue).isNull();
+        assertThat(this.mappedFieldOfTypeObject).isNull();
     }
 
     private void assertFieldIsFetchedFromValueMap() {
@@ -1513,17 +1678,17 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertMappedFieldValueIsCollectionContainingTargetValue() {
-        assertThat(this.mappedFieldValue).isInstanceOf(Collection.class);
-        assertThat((Collection) this.mappedFieldValue).containsOnly(this.targetValue);
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
+        assertThat((Collection) this.mappedFieldOfTypeObject).containsOnly(this.targetValue);
     }
 
     private void assertMappedFieldValueIsEmptyCollection() {
-        assertThat(this.mappedFieldValue).isInstanceOf(Collection.class);
-        assertThat((Collection) this.mappedFieldValue).isEmpty();
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
+        assertThat((Collection) this.mappedFieldOfTypeObject).isEmpty();
     }
 
     private void assertMappedFieldValueIsCollectionWithEntries(Object... entries) {
-        assertThat(this.mappedFieldValue).isInstanceOf(Collection.class);
-        assertThat((Collection<?>) this.mappedFieldValue).containsOnly(entries);
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
+        assertThat((Collection<?>) this.mappedFieldOfTypeObject).containsOnly(entries);
     }
 }

@@ -55,6 +55,15 @@ import java.util.Map;
  * They may thus make use of the already resolved value or choose to provide a different one.
  * </p>
  *
+ * <p>
+ *     <strong>It is crucial for a {@link FieldMapper} to always return a value that is assignment compatible
+ *     to the {@link OngoingMapping#getFieldType() field type}, i.e. either of the same or of a more specific type.</strong>
+ *     It is insufficient to return a type compatible to the {@link #map(io.neba.api.resourcemodels.FieldMapper.OngoingMapping) mapping methods}
+ *     return type declaration. This return type only represents the type any returned value must be compatible to.<br />
+ *     For instance, if a mapper is responsible for {@link java.util.Collection}, it must take care to return the field's actual
+ *     collection type, e.g. {@link java.util.List} or {@link java.util.Set}. Otherwise, an exception will arise.
+ * </p>
+ *
  * @author Olaf Otto
  */
 public interface FieldMapper<FieldType, AnnotationType extends Annotation> {
@@ -94,9 +103,9 @@ public interface FieldMapper<FieldType, AnnotationType extends Annotation> {
         Map<Class<? extends Annotation>, Annotation> getAnnotationsOfField();
 
         /**
-         * @return The mapped type of the field. <em>This may not be the {@link java.lang.reflect.Field#getType() field type}</em>,
-         *         but the component type in case of collections, arrays and {@link io.neba.api.resourcemodels.Optional}
-         *         fields as NEBA resolves these types to determine the target type of a mapping.
+         * @return The mapped type of the field. <em>Note: In case the field is {@link io.neba.api.resourcemodels.Optional}, this
+         *         type is the component type, i.e. the type targeted by the optional field. However, field mappers
+         *         are not applied optional fields but to the subsequent mapping, when the {@link Optional#get() optional value is actually mapped.
          *         Never <code>null</code>.
          */
         Class<?> getFieldType();
@@ -133,8 +142,9 @@ public interface FieldMapper<FieldType, AnnotationType extends Annotation> {
     /**
      * @param ongoingMapping never <code>null</code>.
      *
-     * @return the value to be set on the mapped field during the resource to model mapping. Can be
-     *         <code>null</code>.
+     * @return The value to be set on the mapped field during the resource to model mapping.
+     *         <strong>Must return a value that is assignment-compatible to {@link OngoingMapping#getFieldType()}</strong>.
+     *         Can be <code>null</code>.
      */
     FieldType map(OngoingMapping<FieldType, AnnotationType> ongoingMapping);
 }

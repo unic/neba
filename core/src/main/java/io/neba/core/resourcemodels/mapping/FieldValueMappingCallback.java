@@ -103,22 +103,32 @@ public class FieldValueMappingCallback {
         Object value = null;
 
         if (isMappable(fieldData)) {
-
+            // Explicit lazy loading: provide the lazy loading implementation, not not map anything.
             if (metaData.isOptional()) {
-                // Explicit lazy loading
-                value = new OptionalFieldValue(fieldData, this);
-            } else {
-                value = resolve(fieldData);
-                value = applyCustomFieldMappings(metaData, fieldData, value);
+                setField(metaData.getField(), this.model, new OptionalFieldValue(fieldData, this));
+                return;
             }
 
-            if (value != null) {
-                setField(metaData.getField(), this.model, value);
-            }
+            value = resolve(fieldData);
         }
 
-        if (value == null && metaData.isInstantiableCollectionType()){
-            preventNullValueInMappableCollectionField(metaData);
+        // For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
+        // an empty collection, in case no non-<code>null</code> default value was provided.
+        boolean preventNullCollection =
+                value == null &&
+                metaData.isInstantiableCollectionType() &&
+                getField(metaData.getField(), this.model) == null;
+
+        @SuppressWarnings("unchecked")
+        Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) metaData.getType()) : null;
+
+        // Provide the custom mappers with the default value in case of empty collections for convenience
+        value = applyCustomMappings(metaData, fieldData, value == null ? defaultValue : value);
+
+        value = value == null ? defaultValue : value;
+
+        if (value != null) {
+            setField(metaData.getField(), this.model, value);
         }
     }
 
@@ -127,11 +137,12 @@ public class FieldValueMappingCallback {
      * to the provided value and returns the result.
      */
     @SuppressWarnings("unchecked")
-    private Object applyCustomFieldMappings(MappedFieldMetaData metaData, FieldData fieldData, Object value) {
+    private Object applyCustomMappings(MappedFieldMetaData metaData, FieldData fieldData, final Object value) {
+        Object result = value;
         for (final AnnotationMapping mapping : this.customFieldMappers.get(metaData)) {
-            value = mapping.getMapper().map(new OngoingFieldMapping(this.model, value, mapping, fieldData, this.resource, this.properties));
+            result = mapping.getMapper().map(new OngoingFieldMapping(this.model, result, mapping, fieldData, this.resource, this.properties));
         }
-        return value;
+        return result;
     }
 
     /**
@@ -334,19 +345,6 @@ public class FieldValueMappingCallback {
             value = resolvePropertyTypedValue(field, field.metaData.getType());
         }
         return  value;
-    }
-
-    /**
-     * For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
-     * an empty collection, in case no non-<code>null</code> default value was provided.
-     */
-    private void preventNullValueInMappableCollectionField(MappedFieldMetaData metaData) {
-        Object fieldValue = getField(metaData.getField(), this.model);
-        if (fieldValue == null) {
-            @SuppressWarnings("unchecked")
-            Class<Collection> collectionType = (Class<Collection>) metaData.getType();
-            setField(metaData.getField(), this.model, instantiateCollectionType(collectionType));
-        }
     }
 
     /**
