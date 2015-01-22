@@ -15,7 +15,7 @@
  **/
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.FieldMapper;
+import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import org.springframework.stereotype.Service;
@@ -38,9 +38,9 @@ public class CustomFieldMappers {
      */
     public static class AnnotationMapping {
         private final Annotation annotation;
-        private final FieldMapper mapper;
+        private final AnnotatedFieldMapper mapper;
 
-        public AnnotationMapping(Annotation annotation, FieldMapper mapper) {
+        public AnnotationMapping(Annotation annotation, AnnotatedFieldMapper mapper) {
             this.annotation = annotation;
             this.mapper = mapper;
         }
@@ -49,7 +49,7 @@ public class CustomFieldMappers {
             return annotation;
         }
 
-        public FieldMapper getMapper() {
+        public AnnotatedFieldMapper getMapper() {
             return mapper;
         }
     }
@@ -57,10 +57,10 @@ public class CustomFieldMappers {
     private static final Collection<AnnotationMapping> NULL = emptyList();
     private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache
           = new ConcurrentDistinctMultiValueMap<Field, AnnotationMapping>();
-    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, FieldMapper> fieldMappers
-          = new ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, FieldMapper>();
+    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers
+          = new ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper>();
 
-    public synchronized void add(FieldMapper<?, ?> mapper) {
+    public synchronized void add(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
@@ -68,7 +68,7 @@ public class CustomFieldMappers {
         this.cache.clear();
     }
 
-    public synchronized void remove(FieldMapper<?, ?> mapper) {
+    public synchronized void remove(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
@@ -93,11 +93,11 @@ public class CustomFieldMappers {
 
         List<AnnotationMapping> compatibleMappers = new ArrayList<AnnotationMapping>();
         for (Annotation annotation : metaData.getAnnotations()) {
-            Collection<FieldMapper> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
+            Collection<AnnotatedFieldMapper> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
             if (mappersForAnnotation == null) {
                 continue; // with next element
             }
-            for (FieldMapper<?, ?> mapper:  mappersForAnnotation) {
+            for (AnnotatedFieldMapper<?, ?> mapper:  mappersForAnnotation) {
                 if (mapper.getFieldType().isAssignableFrom(metaData.getType())) {
                     compatibleMappers.add(new AnnotationMapping(annotation, mapper));
                 }

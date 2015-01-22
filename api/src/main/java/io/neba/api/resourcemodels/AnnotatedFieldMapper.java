@@ -56,17 +56,23 @@ import java.util.Map;
  * </p>
  *
  * <p>
- *     <strong>It is crucial for a {@link FieldMapper} to always return a value that is assignment compatible
+ *     <strong>It is crucial for a {@link AnnotatedFieldMapper} to always return a value that is assignment compatible
  *     to the {@link OngoingMapping#getFieldType() field type}, i.e. either of the same or of a more specific type.</strong>
- *     It is insufficient to return a type compatible to the {@link #map(io.neba.api.resourcemodels.FieldMapper.OngoingMapping) mapping methods}
+ *     It is insufficient to return a type compatible to the {@link #map(AnnotatedFieldMapper.OngoingMapping) mapping methods}
  *     return type declaration. This return type only represents the type any returned value must be compatible to.<br />
  *     For instance, if a mapper is responsible for {@link java.util.Collection}, it must take care to return the field's actual
  *     collection type, e.g. {@link java.util.List} or {@link java.util.Set}. Otherwise, an exception will arise.
  * </p>
  *
+ * <p>
+ *     Implementations <strong>must never</strong> store any contextual data provided by the {@link io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping}
+ *     as this data stems from arbitrary OSGi bundles with independent life cycles. Storing any data would result in a class loader / memory leak when
+ *     these bundles change.
+ * </p>
+ *
  * @author Olaf Otto
  */
-public interface FieldMapper<FieldType, AnnotationType extends Annotation> {
+public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotation> {
     /**
      * Represents the contextual data of a field mapping during a resource to model mapping.
      *

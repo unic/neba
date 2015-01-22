@@ -57,7 +57,7 @@
 			<bp:reference-listener ref="resourceModelCaches" bind-method="add" unbind-method="remove" />
 		</bp:reference-list>
 		<!-- All custom injectors are used by the resource to model mapper -->
-		<bp:reference-list interface="io.neba.api.resourcemodels.FieldMapper" availability="optional">
+		<bp:reference-list interface="io.neba.api.resourcemodels.AnnotatedFieldMapper" availability="optional">
 			<bp:reference-listener ref="customFieldMappers" bind-method="add" unbind-method="remove" />
 		</bp:reference-list>
 

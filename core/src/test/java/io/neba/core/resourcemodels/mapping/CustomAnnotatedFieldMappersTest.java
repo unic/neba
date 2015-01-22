@@ -15,7 +15,7 @@
  **/
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.FieldMapper;
+import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.Annotations;
 import org.apache.sling.api.resource.Resource;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verify;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CustomFieldMappersTest {
+public class CustomAnnotatedFieldMappersTest {
     private Field field1 = getDeclaredField(TestModel1.class, "resources");
     private Field field2 = getDeclaredField(TestModel2.class, "resource");
     private CustomAnnotation1 annotation1 = this.field1.getAnnotation(CustomAnnotation1.class);
@@ -80,9 +80,9 @@ public class CustomFieldMappersTest {
     private Annotations annotations2;
 
     @Mock
-    private FieldMapper mapper1;
+    private AnnotatedFieldMapper mapper1;
     @Mock
-    private FieldMapper mapper2;
+    private AnnotatedFieldMapper mapper2;
 
     @InjectMocks
     private CustomFieldMappers testee;
@@ -193,11 +193,11 @@ public class CustomFieldMappersTest {
         verify(this.metadata1).getAnnotations();
     }
 
-    private void remove(FieldMapper mapper) {
+    private void remove(AnnotatedFieldMapper mapper) {
         this.testee.remove(mapper);
     }
 
-    private void withMapperSupporting(FieldMapper mapper, Class<?> type) {
+    private void withMapperSupporting(AnnotatedFieldMapper mapper, Class<?> type) {
         doReturn(type).when(mapper).getFieldType();
     }
 
@@ -205,7 +205,7 @@ public class CustomFieldMappersTest {
         assertThat(this.testee.get(metadata)).isEmpty();
     }
 
-    private void assertMetadataHasMappers(MappedFieldMetaData metadata, FieldMapper... mappers) {
+    private void assertMetadataHasMappers(MappedFieldMetaData metadata, AnnotatedFieldMapper... mappers) {
         assertThat(this.testee.get(metadata)).onProperty("mapper").containsOnly(mappers);
     }
 
@@ -213,7 +213,7 @@ public class CustomFieldMappersTest {
         assertThat(this.testee.get(metadata)).onProperty("annotation").containsOnly(annotations);
     }
 
-    private void add(FieldMapper mapper) {
+    private void add(AnnotatedFieldMapper mapper) {
         this.testee.add(mapper);
     }
 }

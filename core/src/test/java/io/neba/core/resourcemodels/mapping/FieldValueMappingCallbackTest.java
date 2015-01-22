@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.FieldMapper;
+import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Vector;
 
-import static io.neba.api.resourcemodels.FieldMapper.OngoingMapping;
+import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.CustomFieldMappers.AnnotationMapping;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.emptyList;
@@ -1215,7 +1215,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * {@link io.neba.api.resourcemodels.FieldMapper Field mappers}
+     * {@link io.neba.api.resourcemodels.AnnotatedFieldMapper Field mappers}
      * are applied to all field mappings after the field value was resolved by NEBA,
      * i.e. they may override the resolved value. This test scenario verifies that
      * a field mapper is applied and can override an already resolved value.
@@ -1230,7 +1230,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * {@link io.neba.api.resourcemodels.FieldMapper Field mappers} receive extensive
+     * {@link io.neba.api.resourcemodels.AnnotatedFieldMapper Field mappers} receive extensive
      * contextual mapping data, such as the current field, the value that was resolved for it,
      * the model, resource and so forth. This test verifies that this contextual data is correct.
      */
@@ -1246,7 +1246,7 @@ public class FieldValueMappingCallbackTest {
     /**
      * To prevent implementations of field mappers from having to worry about instantiating
      * suitable collection types for collection-typed fields, NEBA extends its guarantee (mappable collection-typed
-     * members are never null) to the {@link io.neba.api.resourcemodels.FieldMapper field mappers}.
+     * members are never null) to the {@link io.neba.api.resourcemodels.AnnotatedFieldMapper field mappers}.
      * This test verifies that field mappers do not receive null for such a collection, even if no value could be resolved.
      * Instead, they should receive an empty default value.
      */
@@ -1266,7 +1266,7 @@ public class FieldValueMappingCallbackTest {
     /**
      * While NEBA guarantees non-null collections, no such guarantee exists for any other
      * field types. This test verifies that null values for non-collection typed fields
-     * are passed to the {@link io.neba.api.resourcemodels.FieldMapper field mappers}.
+     * are passed to the {@link io.neba.api.resourcemodels.AnnotatedFieldMapper field mappers}.
      */
     @Test
     public void testNullNonCollectionValuesAreNullWhenInvokingFieldMappers() throws Exception {
@@ -1276,7 +1276,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * A {@link io.neba.api.resourcemodels.FieldMapper} implementation must take
+     * A {@link io.neba.api.resourcemodels.AnnotatedFieldMapper} implementation must take
      * care to return an assignment-compatible value as a mapping result. However,
      * there are no enforce this at compile time. This test verifies that a suitable exception
      * is thrown in case a field mapper returns an incompatible value at runtime.
@@ -1321,7 +1321,7 @@ public class FieldValueMappingCallbackTest {
     @SuppressWarnings("unchecked")
     private void withCustomFieldMapperMappingTo(final Object value) {
         AnnotationMapping mapping = mock(AnnotationMapping.class);
-        FieldMapper mapper = mock(FieldMapper.class);
+        AnnotatedFieldMapper mapper = mock(AnnotatedFieldMapper.class);
         doReturn(mapper).when(mapping).getMapper();
 
         Collection<AnnotationMapping> mappings = new ArrayList<AnnotationMapping>();

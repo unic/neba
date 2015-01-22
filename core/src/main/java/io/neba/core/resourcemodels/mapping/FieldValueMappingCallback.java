@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.FieldMapper;
+import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
@@ -133,7 +133,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Applies all {@link io.neba.api.resourcemodels.FieldMapper registered field mappers}
+     * Applies all {@link io.neba.api.resourcemodels.AnnotatedFieldMapper registered field mappers}
      * to the provided value and returns the result.
      */
     @SuppressWarnings("unchecked")
@@ -662,7 +662,7 @@ public class FieldValueMappingCallback {
     /**
      * @author Olaf Otto
      */
-    private static class OngoingFieldMapping implements FieldMapper.OngoingMapping {
+    private static class OngoingFieldMapping implements AnnotatedFieldMapper.OngoingMapping {
         private final Object resolvedValue;
         private final AnnotationMapping mapping;
         private final FieldData fieldData;
