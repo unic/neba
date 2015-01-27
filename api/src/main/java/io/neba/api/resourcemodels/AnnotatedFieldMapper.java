@@ -30,8 +30,8 @@ import java.util.Map;
  * as well as {@link #getFieldType() the type the mapped fields} must be {@link Class#isAssignableFrom(Class) assignable to}.
  * </p>
  * <p>
- * For example, the following service would be responsible for fields annotated with &#64;MyAnnotation with a type <em>assignable to</em> {@link java.util.Collection},
- * e.g. List&lt;Resource&gt; or Set&lt;String&gt;.
+ * For example, the following service would be responsible for fields annotated with &#64;MyAnnotation
+ * with a type <em>assignable to</em> {@link java.util.Collection}, e.g. List&lt;Resource&gt; or Set&lt;String&gt;.
  * </p>
  * <pre>
  * &#64;Service
@@ -51,8 +51,9 @@ import java.util.Map;
  * }
  * </pre>
  * <p>
- * Custom mappers are always invoked <em>after</em> all of NEBA's standard mappings have occurred, but before the corresponding value was set on the model's field.
- * They may thus make use of the already resolved value or choose to provide a different one.
+ * Custom mappers are always invoked <em>after</em> all of NEBA's standard mappings have occurred, but before
+ * the corresponding value was set on the model's field. They may thus make use of the already resolved
+ * value or choose to provide a different one.
  * </p>
  *
  * <p>
@@ -65,11 +66,16 @@ import java.util.Map;
  * </p>
  *
  * <p>
- *     Implementations <strong>must never</strong> store any contextual data provided by the {@link io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping}
- *     as this data stems from arbitrary OSGi bundles with independent life cycles. Storing any data would result in a class loader / memory leak when
- *     these bundles change.
+ *     Implementations <strong>must never</strong> store any contextual data provided by the
+ *     {@link io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping}
+ *     as this data stems from arbitrary OSGi bundles with independent life cycles.
+ *     Storing any data would result in a class loader / memory leak when these bundles change.
  * </p>
  *
+ * @param <FieldType> the super type of the {@link java.lang.reflect.Field#getType() field type}
+ *        of the mapped type.
+ * @param <AnnotationType> the exact type of the annotation this mapper is responsible for.
+
  * @author Olaf Otto
  */
 public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotation> {
@@ -110,7 +116,7 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
 
         /**
          * @return The mapped type of the field. <em>Note: In case the field is {@link io.neba.api.resourcemodels.Optional}, this
-         *         type is the component type, i.e. the type targeted by the optional field. However, field mappers
+         *         type is the component type, i.e. the type targeted by the optional field</em>. However, field mappers
          *         are not applied optional fields but to the subsequent mapping, when the {@link Optional#get() optional value is actually mapped.
          *         Never <code>null</code>.
          */
