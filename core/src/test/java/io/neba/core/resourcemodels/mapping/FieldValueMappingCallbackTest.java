@@ -20,6 +20,7 @@ import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
+
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -1191,11 +1192,12 @@ public class FieldValueMappingCallbackTest {
         when(this.resourceTargetedByMapping.getParent()).thenReturn(this.parentOfResourceTargetedByMapping);
     }
 
-    private <T> void withParentOfTargetResourceProperty(String propertyName, T propertyValue) {
+    @SuppressWarnings("unchecked")
+	private <T> void withParentOfTargetResourceProperty(String propertyName, T propertyValue) {
         this.targetValue = propertyValue;
         ValueMap properties = mock(ValueMap.class);
         when(this.parentOfResourceTargetedByMapping.adaptTo(eq(ValueMap.class))).thenReturn(properties);
-        when(properties.get(eq(propertyName), eq(propertyValue.getClass()))).thenReturn(propertyValue);
+        when(properties.get(eq(propertyName), eq((Class<T>) propertyValue.getClass()))).thenReturn(propertyValue);
     }
 
     private void withChildrenAnnotationPresent() {
