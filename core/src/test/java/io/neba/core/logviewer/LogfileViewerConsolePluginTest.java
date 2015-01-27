@@ -33,6 +33,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -72,7 +73,7 @@ public class LogfileViewerConsolePluginTest {
     @Mock
     private Configuration logConfiguration;
     @Mock
-    private Dictionary logConfigurationProperties;
+    private Dictionary<?, String> logConfigurationProperties;
     @Mock
     private ServletOutputStream outputStream;
 
@@ -103,14 +104,14 @@ public class LogfileViewerConsolePluginTest {
         when(this.logConfiguration.getProperties()).thenReturn(this.logConfigurationProperties);
         when(this.logConfigurationProperties.get(eq(ORG_APACHE_SLING_COMMONS_LOG_FILE))).thenReturn("logs/error.log");
 
-        Answer writeIntToByteArrayOutputStream = new Answer() {
+        Answer<Object> writeIntToByteArrayOutputStream = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 internalOutputStream.write((Integer) invocation.getArguments()[0]);
                 return null;
             }
         };
-        Answer writeBytesToByteArrayOutputStream = new Answer() {
+        Answer<Object> writeBytesToByteArrayOutputStream = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 byte[] b = (byte[]) invocation.getArguments()[0];
@@ -307,7 +308,8 @@ public class LogfileViewerConsolePluginTest {
 
     private void withAdditionalLogfile(String additionalLogfile) throws IOException, InvalidSyntaxException {
         Configuration configuration = mock(Configuration.class);
-        Dictionary properties = mock(Dictionary.class);
+        @SuppressWarnings("unchecked")
+		Dictionary<?, String> properties = mock(Dictionary.class);
         String absoluteLogfilePath = this.testLogfileDirectory.getAbsolutePath() + File.separator + additionalLogfile;
         when(properties.get(eq(ORG_APACHE_SLING_COMMONS_LOG_FILE))).thenReturn(absoluteLogfilePath);
         when(configuration.getProperties()).thenReturn(properties);

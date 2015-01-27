@@ -75,7 +75,7 @@ public class ReflectionUtilTest {
 
     private Class<?> typeParameter;
     private Object collectionInstance;
-    private Class type = getClass();
+    private Class<?> type = getClass();
 
     @Test(expected = IllegalArgumentException.class)
     public void testResolutionOfRawCollectionType() throws Exception {

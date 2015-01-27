@@ -80,7 +80,6 @@ public class FieldValueMappingCallbackTest {
     private Resource parentOfResourceTargetedByMapping;
     private Resource resourceTargetedByMapping;
 
-    @SuppressWarnings("unused")
     private Object mappedFieldValue;
 
     private Object targetValue;
@@ -95,7 +94,7 @@ public class FieldValueMappingCallbackTest {
 
     @Before
     public void mockLazyLoadingCollectionFactory() {
-        Answer loadImmediately = new Answer() {
+        Answer<Object> loadImmediately = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
                 lazyLoadingCollectionCallback = (LazyLoader) invocationOnMock.getArguments()[0];
@@ -931,7 +930,7 @@ public class FieldValueMappingCallbackTest {
         mapField();
 
         assertFieldIsFetchedFromValueMapAs(String[].class);
-        assertMappedFieldValueIsCollectionWithEntries(propertyValues);
+        assertMappedFieldValueIsCollectionWithEntries((Object[]) propertyValues);
     }
 
     /**
@@ -1148,7 +1147,7 @@ public class FieldValueMappingCallbackTest {
         withPropertyTypedField();
         withTypeParameter(String.class);
 
-        Collection defaultValue = mock(Collection.class);
+        Collection<?> defaultValue = mock(Collection.class);
         withDefaultFieldValue(defaultValue);
 
         mapField();
@@ -1162,7 +1161,7 @@ public class FieldValueMappingCallbackTest {
         withInstantiableCollectionTypedField();
         withReferenceAnnotationPresent();
 
-        Collection defaultValue = mock(Collection.class);
+        Collection<?> defaultValue = mock(Collection.class);
         withDefaultFieldValue(defaultValue);
 
         mapField();
@@ -1221,7 +1220,10 @@ public class FieldValueMappingCallbackTest {
         mapField();
     }
 
-    private void mapReferenceCollectionField(Class<? extends Collection> collectionType, Class<?> componentType, String[] referencePaths) throws NoSuchFieldException {
+    private void mapReferenceCollectionField(
+    		@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType,
+    		Class<?> componentType, String[] referencePaths)
+    				throws NoSuchFieldException {
         withPropertyField(collectionType, referencePaths);
         withTypeParameter(componentType);
         withReferenceAnnotationPresent();
@@ -1411,9 +1413,8 @@ public class FieldValueMappingCallbackTest {
         doReturn(true).when(this.mappedFieldMetadata).isThisReference();
     }
 
-    @SuppressWarnings("unchecked")
     private void loadOptionalField() {
-        this.mappedFieldValue = ((Optional) this.mappedFieldValue).orElse(null);
+        this.mappedFieldValue = ((Optional<?>) this.mappedFieldValue).orElse(null);
     }
 
     private void assertMappedFieldValueIsOptional() {
@@ -1428,23 +1429,22 @@ public class FieldValueMappingCallbackTest {
         verify(this.lazyLoadingCollectionFactory).newInstance(isA(LazyLoader.class));
     }
 
-    @SuppressWarnings("unchecked")
     private void assertOptionalFieldHasValue(Resource expected) {
         assertThat(this.mappedFieldValue).isInstanceOf(Optional.class);
-        assertThat(((Optional) this.mappedFieldValue).orElse(null)).isEqualTo(expected);
+        assertThat(((Optional<?>) this.mappedFieldValue).orElse(null)).isEqualTo(expected);
     }
 
     private void assertOptionalValueIsPresent() {
-        assertThat(((Optional) this.mappedFieldValue).isPresent()).isTrue();
+        assertThat(((Optional<?>) this.mappedFieldValue).isPresent()).isTrue();
     }
 
     private void assertOptionalValueIsNotPresent() {
-        assertThat(((Optional) this.mappedFieldValue).isPresent()).isFalse();
+        assertThat(((Optional<?>) this.mappedFieldValue).isPresent()).isFalse();
     }
 
     private void getOptionalValue() {
         assertThat(this.mappedFieldValue).isInstanceOf(Optional.class);
-        ((Optional) this.mappedFieldValue).get();
+        ((Optional<?>) this.mappedFieldValue).get();
     }
 
     private void assertMappedFieldValueIsCollectionWithResourcesWithPaths(String... referencedResources) {
@@ -1508,12 +1508,12 @@ public class FieldValueMappingCallbackTest {
 
     private void assertMappedFieldValueIsCollectionContainingTargetValue() {
         assertThat(this.mappedFieldValue).isInstanceOf(Collection.class);
-        assertThat((Collection) this.mappedFieldValue).containsOnly(this.targetValue);
+        assertThat((Collection<?>) this.mappedFieldValue).containsOnly(this.targetValue);
     }
 
     private void assertMappedFieldValueIsEmptyCollection() {
         assertThat(this.mappedFieldValue).isInstanceOf(Collection.class);
-        assertThat((Collection) this.mappedFieldValue).isEmpty();
+        assertThat((Collection<?>) this.mappedFieldValue).isEmpty();
     }
 
     private void assertMappedFieldValueIsCollectionWithEntries(Object... entries) {

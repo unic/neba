@@ -85,7 +85,8 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
     }
 
     private void withUnsupportedParameterType() {
-        Class<? extends AbstractArgumentResolverTest> type = getClass();
+        @SuppressWarnings("rawtypes")
+		Class<? extends AbstractArgumentResolverTest> type = getClass();
         withParameterType(type);
     }
 }

@@ -45,6 +45,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import javax.servlet.ServletConfig;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -84,12 +85,13 @@ public class MvcContextTest {
 
     private MvcContext testee;
 
-    @Before
+    @SuppressWarnings("unchecked")
+	@Before
     public void setUp() throws Exception {
         doReturn(this.applicationContext).when(this.event).getApplicationContext();
         doReturn(this.factory).when(this.applicationContext).getAutowireCapableBeanFactory();
 
-        Answer createMock = new Answer() {
+        Answer<Object> createMock = new Answer<Object>() {
 
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -260,7 +262,7 @@ public class MvcContextTest {
         RequestMappingHandlerAdapter requestMappingHandlerAdapter = mock(RequestMappingHandlerAdapter.class);
         HandlerMethodArgumentResolverComposite composite = mock(HandlerMethodArgumentResolverComposite.class);
         doReturn(composite).when(requestMappingHandlerAdapter).getArgumentResolvers();
-        Answer verifyList = new Answer() {
+        Answer<Object> verifyList = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 registeredArgumentResolvers = (List<?>) invocation.getArguments()[0];

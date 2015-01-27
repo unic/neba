@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(MockitoJUnitRunner.class)
 public class LookupResultTest {
     @Mock
-    private OsgiBeanSource beanSource;
+    private OsgiBeanSource<?> beanSource;
     private LookupResult testee;
 
     @Before

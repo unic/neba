@@ -177,7 +177,7 @@ public class ResourceToModelAdapterUpdaterTest {
 		this.testee.refresh();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "rawtypes" })
 	private void withModel(Class<?> modelType) {
 		OsgiBeanSource source = mock(OsgiBeanSource.class);
 		when(source.getBeanType()).thenReturn((Class) modelType);

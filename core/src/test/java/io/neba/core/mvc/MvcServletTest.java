@@ -72,7 +72,7 @@ public class MvcServletTest {
 
     @Before
     public void setUp() throws Exception {
-        Answer retainMvcContext = new Answer() {
+        Answer<Object> retainMvcContext = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 injectedContext = (MvcContext) invocation.getArguments()[1];
