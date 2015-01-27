@@ -68,7 +68,7 @@ public class NebaViewResolverTest {
         doReturn("").when(this.request).getContextPath();
         doReturn(this.dispatcher).when(this.request).getRequestDispatcher(anyString());
         doReturn(this.flashMapManager).when(this.request).getAttribute(FLASH_MAP_MANAGER_ATTRIBUTE);
-        Answer original = new Answer() {
+        Answer<Object> original = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 return invocation.getArguments()[0];

@@ -63,7 +63,6 @@ public class ModelMetadataConsolePluginTest {
     private ModelMetadataConsolePlugin testee;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         this.metadata = new ArrayList<ResourceModelMetaData>();
         this.internalWriter = new StringWriter();

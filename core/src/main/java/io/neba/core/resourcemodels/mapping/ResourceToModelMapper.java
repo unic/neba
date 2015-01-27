@@ -59,7 +59,6 @@ public class ResourceToModelMapper {
      * @param <T>      the bean type.
      * @return never <code>null</code>.
      */
-    @SuppressWarnings("unchecked")
     public <T> T map(final Resource resource, final OsgiBeanSource<T> modelSource) {
         notNull(resource, "Method argument resource must not be null.");
         notNull(modelSource, "Method argument modelSource must not be null.");

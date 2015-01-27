@@ -32,9 +32,10 @@ import static org.springframework.util.Assert.notNull;
  * @author Olaf Otto
  */
 @Service
+@SuppressWarnings("rawtypes")
 public class CyclicMappingSupport {
     // Recursive mappings always occurs within the same thread.
-    private final ThreadLocal<Map<Mapping, Mapping>> ongoingMappings = new ThreadLocal<Map<Mapping, Mapping>>();
+	private final ThreadLocal<Map<Mapping, Mapping>> ongoingMappings = new ThreadLocal<Map<Mapping, Mapping>>();
 
     /**
      * Contract: When invoked and <code>null</code> is returned,

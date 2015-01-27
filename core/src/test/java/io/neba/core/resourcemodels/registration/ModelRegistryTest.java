@@ -20,6 +20,7 @@ import io.neba.api.annotations.ResourceModel;
 import io.neba.core.blueprint.ReferenceConsistencyChecker;
 import io.neba.core.sling.AdministrativeResourceResolver;
 import io.neba.core.util.OsgiBeanSource;
+
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -35,6 +36,7 @@ import org.osgi.framework.Bundle;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.nodetype.NodeType;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -77,7 +79,6 @@ public class ModelRegistryTest {
     private ModelRegistry testee;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() throws LoginException {
         doReturn(true).when(this.consistencyChecker).isValid(isA(OsgiBeanSource.class));
         doReturn(new String[]{}).when(this.resolver).getSearchPath();
@@ -438,7 +439,7 @@ public class ModelRegistryTest {
     }
 
     private void assertLookedUpModelTypesAre(Class<?>... types) {
-        assertThat(this.lookedUpModels).onProperty("source.beanType").containsOnly(types);
+        assertThat(this.lookedUpModels).onProperty("source.beanType").containsOnly((Object[]) types);
     }
 
 	private void assertNumberOfLookedUpBeanSourcesIs(int i) {
@@ -523,20 +524,20 @@ public class ModelRegistryTest {
         mockBeanSourcesForAllResourceModels();
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     private void mockBeanSource(String resourceType, Class modelType) {
         mockBeanSource(resourceType, modelType, "defaultBeanName");
     }
 
-    private void mockBeanSource(String resourceType, Class<?> modelType, String modelBeanName) {
-        OsgiBeanSource source = mock(OsgiBeanSource.class);
+    @SuppressWarnings("unchecked")
+	private void mockBeanSource(String resourceType, @SuppressWarnings("rawtypes") Class modelType, String modelBeanName) {
+        OsgiBeanSource<?> source = mock(OsgiBeanSource.class);
         when(source.getBeanType()).thenReturn(modelType);
         when(source.getBundleId()).thenReturn(this.bundleId);
         when(source.getBeanName()).thenReturn(modelBeanName);
         this.testee.add(new String[] {resourceType}, source);
     }
 
-    @SuppressWarnings("unchecked")
     private void mockBeanSourcesForAllResourceModels() {
         for (ResourceModel model : this.resourceModelAnnotations) {
             OsgiBeanSource<?> source = mock(OsgiBeanSource.class);
