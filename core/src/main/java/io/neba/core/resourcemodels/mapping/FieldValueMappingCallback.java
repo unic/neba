@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import static io.neba.core.resourcemodels.mapping.CustomFieldMappers.AnnotationMapping;
+import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -56,15 +56,15 @@ public class FieldValueMappingCallback {
     private final ValueMap properties;
     private final Resource resource;
     private final ConfigurableBeanFactory beanFactory;
-    private final CustomFieldMappers customFieldMappers;
+    private final AnnotatedFieldMappers annotatedFieldMappers;
 
     /**
      * @param model    the model to be mapped. Must not be null.
      * @param resource the source of property values for the model. Must not be null.
      * @param factory  must not be null.
-     * @param customFieldMappers  must not be null.
+     * @param annotatedFieldMappers  must not be null.
      */
-    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory, CustomFieldMappers customFieldMappers) {
+    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory, AnnotatedFieldMappers annotatedFieldMappers) {
         if (model == null) {
             throw new IllegalArgumentException("Constructor parameter model must not be null.");
         }
@@ -74,7 +74,7 @@ public class FieldValueMappingCallback {
         if (factory == null) {
             throw new IllegalArgumentException("Constructor parameter factory must not be null.");
         }
-        if (customFieldMappers == null) {
+        if (annotatedFieldMappers == null) {
             throw new IllegalArgumentException("Method argument customFieldMappers must not be null.");
         }
 
@@ -82,13 +82,13 @@ public class FieldValueMappingCallback {
         this.properties = toValueMap(resource);
         this.resource = resource;
         this.beanFactory = factory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) factory : null;
-        this.customFieldMappers = customFieldMappers;
+        this.annotatedFieldMappers = annotatedFieldMappers;
     }
 
     /**
      * Invoked for each {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData#getMappableFields() mappable field}
      * of a {@link io.neba.api.annotations.ResourceModel} to map the {@link MappedFieldMetaData#getField() corresponding field's}
-     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory, CustomFieldMappers) constructor}.
+     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory, AnnotatedFieldMappers) constructor}.
      *
      * @param metaData must not be <code>null</code>.
      */
@@ -139,7 +139,7 @@ public class FieldValueMappingCallback {
     @SuppressWarnings("unchecked")
     private Object applyCustomMappings(MappedFieldMetaData metaData, FieldData fieldData, final Object value) {
         Object result = value;
-        for (final AnnotationMapping mapping : this.customFieldMappers.get(metaData)) {
+        for (final AnnotationMapping mapping : this.annotatedFieldMappers.get(metaData)) {
             result = mapping.getMapper().map(new OngoingFieldMapping(this.model, result, mapping, fieldData, this.resource, this.properties));
         }
         return result;

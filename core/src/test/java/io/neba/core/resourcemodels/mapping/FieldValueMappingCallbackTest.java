@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
-import static io.neba.core.resourcemodels.mapping.CustomFieldMappers.AnnotationMapping;
+import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
@@ -78,7 +78,7 @@ public class FieldValueMappingCallbackTest {
     @Mock
     private Factory lazyLoadingCollectionFactory;
     @Mock
-    private CustomFieldMappers customFieldMappers;
+    private AnnotatedFieldMappers annotatedFieldMappers;
 
     private LazyLoader lazyLoadingCollectionCallback;
 
@@ -125,7 +125,7 @@ public class FieldValueMappingCallbackTest {
 
     @Before
     public void prepareCustomFieldMappers() throws Exception {
-        doReturn(emptyList()).when(this.customFieldMappers).get(isA(MappedFieldMetaData.class));
+        doReturn(emptyList()).when(this.annotatedFieldMappers).get(isA(MappedFieldMetaData.class));
     }
 
     /**
@@ -133,7 +133,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullModelInConstructor() throws Exception {
-        new FieldValueMappingCallback(null, this.resource, this.factory, this.customFieldMappers);
+        new FieldValueMappingCallback(null, this.resource, this.factory, this.annotatedFieldMappers);
     }
 
     /**
@@ -141,7 +141,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullResourceInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, null, this.factory, this.customFieldMappers);
+        new FieldValueMappingCallback(this.model, null, this.factory, this.annotatedFieldMappers);
     }
 
     /**
@@ -149,7 +149,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, null, this.customFieldMappers);
+        new FieldValueMappingCallback(this.model, this.resource, null, this.annotatedFieldMappers);
     }
 
     /**
@@ -157,7 +157,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInMapping() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.customFieldMappers).doWith(null);
+        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers).doWith(null);
     }
 
     /**
@@ -1327,7 +1327,7 @@ public class FieldValueMappingCallbackTest {
         Collection<AnnotationMapping> mappings = new ArrayList<AnnotationMapping>();
         mappings.add(mapping);
 
-        doReturn(mappings).when(this.customFieldMappers).get(isA(MappedFieldMetaData.class));
+        doReturn(mappings).when(this.annotatedFieldMappers).get(isA(MappedFieldMetaData.class));
 
         Answer retainMappingContext = new Answer() {
             @Override
@@ -1574,7 +1574,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void mapField() {
-        this.testee = new FieldValueMappingCallback(this.model, this.resource, this.factory, this.customFieldMappers);
+        this.testee = new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers);
         this.testee.doWith(this.mappedFieldMetadata);
     }
 

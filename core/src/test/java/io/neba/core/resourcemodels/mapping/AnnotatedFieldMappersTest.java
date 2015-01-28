@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verify;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CustomAnnotatedFieldMappersTest {
+public class AnnotatedFieldMappersTest {
     private Field field1 = getDeclaredField(TestModel1.class, "resources");
     private Field field2 = getDeclaredField(TestModel2.class, "resource");
     private CustomAnnotation1 annotation1 = this.field1.getAnnotation(CustomAnnotation1.class);
@@ -85,7 +85,7 @@ public class CustomAnnotatedFieldMappersTest {
     private AnnotatedFieldMapper mapper2;
 
     @InjectMocks
-    private CustomFieldMappers testee;
+    private AnnotatedFieldMappers testee;
 
     @Before
     public void setUp() throws Exception {

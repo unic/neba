@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.emptyList;
 
@@ -32,7 +33,7 @@ import static java.util.Collections.emptyList;
  * @author Olaf Otto
  */
 @Service
-public class CustomFieldMappers {
+public class AnnotatedFieldMappers {
     /**
      * @author Olaf Otto
      */
@@ -54,16 +55,19 @@ public class CustomFieldMappers {
         }
     }
 
-    private static final Collection<AnnotationMapping> NULL = emptyList();
+    private static final Collection<AnnotationMapping> EMPTY = emptyList();
     private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache
           = new ConcurrentDistinctMultiValueMap<Field, AnnotationMapping>();
     private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers
           = new ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper>();
 
+    private final AtomicInteger state = new AtomicInteger(0);
+
     public synchronized void add(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
+        this.state.getAndIncrement();
         this.fieldMappers.put(mapper.getAnnotationType(), mapper);
         this.cache.clear();
     }
@@ -72,6 +76,7 @@ public class CustomFieldMappers {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
+        this.state.getAndIncrement();
         this.fieldMappers.remove(mapper.getAnnotationType());
         this.cache.clear();
     }
@@ -83,13 +88,11 @@ public class CustomFieldMappers {
 
         Collection<AnnotationMapping> mappers = this.cache.get(metaData.getField());
 
-        if (mappers == NULL) {
-            return NULL;
-        }
-
         if (mappers != null) {
             return mappers;
         }
+
+        final int ticket = this.state.get();
 
         List<AnnotationMapping> compatibleMappers = new ArrayList<AnnotationMapping>();
         for (Annotation annotation : metaData.getAnnotations()) {
@@ -103,10 +106,13 @@ public class CustomFieldMappers {
                 }
             }
         }
-        mappers = compatibleMappers.isEmpty() ? NULL : compatibleMappers;
+
+        mappers = compatibleMappers.isEmpty() ? EMPTY : compatibleMappers;
 
         synchronized (this) {
-            this.cache.put(metaData.getField(), mappers);
+            if (ticket == this.state.get()) {
+                this.cache.put(metaData.getField(), mappers);
+            }
         }
 
         return mappers;

@@ -51,7 +51,7 @@ public class ResourceToModelMapper {
     @Inject
     private CyclicMappingSupport cyclicMappingSupport;
     @Inject
-    private CustomFieldMappers customFieldMappers;
+    private AnnotatedFieldMappers annotatedFieldMappers;
     @Inject
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
@@ -144,7 +144,7 @@ public class ResourceToModelMapper {
             model = getTargetObjectOfAdvisedBean((Advised) bean);
         }
 
-        final FieldValueMappingCallback callback = new FieldValueMappingCallback(model, resource, factory, this.customFieldMappers);
+        final FieldValueMappingCallback callback = new FieldValueMappingCallback(model, resource, factory, this.annotatedFieldMappers);
 
         for (MappedFieldMetaData mappedFieldMetaData : metaData.getMappableFields()) {
             callback.doWith(mappedFieldMetaData);
