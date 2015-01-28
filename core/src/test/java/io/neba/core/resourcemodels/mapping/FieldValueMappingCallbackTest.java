@@ -1240,7 +1240,7 @@ public class FieldValueMappingCallbackTest {
 
         mapPropertyField(String.class, "PropertyValue");
 
-        assertOngoingMappinDataIsAccurate();
+        assertOngoingMappingDataIsAccurate();
     }
 
     /**
@@ -1308,14 +1308,15 @@ public class FieldValueMappingCallbackTest {
         assertThat(this.ongoingMapping.getResolvedValue()).isNotNull();
     }
 
-    private void assertOngoingMappinDataIsAccurate() {
+    private void assertOngoingMappingDataIsAccurate() {
         assertThat(this.ongoingMapping.getField()).isEqualTo(this.mappedField);
-        assertThat(this.ongoingMapping.getFieldPath()).isEqualTo("field");
+        assertThat(this.ongoingMapping.getRepositoryPath()).isEqualTo("field");
         assertThat(this.ongoingMapping.getFieldType()).isEqualTo(this.mappedFieldMetadata.getType());
         assertThat(this.ongoingMapping.getModel()).isEqualTo(this.model);
         assertThat(this.ongoingMapping.getProperties()).isNotNull();
         assertThat(this.ongoingMapping.getResolvedValue()).isEqualTo(this.targetValue);
         assertThat(this.ongoingMapping.getResource()).isSameAs(this.resource);
+        assertThat(this.ongoingMapping.getFieldTypeParameter()).isSameAs(this.mappedFieldMetadata.getTypeParameter());
     }
 
     @SuppressWarnings("unchecked")

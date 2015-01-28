@@ -30,11 +30,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.Collections.emptyList;
 
 /**
+ * Represents all registered {@link io.neba.api.resourcemodels.AnnotatedFieldMapper custom field mappers}
+ * and provides the corresponding lookup and caching of lookup results.
+ *
  * @author Olaf Otto
  */
 @Service
 public class AnnotatedFieldMappers {
     /**
+     * Represents the relation of an {@link java.lang.annotation.Annotation} and and a
+     * {@link io.neba.api.resourcemodels.AnnotatedFieldMapper#getAnnotationType() compatible mapper}.
+     *
      * @author Olaf Otto
      */
     public static class AnnotationMapping {
@@ -72,6 +78,9 @@ public class AnnotatedFieldMappers {
         this.cache.clear();
     }
 
+    /**
+     * @param mapper must not be <code>null</code>.
+     */
     public synchronized void remove(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
@@ -81,6 +90,10 @@ public class AnnotatedFieldMappers {
         this.cache.clear();
     }
 
+    /**
+     * @param metaData must not be <code>null</code>.
+     * @return never <code>null</code> but rather an empty collection.
+     */
     public Collection<AnnotationMapping> get(MappedFieldMetaData metaData) {
         if (metaData == null) {
             throw new IllegalArgumentException("Method argument metaData must not be null.");

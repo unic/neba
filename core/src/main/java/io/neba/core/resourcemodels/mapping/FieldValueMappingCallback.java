@@ -718,7 +718,12 @@ public class FieldValueMappingCallback {
         }
 
         @Override
-        public String getFieldPath() {
+        public Class<?> getFieldTypeParameter() {
+            return this.metaData.getTypeParameter();
+        }
+
+        @Override
+        public String getRepositoryPath() {
             return fieldData.path;
         }
 

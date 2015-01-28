@@ -87,7 +87,8 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
     public interface OngoingMapping<FieldType, AnnotationType> {
         /**
          * @return The currently resolved value of the field,
-         * or <code>null</code> if no value could be resolved for the field.
+         * or <code>null</code> if no value could be resolved for the field. This value
+         * has not been set to the {@link #getField() field} at this point.
          */
         FieldType getResolvedValue();
 
@@ -104,7 +105,10 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
         Object getModel();
 
         /**
-         * @return the mapped field. Never <code>null</code>.
+         * @return the mapped field. Never <code>null</code>. The field's value was not changed at this point, i.e. it is likely to
+         *          deviate from {@link #getResolvedValue()}. Note: do not rely on this {@link java.lang.reflect.Field#getType() field's type}
+         *          but use the {@link #getFieldType() provided field type} instead, as these types may be different, for instance in case
+         *          of {@link io.neba.api.resourcemodels.Optional} fields.
          */
         Field getField();
 
@@ -123,10 +127,17 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
         Class<?> getFieldType();
 
         /**
-         * @return the path of a field, as determined by the field name or {@link io.neba.api.annotations.Path path annotation}. Placeholders
+         * @return the generic type parameter of the {@link #getFieldType() field type}, or <code>null</code> if
+         *         no such parameter exists.
+         */
+        Class<?> getFieldTypeParameter();
+
+        /**
+         * @return the repository path that shall be resolved to the field's value, as determined by the
+         *         field name or {@link io.neba.api.annotations.Path path annotation}. Placeholders
          *         in the path are resolved at this point. Never <code>null</code>.
          */
-        String getFieldPath();
+        String getRepositoryPath();
 
         /**
          * @return The resource that is mapped to the model. Never <code>null</code>, but may be a synthetic resource.
