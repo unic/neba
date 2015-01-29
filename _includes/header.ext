@@ -6,6 +6,7 @@
 
         <div id="logo">
             <a href="{{site.contextpath}}/index.html"><img src="{{site.contextpath}}/images/neba-logo.png" alt="NEBA" /></a>
+            <div id="claim">The best of Sling,<br />powered by Spring</div>
         </div><!--END LOGO-->
 
         <div id="primary-menu">
@@ -23,7 +24,6 @@
                 </li>
                 <li><a href="{{site.contextpath}}/contributing.html">Contributing</a></li>
                 <li class="external"><a href="https://github.com/unic/neba/tree/develop"><img src="{{site.contextpath}}/images/github-dark.png" title="Fork me on GitHub"/><span>Fork me on GitHub</span></a></li>
-                <li class="external"><a href="http://stackoverflow.com/questions/tagged/neba"><img src="{{site.contextpath}}/images/stackoverflow.png" title="Find me on Stackoverflow"/><span>Stack overflow</span></a></li>
             </ul><!--END UL-->
         </div><!--END PRIMARY MENU-->
 

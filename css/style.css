@@ -82,7 +82,6 @@ body {
     line-height: 20px;
     color: #444444;
     background: #fff;
-    border-top: 7px solid #f5f5f5;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -138,17 +137,11 @@ h1.title, h2.title, h3.title, h4.title, h5.title, h6.title {
     font-weight: 300;
 }
 
-.intersection {
-    border-bottom: 1px solid #e3e3e3;
-    margin-bottom: 30px;
-}
 
-.intersection span {
-    position: relative;
-    top: 9px;
-    background-color: white;
-    padding: 0 10px;
-    left: 45px;
+.intersection {
+    margin-top: 2em;
+    border-bottom: 1px solid #efefef;
+    padding-bottom: .3em;
 }
 
 ul, ol {
@@ -196,15 +189,10 @@ strong, b {
 input, textarea, select {
     outline: medium none;
     font-family: Helvetica, Arial, sans-serif;
-    font-size: 12px;
+    font-size: 13pt;
     color: #bbb;
     border: 1px solid #ddd;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
     border-radius: 2px;
-    -webkit-transition: all 0.2s ease-out 0s;
-    -moz-transition: all 0.2s ease-out 0s;
-    -o-transition: all 0.2s ease-out 0s;
     background-color: #fff;
     padding: 8px;
 }
@@ -292,12 +280,10 @@ img, iframe {
 }
 
 .divider-border {
-    border-top: 1px solid #eee;
     height: 4px;
-    border-bottom: 1px solid #eee;
     float: left;
     width: 100%;
-    margin: 40px 0;
+    margin: 20px 0;
 }
 
 table {
@@ -339,12 +325,12 @@ td, th {
     width: 960px;
     margin: 0 auto 50px auto;
     padding-top: 30px;
-    border-top: 2px solid #eee;
 }
 
 #header-wrapper {
     width: 100%;
-    /*	background-color: #f7f7f5; */
+    padding-top: 40px;
+    background: url("/images/bg.png") repeat-x ;
 }
 
 .header {
@@ -366,6 +352,17 @@ td, th {
 #logo, #logo a {
     float: left;
 }
+
+#logo img {
+    margin-right: 10px;
+}
+
+#claim {
+    padding: 3pt 0 0 0;
+    color: #40A2BB;
+    width: 20em;
+}
+
 
 /*--------------------------------------------------
 			PRIMARY MENU 
@@ -390,7 +387,6 @@ td, th {
     box-shadow: 0 0 0;
     -moz-box-shadow: 0 0 0;
     -webkit-box-shadow: 0 0 0;
-    color: #676767;
 }
 
 #primary-menu ul {
@@ -427,7 +423,8 @@ td, th {
     float: left;
 }
 
-#primary-menu ul li a:hover, #primary-menu ul li.sfHover a {
+#primary-menu ul li a:hover,
+#primary-menu ul > li.sfHover a {
     background-color: #4167A0;
     color: #fff;
 }
@@ -444,10 +441,6 @@ td, th {
     display: none;
 }
 
-#primary-menu ul li a.current {
-    color: #fff;
-}
-
 #primary-menu ul li a.logo {
     display: none;
     margin: 0;
@@ -456,8 +449,6 @@ td, th {
 #primary-menu ul ul {
     position: absolute;
     top: -9999em;
-    width: 120px;
-    background: #707070;
     z-index: 9999;
 }
 
@@ -486,7 +477,6 @@ td, th {
 
 #primary-menu ul ul li {
     margin: 0;
-    border-bottom: 1px solid #707070;
 }
 
 #primary-menu ul ul li:last-child {
@@ -498,84 +488,6 @@ td, th {
     padding: 12px 15px;
 }
 
-#primary-menu ul li:hover ul li a {
-    color: #e9e9e9;
-    background-color: #707070;
-}
-
-#primary-menu ul li:hover ul li a:hover {
-    color: #fff;
-}
-
-.fixed {
-    position: fixed;
-    top: 0;
-    background-color: #f7f7f5;
-    z-index: 999;
-    height: 59px;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
-}
-
-#header-wrapper .fixed {
-}
-
-.fixed .header {
-    border-bottom: none;
-}
-
-.fixed #logo {
-    display: none;
-}
-
-.fixed .logo2 {
-    position: absolute;
-    left: 0;
-    top: 12px;
-}
-
-.fixed #primary-menu ul {
-    padding: 0;
-}
-
-.fixed #primary-menu ul li {
-    background: url(../images/sprite.png) no-repeat scroll right -149px transparent;
-}
-
-.fixed #primary-menu ul li:last-child {
-    background: none;
-}
-
-.fixed #primary-menu ul li a {
-    color: #707070;
-    padding: 21px 15px;
-}
-
-.fixed #primary-menu ul li a:hover, .fixed #primary-menu ul li.sfHover a {
-    background-color: #4167A0;
-    color: #fff;
-}
-
-.fixed #primary-menu ul li a.current {
-    color: #fff;
-}
-
-.fixed #primary-menu ul li:hover ul {
-    top: 59px;
-}
-
-.fixed #primary-menu ul ul li {
-    background: none;
-}
-
-.fixed #primary-menu ul li:hover ul li a {
-    padding: 12px 15px;
-    background: #707070;
-    color: #e9e9e9;
-}
-
-.fixed #primary-menu ul li:hover ul li a:hover {
-    color: #fff;
-}
 
 /*--------------------------------------------------
 		  SECTION TITLE
@@ -584,7 +496,6 @@ td, th {
     overflow: hidden;
     margin: 0 0 30px 0;
     padding: 0 0 30px 0;
-    border-bottom: 1px solid #eee;
 }
 
 .section-title .title, .section-title .title a {
@@ -629,18 +540,11 @@ td, th {
 #footer {
     width: 100%;
     float: left;
-    color: #999;
-    background-color: #444;
     font-size: 11px;
-    border-bottom: 7px solid #333;
 }
 
 #footer a {
-    color: #ccc;
     font-weight: bold;
-}
-
-#footer a:hover {
 }
 
 #footer h3 {
@@ -648,7 +552,6 @@ td, th {
     font-size: 11px;
     font-family: 'Oswald', sans-serif;
     font-weight: 400;
-    color: #fff;
     display: block;
 }
 
@@ -679,10 +582,8 @@ td, th {
 }
 
 #footer-bottom {
-    background-color: #333;
     font-size: 11px;
     padding: 25px 25px 18px 25px;
-    color: #999999;
 }
 
 #footer-bottom p {
@@ -1399,72 +1300,260 @@ ul.item-nav li.all a {
 				ACTIVITIES
 ---------------------------------------------------*/
 
-#activities {
-    padding-bottom: 50px;
+@font-face {
+    font-family: 'octicons';
+    src: url('octicons.eot?#iefix') format('embedded-opentype'),
+    url('octicons.woff') format('woff'),
+    url('octicons.ttf') format('truetype'),
+    url('octicons.svg#octicons') format('svg');
+    font-weight: normal;
+    font-style: normal;
 }
 
-.activity img {
-    height: 40px;
+/*
+
+.octicon is optimized for 16px.
+.mega-octicon is optimized for 32px but can be used larger.
+
+*/
+.octicon, .mega-octicon {
+    font: normal normal normal 16px/1 octicons;
+    display: inline-block;
+    text-decoration: none;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.mega-octicon { font-size: 32px; }
+
+
+.octicon-alert:before { content: '\f02d'} /*  */
+.octicon-alignment-align:before { content: '\f08a'} /*  */
+.octicon-alignment-aligned-to:before { content: '\f08e'} /*  */
+.octicon-alignment-unalign:before { content: '\f08b'} /*  */
+.octicon-arrow-down:before { content: '\f03f'} /*  */
+.octicon-arrow-left:before { content: '\f040'} /*  */
+.octicon-arrow-right:before { content: '\f03e'} /*  */
+.octicon-arrow-small-down:before { content: '\f0a0'} /*  */
+.octicon-arrow-small-left:before { content: '\f0a1'} /*  */
+.octicon-arrow-small-right:before { content: '\f071'} /*  */
+.octicon-arrow-small-up:before { content: '\f09f'} /*  */
+.octicon-arrow-up:before { content: '\f03d'} /*  */
+.octicon-beer:before { content: '\f069'} /*  */
+.octicon-book:before { content: '\f007'} /*  */
+.octicon-bookmark:before { content: '\f07b'} /*  */
+.octicon-briefcase:before { content: '\f0d3'} /*  */
+.octicon-broadcast:before { content: '\f048'} /*  */
+.octicon-browser:before { content: '\f0c5'} /*  */
+.octicon-bug:before { content: '\f091'} /*  */
+.octicon-calendar:before { content: '\f068'} /*  */
+.octicon-check:before { content: '\f03a'} /*  */
+.octicon-checklist:before { content: '\f076'} /*  */
+.octicon-chevron-down:before { content: '\f0a3'} /*  */
+.octicon-chevron-left:before { content: '\f0a4'} /*  */
+.octicon-chevron-right:before { content: '\f078'} /*  */
+.octicon-chevron-up:before { content: '\f0a2'} /*  */
+.octicon-circle-slash:before { content: '\f084'} /*  */
+.octicon-circuit-board:before { content: '\f0d6'} /*  */
+.octicon-clippy:before { content: '\f035'} /*  */
+.octicon-clock:before { content: '\f046'} /*  */
+.octicon-cloud-download:before { content: '\f00b'} /*  */
+.octicon-cloud-upload:before { content: '\f00c'} /*  */
+.octicon-code:before { content: '\f05f'} /*  */
+.octicon-color-mode:before { content: '\f065'} /*  */
+.octicon-comment-add:before,
+.octicon-comment:before { content: '\f02b'} /*  */
+.octicon-comment-discussion:before { content: '\f04f'} /*  */
+.octicon-credit-card:before { content: '\f045'} /*  */
+.octicon-dash:before { content: '\f0ca'} /*  */
+.octicon-dashboard:before { content: '\f07d'} /*  */
+.octicon-database:before { content: '\f096'} /*  */
+.octicon-device-camera:before { content: '\f056'} /*  */
+.octicon-device-camera-video:before { content: '\f057'} /*  */
+.octicon-device-desktop:before { content: '\f27c'} /*  */
+.octicon-device-mobile:before { content: '\f038'} /*  */
+.octicon-diff:before { content: '\f04d'} /*  */
+.octicon-diff-added:before { content: '\f06b'} /*  */
+.octicon-diff-ignored:before { content: '\f099'} /*  */
+.octicon-diff-modified:before { content: '\f06d'} /*  */
+.octicon-diff-removed:before { content: '\f06c'} /*  */
+.octicon-diff-renamed:before { content: '\f06e'} /*  */
+.octicon-ellipsis:before { content: '\f09a'} /*  */
+.octicon-eye-unwatch:before,
+.octicon-eye-watch:before,
+.octicon-eye:before { content: '\f04e'} /*  */
+.octicon-file-binary:before { content: '\f094'} /*  */
+.octicon-file-code:before { content: '\f010'} /*  */
+.octicon-file-directory:before { content: '\f016'} /*  */
+.octicon-file-media:before { content: '\f012'} /*  */
+.octicon-file-pdf:before { content: '\f014'} /*  */
+.octicon-file-submodule:before { content: '\f017'} /*  */
+.octicon-file-symlink-directory:before { content: '\f0b1'} /*  */
+.octicon-file-symlink-file:before { content: '\f0b0'} /*  */
+.octicon-file-text:before { content: '\f011'} /*  */
+.octicon-file-zip:before { content: '\f013'} /*  */
+.octicon-flame:before { content: '\f0d2'} /*  */
+.octicon-fold:before { content: '\f0cc'} /*  */
+.octicon-gear:before { content: '\f02f'} /*  */
+.octicon-gift:before { content: '\f042'} /*  */
+.octicon-gist:before { content: '\f00e'} /*  */
+.octicon-gist-secret:before { content: '\f08c'} /*  */
+.octicon-git-branch-create:before,
+.octicon-git-branch-delete:before,
+.octicon-git-branch:before { content: '\f020'} /*  */
+.octicon-git-commit:before { content: '\f01f'} /*  */
+.octicon-git-compare:before { content: '\f0ac'} /*  */
+.octicon-git-merge:before { content: '\f023'} /*  */
+.octicon-git-pull-request-abandoned:before,
+.octicon-git-pull-request:before { content: '\f009'} /*  */
+.octicon-globe:before { content: '\f0b6'} /*  */
+.octicon-graph:before { content: '\f043'} /*  */
+.octicon-heart:before { content: '\2665'} /* ♥ */
+.octicon-history:before { content: '\f07e'} /*  */
+.octicon-home:before { content: '\f08d'} /*  */
+.octicon-horizontal-rule:before { content: '\f070'} /*  */
+.octicon-hourglass:before { content: '\f09e'} /*  */
+.octicon-hubot:before { content: '\f09d'} /*  */
+.octicon-inbox:before { content: '\f0cf'} /*  */
+.octicon-info:before { content: '\f059'} /*  */
+.octicon-issue-closed:before { content: '\f028'} /*  */
+.octicon-issue-opened:before { content: '\f026'} /*  */
+.octicon-issue-reopened:before { content: '\f027'} /*  */
+.octicon-jersey:before { content: '\f019'} /*  */
+.octicon-jump-down:before { content: '\f072'} /*  */
+.octicon-jump-left:before { content: '\f0a5'} /*  */
+.octicon-jump-right:before { content: '\f0a6'} /*  */
+.octicon-jump-up:before { content: '\f073'} /*  */
+.octicon-key:before { content: '\f049'} /*  */
+.octicon-keyboard:before { content: '\f00d'} /*  */
+.octicon-law:before { content: '\f0d8'} /*  */
+.octicon-light-bulb:before { content: '\f000'} /*  */
+.octicon-link:before { content: '\f05c'} /*  */
+.octicon-link-external:before { content: '\f07f'} /*  */
+.octicon-list-ordered:before { content: '\f062'} /*  */
+.octicon-list-unordered:before { content: '\f061'} /*  */
+.octicon-location:before { content: '\f060'} /*  */
+.octicon-gist-private:before,
+.octicon-mirror-private:before,
+.octicon-git-fork-private:before,
+.octicon-lock:before { content: '\f06a'} /*  */
+.octicon-logo-github:before { content: '\f092'} /*  */
+.octicon-mail:before { content: '\f03b'} /*  */
+.octicon-mail-read:before { content: '\f03c'} /*  */
+.octicon-mail-reply:before { content: '\f051'} /*  */
+.octicon-mark-github:before { content: '\f00a'} /*  */
+.octicon-markdown:before { content: '\f0c9'} /*  */
+.octicon-megaphone:before { content: '\f077'} /*  */
+.octicon-mention:before { content: '\f0be'} /*  */
+.octicon-microscope:before { content: '\f089'} /*  */
+.octicon-milestone:before { content: '\f075'} /*  */
+.octicon-mirror-public:before,
+.octicon-mirror:before { content: '\f024'} /*  */
+.octicon-mortar-board:before { content: '\f0d7'} /*  */
+.octicon-move-down:before { content: '\f0a8'} /*  */
+.octicon-move-left:before { content: '\f074'} /*  */
+.octicon-move-right:before { content: '\f0a9'} /*  */
+.octicon-move-up:before { content: '\f0a7'} /*  */
+.octicon-mute:before { content: '\f080'} /*  */
+.octicon-no-newline:before { content: '\f09c'} /*  */
+.octicon-octoface:before { content: '\f008'} /*  */
+.octicon-organization:before { content: '\f037'} /*  */
+.octicon-package:before { content: '\f0c4'} /*  */
+.octicon-paintcan:before { content: '\f0d1'} /*  */
+.octicon-pencil:before { content: '\f058'} /*  */
+.octicon-person-add:before,
+.octicon-person-follow:before,
+.octicon-person:before { content: '\f018'} /*  */
+.octicon-pin:before { content: '\f041'} /*  */
+.octicon-playback-fast-forward:before { content: '\f0bd'} /*  */
+.octicon-playback-pause:before { content: '\f0bb'} /*  */
+.octicon-playback-play:before { content: '\f0bf'} /*  */
+.octicon-playback-rewind:before { content: '\f0bc'} /*  */
+.octicon-plug:before { content: '\f0d4'} /*  */
+.octicon-repo-create:before,
+.octicon-gist-new:before,
+.octicon-file-directory-create:before,
+.octicon-file-add:before,
+.octicon-plus:before { content: '\f05d'} /*  */
+.octicon-podium:before { content: '\f0af'} /*  */
+.octicon-primitive-dot:before { content: '\f052'} /*  */
+.octicon-primitive-square:before { content: '\f053'} /*  */
+.octicon-pulse:before { content: '\f085'} /*  */
+.octicon-puzzle:before { content: '\f0c0'} /*  */
+.octicon-question:before { content: '\f02c'} /*  */
+.octicon-quote:before { content: '\f063'} /*  */
+.octicon-radio-tower:before { content: '\f030'} /*  */
+.octicon-repo-delete:before,
+.octicon-repo:before { content: '\f001'} /*  */
+.octicon-repo-clone:before { content: '\f04c'} /*  */
+.octicon-repo-force-push:before { content: '\f04a'} /*  */
+.octicon-gist-fork:before,
+.octicon-repo-forked:before { content: '\f002'} /*  */
+.octicon-repo-pull:before { content: '\f006'} /*  */
+.octicon-repo-push:before { content: '\f005'} /*  */
+.octicon-rocket:before { content: '\f033'} /*  */
+.octicon-rss:before { content: '\f034'} /*  */
+.octicon-ruby:before { content: '\f047'} /*  */
+.octicon-screen-full:before { content: '\f066'} /*  */
+.octicon-screen-normal:before { content: '\f067'} /*  */
+.octicon-search-save:before,
+.octicon-search:before { content: '\f02e'} /*  */
+.octicon-server:before { content: '\f097'} /*  */
+.octicon-settings:before { content: '\f07c'} /*  */
+.octicon-log-in:before,
+.octicon-sign-in:before { content: '\f036'} /*  */
+.octicon-log-out:before,
+.octicon-sign-out:before { content: '\f032'} /*  */
+.octicon-split:before { content: '\f0c6'} /*  */
+.octicon-squirrel:before { content: '\f0b2'} /*  */
+.octicon-star-add:before,
+.octicon-star-delete:before,
+.octicon-star:before { content: '\f02a'} /*  */
+.octicon-steps:before { content: '\f0c7'} /*  */
+.octicon-stop:before { content: '\f08f'} /*  */
+.octicon-repo-sync:before,
+.octicon-sync:before { content: '\f087'} /*  */
+.octicon-tag-remove:before,
+.octicon-tag-add:before,
+.octicon-tag:before { content: '\f015'} /*  */
+.octicon-telescope:before { content: '\f088'} /*  */
+.octicon-terminal:before { content: '\f0c8'} /*  */
+.octicon-three-bars:before { content: '\f05e'} /*  */
+.octicon-tools:before { content: '\f031'} /*  */
+.octicon-trashcan:before { content: '\f0d0'} /*  */
+.octicon-triangle-down:before { content: '\f05b'} /*  */
+.octicon-triangle-left:before { content: '\f044'} /*  */
+.octicon-triangle-right:before { content: '\f05a'} /*  */
+.octicon-triangle-up:before { content: '\f0aa'} /*  */
+.octicon-unfold:before { content: '\f039'} /*  */
+.octicon-unmute:before { content: '\f0ba'} /*  */
+.octicon-versions:before { content: '\f064'} /*  */
+.octicon-remove-close:before,
+.octicon-x:before { content: '\f081'} /*  */
+.octicon-zap:before { content: '\26A1'} /* ⚡ */
+
+#activities {
+    min-height: 12em;
+    padding-bottom: 3em;
 }
 
 .activity {
     padding-top: 5px;
-    text-align: center;
+    word-wrap: break-word;
 }
 
-a.activity-link {
-    display: block;
-    height: 40px;
-    margin-bottom: 5px;
-    width: 100%;
-    background: no-repeat center;
-}
-
-.issue a.activity-link {
-    background-image: url("../images/todo.png");
-}
-
-.commit-unic-neba-gh-pages a.activity-link {
-    background-image: url("../images/documentation.png");
-}
-
-.commit-unic-neba-develop a.activity-link {
-    background-image: url("../images/code.png");
+.activity-link {
+    padding: 0 .3em 0 0;
+    float: left;
 }
 
 .tweet a.activity-link {
-    background-image: url("../images/twitter.png");
-}
-
-.issue a.activity-link {
-    background-image: url("../images/todo.png");
-}
-
-@media only screen and (min-width: 959px) {
-    /** Virtually Move targets of anchor links down by the fixed menu height  **/
-    h2[id],
-    h3[id],
-    h4[id],
-    p[id] {
-        padding-top: 70px;
-        margin-top: -70px;
-    }
-
-    h3[id] {
-        padding-top: 100px;
-    }
-
-    h4[id] {
-        padding-top: 90px;
-    }
-
-    h2 + h3[id] {
-        padding-top: 70px;
-    }
-
-    h3 + h4[id] {
-        padding-top: 70px;
-    }
+    background: url("/images/tweet.png") no-repeat left center;
+    padding: 20px;
 }
 
 /*---------------iPad portrait from 768px to 959px ---------------*/
@@ -1694,94 +1783,6 @@ CSS overview:
 }
 
 /*--------------------------------------------------
-				WIDGET
----------------------------------------------------*/
-.widget {
-    margin-bottom: 50px;
-    float: left;
-    width: 100%;
-}
-
-.widget h3.title {
-    font-family: 'Oswald', sans-serif;
-    font-size: 15px;
-    line-height: 20px;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: block;
-    padding: 0 0 5px 0;
-    margin: 0 0 5px 0;
-}
-
-.widget ul {
-    padding: 0;
-    margin: 0;
-    list-style-type: none;
-    color: #aaa;
-}
-
-.widget ul li {
-    padding: 0;
-    margin: 0 0 15px 0;
-    width: 100%;
-}
-
-.widget ul li:last-child {
-    margin: 0;
-}
-
-.widget ul li a {
-    color: #676767;
-    font-weight: bold;
-}
-
-.widget a:hover {
-}
-
-.widget ul li span.date {
-    color: #aaa;
-    display: block;
-    font-size: 11px;
-    text-transform: uppercase;
-}
-
-.widget img.alignleft {
-    margin: 5px 15px 0 0;
-    padding: 6px;
-    background-color: #f4f4f4;
-    position: relative;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    border-radius: 2px;
-}
-
-.widget ul.archive li {
-    float: left;
-    margin-bottom: 5px;
-}
-
-.widget ul#recentcomments a {
-    font-size: 12px;
-    text-transform: none;
-    font-weight: bold;
-}
-
-.widget ul#recentcomments a.author:hover {
-}
-
-.widget ul#recentcomments, .widget ul#recentcomments li a.author {
-    color: #aaa;
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: normal;
-}
-
-.widget .photostream a, .widget .photostream img {
-    height: 50px;
-    width: 50px;
-}
-
-/*--------------------------------------------------
 			POST
 ---------------------------------------------------*/
 .post {
@@ -1861,9 +1862,6 @@ CSS overview:
     word-spacing: 5px;
 }
 
-.post-title h2.title a:hover {
-}
-
 .post h3.title {
     margin-bottom: 0;
     line-height: 27px;
@@ -1937,26 +1935,6 @@ CSS overview:
     line-height: 11px;
 }
 
-.post-info div.comments a {
-    color: #bbb;
-    display: block;
-    cursor: pointer;
-    background-color: #444;
-    font-size: 9px;
-    padding: 6px;
-}
-
-.post-info div.comments a:hover {
-    color: #fff;
-}
-
-.post-info div.comments a span {
-    font-size: 22px;
-    letter-spacing: 0;
-    line-height: 27px;
-    margin-top: 2px;
-}
-
 /*--------------------------------------------------
 			SHARE
 ---------------------------------------------------*/
@@ -1974,195 +1952,6 @@ ul.share li {
 
 ul.share li.twitter {
     width: 110px;
-}
-
-/*--------------------------------------------------
-			COMMENTS
----------------------------------------------------*/
-.comment-list {
-    overflow: hidden;
-    margin: 0;
-    padding: 15px 0 0 0;
-}
-
-.comment {
-    list-style-type: none;
-    margin: 15px 0 0 0;
-}
-
-.comment:first-child {
-    border-top: none;
-    margin-top: 0;
-}
-
-.comment div {
-    margin: 0;
-    overflow: hidden;
-    background-color: #f8f8f8;
-    padding: 25px;
-    position: relative;
-}
-
-.comment div .item-mask {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 99;
-}
-
-.comment .avatar {
-    margin: 0 20px 5px 0;
-    padding: 0;
-    width: 44px;
-    height: 48px;
-    float: left;
-    z-index: 1;
-}
-
-.comment .comment-wrap, .comment .comment-meta {
-    width: 90%;
-    padding: 0;
-}
-
-.comment .comment-meta {
-    font-size: 11px;
-    text-transform: uppercase;
-}
-
-.comment .comment-meta .reply {
-    font-size: 9px;
-    line-height: 16px;
-    font-weight: bold;
-    padding: 2px 4px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    border-radius: 2px;
-    background-color: #444;
-    color: #ccc;
-}
-
-.comment .comment-meta .reply:hover {
-    color: #fff;
-}
-
-.comment .author, .comment .author a {
-    color: #676767;
-    margin: 0;
-    font-weight: bold;
-}
-
-.comment .date {
-    color: #aaa;
-    margin: 0 0 5px 0;
-}
-
-.comment .comment-wrap {
-    margin-top: 5px;
-}
-
-.comment .children {
-    padding: 0 0 0 35px;
-    margin: 15px 0 0 25px;
-    border-left: 1px solid #eee;
-    background: url(../images/sprite.png) no-repeat 0 -379px transparent;
-}
-
-.comment .children .comment {
-    list-style-type: none;
-}
-
-.comment div {
-    margin: 0;
-    overflow: hidden;
-    background-color: #f8f8f8;
-    padding: 25px;
-}
-
-.comment .children .comment {
-    margin: 15px 0 0 0;
-    padding: 0 0 0 0;
-    position: relative;
-}
-
-.comment .children .comment:first-child {
-    margin-top: 0;
-}
-
-.comment .children .comment-wrap, .comment .children .comment-meta {
-    width: 89%;
-}
-
-.comment .children .children .comment-wrap, .comment .children .children .comment-meta {
-    width: 87.5%;
-}
-
-.comment .children .children .children .comment-wrap, .comment .children .children .children .comment-meta {
-    width: 86%;
-}
-
-.comment .children .children .children .children .comment-wrap, .comment .children .children .children .children .comment-meta {
-    width: 84%;
-}
-
-.comment .children .children .children .children .children .comment-wrap, .comment .children .children .children .children .children .comment-meta {
-    width: 81%;
-}
-
-/*--------------------------------------------------
-		COMMENT FORM
----------------------------------------------------*/
-#comment-form {
-    width: 90%;
-}
-
-#comment-form.form input {
-    width: 60%;
-}
-
-#comment-form.form textarea {
-    width: 97%;
-    height: 150px;
-}
-
-#comment-form.form input.submit {
-    width: 130px;
-    float: right;
-}
-
-/*--------------------------------------------------
-			WP-PAGINATION
----------------------------------------------------*/
-.wp-pagenavi {
-    float: right;
-    position: relative;
-}
-
-.wp-pagenavi span.pages {
-    margin: 7px 30px 0 0;
-    padding: 0;
-    background-color: transparent;
-}
-
-.wp-pagenavi a, .wp-pagenavi a:link, .wp-pagenavi span {
-    background-color: #f8f8f8;
-    display: inline-block;
-    float: left;
-    color: #676767;
-    font-size: 11px;
-    text-decoration: none;
-    font-weight: bold;
-    margin: 0 0 0 4px;
-    padding: 7px 12px;
-    text-transform: uppercase;
-}
-
-.wp-pagenavi a:hover {
-    color: #fff;
-    background-color: #4167A0;
-}
-
-.wp-pagenavi span.current {
-    color: #fff;
 }
 
 /*---------------iPad portrait---------------*/
@@ -2185,30 +1974,6 @@ ul.share li.twitter {
 
     .blog3 .post-content {
         width: 210px;
-    }
-
-    .comment .comment-wrap, .comment .comment-meta {
-        width: 85.4%;
-    }
-
-    .comment .children .comment-wrap, .comment .children .comment-meta {
-        width: 83%;
-    }
-
-    .comment .children .children .comment-wrap, .comment .children .children .comment-meta {
-        width: 79.8%;
-    }
-
-    .comment .children .children .children .comment-wrap, .comment .children .children .children .comment-meta {
-        width: 75%;
-    }
-
-    .comment .children .children .children .children .comment-wrap, .comment .children .children .children .children .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .children .children .children .children .comment-wrap, .comment .children .children .children .children .children .comment-meta {
-        width: 100%;
     }
 }
 
@@ -2243,25 +2008,6 @@ ul.share li.twitter {
         width: 320px;
     }
 
-    .comment .comment-wrap, .comment .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .comment-wrap, .comment .children .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .children .comment-wrap, .comment .children .children .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .children .children .comment-wrap, .comment .children .children .children .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .children .children .children .comment-wrap, .comment .children .children .children .children .comment-meta {
-        width: 100%;
-    }
 }
 
 /*---------------iPhone portrait---------------*/
@@ -2292,26 +2038,6 @@ ul.share li.twitter {
         width: 300px;
     }
 
-    .comment .comment-wrap, .comment .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .comment-wrap, .comment .children .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .children .comment-wrap, .comment .children .children .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .children .children .comment-wrap, .comment .children .children .children .comment-meta {
-        width: 100%;
-    }
-
-    .comment .children .children .children .children .comment-wrap, .comment .children .children .children .children .comment-meta {
-        width: 100%;
-    }
-
     .blog5 .post-info {
         width: 100%;
         margin: -57px 0 0 0;
@@ -2339,20 +2065,6 @@ ul.share li.twitter {
     .post-info div.date span.day, .post-info div.date span.month, .post-info div.comments a span {
         font-size: 11px;
         line-height: 11px;
-    }
-
-    .post-info div.comments {
-        height: auto;
-    }
-
-    .post-info div.comments a {
-        font-size: 11px;
-        padding: 8px;
-    }
-
-    .post-info div.comments a span {
-        display: inline;
-        margin: 0 2px;
     }
 }
 
@@ -3612,9 +3324,7 @@ div.ppt {
     outline: none;
 }
 
-.slides,
-.flex-control-nav,
-.flex-direction-nav {
+.slides {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -3627,18 +3337,15 @@ div.ppt {
     padding: 0;
 }
 
+/* Hide the slides before the JS is loaded. Avoids image jumping */
 .flexslider .slides > li {
     display: none;
-    -webkit-backface-visibility: hidden;
 }
 
-/* Hide the slides before the JS is loaded. Avoids image jumping */
 .flexslider .slides > li:first-child {
-    display: block;
-    -webkit-backface-visibility: hidden;
+    display: none;
 }
 
-/* Hide the slides before the JS is loaded. Avoids image jumping */
 .flexslider .slides img {
     max-width: 100%;
     display: block;
@@ -3700,89 +3407,20 @@ html[xmlns] .slides {
     zoom: 1;
 }
 
-.flex-caption {
-    z-index: 500;
-    position: absolute;
-    bottom: 0;
-    left: 92px;
-    background: #444;
-    color: #fff;
-    max-width: 70%;
-    padding: 12px 20px;
-    margin-bottom: 0;
+.flex-direction-nav a {
+    z-index: 600;
 }
 
 /* Direction Nav */
-.flex-direction-nav {
-    height: 0;
-}
-
-.flex-direction-nav li a {
-    background: url(../images/sprite.png) no-repeat scroll 0 0 #444;
-    bottom: 0;
-    width: 45px;
-    height: 44px;
-    position: absolute;
-    text-indent: -999em;
-    z-index: 500;
-}
-
-.flex-direction-nav li a:hover {
-}
-
-.flex-direction-nav li .flex-prev {
-    left: 0;
-    background-position: 17px -212px;
-}
-
-.flex-direction-nav li .flex-next {
-    left: 46px;
-    background-position: 17px -282px;
-}
-
-.flex-direction-nav li .flex-disabled {
-    opacity: .3;
-    filter: alpha(opacity=30);
-    cursor: default;
-}
-
-/* Control Nav */
-.flex-control-nav {
-    width: 100%;
-    position: absolute;
-    bottom: -15px;
-    text-align: center;
-}
-
-.flex-control-nav li {
-    margin: 0 0 0 5px;
-    display: inline;
-}
-
-.flex-control-nav li:first-child {
-    margin: 0;
-}
-
-.flex-control-nav li a {
-    width: 10px;
-    height: 10px;
-    display: block;
-    background: #ddd;
-    cursor: pointer;
-    text-indent: -999em;
-    -webkit-transition-duration: 0s;
-    -moz-transition-duration: 0s;
-    -o-transition-duration: 0s;
-    border-radius: 30px 30px 30px 30px;
-}
-
-.flex-control-nav li a:hover {
-    background: #aaa;
-}
-
-.flex-control-nav li a.active {
-    background: #aaa;
-    cursor: default;
+.flex-direction-nav a {width: 30px; height: 30px; margin: -20px 0 0; display: block; background: url(/images/sprite.png) no-repeat 7px -220px #A5B9DC; position: absolute; top: 50%; cursor: pointer; text-indent: -9999px; opacity: 0; -webkit-transition: all .3s ease;}
+.flex-direction-nav .flex-next {background-position: 8px -290px; right: -36px; }
+.flex-direction-nav .flex-prev {left: -36px;}
+.flexslider:hover .flex-next {opacity: 0.8; right: 5px;}
+.flexslider:hover .flex-prev {opacity: 0.8; left: 5px;}
+.flexslider:hover .flex-next:hover, .flexslider:hover .flex-prev:hover {opacity: 1;}
+.flex-direction-nav .disabled {opacity: .3!important; filter:alpha(opacity=30); cursor: default;}
+.flex-direction-nav li {
+    list-style: none;
 }
 
 /* Index page top FlexSlider Necessary Styles
@@ -3790,13 +3428,30 @@ html[xmlns] .slides {
 .slideshow-container {
     width: 960px;
     float: left;
-    margin: 0 0 30px 0;
-    padding: 0 0 30px 0;
-    border-bottom: 1px solid #eee;
+}
+#index-slider img {
+    float:left;
+}
+
+.slider-claim {
+    font-size: 220%;
+    line-height: 120%;
+    color: #000;
+    padding: 1em 1em 1em 0;
+}
+
+.slider-claim strong {
+    font-family: Oswald, sans-serif;
+    position: relative;
+    top: .075em;
 }
 
 #index-slider {
     height: 370px;
+}
+
+#disqus_thread {
+    margin-top: 3em;
 }
 
 /*---------------iPad portrait---------------*/
@@ -3847,6 +3502,11 @@ html[xmlns] .slides {
     .flex-caption, .pagination {
         display: none;
     }
+
+    #index-slider .slider-claim {
+        font-size: inherit;
+        line-height: inherit;
+    }
 }
 
 /* ----------------------------------------------------------------- COLORS -------------------------------------------------------------------------------- */
@@ -3857,14 +3517,6 @@ input.submit, input.submit:focus, input.submit:active {
 
 a {
     color: #2f6fbf;
-}
-
-#primary-menu ul li a.current {
-    background-color: #63B5B7;
-}
-
-.fixed #primary-menu ul li a.current {
-    background-color: #63B5B7;
 }
 
 #footer a:hover {
@@ -3937,10 +3589,6 @@ ul.item-nav li:hover {
     text-decoration: underline;
 }
 
-.widget ul#recentcomments a.author:hover {
-    color: #4167A0;
-}
-
 .post-title h2.title a:hover {
     color: #4167A0;
 }
@@ -3953,14 +3601,46 @@ ul.item-nav li:hover {
     background-color: #4167A0;
 }
 
-.comment .author a:hover {
-    color: #4167A0;
+#primary-menu ul ul {
+    background-color: #4167A0;
 }
 
-.comment .comment-meta .reply:hover {
-    background-color: #3ea9a1;
+#primary-menu ul ul li {
+    border-bottom: 1px solid #ffffff;
 }
 
-.wp-pagenavi span.current {
-    background-color: #D9BE3E;
+#primary-menu ul li.current a {
+    color: #fff;
+}
+
+#primary-menu ul li:hover ul li a {
+    color: #e9e9e9;
+}
+
+#primary-menu ul li:hover ul li a:hover {
+    color: #fff;
+}
+
+#primary-menu select {
+    color: #000;
+}
+
+#primary-menu ul li.current,
+#primary-menu ul li ul li.current a {
+    background-color: #63B5B7;
+}
+
+#footer {
+    font-size: 85%;
+    border-top: 1px solid #DAF2F1;
+    background-color: #fbfbff;
+    border-bottom: 7px solid #BDE3FA;
+}
+
+#footer a:hover {
+    color: #000;
+}
+
+#footer-bottom {
+    background-color: #BDE3FA;
 }

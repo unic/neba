@@ -5,91 +5,57 @@ description: NEBA brings Spring and Sling together - using expressive and conven
 ---
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 {% include head.ext %}
-
 <body id="top">
-
 {% include header.ext %}
-
 <div id="wrapper">
-
-    <!-- START HOME -->
-
     <div class="content-wrapper clear">
-
-        <div class="section-title text-align-center">
-
-            <h1 class="title">The best of Sling, powered by Spring.</h1>
-
-        </div><!--END SECTION TITLE-->
-
-
         <div class="slideshow-container">
             <div class="flexslider" id="index-slider">
                 <ul class="slides">
                     <li>
-                        <a href="{% post_url 2014-11-18-neba-release-3.4.0 %}"><img src="images/release-anouncement.png" /></a>
-                        <p class="flex-caption">Read the release blog post.</p>
+                        <a href="{% post_url 2014-11-18-neba-release-3.4.0 %}">
+                            <img src="images/release-anouncement.png"
+                                 alt="Introducing out of the box lazy-loading for all resource model mappings: NEBA 3.4.0 brings even more performance for demanding applications."/>
+                            <div class="slider-claim">
+                                Introducing out-of-the-box lazy-loading for all resource model mappings:<br />
+                                <strong>NEBA 3.4.0</strong> brings even more performance for demanding applications!
+                            </div>
+                        </a>
                     </li>
                     <li>
-                        <a href="neba-in-a-nutshell.html"><img src="images/slider1.png" /></a>
-                        <p class="flex-caption">Spring and Sling, integrated by Blueprint. Zero dependencies, all the @Semantics.</p>
+                        <a href="neba-in-a-nutshell.html#features">
+                            <img src="images/slide2.png" alt="" title="NEBA features"/>
+                            <div class="slider-claim">
+                                Browse and inspect all <strong>content and model relationships</strong>, investigate mapping behavior in the Felix console
+                            </div>
+                        </a>
                     </li>
                     <li>
-                        <a href="neba-in-a-nutshell.html#features"><img src="images/slide2.png" alt="" /></a>
-                        <p class="flex-caption">Declare resource models with one annotation, navigate resource model mappings directly in Sling</p>
+                        <a href="neba-in-a-nutshell.html#features">
+                            <img src="images/slide3.png" alt="" />
+                            <div class="slider-claim">
+                                <strong>Real-time model performance analysis,</strong><br />
+                                Any time, on any instance - right in the Felix console.
+                            </div>
+                        </a>
                     </li>
-                    <li>
-                        <a href="neba-in-a-nutshell.html#features"><img src="images/slide3.png" alt="" /></a>
-                        <p class="flex-caption">Explore resource model behavior in real time, visualized with d3js</p>
-                    </li>
-                </ul><!--END UL SLIDES-->
-            </div><!--END FLEXSLIDER-->
-        </div><!--END SLIDESHOW-CONTAINER-->
+                </ul>
+            </div>
+        </div>
 
-        <ul class="grid row4 services">
-            <li>
-                <div data-href="neba-in-a-nutshell.html">
-                    <h2>In a nutshell</h2>
-                    <img src="images/icon1.png" alt="" />
-                    <p>NEBA integrates Sling and Spring in a non-intrusive, standardized manner.</p>
-                </div>
-            </li>
-            <li>
-                <div data-href="quickstart.html">
-                    <h2>Quickstart</h2>
-                    <img src="images/icon2.png" alt="" />
-                    <p><a href="quickstart.html">Get ready in two simple steps: Download &amp; install the CRX package, follow the quickstart guide.</a></p>
-                </div>
-            </li>
-            <li>
-                <div>
-                    <h2>License</h2>
-                    <img src="images/icon3.png" alt="" />
-                    <p>NEBA is published under the Apache License. It includes works licensed under the ASL, EPL and BSD-3 license.</p>
-                </div>
-            </li>
-            <li>
-                <div>
-                    <h2>Compatibility</h2>
-                    <img src="images/icon4.png" alt="" />
-                    <p>NEBA runs on Adobe AEM&#8482; 5.3 to 5.6 - and AEM&#8482;6 using JAVA 6 or 7 </p>
-                </div>
-            </li>
-        </ul><!--END GRID SERVICES-->
+        <h2 class="title intersection">Quick facts</h2>
+        <p>NEBA enables the development of clean, high-performing and easy to change solutions on Sling-based applications such as Adobe AEM&trade;.
+           NEBA integrates <a href="http://spring.io/">Spring</a> into Sling, exclusively using <a href="http://www.eclipse.org/gemini/blueprint/">the standardized reference implementation</a> of the
+           <a href="http://www.osgi.org/Specifications/HomePage">OSGi Compendium R4.2 specification</a>. </p>
+        <p>NEBA is 100% open source and published under the Apache license 2.0. It runs on standalone Sling and Adobe AEM&trade; 5.3 - 6.x using Java 1.6+.</p>
 
-
-        <h2 class="title intersection"><span>Activity stream</span></h2>
-        <div id="activities" class="flexslider"></div>
-
-    </div><!-- END CONTENT-WRAPPER -->
-
-    <!-- END HOME -->
-
-</div><!-- END WRAPPER -->
-
+        <h2 class="title intersection">Recent activities</h2>
+        <div id="activities" class="flexslider">
+            <img src="/images/ajax-loader.gif" class="spinner"/>
+        </div>
+    </div>
+</div>
 {% include footer.ext %}
-
 </body>
 </html>
