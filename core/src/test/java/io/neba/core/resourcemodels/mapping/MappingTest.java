@@ -50,7 +50,7 @@ public class MappingTest {
 
     @Test
     public void testHashCodeAndEquals() throws Exception {
-        Mapping secondMapping = new Mapping<Object>(this.source, this.metaData);
+        Mapping<?> secondMapping = new Mapping<Object>(this.source, this.metaData);
         assertThat(this.testee.hashCode()).isEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isEqualTo(secondMapping);
         

@@ -41,6 +41,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,7 +82,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
      *
      * @author Olaf Otto
      */
-    private static class ContextSpecificDispatcherServlet extends DispatcherServlet {
+	private static class ContextSpecificDispatcherServlet extends DispatcherServlet {
         private ServletConfig servletConfig;
 
         private ContextSpecificDispatcherServlet() {
@@ -252,7 +253,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
         }
     }
 
-    private String generateBeanNameFor(Class type) {
+    private String generateBeanNameFor(Class<?> type) {
         return type.getName() + GENERATED_BEAN_NAME_SEPARATOR + "0";
     }
 

@@ -125,7 +125,7 @@ public class ResourceModelMetaDataRegistrarTest {
     }
 
     private void assertAllMetadataConsistsOfMetadataFor(Class<?>... types) {
-        assertThat(this.allMetaData).onProperty("typeName").containsOnly(typeNamesOf(types));
+        assertThat(this.allMetaData).onProperty("typeName").containsOnly((Object[]) typeNamesOf(types));
     }
 
     private void getAllMetadata() {
@@ -162,7 +162,7 @@ public class ResourceModelMetaDataRegistrarTest {
         this.metadata = this.testee.get(modelType);
     }
 
-    private String[] typeNamesOf(Class... types) {
+    private String[] typeNamesOf(Class<?>... types) {
         if (types == null) {
             return null;
         }
