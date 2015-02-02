@@ -140,7 +140,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
         StringBuilder options = new StringBuilder(1024);
         for (File logFile : resolveLogFiles()) {
             String fileIdentifier = getNormalizedFilePath(logFile);
-            options.append("<option value=\"").append(fileIdentifier).append("\" id=\"logfile\" ")
+            options.append("<option value=\"").append(fileIdentifier).append("\" ")
                     .append("title=\"").append(fileIdentifier).append("\">")
                     .append(logFile.getParentFile().getName()).append('/').append(logFile.getName())
                     .append("</option>");
