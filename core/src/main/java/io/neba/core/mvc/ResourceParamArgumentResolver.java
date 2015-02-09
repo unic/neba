@@ -94,6 +94,9 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
             return null;
         }
 
+        if (!isEmpty(resourceParam.append())) {
+            resourcePath += resourceParam.append();
+        }
 
         // We must resolve (and not use getResource()) as the resource path may be mapped.
         ResourceResolver resolver = request.getResourceResolver();
@@ -112,11 +115,9 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         }
 
         Object adapted = resource.adaptTo(parameter.getParameterType());
-        if (adapted == null) {
-            if (required) {
+        if (adapted == null && required) {
                 throw new MissingAdapterException("Unable to adapt " + resource + " to " + parameter.getParameterType() +
                                                   " for required parameter '" + parameterName + "'.");
-            }
         }
 
         return adapted;

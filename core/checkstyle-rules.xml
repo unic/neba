@@ -127,7 +127,7 @@
         </module>
         <module name="JUnitTestCase"/>
         <module name="CyclomaticComplexity">
-            <property name="max" value="12"/>
+            <property name="max" value="13"/>
         </module>
         <module name="VisibilityModifier"/>
         <module name="HideUtilityClassConstructor"/>
