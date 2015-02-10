@@ -21,7 +21,6 @@ import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.springframework.beans.factory.BeanFactory;

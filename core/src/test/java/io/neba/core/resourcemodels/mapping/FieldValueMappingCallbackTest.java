@@ -21,7 +21,6 @@ import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -1297,8 +1296,8 @@ public class FieldValueMappingCallbackTest {
         assertThat(e)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Can not set java.lang.String field " +
-                "io.neba.core.resourcemodels.mapping.FieldValueMappingCallbackTest.mappedFieldOfTypeString " +
-                "to java.util.ArrayList");
+                        "io.neba.core.resourcemodels.mapping.FieldValueMappingCallbackTest.mappedFieldOfTypeString " +
+                        "to java.util.ArrayList");
     }
 
     private void assertOngoingMappingsResolvedValueIsNull() {
