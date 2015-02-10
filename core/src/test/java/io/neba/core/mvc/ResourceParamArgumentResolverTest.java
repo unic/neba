@@ -126,6 +126,7 @@ public class ResourceParamArgumentResolverTest {
 
         resolveArgument();
 
+        verifyResolvedPathIs("/junit/test/path");
         assertResolvedArgumentIsNull();
     }
 
@@ -134,6 +135,7 @@ public class ResourceParamArgumentResolverTest {
         withParameterRequired();
         withResourceParameter("/junit/test/path");
         withResolvedResource();
+
         resolveArgument();
     }
 
@@ -144,6 +146,7 @@ public class ResourceParamArgumentResolverTest {
 
         resolveArgument();
 
+        verifyResolvedPathIs("/junit/test/path");
         assertResolvedArgumentIsNull();
     }
 
@@ -155,6 +158,7 @@ public class ResourceParamArgumentResolverTest {
 
         resolveArgument();
 
+        verifyResolvedPathIs("/junit/test/path");
         assertResourceIsResolvedAsArgument();
     }
 
@@ -167,6 +171,7 @@ public class ResourceParamArgumentResolverTest {
 
         resolveArgument();
 
+        verifyResolvedPathIs("/junit/test/path");
         assertResolvedArgumentIsA(ValueMap.class);
     }
 
@@ -191,6 +196,41 @@ public class ResourceParamArgumentResolverTest {
     }
 
     @Test
+    public void testAppendPathIsIgnoredIfValueIsNull() throws Exception {
+        withResourceParameter(null);
+        withAppendPath("/jcr:content");
+
+        resolveArgument();
+        assertResolvedArgumentIsNull();
+    }
+
+    @Test
+    public void testAppendPathIsAddedToNonNullValue() throws Exception {
+        withResourceParameter("/content/path");
+        withAppendPath("/jcr:content");
+        withParameterType(Resource.class);
+        withResolvedResource();
+
+        resolveArgument();
+
+        verifyResolvedPathIs("/content/path/jcr:content");
+        assertResourceIsResolvedAsArgument();
+    }
+
+    @Test
+    public void testAppendPathIsAddedToDefaultValue() throws Exception {
+        withDefaultValue("/default/path");
+        withAppendPath("/jcr:content");
+        withParameterType(Resource.class);
+        withResolvedResource();
+
+        resolveArgument();
+
+        verifyResolvedPathIs("/default/path/jcr:content");
+        assertResourceIsResolvedAsArgument();
+    }
+
+    @Test
     public void testParametersAreOptionalIfDefaultValueIsProvided() throws Exception {
         withDefaultValue("/default/value");
         withDefaultParameterName("defaultName");
@@ -211,12 +251,13 @@ public class ResourceParamArgumentResolverTest {
         resolveArgument();
 
         verifyDefaultResourceIsResolved();
+        verifyResolvedPathIs("/default/value");
         assertResourceIsResolvedAsArgument();
     }
 
     private void verifyDefaultResourceIsResolved() {
         String defaultValue = this.resourceParam.defaultValue();
-        verify(this.resolver).resolve(eq(this.slingRequest), eq(defaultValue));
+        verifyResolvedPathIs(defaultValue);
     }
 
     private void withDefaultValue(String defaultValue) {
@@ -227,8 +268,16 @@ public class ResourceParamArgumentResolverTest {
         doReturn(parameterName).when(this.methodParameter).getParameterName();
     }
 
+    private void withAppendPath(String path) {
+        doReturn(path).when(this.resourceParam).append();
+    }
+
     private void verifyResolverLooksUpParameter(String key) {
         verify(this.slingRequest).getParameter(eq(key));
+    }
+
+    private void verifyResolvedPathIs(String path) {
+        verify(this.resolver).resolve(eq(this.slingRequest), eq(path));
     }
 
     private void withResourceParamValue(String parameterName) {

@@ -180,5 +180,8 @@ import static java.lang.annotation.ElementType.FIELD;
 @Target({FIELD, ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Reference {
+    /**
+     * Append this path segment to the reference path prior to resource resolution.
+     */
     String append() default "";
 }

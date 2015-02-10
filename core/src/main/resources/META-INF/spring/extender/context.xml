@@ -148,12 +148,12 @@
             </bp:service-properties>
         </bp:service>
 
-        <bp:service ref="modelMetadataConsolePlugin" interface="javax.servlet.Servlet" ranking="0">
+        <bp:service ref="modelStatisticsConsolePlugin" interface="javax.servlet.Servlet" ranking="0">
             <bp:service-properties>
-                <bp:entry key="felix.webconsole.label" value="modelmetadata"/>
+                <bp:entry key="felix.webconsole.label" value="modelstatistics"/>
                 <bp:entry key="service.vendor" value="neba.io"/>
                 <bp:entry key="service.description"
-                          value="Provides a Felix console plugin visualizing resource @ResourceModel metadata."/>
+                          value="Provides a Felix console plugin visualizing resource @ResourceModel statistics."/>
             </bp:service-properties>
         </bp:service>
 

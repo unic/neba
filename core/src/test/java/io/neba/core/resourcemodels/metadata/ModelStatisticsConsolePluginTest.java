@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ModelMetadataConsolePluginTest {
+public class ModelStatisticsConsolePluginTest {
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -60,10 +60,9 @@ public class ModelMetadataConsolePluginTest {
     private String renderedResponse;
 
     @InjectMocks
-    private ModelMetadataConsolePlugin testee;
+    private ModelStatisticsConsolePlugin testee;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         this.metadata = new ArrayList<ResourceModelMetaData>();
         this.internalWriter = new StringWriter();
@@ -80,25 +79,29 @@ public class ModelMetadataConsolePluginTest {
 
     @Test
     public void testHtmlRendering() throws Exception {
-        withRequestPath("/system/console/modelmetadata");
+        withRequestPath("/system/console/modelstatistics");
         doGet();
 
-        assertResponseContains("<button type=\"button\" onclick=\"resetResourceModelStatistics()\"");
-        assertResponseContains("<div id=\"scatterplot\" class=\"chartWrap\">        <svg></svg>    </div>");
-        assertResponseContains("<div id=\"barchart\">        <svg></svg>    </div>");
+        assertResponseContains("<button type=\"button\" id=\"resetStatistics\"");
+        assertResponseContains("<button type=\"button\" id=\"helpWithExpressions\"");
+        assertResponseContains("<div id=\"plotarea\">");
+        assertResponseContains("<input type=\"text\" id=\"filter\" data-default-value=\"Begin typing to create a filter expression\" />");
+        assertResponseContains("<div id=\"target\"></div>");
     }
 
     @Test
     public void testRetrievalOfAllStatistics() throws Exception {
         addStatistics("junit.test.type.NameOne", 123456L, 100L, 5, 0, 10, 20, new int[]{1, 2, 4, 8, 16}, new int[]{10, 20, 4, 1, 0});
         addStatistics("junit.test.type.NameTwo", 234567L, 200L, 10, 1, 20, 40, new int[]{2, 4, 8, 16, 23}, new int[]{20, 40, 8, 2, 0});
-        withRequestPath("/system/console/modelmetadata/api/statistics");
+        withRequestPath("/system/console/modelstatistics/api/statistics");
         doGet();
         assertResponseIsEqualTo("[" +
                                     "{" +
                                     "\"type\":\"junit.test.type.NameOne\"," +
                                     "\"since\":123456," +
                                     "\"mappableFields\":0," +
+                                    "\"lazyFields\":0," +
+                                    "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":100," +
                                     "\"averageMappingDuration\":10," +
@@ -111,6 +114,8 @@ public class ModelMetadataConsolePluginTest {
                                     "\"type\":\"junit.test.type.NameTwo\"," +
                                     "\"since\":234567," +
                                     "\"mappableFields\":0," +
+                                    "\"lazyFields\":0," +
+                                    "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":200," +
                                     "\"averageMappingDuration\":20," +
@@ -124,11 +129,14 @@ public class ModelMetadataConsolePluginTest {
     @Test
     public void testRetrievalOfStatisticsForSpecificType() throws Exception {
         addStatistics("junit.test.type.NameOne", 123456L, 100L, 5, 0, 10, 20, new int[]{1, 2, 4, 8, 16}, new int[]{10, 20, 4, 1, 0});
-        withRequestPath("/system/console/modelmetadata/api/statistics/junit.test.type.NameOne");
+        withRequestPath("/system/console/modelstatistics/api/statistics/junit.test.type.NameOne");
         doGet();
         assertResponseIsEqualTo("{" +
-                        "\"age\":123456," +
+                        "\"type\":\"junit.test.type.NameOne\"," +
+                        "\"since\":123456," +
                         "\"mappableFields\":0," +
+                        "\"lazyFields\":0," +
+                        "\"greedyFields\":0," +
                         "\"instantiations\":0," +
                         "\"mappings\":100," +
                         "\"averageMappingDuration\":10," +
@@ -150,7 +158,7 @@ public class ModelMetadataConsolePluginTest {
         addStatistics("junit.test.type.NameOne", 1, 1L, 1, 1, 1, 1, new int[]{}, new int[]{});
         addStatistics("junit.test.type.NameTwo", 1, 1L, 1, 1, 1, 1, new int[]{}, new int[]{});
 
-        withRequestPath("/system/console/modelmetadata/api/reset");
+        withRequestPath("/system/console/modelstatistics/api/reset");
         doGet();
 
         assertResponseIsEqualTo("{\"success\": true}");
@@ -219,7 +227,7 @@ public class ModelMetadataConsolePluginTest {
     }
 
     private void getResource(String resource) {
-        String resourcePath = "/" + ModelMetadataConsolePlugin.LABEL + "/static/" + resource;
+        String resourcePath = "/" + ModelStatisticsConsolePlugin.LABEL + "/static/" + resource;
         this.resourceUrl = this.testee.getResource(resourcePath);
     }
 }

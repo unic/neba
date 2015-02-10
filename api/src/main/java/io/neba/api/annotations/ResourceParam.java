@@ -44,7 +44,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *          return page.getTitle();
  *      }
  *  }
- *
  *  </pre>
  *
  *  In the above example, a request parameter "page" is expected. The parameter value is regarded as a
@@ -54,6 +53,17 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  *  <pre>GET /bin/mvc.do/echoTitle?path=/content/site/en: "English page title".</pre>
 
+ * </p>
+ * <p>
+ *     One may also append a segment to the path prior to resolution, for instance to target
+ *     a sub resource of the provided path, like so:
+ *  <pre>
+ *      public String echoTitle(&#64;ResourceParam(append = "jcr:content") PageContent content) {
+ *          return page.getTitle();
+ *      }
+ *  </pre>
+ *
+ *  The append path is also applied to the default value, if provided.
  * </p>
  *
  * By default, &#64;{@link ResourceParam} parameters are {@link ResourceParam#required() required}. If the parameter is missing,
@@ -87,4 +97,9 @@ public @interface ResourceParam {
      *         Providing a default value implies {@link #required()} = false.
      */
     String defaultValue() default "";
+
+    /**
+     * Append this path segment to the provided path prior to resource resolution.
+     */
+    String append() default "";
 }
