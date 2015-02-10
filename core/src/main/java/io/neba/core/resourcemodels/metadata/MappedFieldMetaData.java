@@ -21,7 +21,7 @@ import io.neba.api.annotations.Path;
 import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.This;
 import io.neba.api.resourcemodels.Optional;
-import io.neba.core.util.MetaAnnotatedElement;
+import io.neba.core.util.Annotations;
 import io.neba.core.util.ReflectionUtil;
 import org.apache.commons.lang.ClassUtils;
 import org.springframework.cglib.proxy.Enhancer;
@@ -35,7 +35,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
-import static io.neba.core.util.MetaAnnotatedElement.annotatedElement;
+import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -50,8 +50,6 @@ import static org.springframework.util.ReflectionUtils.makeAccessible;
  * @author Olaf Otto
  */
 public class MappedFieldMetaData {
-    private final MetaAnnotatedElement annotatedElement;
-
     /**
      * Whether a property cannot be represented by a resource but must stem
      * from a value map representing the properties of a resource.
@@ -65,6 +63,7 @@ public class MappedFieldMetaData {
     }
 
     private final Field field;
+    private final Annotations annotations;
     private final String path;
     private final boolean isReference;
     private final boolean isAppendPathPresentOnReference;
@@ -105,17 +104,17 @@ public class MappedFieldMetaData {
         this.modelType = modelType;
         this.field = field;
         this.isOptional = field.getType() == Optional.class;
-        this.annotatedElement = annotatedElement(field);
+        this.annotations = annotations(field);
 
         // Treat Optional<X> fields transparently like X fields: This way, anyone operating on the metadata is not
         // forced to be aware of the lazy-loading value holder indirection but can operate on the target type directly.
         this.genericFieldType = this.isOptional ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
         this.fieldType = this.isOptional ? getRawType(this.genericFieldType, this.modelType) : field.getType();
         this.isCollectionType = Collection.class.isAssignableFrom(this.fieldType);
-        this.isPathAnnotationPresent = this.annotatedElement.isAnnotatedWith(Path.class);
-        this.isReference = this.annotatedElement.isAnnotatedWith(Reference.class);
-        this.isThisReference = this.annotatedElement.isAnnotatedWith(This.class);
-        this.isChildrenAnnotationPresent = this.annotatedElement.isAnnotatedWith(Children.class);
+        this.isPathAnnotationPresent = this.annotations.contains(Path.class);
+        this.isReference = this.annotations.contains(Reference.class);
+        this.isThisReference = this.annotations.contains(This.class);
+        this.isChildrenAnnotationPresent = this.annotations.contains(Children.class);
 
         // The following initializations are not atomic but order-sensitive.
         this.isAppendPathPresentOnReference = isAppendPathPresentOnReferenceInternal();
@@ -178,7 +177,7 @@ public class MappedFieldMetaData {
     }
 
     private String getAppendPathOfReference() {
-        return this.annotatedElement.getAnnotation(Reference.class).append();
+        return this.annotations.get(Reference.class).append();
     }
 
     private boolean isResolveBelowEveryChildPathPresentOnChildrenInternal() {
@@ -191,7 +190,7 @@ public class MappedFieldMetaData {
     }
 
     private String getResolveBelowEveryChildPathOfChildren() {
-        String relativePath = this.annotatedElement.getAnnotation(Children.class).resolveBelowEveryChild();
+        String relativePath = this.annotations.get(Children.class).resolveBelowEveryChild();
         // The path must be relative, otherwise resource#getChild will be equivalent to
         // resolver.getResource("/..."), i.e. the resolution will not be relative.
         return isResolveBelowEveryChildPathPresentOnChildren &&
@@ -240,7 +239,7 @@ public class MappedFieldMetaData {
     private String getPathInternal() {
         String resolvedPath;
         if (isPathAnnotationPresent()) {
-            Path path = this.annotatedElement.getAnnotation(Path.class);
+            Path path = this.annotations.get(Path.class);
             if (isBlank(path.value())) {
                 throw new IllegalArgumentException("The value of the @" + Path.class.getSimpleName() +
                         " annotation on " + field + " must not be empty");
@@ -395,6 +394,13 @@ public class MappedFieldMetaData {
      */
     public Class<?> getArrayTypeOfTypeParameter() {
         return arrayTypeOfComponentType;
+    }
+
+    /**
+     * @return the annotations of the field, never <code>null</code>.
+     */
+    public Annotations getAnnotations() {
+        return annotations;
     }
 
     /**

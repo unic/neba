@@ -56,6 +56,10 @@
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelCache" availability="optional">
 			<bp:reference-listener ref="resourceModelCaches" bind-method="add" unbind-method="remove" />
 		</bp:reference-list>
+		<!-- All custom injectors are used by the resource to model mapper -->
+		<bp:reference-list interface="io.neba.api.resourcemodels.AnnotatedFieldMapper" availability="optional">
+			<bp:reference-listener ref="annotatedFieldMappers" bind-method="add" unbind-method="remove" />
+		</bp:reference-list>
 
 		<!-- Beans not providable by classpath scanning -->
 		<bp:bean class="org.springframework.web.filter.RequestContextFilter" id="requestContextFilter" />

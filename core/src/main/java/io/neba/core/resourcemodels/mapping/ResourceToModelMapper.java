@@ -51,6 +51,8 @@ public class ResourceToModelMapper {
     @Inject
     private CyclicMappingSupport cyclicMappingSupport;
     @Inject
+    private AnnotatedFieldMappers annotatedFieldMappers;
+    @Inject
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     /**
@@ -134,17 +136,20 @@ public class ResourceToModelMapper {
     private <T> T map(final Resource resource, final T bean, final ResourceModelMetaData metaData, final BeanFactory factory) {
         T preprocessedModel = preProcess(resource, bean, factory);
 
-        T mappingTarget = preprocessedModel;
+        T model = preprocessedModel;
+        // Unwrap proxied beans prior to mapping. The mapping must access the target
+        // bean's fields in order to perform value injection there.
         if (preprocessedModel instanceof Advised) {
-            mappingTarget = getTargetObjectOfAdvisedBean((Advised) bean);
+            model = getTargetObjectOfAdvisedBean((Advised) bean);
         }
 
-        final FieldValueMappingCallback callback = new FieldValueMappingCallback(mappingTarget, resource, factory);
+        final FieldValueMappingCallback callback = new FieldValueMappingCallback(model, resource, factory, this.annotatedFieldMappers);
 
         for (MappedFieldMetaData mappedFieldMetaData : metaData.getMappableFields()) {
             callback.doWith(mappedFieldMetaData);
         }
 
+        // Do not expose the unwrapped model to the post processors, use the proxy (if any) instead.
         return postProcess(resource, preprocessedModel, factory);
     }
 

@@ -16,22 +16,26 @@
 
 package io.neba.core.resourcemodels.mapping;
 
+import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
-
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cglib.proxy.LazyLoader;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
+import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -52,13 +56,15 @@ public class FieldValueMappingCallback {
     private final ValueMap properties;
     private final Resource resource;
     private final ConfigurableBeanFactory beanFactory;
+    private final AnnotatedFieldMappers annotatedFieldMappers;
 
     /**
      * @param model    the model to be mapped. Must not be null.
      * @param resource the source of property values for the model. Must not be null.
      * @param factory  must not be null.
+     * @param annotatedFieldMappers  must not be null.
      */
-    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory) {
+    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory, AnnotatedFieldMappers annotatedFieldMappers) {
         if (model == null) {
             throw new IllegalArgumentException("Constructor parameter model must not be null.");
         }
@@ -68,17 +74,21 @@ public class FieldValueMappingCallback {
         if (factory == null) {
             throw new IllegalArgumentException("Constructor parameter factory must not be null.");
         }
+        if (annotatedFieldMappers == null) {
+            throw new IllegalArgumentException("Method argument customFieldMappers must not be null.");
+        }
 
         this.model = model;
         this.properties = toValueMap(resource);
         this.resource = resource;
         this.beanFactory = factory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) factory : null;
+        this.annotatedFieldMappers = annotatedFieldMappers;
     }
 
     /**
      * Invoked for each {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData#getMappableFields() mappable field}
      * of a {@link io.neba.api.annotations.ResourceModel} to map the {@link MappedFieldMetaData#getField() corresponding field's}
-     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory) constructor}.
+     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory, AnnotatedFieldMappers) constructor}.
      *
      * @param metaData must not be <code>null</code>.
      */
@@ -93,25 +103,47 @@ public class FieldValueMappingCallback {
         Object value = null;
 
         if (isMappable(fieldData)) {
-
+            // Explicit lazy loading: provide the lazy loading implementation, not not map anything.
             if (metaData.isOptional()) {
-                // Explicit lazy loading
-                value = new OptionalFieldValue(fieldData, this);
-            } else {
-                value = resolve(fieldData);
+                setField(metaData.getField(), this.model, new OptionalFieldValue(fieldData, this));
+                return;
             }
 
-            if (value != null) {
-                setField(metaData.getField(), this.model, value);
-            }
+            value = resolve(fieldData);
         }
 
-        if (value == null && metaData.isInstantiableCollectionType()){
-            preventNullValueInMappableCollectionField(metaData);
+        // For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
+        // an empty collection, in case no non-<code>null</code> default value was provided.
+        boolean preventNullCollection =
+                value == null &&
+                metaData.isInstantiableCollectionType() &&
+                getField(metaData.getField(), this.model) == null;
+
+        @SuppressWarnings("unchecked")
+        Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) metaData.getType()) : null;
+
+        // Provide the custom mappers with the default value in case of empty collections for convenience
+        value = applyCustomMappings(metaData, fieldData, value == null ? defaultValue : value);
+
+        value = value == null ? defaultValue : value;
+
+        if (value != null) {
+            setField(metaData.getField(), this.model, value);
         }
     }
 
-
+    /**
+     * Applies all {@link io.neba.api.resourcemodels.AnnotatedFieldMapper registered field mappers}
+     * to the provided value and returns the result.
+     */
+    @SuppressWarnings("unchecked")
+    private Object applyCustomMappings(MappedFieldMetaData metaData, FieldData fieldData, final Object value) {
+        Object result = value;
+        for (final AnnotationMapping mapping : this.annotatedFieldMappers.get(metaData)) {
+            result = mapping.getMapper().map(new OngoingFieldMapping(this.model, result, mapping, fieldData, this.resource, this.properties));
+        }
+        return result;
+    }
 
     /**
      * Resolves the field's value with regard to the {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData}
@@ -314,19 +346,6 @@ public class FieldValueMappingCallback {
             value = resolvePropertyTypedValue(field, field.metaData.getType());
         }
         return  value;
-    }
-
-    /**
-     * For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
-     * an empty collection, in case no non-<code>null</code> default value was provided.
-     */
-    private void preventNullValueInMappableCollectionField(MappedFieldMetaData metaData) {
-        Object fieldValue = getField(metaData.getField(), this.model);
-        if (fieldValue == null) {
-            @SuppressWarnings("unchecked")
-            Class<Collection<Object>> collectionType = (Class<Collection<Object>>) metaData.getType();
-            setField(metaData.getField(), this.model, instantiateCollectionType(collectionType));
-        }
     }
 
     /**
@@ -637,6 +656,85 @@ public class FieldValueMappingCallback {
         @Override
         public Object loadObject() throws Exception {
             return this.callback.loadReferences(field, paths);
+        }
+    }
+
+    /**
+     * @author Olaf Otto
+     */
+    private static class OngoingFieldMapping implements AnnotatedFieldMapper.OngoingMapping {
+        private final Object resolvedValue;
+        private final AnnotationMapping mapping;
+        private final FieldData fieldData;
+        private final Object model;
+        private final Resource resource;
+        private final ValueMap properties;
+        private final MappedFieldMetaData metaData;
+
+        public OngoingFieldMapping(Object model,
+                                   Object resolvedValue,
+                                   AnnotationMapping mapping,
+                                   FieldData fieldData,
+                                   Resource resource,
+                                   ValueMap properties) {
+
+            this.model = model;
+            this.resolvedValue = resolvedValue;
+            this.mapping = mapping;
+            this.metaData = fieldData.metaData;
+            this.fieldData = fieldData;
+            this.resource = resource;
+            this.properties = properties;
+        }
+
+        @Override
+        public Object getResolvedValue() {
+            return resolvedValue;
+        }
+
+        @Override
+        public Object getAnnotation() {
+            return mapping.getAnnotation();
+        }
+
+        @Override
+        public Object getModel() {
+            return model;
+        }
+
+        @Override
+        public Field getField() {
+            return metaData.getField();
+        }
+
+        @Override
+        public Map<Class<? extends Annotation>, Annotation> getAnnotationsOfField() {
+            return metaData.getAnnotations().getAnnotations();
+        }
+
+        @Override
+        public Class<?> getFieldType() {
+            return metaData.getType();
+        }
+
+        @Override
+        public Class<?> getFieldTypeParameter() {
+            return this.metaData.getTypeParameter();
+        }
+
+        @Override
+        public String getRepositoryPath() {
+            return fieldData.path;
+        }
+
+        @Override
+        public Resource getResource() {
+            return resource;
+        }
+
+        @Override
+        public ValueMap getProperties() {
+            return properties;
         }
     }
 }

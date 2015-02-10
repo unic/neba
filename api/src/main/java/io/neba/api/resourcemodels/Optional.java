@@ -55,6 +55,7 @@ import java.util.NoSuchElementException;
  *     reason to make them {@link io.neba.api.resourcemodels.Optional}.
  * </p>
  *
+ * @param <T> the type of the lazy-loaded object.
  * @author Olaf Otto
  */
 public interface Optional<T> {

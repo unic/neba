@@ -15,18 +15,22 @@
  **/
 package io.neba.core.util;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
  */
-public class MetaAnnotatedElementTest {
+public class AnnotationsTest {
     @TestAnnotation
     private static class TestType {
     }
@@ -47,7 +51,19 @@ public class MetaAnnotatedElementTest {
     private static @interface CyclicAnnotation {
     }
 
-    private MetaAnnotatedElement testee = new MetaAnnotatedElement(TestType.class);
+    private Set<Annotation> allAnnotations;
+
+    private Annotations testee = new Annotations(TestType.class);
+
+    @Before
+    public void setUp() throws Exception {
+        this.allAnnotations = new HashSet<Annotation>();
+        this.allAnnotations.addAll(asList(TestType.class.getAnnotations()));
+        this.allAnnotations.addAll(asList(TestAnnotation.class.getAnnotations()));
+        this.allAnnotations.addAll(asList(MetaAnnotation.class.getAnnotations()));
+        this.allAnnotations.addAll(asList(CyclicAnnotation.class.getAnnotations()));
+        this.allAnnotations.addAll(asList(Retention.class.getAnnotations()));
+    }
 
     @Test
     public void testDetectionOfDirectAnnotation() throws Exception {
@@ -69,17 +85,17 @@ public class MetaAnnotatedElementTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullElementArgumentForLookup() throws Exception {
-        this.testee.getAnnotation(null);
+        this.testee.get(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullElementArgumentForExistenceTest() throws Exception {
-        this.testee.isAnnotatedWith(null);
+        this.testee.contains(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullTypeArgumentForConstructor() throws Exception {
-        new MetaAnnotatedElement(null);
+        new Annotations(null);
     }
 
     @Test
@@ -88,18 +104,23 @@ public class MetaAnnotatedElementTest {
         assertAnnotationsAre(MetaAnnotation.class, CyclicAnnotation.class);
     }
 
+    @Test
+    public void testIteratorProvidesExpectedAnnotations() throws Exception {
+        assertThat(this.testee.iterator()).containsOnly(this.allAnnotations.toArray());
+    }
+
     private void assertAnnotationsAre(Class<? extends Annotation>... annotations) {
         for (Class<? extends Annotation> annotationType : annotations) {
-            assertThat(this.testee.isAnnotatedWith(annotationType)).isTrue();
-            assertThat(this.testee.getAnnotation(annotationType)).isNotNull();
+            assertThat(this.testee.contains(annotationType)).isTrue();
+            assertThat(this.testee.get(annotationType)).isNotNull();
         }
     }
 
     private void assertAnnotationInstanceCanBeObtained(Class<? extends Annotation> type) {
-        assertThat(this.testee.getAnnotation(type)).isInstanceOf(type);
+        assertThat(this.testee.get(type)).isInstanceOf(type);
     }
 
     private void assertAnnotationIsPresent(Class<? extends Annotation> type) {
-        assertThat(this.testee.isAnnotatedWith(type)).isTrue();
+        assertThat(this.testee.contains(type)).isTrue();
     }
 }

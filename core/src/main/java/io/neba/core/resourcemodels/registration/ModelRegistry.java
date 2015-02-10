@@ -398,7 +398,7 @@ public class ModelRegistry {
      * Clears all quick lookup caches for resource models, but
      * not the registry itself.
      */
-    private void registryChanged() {
+    private synchronized void registryChanged() {
         this.state.incrementAndGet();
         this.lookupCache.clear();
         this.unmappedTypesCache.clear();
@@ -498,14 +498,18 @@ public class ModelRegistry {
      * resource type -&gt; model relationship.
      */
     private void cache(final Key key, final Collection<LookupResult> sources, final int stateId) {
-        if (stateId == this.state.get()) {
-            this.lookupCache.put(key, sources);
+        synchronized (this) {
+            if (stateId == this.state.get()) {
+                this.lookupCache.put(key, sources);
+            }
         }
     }
 
     private void markAsUnmapped(final Key key, final int stateId) {
-        if (stateId == this.state.get()) {
-            this.unmappedTypesCache.put(key, NULL_VALUE);
+        synchronized (this) {
+            if (stateId == this.state.get()) {
+                this.unmappedTypesCache.put(key, NULL_VALUE);
+            }
         }
     }
 }

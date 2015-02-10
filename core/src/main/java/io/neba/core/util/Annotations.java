@@ -18,10 +18,12 @@ package io.neba.core.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+import static io.neba.core.util.ReadOnlyIterator.readOnly;
 import static java.util.Arrays.asList;
 import static java.util.Collections.addAll;
 
@@ -32,7 +34,7 @@ import static java.util.Collections.addAll;
  *
  * @author Olaf Otto
  */
-public class MetaAnnotatedElement {
+public class Annotations implements Iterable<Annotation> {
     private final AnnotatedElement annotatedElement;
     private Map<Class<? extends Annotation>, Annotation> annotations = null;
 
@@ -40,17 +42,17 @@ public class MetaAnnotatedElement {
      * @param annotatedElement must not be <code>null</code>
      * @return never null.
      */
-    public static MetaAnnotatedElement annotatedElement(AnnotatedElement annotatedElement) {
+    public static Annotations annotations(AnnotatedElement annotatedElement) {
         if (annotatedElement == null) {
             throw new IllegalArgumentException("Method argument annotatedElement must not be null.");
         }
-        return new MetaAnnotatedElement(annotatedElement);
+        return new Annotations(annotatedElement);
     }
 
     /**
      * @param annotatedElement must not be <code>null</code>.
      */
-    public MetaAnnotatedElement(AnnotatedElement annotatedElement) {
+    public Annotations(AnnotatedElement annotatedElement) {
         if (annotatedElement == null) {
             throw new IllegalArgumentException("Constructor parameter annotatedElement must not be null.");
         }
@@ -61,11 +63,11 @@ public class MetaAnnotatedElement {
      * @param type must not be <code>null</code>.
      * @return whether the given element or any of its meta-annotations is annotated with the given annotation type.
      */
-    public boolean isAnnotatedWith(Class<? extends Annotation> type) {
+    public boolean contains(Class<? extends Annotation> type) {
         if (type == null) {
             throw new IllegalArgumentException("Method argument type must not be null.");
         }
-        return getAnnotations().get(type) != null;
+        return getAnnotationMap().get(type) != null;
     }
 
     /**
@@ -73,18 +75,18 @@ public class MetaAnnotatedElement {
      * @return the annotation if present on the given element or any meta-annotation thereof, or <code>null</code>.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Annotation> T getAnnotation(Class<T> type) {
+    public <T extends Annotation> T get(Class<T> type) {
         if (type == null) {
             throw new IllegalArgumentException("Method argument type must not be null.");
         }
 
-        return (T) getAnnotations().get(type);
+        return (T) getAnnotationMap().get(type);
     }
 
     /**
-     * @return all annotations an meta-annotations present on the element. Never <code>null</code> but rather an empty map.
+     * @return all annotations and meta-annotations present on the element. Never <code>null</code> but rather an empty map.
      */
-    private Map<Class<? extends Annotation>, Annotation> getAnnotations() {
+    private Map<Class<? extends Annotation>, Annotation> getAnnotationMap() {
         if (this.annotations == null) {
             // We do not care about calculating the same thing twice in case of concurrent access.
             HashMap<Class<? extends Annotation>, Annotation> annotations = new HashMap<Class<? extends Annotation>, Annotation>();
@@ -101,5 +103,14 @@ public class MetaAnnotatedElement {
         }
 
         return this.annotations;
+    }
+
+    @Override
+    public Iterator<Annotation> iterator() {
+        return readOnly(getAnnotationMap().values().iterator());
+    }
+
+    public Map<Class<? extends Annotation>, Annotation> getAnnotations() {
+        return new HashMap<Class<? extends Annotation>, Annotation>(getAnnotationMap());
     }
 }

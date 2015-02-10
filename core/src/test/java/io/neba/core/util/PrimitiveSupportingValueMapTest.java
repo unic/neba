@@ -23,8 +23,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
@@ -122,6 +128,115 @@ public class PrimitiveSupportingValueMapTest {
         with("JUnitTestValue");
         get();
         assertResultIs("JUnitTestValue");
+    }
+
+    @Test
+    public void testKeySetDelegation() throws Exception {
+        withKeySet("key");
+        assertKeySetIs("key");
+    }
+
+    @Test
+    public void testValuesDelegation() throws Exception {
+        withValues("value");
+        assertValuesAre("value");
+    }
+
+    @Test
+    public void testEntrySetDelegation() throws Exception {
+        withEntries("key", "value");
+        assertEntriesAre("key", "value");
+    }
+
+    @Test
+    public void testIsEmpty() throws Exception {
+        withEmptyWrappedValueMap();
+        assertMapIsEmpty();
+    }
+
+    @Test
+    public void testSize() throws Exception {
+        withWrappedSize(12);
+        assertSizeIs(12);
+    }
+
+    @Test
+    public void testContainsKey() throws Exception {
+        withWrappedContainingKey("key");
+        assertKeyIsContained("key");
+    }
+
+    @Test
+    public void testContainsValue() throws Exception {
+        withWrappedContainingValue("value");
+        assertValueIsContained("value");
+    }
+
+    private void assertValueIsContained(String value) {
+        assertThat(this.testee.containsValue(value)).isTrue();
+    }
+
+    private void withWrappedContainingValue(String value) {
+        doReturn(true).when(this.wrapped).containsValue(value);
+    }
+
+    private void assertKeyIsContained(String key) {
+        assertThat(this.testee.containsKey(key)).isTrue();
+    }
+
+    private void withWrappedContainingKey(String key) {
+        doReturn(true).when(this.wrapped).containsKey(key);
+    }
+
+    private void assertSizeIs(int expected) {
+        assertThat(this.testee.size()).isEqualTo(expected);
+    }
+
+    private void withWrappedSize(int size) {
+        doReturn(size).when(this.wrapped).size();
+    }
+
+    private void assertMapIsEmpty() {
+        assertThat(this.testee.isEmpty()).isTrue();
+    }
+
+    private void withEmptyWrappedValueMap() {
+        doReturn(true).when(wrapped).isEmpty();
+    }
+
+    private void assertEntriesAre(String key, String value) {
+        assertThat(this.testee.entrySet()).onProperty("value").contains(value);
+        assertThat(this.testee.entrySet()).onProperty("key").contains(key);
+    }
+
+    private void withEntries(String key, String value) {
+        Set<Map.Entry<String, String>> entrySet = new HashSet<Map.Entry<String, String>>();
+        Map.Entry entry = mock(Map.Entry.class);
+        doReturn(key).when(entry).getKey();
+        doReturn(value).when(entry).getValue();
+        entrySet.add(entry);
+
+        doReturn(entrySet).when(this.wrapped).entrySet();
+    }
+
+    private void assertValuesAre(String value) {
+        assertThat(this.testee.values()).containsOnly(value);
+    }
+
+    private void withValues(String value) {
+        HashSet values = new HashSet();
+        values.add(value);
+        doReturn(values).when(this.wrapped).values();
+    }
+
+    private void assertKeySetIs(String key) {
+        assertThat(this.testee.keySet()).containsOnly(key);
+    }
+
+    private void withKeySet(String key) {
+        HashSet keySet = new HashSet();
+        keySet.add(key);
+        doReturn(keySet).when(this.wrapped).keySet();
     }
 
     @Test
