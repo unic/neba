@@ -20,7 +20,7 @@
                     <strong>Telephone</strong>: +41 31 560 12 12<br />
                     <strong>Fax</strong>: +41 31 560 12 13
                 </p>
-            </div><!--END ONE-FOURTH-->
+            </div><!--END ONE-THIRD-->
 
 
             <div class="one-third">
@@ -33,7 +33,7 @@
                     </li>
                     {% endfor %}
                 </ul><!--END UL-->
-            </div><!--END ONE-FOURTH-->
+            </div><!--END ONE-THIRD-->
 
 
             <div class="one-third last">
@@ -43,7 +43,7 @@
                     We're using git flow - check out the <a href="https://github.com/unic/neba/tree/develop">develop branch</a> for the latest and greatest version.
                 </p>
 
-            </div><!--END ONE-FOURTH LAST-->
+            </div><!--END ONE-THIRD LAST-->
 
         </div><!--END FOOTER-TOP-->
 
