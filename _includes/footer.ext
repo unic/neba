@@ -10,6 +10,15 @@
                 <h3>About NEBA</h3>
                 <p>NEBA has been developed by <a href="https://www.unic.com/">Unic</a> since 2010, and was published as open source software on June 26, 2014</p><br />
 
+                <h3>Fork me on GitHub</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/tree/develop" class="alignleft"><img src="{{site.contextpath}}/images/github-dark.png" alt="NEBA at GitHub" title="NEBA at GitHub"/></a>
+                    We're using git flow - check out the <a href="https://github.com/unic/neba/tree/develop">develop branch</a> for the latest and greatest version.
+                </p>
+            </div><!--END ONE-THIRD-->
+
+
+            <div class="one-third">
                 <h3>Contact</h3>
                 <p>
                     <strong>E-Mail</strong>: <script>document.write('<a href="mailto:neba' + '@unic.com">neba' + "@unic.com</a>");</script>
@@ -20,10 +29,11 @@
                     <strong>Telephone</strong>: +41 31 560 12 12<br />
                     <strong>Fax</strong>: +41 31 560 12 13
                 </p>
+
             </div><!--END ONE-THIRD-->
 
 
-            <div class="one-third">
+            <div class="one-third last">
                 <h3>Latest posts</h3>
 
                 <ul>
@@ -33,15 +43,7 @@
                     </li>
                     {% endfor %}
                 </ul><!--END UL-->
-            </div><!--END ONE-THIRD-->
 
-
-            <div class="one-third last">
-                <h3>Fork me on GitHub</h3>
-                <p>
-                    <a href="https://github.com/unic/neba/tree/develop" class="alignleft"><img src="{{site.contextpath}}/images/github-dark.png" alt="NEBA at GitHub" title="NEBA at GitHub"/></a>
-                    We're using git flow - check out the <a href="https://github.com/unic/neba/tree/develop">develop branch</a> for the latest and greatest version.
-                </p>
 
             </div><!--END ONE-THIRD LAST-->
 
@@ -51,7 +53,7 @@
         <div id="footer-bottom" class="clear">
 
             <div class="one-half">
-                <p>Copyright &copy; 2014. All rights reserved.</p>
+                <p>Copyright &copy; 2015. All rights reserved.</p>
             </div><!--END ONE-HALF-->
 
             <div class="one-half text-align-right last">
