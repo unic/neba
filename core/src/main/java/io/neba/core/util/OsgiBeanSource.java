@@ -17,7 +17,11 @@
 package io.neba.core.util;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.osgi.framework.Bundle;
 import org.springframework.beans.factory.BeanFactory;
+
+import static org.osgi.framework.Bundle.ACTIVE;
+
 /**
  * A source for beans in an {@link org.springframework.context.ApplicationContext} obtained
  * from a {@link org.osgi.framework.Bundle}.
@@ -31,22 +35,27 @@ public class OsgiBeanSource<T> {
 	private final long bundleId;
     private final int hashCode;
     private final Class<?> beanType;
+    private final Bundle bundle;
 
     /**
      * @param beanName must not be <code>null</code>.
      * @param factory must not be <code>null</code>.
      */
-    public OsgiBeanSource(String beanName, BeanFactory factory, long bundleId) {
+    public OsgiBeanSource(String beanName, BeanFactory factory, Bundle bundle) {
         if (beanName == null) {
             throw new IllegalArgumentException("Method argument beanName must not be null.");
         }
         if (factory == null) {
             throw new IllegalArgumentException("Method argument factory must not be null.");
         }
+        if (bundle == null) {
+            throw new IllegalArgumentException("Method argument bundle must not be null.");
+        }
 
         this.beanName = beanName;
 		this.factory = factory;
-		this.bundleId = bundleId;
+		this.bundleId = bundle.getBundleId();
+        this.bundle = bundle;
         // Referencing the bean type is safe: It either stems from the source bundle, or a bundle the source bundle depends on
         // via an import-package relationship. Thus, if the type changes, the source bundle is re-loaded as well thus
         // causing this bean source to be re-created.
@@ -75,6 +84,13 @@ public class OsgiBeanSource<T> {
         return beanName;
     }
 
+    /**
+     * @return whether this reference points to an active bundle.
+     */
+    public boolean isValid() {
+        return this.bundle.getState() == ACTIVE;
+    }
+
 	@Override
 	public String toString() {
         return "Bean " + '"' + this.getBeanName() + '"' + " from bundle with id " + this.bundleId;
@@ -101,4 +117,11 @@ public class OsgiBeanSource<T> {
         return this.bundleId == other.bundleId && 
                this.beanName.equals(other.beanName);
 	}
+
+    /**
+     * @return never <code>null</code>.
+     */
+    public Bundle getBundle() {
+        return this.bundle;
+    }
 }

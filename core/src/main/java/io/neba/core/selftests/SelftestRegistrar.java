@@ -18,7 +18,6 @@ package io.neba.core.selftests;
 
 import io.neba.api.annotations.SelfTest;
 import io.neba.core.blueprint.EventhandlingBarrier;
-import io.neba.core.blueprint.ReferenceConsistencyChecker;
 import org.eclipse.gemini.blueprint.service.importer.ImportedOsgiServiceProxy;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
@@ -37,7 +36,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
 
-import javax.inject.Inject;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,8 +60,6 @@ public class SelftestRegistrar {
     private final Collection<SelftestReference> selftestReferences = new LinkedHashSet<SelftestReference>();
     private final String selftestAnnotationName = SelfTest.class.getName();
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    @Inject
-    private ReferenceConsistencyChecker consistencyChecker;
 
     public void registerSelftests(ConfigurableListableBeanFactory factory, Bundle bundle) {
         String[] beanNames = BeanFactoryUtils.beanNamesIncludingAncestors(factory);
@@ -85,7 +81,7 @@ public class SelftestRegistrar {
                 this.logger.debug("Checking for references to beans from inactive bundles...");
                 for (Iterator<SelftestReference> it = this.selftestReferences.iterator(); it.hasNext(); ) {
                     final SelftestReference reference = it.next();
-                    if (!this.consistencyChecker.isValid(reference)) {
+                    if (!reference.isValid()) {
                         this.logger.info("Reference to " + reference + " is invalid, removing.");
                         it.remove();
                     }
@@ -130,8 +126,7 @@ public class SelftestRegistrar {
         AnnotationMetadata metadata = annotatedBeanDefinition.getMetadata();
         if (isSelftestingBean(metadata)) {
             for (MethodMetadata selftestMethodMetadata : getSelfTestMethods(metadata)) {
-                final long bundleId = bundle.getBundleId();
-                this.selftestReferences.add(new SelftestReference(factory, beanName, selftestMethodMetadata, bundleId));
+                this.selftestReferences.add(new SelftestReference(factory, beanName, selftestMethodMetadata, bundle));
             }
         }
     }
@@ -150,8 +145,7 @@ public class SelftestRegistrar {
                     SelfTest selfTest = AnnotationUtils.findAnnotation(method, SelfTest.class);
                     if (selfTest != null) {
                         String methodName = method.getName();
-                        long bundleId = bundle.getBundleId();
-                        selftestReferences.add(new SelftestReference(factory, beanName, selfTest, methodName, bundleId));
+                        selftestReferences.add(new SelftestReference(factory, beanName, selfTest, methodName, bundle));
                     }
                 }
             });
@@ -201,9 +195,5 @@ public class SelftestRegistrar {
             }
         }
         this.logger.info("Bundle " + displayNameOf(bundle) + " was removed from the selftest registry.");
-    }
-
-    public void setConsistencyChecker(ReferenceConsistencyChecker consistencyChecker) {
-        this.consistencyChecker = consistencyChecker;
     }
 }
