@@ -660,6 +660,25 @@ public class DemoController {
 
 <p>Here, "page" is implicitly considered option (since there is a default value)</p>
 
+<p>
+   Furthermore, the content paths resolved by the @ResourceParam annotations can be altered by appending an arbitrary sub-path:
+</p>
+
+{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/echoTitle")
+    @ResponseBody
+    public String echo(@ResourceParam(append = "/jcr:content") PageContent pageContent) {
+       return pageContent.getTitle();
+    }
+}
+{% endhighlight %}
+
+<p>
+    The path specified in "append" is appended to the provided path or the specified default path prior to resolution.
+</p>
+
 <h3 id="configuring-mvc-logging">Configuring MVC logging</h3>
 <p>Internal errors during controller invocation, e.g. when
     required parameters are missing, are logged to the logs/error.log on &quot;warn&quot; level by default. It is highly
