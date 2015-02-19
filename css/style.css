@@ -1844,6 +1844,52 @@ CSS overview:
     float: right;
 }
 
+#sidebar .related-posts {
+    margin-bottom: 50px;
+    float: left;
+    width: 100%;
+}
+
+#sidebar .related-posts h3.title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: block;
+    padding: 0 0 5px 0;
+    margin: 0 0 5px 0;
+}
+
+#sidebar .related-posts ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    color: #aaa;
+}
+
+#sidebar .related-posts ul li {
+    padding: 0;
+    margin: 0 0 15px 0;
+    width: 100%;
+}
+
+#sidebar .related-posts ul li:last-child {
+    margin: 0;
+}
+
+#sidebar .related-posts ul li a {
+    color: #676767;
+    font-weight: bold;
+}
+
+#sidebar .related-posts ul li span.date {
+    color: #aaa;
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
 .post-media, .post-title, .post-meta {
     display: block;
 }

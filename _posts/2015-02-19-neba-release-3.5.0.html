@@ -1,0 +1,131 @@
+---
+title: NEBA 3.5.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.5.0 Release notes
+---
+<div class="section-title">
+
+    <h1 class="title">NEBA <span>Release 3.5.0</span></h1>
+
+</div><!--END SECTION TITLE-->
+
+<div id="inner-content" class="blog1">
+
+    <div class="post">
+
+        <div class="post-info">
+            <div class="date"><span class="month">Feb</span><span class="day">19</span><span class="month">2015</span></div>
+        </div><!--END POST-INFO-->
+
+        <div class="post-content">
+
+            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
+
+            <div class="post-title">
+                <h2 class="title">Release 3.5.0</h2>
+            </div><!--END POST-TITLE-->
+
+            <div class="post-meta">
+                <ul>
+                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
+                </ul>
+            </div><!--END POST-META-->
+
+            <div class="one">
+                <h3>A new model statistics console for real-time visualization of resource model performance</h3>
+                <div class="one-half">
+                    <a href="/images/userguide/modelstatistics-large.png" data-rel="prettyPhoto" rel="prettyPhoto"><img src="/images/userguide/modelstatistics.png" alt="The NEBA model statistics"></a>
+                </div>
+                <div class="one-half last">
+                    <p>
+                        In this release, the model metadata console was replaced with the <a href="/userguide.html#tooling/modelstatistics">model statistics console</a>.
+                        This console visualizes resource model metadata collected in real-time and allows querying the collected data to find models with specific performance characteristics or -features - right in
+                        the browser. <a href="/userguide.html#tooling/modelstatistics/demo">Try the interactive demo of the model statistics console</a>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="divider-border"></div>
+
+
+            <h3>First-class support for custom annotations</h3>
+            <p>
+                One of NEBA's key goals is to enable clean separation of the project-specific implementation and
+                the system-level concerns of Sling, AEM&trade; or NEBA. Consequently, NEBA offers <a href="/userguide.html#extending">extension points in its API</a>
+                to allow adding additional functionality without depending on NEBA's implementation details.
+            </p>
+            <p>
+                The most common use cases for these extension points is supporting custom annotations. For instance, one project featured a @Translated annotation
+                allowing the injection of internationalized values into resource models. Until now, such extensions could be implemented using
+                <a href="/userguide.html#post-processing-resourcemodels">custom post processors</a>. Now, NEBA features
+                <a href="/userguide.html#custom-annotation-based-field-mappers">first-class support for custom annotations</a>.
+                Not only does this enable easy addition of semantic annotations - it also allows extending NEBA's
+                <a href="/userguide.html#resourceAnnotations">out-of-the-box annotations</a>.
+            </p>
+
+            <h3>Support for meta-annotations</h3>
+
+            <p>
+                NEBA now supports meta-annotations (annotated annotations). This allows combining custom and NEBA annotations into new semantic annotations - for example
+            </p>
+{% highlight java %}
+@Reference
+@Path("paths")
+@MyCustomAnnotation
+private List<Resource> pages;
+{% endhighlight %}
+
+            <p>
+                Can now be simplified by annotating @MyCustomAnnotation with NEBA's annotations instead, like so:
+            </p>
+{% highlight java %}
+@Reference
+@Path("paths")
+public @interface MyCustomAnnotation { ... }
+{% endhighlight %}
+
+            <p>
+                META-annotations are supported for all of NEBA's annotations, including <a href="/userguide.html#api/@ResourceParam">MVC annotations</a>.
+            </p>
+
+            <h3>Upgrade to Spring 3.2.13</h3>
+
+            <p>This release updates from Spring 3.2.11 to Spring 3.2.13. No API changes are introduced by this change, however it is recommended to upgrade project dependencies to
+            this Spring version as well. Please refer to <a href="http://docs.spring.io/spring/docs/3.2.x/changelog.txt">the Spring 3.2.x release notes</a> regarding the corresponding changes.</p>
+
+            <div class="divider-border"></div>
+
+            <h2>Release notes</h2>
+
+            <h3>Improvements</h3>
+            <p>
+                <a href="https://github.com/unic/neba/issues/37">#37 Harden ReferenceConsistencyChecker against invalid bundle contexts</a><br />
+                <a href="https://github.com/unic/neba/issues/31">#31 Upgrade to Spring 3.2.13</a><br />
+                <a href="https://github.com/unic/neba/issues/25">#25 Reimplement the model metadata console to allow dynamic visualization of realtime model performance data</a><br />
+                <a href="https://github.com/unic/neba/issues/24">#24 Make logfile and number of line selection bookmarkable in the log file viewer</a><br />
+                <a href="https://github.com/unic/neba/issues/22">#22 Support meta annotations (annotation inheritance)</a><br />
+                <a href="https://github.com/unic/neba/issues/18">#18 Append parameter for @ResourceParam</a><br />
+                <a href="https://github.com/unic/neba/issues/16">#16 Support custom injectors in resource to model mapping</a><br />
+            </p>
+
+            <h3>Fixed bugs</h3>
+            <p>
+                <a href="https://github.com/unic/neba/issues/39">#39 Log file viewer exhibits NPE in pure Sling if the "Apache Sling Logging Configuration" is not persitent</a>
+            </p>
+
+
+            <div class="divider-border"></div>
+
+            <h3>Upgrading from 3.4.0</h3>
+
+            <p>
+                Simply upgrade your dependencies and re-deploy NEBA - there are no incompatible API changes in this release. Note that the version of Spring
+                contained in the <a href="/download.html#installation">delivery package</a> was updated from 3.2.11 to 3.2.13, which should be reflected in
+                the projects dependencies as well.
+            </p>
+        </div><!--END POST-CONTENT -->
+
+    </div><!--END POST-->
+
+</div><!--END INNER-CONTENT-->
