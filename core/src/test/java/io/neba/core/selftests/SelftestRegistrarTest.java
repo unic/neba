@@ -16,13 +16,6 @@
 
 package io.neba.core.selftests;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import io.neba.core.blueprint.ReferenceConsistencyChecker;
-import io.neba.core.util.OsgiBeanSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +27,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Tests {@link SelftestRegistrar} using a bundle mock.
  * @author Olaf Otto
@@ -43,16 +41,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class SelftestRegistrarTest implements BeanFactoryAware {
     private ConfigurableListableBeanFactory factory;
     private Bundle bundle;
-    private ReferenceConsistencyChecker consistencyChecker;
 
     private SelftestRegistrar testee;
 
     @Before
     public void prepareRegistrar() {
         this.testee = new SelftestRegistrar();
-
-        this.consistencyChecker = mock(ReferenceConsistencyChecker.class);
-        this.testee.setConsistencyChecker(this.consistencyChecker);
     }
     
     @Before
@@ -89,7 +83,7 @@ public class SelftestRegistrarTest implements BeanFactoryAware {
     }
 
     private void withInvalidReferences() {
-        when(this.consistencyChecker.isValid(isA(OsgiBeanSource.class))).thenReturn(false);
+        doReturn(Bundle.UNINSTALLED).when(this.bundle).getState();
     }
 
     private void signalSourceBundleRemoval() {
