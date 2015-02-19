@@ -7,7 +7,7 @@
         An expression filters the list of resource models. It allows finding models with specific performance characteristics. For instance, <span class="expressionExample">mappings > instantiations</span>
         finds models causing more than one subsequent resource to model mapping when instantiated. The query <span class="expressionExample">averageMappingDuration > average(averageMappingDuration)</span>
         finds resource models who's individual average mapping duration is higher than the average mapping duration of all resource models. All properties, except when enclosed in entire(...) or average(...), apply
-        to the <em>individual</em> model. For instance, <span class="expressionExample">mappingDurationMedian < averageMappingDuration</span> translates to "find models who's mapping duration median is less than it's average mapping duration median".
+        to the <em>individual</em> model. For instance, <span class="expressionExample">mappingDurationMedian < averageMappingDuration</span> translates to "find models who's mapping duration median is less than it's average mapping duration".
         One can also employ sub clauses and arithmetic expressions. For instance, <span class="expressionExample">totalTime > entire(totalTime) * 0.05</span> finds models that are responsible for more than 5% of the entire mapping time.
 
         <h2>The model visualization</h2>
@@ -19,8 +19,8 @@
                 <tr><th>&#x00D8; duration</th><td>The average duration of one resource to model mapping for this type</td></tr>
                 <tr><th>median</th><td>The median duration of one resource to model mapping for this type</td></tr>
                 <tr><th>Lazy fields</th><td>The number of lazy fields (Optional fields or lazy-loading collections) of this resource model</td></tr>
-                <tr><th>Greedy fields</th><td>The number of non-lazy fields (neither Optional nor lazy-loading collection) of this resource model</td></tr>
-                <tr><th>Total time</th><td>The total time spend mapping this model</td></tr>
+                <tr><th>Greedy fields</th><td>The number of non-lazy fields (neither Optional nor lazy-loading collections) of this resource model</td></tr>
+                <tr><th>Total time</th><td>The total time spent mapping this model</td></tr>
             </tbody>
         </table>
     </div>
