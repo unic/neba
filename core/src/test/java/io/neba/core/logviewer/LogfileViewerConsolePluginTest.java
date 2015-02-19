@@ -33,7 +33,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,6 +51,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -300,6 +300,18 @@ public class LogfileViewerConsolePluginTest {
         assertNextZipEntryIs(pathOf("logs/error.log.2020-01-01"));
         assertNextZipEntryIs(pathOf("remote-logs/error.log"));
         assertNextZipEntryIs(pathOf("remote-logs/error.log.2020-01-01"));
+    }
+
+    @Test
+    public void testViewerFallsBackToDefaultLogsLocationIfNoConfigurationExists() throws Exception {
+        withNonexistingLoggingConfiguration();
+        withRequestPath("/system/console/logviewer");
+        doGet();
+        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log") + "\"");
+    }
+
+    private void withNonexistingLoggingConfiguration() {
+        doReturn(null).when(this.logConfiguration).getProperties();
     }
 
     private void verifyLogFilesAreSendAs(String filename) {
