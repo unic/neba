@@ -72,7 +72,7 @@ public class PageModel {
 }
 {% endhighlight %}
 
-<h3>Use the model in application mode</h3>
+<h3>Use the model</h3>
 <p>
 Once your bundle is deployed, you can see your model in NEBA's model registry console in the Felix web console (/system/console/modelregistry).
 Now, you can adapt any cq:Page resource to this model - for instance in a Spring controller:</p>
@@ -138,13 +138,13 @@ like so (the corresponding package must be exported by the containing bundle):
         <h3>More information on blueprint and Spring</h3>
         <p>Blueprint is part of the OSGi specification. NEBA relies on <a href="http://www.eclipse.org/gemini/blueprint/">gemini-blueprint, the open source reference implementation of this standard</a>.</p>
         <p>A blueprint XML declaration is simply a <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-factory-xml-import">Spring application context</a> -
-            with an <a href="http://www.eclipse.org/gemini/blueprint/documentation/reference/2.0.0.M02/html/index.html">additional blueprint namespace providing support for
-                OSGi service exports and imports, SCR configuration creation and consumption and much more.</a></p>
+            with an <a href="http://www.eclipse.org/gemini/blueprint/documentation/reference/2.0.0.M02/html/index.html">additional blueprint namespace</a> providing support for
+                OSGi service exports and imports, SCR configuration creation and consumption and much more.</p>
     </div><!--END TWO-THIRD-->
 
     <div class="one-third last">
         <h3>More information on @ResourceModels</h3>
-        <p>Follow the <a href="userguide.html#api/@ResourceModel">user guide to find out more about the capabilities of @ResourceModel</a>s</p>
+        <p>Follow the <a href="userguide.html#api/@ResourceModel">user guide</a> to find out more about the capabilities of @ResourceModels</p>
     </div><!--END ONE-THIRD LAST-->
 
 </div><!--END ONE-->
