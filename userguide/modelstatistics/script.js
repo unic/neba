@@ -279,11 +279,11 @@
                                     hint: completion ? completion.hint : ""
                                 }, expected.value ? {
                                     label: expected.value,
-                                    value: validTextPortion + expected.value,
+                                    value: (validTextPortion + expected.value).trim(),
                                     highlightLength: showSpecific ? e.found.length : 0
                                 } : {
                                     label: expected.description,
-                                    value: validTextPortion,
+                                    value: validTextPortion.trim(),
                                     highlightLength: 0
                                 });
                             }).sort(function(left, right) {
