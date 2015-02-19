@@ -16,18 +16,18 @@
 
 package io.neba.core.selftests;
 
-import java.lang.reflect.Method;
-import java.util.Locale;
-import java.util.Map;
-import java.util.regex.Pattern;
-
+import io.neba.api.annotations.SelfTest;
+import io.neba.core.util.OsgiBeanSource;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.osgi.framework.Bundle;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ReflectionUtils;
 
-import io.neba.api.annotations.SelfTest;
-import io.neba.core.util.OsgiBeanSource;
+import java.lang.reflect.Method;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * References a {@link SelfTest}, i.e. a method of a bean
@@ -46,24 +46,24 @@ public class SelftestReference extends OsgiBeanSource<Object> {
     private final Pattern nonAsciiCharacters = Pattern.compile("[^A-z]");
     private final int hashCode;
 
-    public SelftestReference(BeanFactory factory, String beanName, MethodMetadata methodMetadata, long bundleId) {
-        super(beanName, factory, bundleId);
+    public SelftestReference(BeanFactory factory, String beanName, MethodMetadata methodMetadata, Bundle bundle) {
+        super(beanName, factory, bundle);
         Map<String, Object> annotationAttributes = methodMetadata.getAnnotationAttributes(SelfTest.class.getName());
         this.success = (String) annotationAttributes.get("success");
         this.failure = (String) annotationAttributes.get("failure");
         this.description = (String) annotationAttributes.get("value");
         this.methodName = methodMetadata.getMethodName();
-        this.hashCode = new HashCodeBuilder().append(beanName).append(bundleId).append(this.methodName).toHashCode();
+        this.hashCode = new HashCodeBuilder().append(beanName).append(bundle.getBundleId()).append(this.methodName).toHashCode();
     }
     
-    public SelftestReference(BeanFactory factory, String beanName, SelfTest selfTest, String methodName, long bundleId) {
-        super(beanName, factory, bundleId);
+    public SelftestReference(BeanFactory factory, String beanName, SelfTest selfTest, String methodName, Bundle bundle) {
+        super(beanName, factory, bundle);
         
         this.success = selfTest.success();
         this.failure = selfTest.failure();
         this.description = selfTest.value();
         this.methodName = methodName;
-        this.hashCode = new HashCodeBuilder().append(beanName).append(bundleId).append(methodName).toHashCode();
+        this.hashCode = new HashCodeBuilder().append(beanName).append(bundle.getBundleId()).append(methodName).toHashCode();
     }
 
     public void execute() {

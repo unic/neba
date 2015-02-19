@@ -47,7 +47,7 @@ public class ResourceModelMetaDataTest {
 	
     @Test
     public void testMappingOfStaticField() throws Exception {
-    	assertMappableFieldsDoesNotContain("STATIC_FIELD");
+    	assertMappableFieldsDoesNotContain("staticField");
     }
 
 	@Test
@@ -59,6 +59,11 @@ public class ResourceModelMetaDataTest {
     public void testMappingOfUnmappedField() throws Exception {
     	assertMappableFieldsDoesNotContain("transientStringField");
     }
+
+	@Test
+	public void testMappingOfUnmappedFieldWithMetaAnnotation() throws Exception {
+		assertMappableFieldsDoesNotContain("transientStringFieldWithUnmappedMetaAnnotation");
+	}
 
     @Test
     public void testMappingOfInjectedField() throws Exception {
@@ -90,8 +95,10 @@ public class ResourceModelMetaDataTest {
 
 	private void assertMappableFieldsDoesNotContain(String name) {
     	Field field = findField(this.modelType, name);
-		for (MappedFieldMetaData fm : this.testee.getMappableFields()) {
-			assertThat(fm.getField()).isNotEqualTo(field);
-		}
+		assertThat(field).overridingErrorMessage("Field " + this.modelType.getSimpleName() + "." + name + " does not exist.").isNotNull();
+		assertThat(this.testee.getMappableFields())
+				.onProperty("field")
+				.overridingErrorMessage("The detected mappable fields must not contain the field " + field + ".")
+				.excludes(field);
 	}
 }

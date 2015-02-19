@@ -19,6 +19,7 @@ package io.neba.core.rendering;
 import io.neba.core.sling.AdministrativeResourceResolver;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -51,10 +52,15 @@ public class JcrResourceLoaderTest {
 
     @InjectMocks
     private JcrResourceLoader testee;
+    private long lastModified;
+
+    @Before
+    public void initResourceLoader() {
+        this.testee.init(null);
+    }
 
     @Test
     public void testResourceLoaderAdaptsResourceToInputStream() throws Exception {
-        initResourceLoader();
         withTemplatePath("/junit/resource");
         withResourceForTemplatePath();
         getResourceStream();
@@ -63,7 +69,6 @@ public class JcrResourceLoaderTest {
         
     @Test
     public void testModificationDetectionByModificationDate() throws Exception {
-        initResourceLoader();
         withTemplatePath("/junit/resource");
         withResourceForTemplatePath();
         withVelocityResourceForTemplatePath();
@@ -81,15 +86,30 @@ public class JcrResourceLoaderTest {
     
     @Test
 	public void testModificationDetectionByResourceRemoval() throws Exception {
-        initResourceLoader();
     	withTemplatePath("/junit/resource");
     	withVelocityResourceForTemplatePath();
     	// No JCR resource is mocked for the velocity template.
     	assertResourceWasModified();
 	}
 
-    private void initResourceLoader() {
-        this.testee.init(null);
+    @Test
+    public void testGetLastModifiedFromUnderlyingJcrResource() throws Exception {
+        withTemplatePath("/junit/resource");
+        withResourceForTemplatePath();
+        withVelocityResourceForTemplatePath();
+        withLastResourceModificationTime(123L);
+
+        getLastModificationTimeOfVelocityResource();
+
+        assertLastModificationTimeIs(123L);
+    }
+
+    private void getLastModificationTimeOfVelocityResource() {
+        this.lastModified = this.testee.getLastModified(this.velocityResource);
+    }
+
+    private void assertLastModificationTimeIs(long time) {
+        assertThat(this.lastModified).isEqualTo(time);
     }
 
     private void assertResourceWasModified() {

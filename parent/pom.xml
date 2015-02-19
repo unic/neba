@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>3.3.0</version>
+    <version>3.5.0</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
@@ -59,7 +59,7 @@
     </developers>
 
     <properties>
-        <spring.version>3.2.11.RELEASE_1</spring.version>
+        <spring.version>3.2.13.RELEASE_1</spring.version>
         <gemini.version>2.0.0.M02</gemini.version>
         <language.level>1.6</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
@@ -112,7 +112,7 @@
         <pluginRepository>
             <id>adobe-public-releases</id>
             <name>Adobe Public Repository</name>
-            <url>http://repo.adobe.com/nexus/content/groups/public</url>
+            <url>https://repo.adobe.com/nexus/content/groups/public</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -515,7 +515,7 @@
                     <executions>
                         <execution>
                             <id>attach-sources</id>
-                            <phase>verify</phase>
+                            <phase>package</phase>
                             <goals>
                                 <goal>jar-no-fork</goal>
                             </goals>

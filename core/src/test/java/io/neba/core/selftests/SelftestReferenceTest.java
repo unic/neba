@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.framework.Bundle;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.type.MethodMetadata;
 
@@ -56,10 +57,12 @@ public class SelftestReferenceTest {
     private MethodMetadata methodMetadata;
     @Mock
     private SelfTest selfTest;
+    @Mock
+    private Bundle bundle;
 
     private String methodName;
     private TestBean bean;
-    private long bundleId;
+    private long bundleId = 123L;
     private Map<String, Object> metadataAttributes;
     private String beanName = "testBean";
 
@@ -69,16 +72,16 @@ public class SelftestReferenceTest {
     public void prepare() throws Exception {
         this.methodName = "selfTestMethod";
         this.metadataAttributes = new HashMap<String, Object>();
-        this.bundleId = 123L;
 
+        when(this.bundle.getBundleId()).thenReturn(this.bundleId);
         when(this.methodMetadata.getMethodName()).thenReturn(this.methodName);
         when(this.methodMetadata.getAnnotationAttributes(eq(SelfTest.class.getName()))).thenReturn(this.metadataAttributes);
     }
     
     @Test
     public void testHashCodeAndEqualsWithMatchingReferences() throws Exception {
-        SelftestReference one = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundleId);
-        SelftestReference two = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundleId);
+        SelftestReference one = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundle);
+        SelftestReference two = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundle);
         
         assertThat(one.hashCode()).isEqualTo(two.hashCode());
         assertThat(one).isEqualTo(two);
@@ -87,8 +90,8 @@ public class SelftestReferenceTest {
 
     @Test
     public void testHashCodeAndEqualsWithDifferentTestMethodName() throws Exception {
-        SelftestReference one = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundleId);
-        SelftestReference two = new SelftestReference(this.factory, this.beanName, this.selfTest, "otherTestMethod", this.bundleId);
+        SelftestReference one = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundle);
+        SelftestReference two = new SelftestReference(this.factory, this.beanName, this.selfTest, "otherTestMethod", this.bundle);
 
         assertThat(one.hashCode()).isNotSameAs(two.hashCode());
         assertThat(one).isNotEqualTo(two);
@@ -174,7 +177,7 @@ public class SelftestReferenceTest {
     }
 
     private void createSelftestReferenceUsingSelftestInstance() {
-        this.testee = new SelftestReference(this.factory, this.beanName, this.selfTest, this.methodName, this.bundleId);
+        this.testee = new SelftestReference(this.factory, this.beanName, this.selfTest, this.methodName, this.bundle);
     }
 
     private void withMetadata(String attributeName, String value) {
@@ -198,6 +201,6 @@ public class SelftestReferenceTest {
     }
 
     private void createSelftestReferenceUsingMethodMetadata() {
-        this.testee = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundleId);
+        this.testee = new SelftestReference(this.factory, this.beanName, this.methodMetadata, this.bundle);
     }
 }

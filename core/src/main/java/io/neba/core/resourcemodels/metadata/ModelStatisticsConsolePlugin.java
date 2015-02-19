@@ -1,10 +1,10 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.metadata;
 
@@ -45,8 +45,8 @@ import static org.apache.commons.lang.StringUtils.substringAfter;
  * @author Olaf Otto
  */
 @Service
-public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
-    public static final String LABEL = "modelmetadata";
+public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
+    public static final String LABEL = "modelstatistics";
     private static final long serialVersionUID = -8676958166611686979L;
     private static final String STATISTICS_API_PATH = "/api/statistics";
     private static final String RESET_API_PATH = "/api/reset";
@@ -65,21 +65,30 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
 
     @Override
     public String getTitle() {
-        return "Model metadata";
+        return "Model statistics";
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String suffix = substringAfter(req.getRequestURI(), req.getServletPath() + "/" + getLabel());
         if (!isBlank(suffix) && suffix.startsWith(STATISTICS_API_PATH)) {
+            setNoCacheHeaders(res);
             getModelMetadata(suffix.substring(STATISTICS_API_PATH.length()), res);
             return;
         }
         if (!isBlank(suffix) && suffix.startsWith(RESET_API_PATH)) {
+            setNoCacheHeaders(res);
             resetStatistics(res);
             return;
         }
         super.doGet(req, res);
+    }
+
+    private void setNoCacheHeaders(HttpServletResponse res) {
+        res.setHeader("Expires", "Sat, 6 May 1970 12:00:00 GMT");
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        res.addHeader("Cache-Control", "post-check=0, pre-check=0");
+        res.setHeader("Pragma", "no-cache");
     }
 
     private void resetStatistics(HttpServletResponse res) {
@@ -112,18 +121,10 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
         });
 
         if (metaData != null) {
+
+            Map<String, Object> data = data(metaData);
+
             ResourceModelStatistics statistics = metaData.getStatistics();
-
-            Map<String, Object> data = new LinkedHashMap<String, Object>();
-            data.put("age", statistics.getSince());
-            data.put("mappableFields", metaData.getMappableFields().length);
-            data.put("instantiations", statistics.getInstantiations());
-            data.put("mappings", statistics.getNumberOfMappings());
-            data.put("averageMappingDuration", statistics.getAverageMappingDuration());
-            data.put("maximumMappingDuration", statistics.getMaximumMappingDuration());
-            data.put("minimumMappingDuration", statistics.getMinimumMappingDuration());
-            data.put("mappingDurationMedian", statistics.getMappingDurationMedian());
-
             int[] mappingDurationFrequencies = statistics.getMappingDurationFrequencies();
             int[] intervalBoundaries = statistics.getMappingDurationIntervalBoundaries();
 
@@ -155,18 +156,8 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
     private void provideStatisticsOfAllModels(HttpServletResponse res) {
         JSONArray array = new JSONArray();
         for (ResourceModelMetaData metaData : this.modelMetaDataRegistrar.get()) {
-            ResourceModelStatistics statistics = metaData.getStatistics();
+            Map<String, Object> data = data(metaData);
 
-            Map<String, Object> data = new LinkedHashMap<String, Object>();
-            data.put("type", metaData.getTypeName());
-            data.put("since", statistics.getSince());
-            data.put("mappableFields", metaData.getMappableFields().length);
-            data.put("instantiations", statistics.getInstantiations());
-            data.put("mappings", statistics.getNumberOfMappings());
-            data.put("averageMappingDuration", statistics.getAverageMappingDuration());
-            data.put("maximumMappingDuration", statistics.getMaximumMappingDuration());
-            data.put("minimumMappingDuration", statistics.getMinimumMappingDuration());
-            data.put("mappingDurationMedian", statistics.getMappingDurationMedian());
             array.put(data);
         }
         try {
@@ -175,6 +166,38 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
         } catch (Exception e) {
             throw new RuntimeException("Unable to write the resource model JSON data.", e);
         }
+    }
+
+    private Map<String, Object> data(ResourceModelMetaData metaData) {
+        ResourceModelStatistics statistics = metaData.getStatistics();
+
+        //
+        Map<String, Object> data = new LinkedHashMap<String, Object>();
+
+        int lazyFields = 0, greedyFields = 0;
+        for (MappedFieldMetaData field : metaData.getMappableFields()) {
+            boolean isLazyLoadedField = field.isOptional() ||
+                    field.isChildrenAnnotationPresent() ||
+                    field.isReference() && field.isInstantiableCollectionType();
+            if (isLazyLoadedField) {
+                ++lazyFields;
+            } else {
+                ++greedyFields;
+            }
+        }
+
+        data.put("type", metaData.getTypeName());
+        data.put("since", statistics.getSince());
+        data.put("mappableFields", metaData.getMappableFields().length);
+        data.put("lazyFields", lazyFields);
+        data.put("greedyFields", greedyFields);
+        data.put("instantiations", statistics.getInstantiations());
+        data.put("mappings", statistics.getNumberOfMappings());
+        data.put("averageMappingDuration", statistics.getAverageMappingDuration());
+        data.put("maximumMappingDuration", statistics.getMaximumMappingDuration());
+        data.put("minimumMappingDuration", statistics.getMinimumMappingDuration());
+        data.put("mappingDurationMedian", statistics.getMappingDurationMedian());
+        return data;
     }
 
     @Override
@@ -187,25 +210,25 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
         URL url = null;
         String internalPath = substringAfter(path, "/" + getLabel());
         if (startsWith(internalPath, "/static/")) {
-            url = getClass().getResource("/META-INF/consoleplugin/modelmetadata" + internalPath);
+            url = getClass().getResource("/META-INF/consoleplugin/modelstatistics" + internalPath);
         }
         return url;
     }
-    
+
     private void writeHeadnavigation(HttpServletResponse response) throws IOException {
         int numberOfModelsWithInstantiations = 0;
-        double highestMappingDuration = 0D;
+        double highestAverageMappingDuration = 0D;
         int highestNumberOfFields = 0;
-        String nameOfModelWithHighestMappingDuration = "";
+        String nameOfModelWithHighestAverageMappingDuration = "";
         String nameOfModelWithGreatestNumberOfFields = "";
         for (ResourceModelMetaData metaData : this.modelMetaDataRegistrar.get()) {
             ResourceModelStatistics statistics = metaData.getStatistics();
             if (statistics.getInstantiations() != 0) {
                 ++numberOfModelsWithInstantiations;
-                double maximumMappingDuration = statistics.getMaximumMappingDuration();
-                if (maximumMappingDuration > highestMappingDuration) {
-                    highestMappingDuration = maximumMappingDuration;
-                    nameOfModelWithHighestMappingDuration = metaData.getTypeName();
+                double averageMappingDuration = statistics.getAverageMappingDuration();
+                if (averageMappingDuration > highestAverageMappingDuration) {
+                    highestAverageMappingDuration = averageMappingDuration;
+                    nameOfModelWithHighestAverageMappingDuration = metaData.getTypeName();
                 }
                 int numberOfMappableFields = metaData.getMappableFields().length;
                 if (numberOfMappableFields > highestNumberOfFields) {
@@ -215,17 +238,17 @@ public class ModelMetadataConsolePlugin extends AbstractWebConsolePlugin {
             }
         }
 
-        String template = readTemplateFile("/META-INF/consoleplugin/modelmetadata/templates/head.html");
+        String template = readTemplateFile("/META-INF/consoleplugin/modelstatistics/templates/head.html");
         response.getWriter().printf(template,
-                                    numberOfModelsWithInstantiations,
-                                    round(highestMappingDuration),
-                                    nameOfModelWithHighestMappingDuration,
-                                    highestNumberOfFields,
-                                    nameOfModelWithGreatestNumberOfFields);
+                numberOfModelsWithInstantiations,
+                round(highestAverageMappingDuration),
+                nameOfModelWithHighestAverageMappingDuration,
+                highestNumberOfFields,
+                nameOfModelWithGreatestNumberOfFields);
     }
 
     private void writeBody(HttpServletResponse response) throws IOException {
-        String template = readTemplateFile("/META-INF/consoleplugin/modelmetadata/templates/plots.html");
+        String template = readTemplateFile("/META-INF/consoleplugin/modelstatistics/templates/plots.html");
         response.getWriter().print(template);
     }
 }

@@ -17,7 +17,6 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.blueprint.EventhandlingBarrier;
-import io.neba.core.blueprint.ReferenceConsistencyChecker;
 import io.neba.core.sling.AdministrativeResourceResolver;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
@@ -148,8 +147,6 @@ public class ModelRegistry {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicInteger state = new AtomicInteger(0);
 
-    @Inject
-    private ReferenceConsistencyChecker consistencyChecker;
     @Inject
     private AdministrativeResourceResolver resourceResolver;
 
@@ -369,7 +366,7 @@ public class ModelRegistry {
 
     /**
      * Checks whether the {@link OsgiBeanSource sources} of all resource models
-     * are still {@link ReferenceConsistencyChecker#isValid(OsgiBeanSource) valid}. If not,
+     * are still {@link io.neba.core.util.OsgiBeanSource#isValid() valid}. If not,
      * the corresponding model(s) are removed from the registry.
      */
     @Scheduled(fixedRate = EVERY_30_SECONDS)
@@ -380,7 +377,7 @@ public class ModelRegistry {
                 for (Collection<OsgiBeanSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
                     for (Iterator<OsgiBeanSource<?>> it = values.iterator(); it.hasNext(); ) {
                         final OsgiBeanSource<?> source = it.next();
-                        if (!consistencyChecker.isValid(source)) {
+                        if (!source.isValid()) {
                             this.logger.info("Reference to " + source + " is invalid, removing.");
                             it.remove();
                             registryChanged();
@@ -398,7 +395,7 @@ public class ModelRegistry {
      * Clears all quick lookup caches for resource models, but
      * not the registry itself.
      */
-    private void registryChanged() {
+    private synchronized void registryChanged() {
         this.state.incrementAndGet();
         this.lookupCache.clear();
         this.unmappedTypesCache.clear();
@@ -498,14 +495,18 @@ public class ModelRegistry {
      * resource type -&gt; model relationship.
      */
     private void cache(final Key key, final Collection<LookupResult> sources, final int stateId) {
-        if (stateId == this.state.get()) {
-            this.lookupCache.put(key, sources);
+        synchronized (this) {
+            if (stateId == this.state.get()) {
+                this.lookupCache.put(key, sources);
+            }
         }
     }
 
     private void markAsUnmapped(final Key key, final int stateId) {
-        if (stateId == this.state.get()) {
-            this.unmappedTypesCache.put(key, NULL_VALUE);
+        synchronized (this) {
+            if (stateId == this.state.get()) {
+                this.unmappedTypesCache.put(key, NULL_VALUE);
+            }
         }
     }
 }

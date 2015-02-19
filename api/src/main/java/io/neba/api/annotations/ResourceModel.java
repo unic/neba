@@ -16,6 +16,7 @@
 
 package io.neba.api.annotations;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
@@ -89,7 +90,7 @@ import org.springframework.stereotype.Component;
  */
 @Scope(SCOPE_PROTOTYPE)
 @Component
-@Target(TYPE)
+@Target({TYPE, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface ResourceModel {

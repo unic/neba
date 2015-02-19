@@ -28,7 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 
 import javax.servlet.ServletException;
@@ -52,7 +51,6 @@ import java.util.Set;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -86,8 +84,6 @@ public class ModelRegistryConsolePluginTest {
     @Mock
     private ServletOutputStream outputStream;
     @Mock
-    private BundleContext bundleContext;
-    @Mock
     private Bundle bundle;
     @Mock
     private Version version;
@@ -117,7 +113,6 @@ public class ModelRegistryConsolePluginTest {
         doReturn("").when(this.request).getContextPath();
         doReturn("/system/console").when(this.request).getServletPath();
         doReturn(this.outputStream).when(this.response).getOutputStream();
-        doReturn(this.bundle).when(this.bundleContext).getBundle(anyLong());
         doReturn("JUnit test bundle").when(this.bundle).getSymbolicName();
         doReturn(this.version).when(this.bundle).getVersion();
         doReturn("1.0.0").when(this.version).toString();
@@ -337,6 +332,7 @@ public class ModelRegistryConsolePluginTest {
         doReturn(modelType).when(source).getBeanType();
         doReturn(bundleId).when(source).getBundleId();
         doReturn(beanName).when(source).getBeanName();
+        doReturn(this.bundle).when(source).getBundle();
         sources.add(source);
         this.beanSources.add(source);
         this.typeMappings.put(typeName, sources);

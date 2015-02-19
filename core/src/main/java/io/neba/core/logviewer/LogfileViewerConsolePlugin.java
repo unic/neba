@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.TreeSet;
@@ -140,7 +141,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
         StringBuilder options = new StringBuilder(1024);
         for (File logFile : resolveLogFiles()) {
             String fileIdentifier = getNormalizedFilePath(logFile);
-            options.append("<option value=\"").append(fileIdentifier).append("\" id=\"logfile\" ")
+            options.append("<option value=\"").append(fileIdentifier).append("\" ")
                     .append("title=\"").append(fileIdentifier).append("\">")
                     .append(logFile.getParentFile().getName()).append('/').append(logFile.getName())
                     .append("</option>");
@@ -291,6 +292,11 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
             }
         });
 
+        if (logDir == null) {
+            // No configured log file directory exists, assume the default
+            logDir = new File(this.slingHomeDirectory, "logs");
+        }
+
         // The log directory may be removed during runtime - always check access.
         if (logDir.exists() && logDir.isDirectory()) {
             logFiles.addAll(listFiles(logDir, LOGFILE_FILTER, TrueFileFilter.INSTANCE));
@@ -334,16 +340,22 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
     }
 
     private File getConfiguredLogfile(Configuration logConfiguration) throws IOException {
-        String logFilePath = (String) logConfiguration.getProperties().get(LOG_FILE_PROPERTY);
-        File logFile = null;
-        if (!isEmpty(logFilePath)) {
-            logFile = new File(logFilePath);
-            if (!logFile.isAbsolute()) {
-                logFile = new File(this.slingHomeDirectory, logFilePath);
-            }
-            logFile = logFile.getCanonicalFile();
+        Dictionary properties = logConfiguration.getProperties();
+        if (properties == null) {
+            return null;
         }
-        return logFile;
+
+        String logFilePath = (String) properties.get(LOG_FILE_PROPERTY);
+        if (isEmpty(logFilePath)) {
+            return null;
+        }
+
+        File logFile = new File(logFilePath);
+        if (!logFile.isAbsolute()) {
+            logFile = new File(this.slingHomeDirectory, logFilePath);
+        }
+
+        return logFile.getCanonicalFile();
     }
 
     private void writeFromTemplate(HttpServletResponse response, String templateName, Object... templateArgs) throws IOException {

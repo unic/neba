@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+<module name="Checker">
+    <property name="severity" value="error"/>
+
+    <module name="FileLength">
+        <property name="max" value="2000"/>
+    </module>
+
+    <module name="TreeWalker">
+        <property name="tabWidth" value="4"/>
+
+        <module name="FileContentsHolder"/>
+
+        <!--  JavaDoc -->
+        <module name="JavadocType">
+            <property name="authorFormat" value="\S"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="@param[\s]+[^\s]+[\s]*$"/>
+            <property name="message" value="@param without description detected."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="@return[\s]*$"/>
+            <property name="message" value="@return without description detected."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="JavadocStyle">
+            <property name="checkFirstSentence" value="false"/>
+        </module>
+
+        <!--  Naming -->
+        <module name="PackageName">
+            <property name="format"
+				value="^[a-z]{2,}\.[a-z]{2,}(\.[a-z0-9]+)*$" />
+        </module>
+        <module name="TypeName">
+            <property name="format" value="^[A-Z][a-z0-9]+([A-Z][a-z0-9]+)*$"/>
+        </module>
+        <module name="ConstantName">
+            <property name="format" value="^[A-Z][A-Z0-9_]*$"/>
+        </module>
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-z0-9]*([A-Z][a-z0-9]+)*$"/>
+        </module>
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-z0-9]*([A-Z][a-z0-9]+)*$"/>
+        </module>
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-z0-9]*([A-Z][a-z0-9]+)*$"/>
+        </module>
+
+        <!--  Imports -->
+        <module name="RedundantImport"/>
+        <module name="UnusedImports"/>
+        <module name="IllegalImport"/>
+        <module name="AvoidStarImport"/>
+
+        <!--  Size constraints -->
+
+        <module name="MethodLength">
+            <property name="max" value="100"/>
+        </module>
+        <module name="AnonInnerLength">
+            <property name="max" value="100"/>
+        </module>
+        <module name="ParameterNumber"/>
+        <module name="LineLength">
+            <property name="max" value="160"/>
+        </module>
+
+        <!--  Whitespace -->
+        <module name="NoWhitespaceBefore">
+            <property name="allowLineBreaks" value="true"/>
+            <property name="tokens" value="SEMI, DOT, POST_DEC, POST_INC"/>
+        </module>
+        <module name="NoWhitespaceAfter">
+            <property name="allowLineBreaks" value="false"/>
+            <property name="tokens"
+                      value="BNOT, DEC, DOT, INC, LNOT, UNARY_MINUS, UNARY_PLUS"/>
+        </module>
+        <module name="WhitespaceAfter">
+            <property name="tokens" value="ARRAY_INIT, COMMA, SEMI, TYPECAST"/>
+        </module>
+        <module name="WhitespaceAround">
+            <property name="tokens"
+                      value="ASSIGN,EQUAL,NOT_EQUAL,GE,GT,LE,LT,LAND,LOR,PLUS,MINUS,LITERAL_SYNCHRONIZED,LITERAL_IF,LITERAL_ELSE, LITERAL_SWITCH,LITERAL_FOR, LITERAL_WHILE, LITERAL_DO,LITERAL_TRY,LITERAL_CATCH,LITERAL_FINALLY,LITERAL_RETURN"/>
+        </module>
+        <module name="EmptyForIteratorPad">
+            <property name="option" value="space"/>
+        </module>
+        <module name="ParenPad"/>
+        <module name="TypecastParenPad"/>
+
+        <!-- Block Checks -->
+        <module name="NeedBraces">
+            <property name="tokens"
+                      value="LITERAL_IF,LITERAL_ELSE,LITERAL_FOR,LITERAL_WHILE,LITERAL_DO"/>
+        </module>
+        <module name="LeftCurly">
+            <property name="maxLineLength" value="9999"/>
+            <property name="tokens"
+                      value="CLASS_DEF,INTERFACE_DEF,CTOR_DEF,METHOD_DEF,LITERAL_SYNCHRONIZED,LITERAL_IF,LITERAL_ELSE,LITERAL_SWITCH,LITERAL_FOR,LITERAL_WHILE,LITERAL_DO,LITERAL_TRY,LITERAL_CATCH,LITERAL_FINALLY"/>
+        </module>
+        <module name="RightCurly">
+            <property name="tokens" value="LITERAL_ELSE, LITERAL_TRY, LITERAL_CATCH"/>
+        </module>
+        <module name="EmptyBlock">
+            <property name="option" value="text"/>
+        </module>
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean, java.lang.String"/>
+        </module>
+        <module name="SuperClone"/>
+        <module name="SuperFinalize"/>
+        <module name="EqualsHashCode"/>
+        <module name="CovariantEquals"/>
+        <module name="EmptyStatement"/>
+        <module name="InnerAssignment"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="StringLiteralEquality"/>
+        <module name="NestedIfDepth">
+            <property name="max" value="4"/>
+        </module>
+        <module name="JUnitTestCase"/>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="12"/>
+        </module>
+        <module name="VisibilityModifier"/>
+        <module name="HideUtilityClassConstructor"/>
+        <module name="InterfaceIsType"/>
+        <module name="MutableException"/>
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+        <module name="UpperEll"/>
+        <module name="Regexp">
+            <property name="format" value="System[.]out[.]print"/>
+            <property name="message" value="Don't use System.out."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="System[.]err[.]print"/>
+            <property name="message" value="Don't use System.err."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="[.]printStackTrace"/>
+            <property name="message"
+                      value="Don't print stack traces - use your logging framework."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="TODO:?[\s]*$"/>
+            <property name="message"
+                      value="Empty TODO comment, please provide additional information after the TODO keyword."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="LOGGER.error\([^,]*\);"/>
+            <property name="message"
+                      value="LOGGER.error(...) called without exception as second parameter."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="LOGGER.warn\([^)]*\);"/>
+            <property name="message"
+                      value="LOGGER.warn(...) is not allowed: Either an exception is an error (in this case, consider throwing an exception), or it is expected , in which case logger.info does suffice."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="static (final )?(Date|Number)Format"/>
+            <property name="message"
+                      value="The Formatter classes are not synchronised, don't cache them."/>
+            <property name="illegalPattern" value="true"/>
+		</module>
+		<module name="IllegalCatch">
+			<property name="illegalClassNames" value="java.lang.Throwable"/>
+        </module>
+    </module>
+    <module name="SuppressionCommentFilter"/>
+</module>

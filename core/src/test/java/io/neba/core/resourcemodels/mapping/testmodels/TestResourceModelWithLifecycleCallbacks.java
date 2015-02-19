@@ -32,4 +32,13 @@ public class TestResourceModelWithLifecycleCallbacks {
 	@PostMapping
 	public void afterMapping() {
 	}
+
+	@CustomAnnotationWithPreMappingMetaAnnotation
+	public void beforeMappingWithMetaAnnotation() {
+	}
+
+	@CustomAnnotationWithPostMappingMetaAnnotation
+	public void afterMappingWithMetaAnnotation() {
+	}
+
 }
