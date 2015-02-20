@@ -50,7 +50,7 @@ public class BeanRendererFactoryConfiguration {
     
     @Property(name = PROPERTY_RENDERERS, 
              label = "Bean renderers", 
-             description = "List of renderer names and repository paths. Each entry is of the form" +
+             description = "List of renderer names and repository paths. Each entry is of the form " +
                            "name:/path/in/repository. A renderer may then be referenced by its name " +
                            "and will use the repository path to resolve its views.",
              cardinality = Integer.MAX_VALUE)
