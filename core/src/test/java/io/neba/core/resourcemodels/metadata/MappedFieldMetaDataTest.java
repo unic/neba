@@ -78,8 +78,15 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
+    public void testAppendAbsolutePathOnReference() throws Exception {
+        createMetadataForTestModelFieldWithName("referencedResourceModelWithAbsoluteAppendedReferencePath");
+        assertReferenceHasAppendPath();
+        assertReferenceAppendPathIs("/jcr:content");
+    }
+
+    @Test
     public void testAppendRelativePathOnReference() throws Exception {
-        createMetadataForTestModelFieldWithName("referencedResourceModelWithAppendedReferencePath");
+        createMetadataForTestModelFieldWithName("referencedResourceModelWithRelativeAppendedReferencePath");
         assertReferenceHasAppendPath();
         assertReferenceAppendPathIs("/jcr:content");
     }

@@ -39,6 +39,7 @@ import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.springframework.util.ReflectionUtils.makeAccessible;
@@ -177,7 +178,11 @@ public class MappedFieldMetaData {
     }
 
     private String getAppendPathOfReference() {
-        return this.annotations.get(Reference.class).append();
+        String path = this.annotations.get(Reference.class).append();
+        if (!isEmpty(path) && path.charAt(0) != '/') {
+            path = '/' + path;
+        }
+        return path;
     }
 
     private boolean isResolveBelowEveryChildPathPresentOnChildrenInternal() {
