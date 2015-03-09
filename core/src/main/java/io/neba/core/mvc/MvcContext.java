@@ -41,7 +41,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -88,6 +87,8 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
         private ContextSpecificDispatcherServlet() {
             super();
             setPublishEvents(false);
+            setDispatchOptionsRequest(true);
+            setDispatchTraceRequest(true);
         }
 
         @Override
@@ -173,19 +174,6 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
     }
 
     /**
-     * Discovers existing {@link org.springframework.web.servlet.HandlerAdapter handler adapters} in the provided
-     * context. Provides the default adapters (see original dispatcher servlet) in case no adapters
-     * exist in the context.
-     */
-    private void configureHandlerAdapters() {
-        Map<String, HandlerAdapter> handlerAdapters = this.factory.getBeansOfType(HandlerAdapter.class);
-        if (handlerAdapters.isEmpty()) {
-            defineBean(HttpRequestHandlerAdapter.class);
-            defineBean(RequestMappingHandlerAdapter.class);
-        }
-    }
-
-    /**
      * Registers the custom argument resolvers if a {@link RequestMappingHandlerAdapter}
      * is present in the factory.
      */
@@ -210,6 +198,19 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
             // thus the custom resolvers have to go first)
             resolvers.addAll(argumentResolvers.getResolvers());
             requestMappingHandlerAdapter.setArgumentResolvers(resolvers);
+        }
+    }
+
+    /**
+     * Discovers existing {@link org.springframework.web.servlet.HandlerAdapter handler adapters} in the provided
+     * context. Provides the default adapters (see original dispatcher servlet) in case no adapters
+     * exist in the context.
+     */
+    private void configureHandlerAdapters() {
+        Map<String, HandlerAdapter> handlerAdapters = this.factory.getBeansOfType(HandlerAdapter.class);
+        if (handlerAdapters.isEmpty()) {
+            defineBean(HttpRequestHandlerAdapter.class);
+            defineBean(RequestMappingHandlerAdapter.class);
         }
     }
 
@@ -253,6 +254,17 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
         }
     }
 
+    /**
+     * Discovers existing {@link org.springframework.web.multipart.MultipartResolver multipart resolvers}
+     * in the provided context. Provides a special {@link io.neba.core.mvc.SlingMultipartResolver}
+     * in case no resolver exists in the context.
+     */
+    private void configureMultipartResolver() {
+        if (!hasBean(MultipartResolver.class)) {
+            defineBean(SlingMultipartResolver.class, MULTIPART_RESOLVER_BEAN_NAME);
+        }
+    }
+
     private String generateBeanNameFor(Class<?> type) {
         return type.getName() + GENERATED_BEAN_NAME_SEPARATOR + "0";
     }
@@ -277,12 +289,6 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
 
     public boolean mustInitializeDispatcherServlet() {
         return !this.dispatcherServletInitialized && this.mvcInfrastructureInitialized;
-    }
-
-    private void configureMultipartResolver() {
-        if (!hasBean(MultipartResolver.class)) {
-            defineBean(SlingMultipartResolver.class, MULTIPART_RESOLVER_BEAN_NAME);
-        }
     }
 
     private boolean hasBean(Class<?> type) {

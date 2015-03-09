@@ -1,10 +1,10 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.mvc;
 
+import org.apache.sling.api.SlingHttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -45,7 +47,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import javax.servlet.ServletConfig;
-
+import javax.servlet.ServletException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +63,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -80,14 +84,21 @@ public class MvcContextTest {
     private ContextRefreshedEvent event;
     @Mock
     private ServletConfig servletConfig;
+    @Mock
+    private SlingMvcServletRequest request;
+    @Mock
+    private SlingHttpServletResponse response;
 
     private List<?> registeredArgumentResolvers = new ArrayList<Object>();
+    private HandlerMapping handlerMapping;
 
     private MvcContext testee;
 
     @SuppressWarnings("unchecked")
-	@Before
+    @Before
     public void setUp() throws Exception {
+        doThrow(new NoSuchBeanDefinitionException("THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(this.applicationContext).getBean(anyString(), isA(Class.class));
         doReturn(this.applicationContext).when(this.event).getApplicationContext();
         doReturn(this.factory).when(this.applicationContext).getAutowireCapableBeanFactory();
 
@@ -234,6 +245,53 @@ public class MvcContextTest {
         verifyMvcContextIgnoresEvent();
     }
 
+    @Test
+    public void testOptionsRequestsArePassedToHandlers() throws Exception {
+        withExistingHandlerMapping();
+        signalContextRefreshed();
+        initDispatcherServlet();
+
+        withMethod("OPTIONS");
+        service();
+
+        verifyHandlerMappingIsUsedForRequest();
+    }
+
+    @Test
+    public void testTraceRequestsArePassedToHandlers() throws Exception {
+        withExistingHandlerMapping();
+        signalContextRefreshed();
+        initDispatcherServlet();
+
+        withMethod("TRACE");
+        // Mock expected response type to prevent the default trace behavior
+        // from executing, which would require superfluous mocking
+        withResponseContentType("message/http");
+        service();
+
+        verifyHandlerMappingIsUsedForRequest();
+    }
+
+    private void withResponseContentType(String type) {
+        doReturn(type).when(this.response).getContentType();
+    }
+
+    private void verifyHandlerMappingIsUsedForRequest() throws Exception {
+        verify(this.handlerMapping).getHandler(eq(this.request));
+    }
+
+    private void withExistingHandlerMapping() {
+        this.handlerMapping = mockExistingBean(HandlerMapping.class);
+    }
+
+    private void service() throws ServletException, IOException {
+        this.testee.service(this.request, this.response);
+    }
+
+    private void withMethod(String method) {
+        doReturn(method).when(this.request).getMethod();
+    }
+
     private void initDispatcherServlet() {
         this.testee.initializeDispatcherServlet(this.servletConfig);
     }
@@ -370,8 +428,8 @@ public class MvcContextTest {
         this.testee.onApplicationEvent(this.event);
     }
 
-    private Object mockExistingBean(final Class<?> beanType) {
-        Object bean = mock(beanType, Mockito.RETURNS_MOCKS);
+    private <T> T mockExistingBean(final Class<T> beanType) {
+        T bean = mock(beanType, Mockito.RETURNS_MOCKS);
 
         Map<String, Object> matchingBeans = new HashMap<String, Object>();
         matchingBeans.put("name", bean);
