@@ -165,7 +165,7 @@ import static java.lang.annotation.ElementType.FIELD;
  *
  * <pre>
  * ...
- * &#64;{@link Reference}(append = "/jcr:content")
+ * &#64;{@link Reference}(append = "jcr:content")
  * private List&lt;PageContent&gt; pageContents;
  * </pre>
  *

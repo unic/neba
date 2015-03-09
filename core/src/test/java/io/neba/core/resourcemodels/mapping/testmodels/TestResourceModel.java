@@ -70,7 +70,10 @@ public class TestResourceModel {
     private List<Resource> referencedResourcesListWithSimpleTypeParameter;
 
     @Reference(append = "/jcr:content")
-    private OtherTestResourceModel referencedResourceModelWithAppendedReferencePath;
+    private OtherTestResourceModel referencedResourceModelWithAbsoluteAppendedReferencePath;
+
+    @Reference(append = "jcr:content")
+    private OtherTestResourceModel referencedResourceModelWithRelativeAppendedReferencePath;
 
     @Path("namespace:customName")
     private String stringFieldWithRelativePathAnnotation;
