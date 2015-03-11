@@ -3506,6 +3506,10 @@ html[xmlns] .slides {
         width: 714px;
         height: auto;
     }
+
+    #claim {
+        display: none;
+    }
 }
 
 /*---------------iPhone landscape---------------*/
@@ -3525,6 +3529,10 @@ html[xmlns] .slides {
     }
 
     .flex-caption, .pagination {
+        display: none;
+    }
+
+    #claim {
         display: none;
     }
 }
@@ -3552,6 +3560,10 @@ html[xmlns] .slides {
     #index-slider .slider-claim {
         font-size: inherit;
         line-height: inherit;
+    }
+
+    #claim {
+        display: none;
     }
 }
 
