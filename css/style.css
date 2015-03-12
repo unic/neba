@@ -404,7 +404,8 @@ td, th {
     position: relative;
     display: inline;
     float: left;
-    margin: 0 0 0 -1px;
+    margin: 0;
+    min-width: 6.5em;
 }
 
 #primary-menu ul li:last-child {
@@ -425,8 +426,12 @@ td, th {
 
 #primary-menu ul li a:hover,
 #primary-menu ul > li.sfHover a {
-    background-color: #4167A0;
     color: #fff;
+}
+
+#primary-menu ul li:hover,
+#primary-menu ul > li.sfHover {
+    background-color: #4167A0;
 }
 
 #primary-menu ul li.external a:hover {

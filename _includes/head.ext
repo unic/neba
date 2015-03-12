@@ -1,10 +1,12 @@
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="viewport" content="initial-scale=1, maximum-scale=1" />
-<meta name="viewport" content="width=device-width" />
-<title>{{ page.title }}</title>
+    <title>{{ page.title }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width" />
     <meta name="description" content="{{page.description}}" />
-
+    {% if page.keywords %}
+    <meta name="keywords" content="{{page.keywords}}" />
+    {% endif %}
     <!-- Twitter Card data -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="{{page.title}}" />
