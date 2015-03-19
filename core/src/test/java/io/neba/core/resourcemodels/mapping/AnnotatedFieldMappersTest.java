@@ -167,6 +167,19 @@ public class AnnotatedFieldMappersTest {
     }
 
     @Test
+    public void testMappersForBoxedTypesAreaAppliedToTheirPrimitiveVariants() throws Exception {
+        add(this.mapper1);
+
+        doReturn(Boolean.class).when(this.mapper1).getFieldType();
+        doReturn(boolean.class).when(this.metadata1).getType();
+        assertMetadataHasMappers(this.metadata1, this.mapper1);
+
+        doReturn(Integer.class).when(this.mapper1).getFieldType();
+        doReturn(int.class).when(this.metadata1).getType();
+        assertMetadataHasMappers(this.metadata1, this.mapper1);
+    }
+
+    @Test
     public void testMapperRemoval() throws Exception {
         assertNoMapperExistFor(this.metadata1);
 

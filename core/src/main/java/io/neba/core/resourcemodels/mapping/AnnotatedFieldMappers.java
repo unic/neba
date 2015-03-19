@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.emptyList;
+import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
 
 /**
  * Represents all registered {@link io.neba.api.resourcemodels.AnnotatedFieldMapper custom field mappers}
@@ -114,7 +115,10 @@ public class AnnotatedFieldMappers {
                 continue; // with next element
             }
             for (AnnotatedFieldMapper<?, ?> mapper:  mappersForAnnotation) {
-                if (mapper.getFieldType().isAssignableFrom(metaData.getType())) {
+                // Mappers supporting boxed types shall also support the primitive equivalent,
+                // e.g. Boolean and boolean, Integer / int.
+                Class type = primitiveToWrapper(metaData.getType());
+                if (mapper.getFieldType().isAssignableFrom(type)) {
                     compatibleMappers.add(new AnnotationMapping(annotation, mapper));
                 }
             }
