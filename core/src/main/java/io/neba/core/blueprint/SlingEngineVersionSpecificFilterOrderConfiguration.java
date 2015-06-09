@@ -3,6 +3,7 @@ package io.neba.core.blueprint;
 import org.eclipse.gemini.blueprint.context.BundleContextAware;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -51,11 +52,8 @@ public class SlingEngineVersionSpecificFilterOrderConfiguration implements BeanF
 
     private boolean isSlingEngineGreater232() {
         for (Bundle bundle : this.context.getBundles()) {
-            if ("org.apache.sling.engine".equals(bundle.getHeaders().get(BUNDLE_SYMBOLICNAME)) &&
-                    (bundle.getVersion().getMajor() > 1 &&
-                            bundle.getVersion().getMinor() > 2) &&
-                    bundle.getVersion().getMicro() > 2) {
-                return true;
+            if ("org.apache.sling.engine".equals(bundle.getHeaders().get(BUNDLE_SYMBOLICNAME))) {
+                return bundle.getVersion().compareTo(new Version(2, 3, 2)) > 0;
             }
         }
 

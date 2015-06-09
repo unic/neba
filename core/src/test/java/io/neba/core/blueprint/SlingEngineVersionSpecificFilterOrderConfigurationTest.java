@@ -5,7 +5,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
@@ -17,6 +19,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME;
@@ -32,7 +35,7 @@ public class SlingEngineVersionSpecificFilterOrderConfigurationTest {
     private Bundle
             slingEngineBundle,
             otherBundle;
-    @Mock
+
     private Version slingEngineVersion;
 
     @Mock
@@ -53,7 +56,13 @@ public class SlingEngineVersionSpecificFilterOrderConfigurationTest {
 
     @Before
     public void setUp() throws Exception {
-        doReturn(this.slingEngineVersion).when(this.slingEngineBundle).getVersion();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return slingEngineVersion;
+            }
+        }).when(this.slingEngineBundle).getVersion();
+
         doReturn(new Bundle[]{this.slingEngineBundle, this.otherBundle}).when(this.context).getBundles();
 
         Dictionary<String, String> otherManifest = new Hashtable<String, String>();
@@ -123,8 +132,6 @@ public class SlingEngineVersionSpecificFilterOrderConfigurationTest {
     }
 
     private void withSlingEngineVersion(int major, int minor, int micro) {
-        doReturn(major).when(this.slingEngineVersion).getMajor();
-        doReturn(minor).when(this.slingEngineVersion).getMinor();
-        doReturn(micro).when(this.slingEngineVersion).getMicro();
+        this.slingEngineVersion = new Version(major, minor, micro);
     }
 }
