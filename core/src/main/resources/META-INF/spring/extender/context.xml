@@ -21,7 +21,7 @@
            http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd">
 
 	<context:component-scan base-package="io.neba.core" />
-	
+
 	<task:annotation-driven  proxy-target-class="true"/>
 
     <task:executor id="singlethreaded" pool-size="1" queue-capacity="1" rejection-policy="DISCARD_OLDEST" />
@@ -73,7 +73,7 @@
 		</bp:bean>
 
 		<!-- Beans exported as OSGi services -->
-		<bp:service ref="requestScopedResourceModelCache" ranking="-9999">
+		<bp:service ref="requestScopedResourceModelCache" id="requestScopedResourceModelCacheService">
             <bp:interfaces>
                 <bp:value>io.neba.api.resourcemodels.ResourceModelCache</bp:value>
                 <bp:value>javax.servlet.Filter</bp:value>
@@ -97,7 +97,7 @@
 			</bp:service-properties>
 		</bp:service>
 
-		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" ranking="-10000">
+		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" id="requestContextFilterService">
 			<bp:service-properties>
 				<entry key="sling.filter.scope">
 					<array value-type="java.lang.String">
