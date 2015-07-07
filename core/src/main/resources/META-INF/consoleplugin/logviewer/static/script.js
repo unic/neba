@@ -32,9 +32,12 @@ $(function() {
 		return true;
     });
 
+    $("#hideRotated").change(showOrHideRotatedLogfiles);
+
 	updateErrorLevelFilters();
 	adjustTailWindowToScreenHeight();
 	observeFollowMode();
+    showOrHideRotatedLogfiles();
 
 	// Load a pre-selected logfile (#file:numberOfLines)
 	var href = document.location.href;
@@ -122,4 +125,8 @@ $(function() {
 		$("#tail").css("height", screen.height * 0.65)
 	}
 
+    function showOrHideRotatedLogfiles() {
+        var display = $("#hideRotated").is(":checked") ? "none" : "inline";
+        $("#logfile").find("option").not("[value$='.log']").css("display", display)
+    }
 });
