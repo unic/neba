@@ -57,6 +57,16 @@
                     filter.val(filter.attr("data-default-value"));
                 }
             },
+            cursorPosition = function () {
+                if (document.selection) {
+                    var selection = document.selection.createRange();
+                    selection.moveStart ('character', -filter.value().length);
+                    return selection.text.length;
+                }  else if (filter[0].selectionStart || filter[0].selectionStart == '0') {
+                    return filter[0].selectionStart;
+                }
+                return 0;
+            },
             processFilterExpression = function(force) {
                 var val = filter.val();
                 if (!force) {
@@ -256,10 +266,11 @@
                     invalid();
                     if(e.expected) {
                         var validTextPortion = request.term.substr(0, e.column - 1),
+                            invalidTextPortion = request.term.substr(e.column - 1, cursorPosition()),
                             // if there is invalid text and any of the suggestions starts with it, present the suggestion.
                             // otherwise, present all suggestions
                             showSpecific = e.found && e.expected.some(function (element) {
-                                            return element.value && element.value.indexOf(e.found) == 0;
+                                            return element.value && element.value.indexOf(invalidTextPortion) == 0;
                                            });
                         suggestions = e.expected
                             .filter(function(element) {
@@ -267,7 +278,7 @@
                                 // include all elements in case no specific element matches.
                                 return element.description &&
                                     element.description.length && (
-                                        !showSpecific ||  element.value && element.value.indexOf(e.found) == 0
+                                        !showSpecific ||  element.value && element.value.indexOf(invalidTextPortion) == 0
                                     );
                             }).map(function(expected) {
                                 // The completion metadata key is either the value, or, if not present, the description.
@@ -280,7 +291,7 @@
                                 }, expected.value ? {
                                     label: expected.value,
                                     value: (validTextPortion + expected.value).trim(),
-                                    highlightLength: showSpecific ? e.found.length : 0
+                                    highlightLength: showSpecific ? invalidTextPortion.length : 0
                                 } : {
                                     label: expected.description,
                                     value: validTextPortion.trim(),
