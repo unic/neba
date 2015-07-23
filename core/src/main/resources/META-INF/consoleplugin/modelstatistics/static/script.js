@@ -265,6 +265,12 @@
                 } catch (e) {
                     invalid();
                     if(e.expected) {
+                        // special case: use enters spaces only - remove spaces to allow starting to type a valid expression
+                        if (/^\s+/.test(request.term)) {
+                            request.term = "";
+                            filter.val("");
+                        }
+
                         var validTextPortion = request.term.substr(0, e.column - 1),
                             invalidTextPortion = request.term.substr(e.column - 1, cursorPosition()),
                             // if there is invalid text and any of the suggestions starts with it, present the suggestion.
@@ -290,13 +296,16 @@
                                     hint: completion ? completion.hint : ""
                                 }, expected.value ? {
                                     label: expected.value,
-                                    value: (validTextPortion + expected.value).trim(),
+                                    value: (validTextPortion + expected.value),
                                     highlightLength: showSpecific ? invalidTextPortion.length : 0
                                 } : {
                                     label: expected.description,
-                                    value: validTextPortion.trim(),
+                                    value: validTextPortion,
                                     highlightLength: 0
                                 });
+                            }).map(function (suggestion) {
+                                suggestion.value = suggestion.value.length ? suggestion.value : "NONE";
+                                return suggestion;
                             }).sort(function(left, right) {
                                 return left.order - right.order;
                             });
@@ -313,6 +322,14 @@
                 filter.autoApply = true;
                 processFilterExpression();
                 filter.valid || filter.autocomplete("search");
+            },
+            select: function(e, ui) {
+                filter.val(ui.item.value == "NONE" ? "" : ui.item.value);
+                return false;
+            },
+            focus: function(e, ui) {
+                filter.val(ui.item.value == "NONE" ? "" : ui.item.value);
+                return false;
             },
             appendTo: "#plotarea"
         }).on('change keyup paste mouseup', function() {
