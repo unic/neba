@@ -42,4 +42,5 @@
 
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script type="text/javascript" src="{{site.contextpath}}/javascript/main.js" async="async"></script>
+    <script type="text/javascript" src="{{site.contextpath}}/userguide/page-scroll-to-id/js/minified/jquery.malihu.PageScroll2id.min.js"></script>
 </head>

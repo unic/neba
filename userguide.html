@@ -14,32 +14,32 @@ twitterAuthor: deploynix
 <ul class="plain-list">
     <li><a href="#installing">Installing NEBA</a></li>
     <li>
-        <a href="#api/@ResourceModel">Writing @ResourceModels</a>
+        <a href="#api_ResourceModel">Writing @ResourceModels</a>
         <ul class="plain-list">
             <li><a href="#resourceModelDefinition">Resources, resource types and resource models</a></li>
             <li><a href="#nebaDefineObjects">The neba:defineObjects tag</a></li>
             <li><a href="#resourceToModelMapping">Mapping properties and resources to models</a></li>
             <li><a href="#resourceAnnotations">Annotations for advanced resource to model mapping</a></li>
             <li><a href="#lazyLoading">Lazy loading</a></li>
-            <li><a href="#api/@PreMapping and @PostMapping">Performing additional initializations</a></li>
+            <li><a href="#api_PreMapping-and-PostMapping">Performing additional initializations</a></li>
         </ul>
     </li>
     <li>
         <a href="#springmvc">Using Spring MVC in Sling</a>
         <ul class="plain-list">
-            <li><a href="#api/@ResourceParam">Resolving resource parameters with the @ResourceParam annotation</a></li>
+            <li><a href="#api_ResourceParam">Resolving resource parameters with the @ResourceParam annotation</a></li>
             <li><a href="#configuring-mvc-logging">Configuring logging for MVC</a></li>
         </ul>
     </li>
     <li><a href="#beanscopes">Support for web-specific bean scopes</a></li>
     <li><a href="#using-velocity">Rendering beyond resources with Velocity</a></li>
-    <li><a href="#api/@SelfTest">Writing self-testing applications with NEBA</a></li>
+    <li><a href="#api_SelfTest">Writing self-testing applications with NEBA</a></li>
     <li>
         <a href="#tooling">NEBA tooling for developers and administrators</a>
         <ul class="plain-list">
-            <li><a href="#tooling/modelregistry">The NEBA model registry</a></li>
-            <li><a href="#tooling/modelstatistics">The NEBA model statistics</a></li>
-            <li><a href="#tooling/logviewer">The NEBA log viewer</a></li>
+            <li><a href="#tooling_modelregistry">The NEBA model registry</a></li>
+            <li><a href="#tooling_modelstatistics">The NEBA model statistics</a></li>
+            <li><a href="#tooling_logviewer">The NEBA log viewer</a></li>
         </ul>
     </li>
     <li><a href="#extending">Extending NEBA</a></li>
@@ -51,15 +51,15 @@ twitterAuthor: deploynix
     <div class="one-half">
         <h3>Annotations</h3>
         <ul class="plain-list">
-            <li><a href="#api/@ResourceModel">@ResourceModel</a></li>
-            <li><a href="#api/@This">@This</a></li>
-            <li><a href="#api/@Reference">@Reference</a></li>
-            <li><a href="#api/@Children">@Children</a></li>
-            <li><a href="#api/@Resource">@Path</a></li>
-            <li><a href="#api/@Unmapped">@Unmapped</a></li>
-            <li><a href="#api/@SelfTest">@SelfTest</a></li>
-            <li><a href="#api/@ResourceParam">@ResourceParam</a></li>
-            <li><a href="#api/@PreMapping and @PostMapping">@PostMapping, @PreMapping</a></li>
+            <li><a href="#api_ResourceModel">@ResourceModel</a></li>
+            <li><a href="#api_This">@This</a></li>
+            <li><a href="#api_Reference">@Reference</a></li>
+            <li><a href="#api_Children">@Children</a></li>
+            <li><a href="#api_Resource">@Path</a></li>
+            <li><a href="#api_Unmapped">@Unmapped</a></li>
+            <li><a href="#api_SelfTest">@SelfTest</a></li>
+            <li><a href="#api_ResourceParam">@ResourceParam</a></li>
+            <li><a href="#api_PreMapping-and-PostMapping">@PostMapping, @PreMapping</a></li>
         </ul>
         <h3>Tag libraries</h3>
         <ul class="plain-list">
@@ -70,7 +70,7 @@ twitterAuthor: deploynix
     <div class="one-half last">
         <h3>Interfaces</h3>
         <ul class="plain-list">
-            <li><a href="#api/Optional">Optional&lt;T&gt;</a></li>
+            <li><a href="#api_Optional">Optional&lt;T&gt;</a></li>
             <li><a href="#path-placeholders">PlaceholderVariableResolver</a></li>
             <li><a href="#configuring-velocity">BeanRenderer, BeanRendererFactory</a></li>
             <li><a href="#cache-extension">ResourceModelCache</a></li>
@@ -90,7 +90,7 @@ twitterAuthor: deploynix
 <div class="divider-border"></div>
 
 <div class="one">
-<h2 id="api/@ResourceModel">Writing @ResourceModels</h2>
+<h2 id="api_ResourceModel">Writing @ResourceModels</h2>
 
 <h3 id="resourceModelDefinition">Resources, resource types and resource models</h3>
 
@@ -234,9 +234,9 @@ Pages:
 <p>All NEBA annotations can also supported as meta-annotations - thus, custom annotations annotated with any of the annotations provided
 by NEBA are treated as if the corresponding NEBA annotation was directly applied.</p>
 
-<h4 id="api/@Reference">Resolving references with the @Reference annotation</h4>
+<h4 id="api_Reference">Resolving references with the @Reference annotation</h4>
 
-<p><span id="api/@Unmapped">NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
+<p><span id="api_Unmapped">NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
     annotated with @Unmapped</span>.  Notice that play speed and trans time are Strings in this example, whereas one would
     expect them to be integers. This is simply because these values are defined to be Strings in the component's CQ
     dialog. Had they been defined as integers, we could also retrieve them as integers. You will also notice that &quot;pages&quot;
@@ -280,7 +280,7 @@ private List<PageContent> pageContents;
 Here, instead of resolving and adapting the paths in the property "pages" directly, "/jcr:content" is appended to all of the paths prior to resolution.
 </p>
 
-<h4 id="api/@Children">Resolving children with the @Children annotation</h4>
+<h4 id="api_Children">Resolving children with the @Children annotation</h4>
 
 <p>While the resource hierarchy is conveniently
     navigable using the generic Resource model (i.e. using getChildren()), one often has to subsequently adapt the children. Consequently,
@@ -330,7 +330,7 @@ private List<Page> link;
 private List<PageContent> childPageContents;
 {% endhighlight %}
 
-<h4 id="api/@Resource">Using the @Path annotation to specify property names or resource paths</h4>
+<h4 id="api_Resource">Using the @Path annotation to specify property names or resource paths</h4>
 
 <p>Now, lets add another property to the model, jcr:lastModified.</p>
 
@@ -380,7 +380,7 @@ public class MyVariableResolver implements PlaceholderVariableResolver {
 
 <h4>The @This annotation</h4>
 
-<p id="api/@This">The same applies to members injected with an absolute @Path and the @This annotation; if you have multiple
+<p id="api_This">The same applies to members injected with an absolute @Path and the @This annotation; if you have multiple
     models compatible  to your resource, you may also write:</p>
 
 {% highlight java %}
@@ -429,7 +429,7 @@ public class AccessRestricted {
 
 <p>
 All collection-typed references are automatically provided as lazy-loading proxies, for example in case of
-<a href="#api/@Children">@Children</a> and <a href="#api/@Reference">@Reference</a> collections:
+<a href="#api_Children">@Children</a> and <a href="#api_Reference">@Reference</a> collections:
 </p>
 
 {% highlight java %}
@@ -447,7 +447,7 @@ The contents of these collection are loaded as soon as a collection method - suc
 The lazy-loading behavior for collections is thus completely transparent.
 </p>
 
-<h4 id="api/Optional">Declaring lazy-loading relationships using the Optional&lt;T&gt; interface</h4>
+<h4 id="api_Optional">Declaring lazy-loading relationships using the Optional&lt;T&gt; interface</h4>
 
 <p>
 1:1 relationships are not automatically lazy. In order to make them lazy-loading,
@@ -523,7 +523,7 @@ public class MyModel {
 
 
 
-<h3 id="api/@PreMapping and @PostMapping">Performing additional initializations</h3>
+<h3 id="api_PreMapping-and-PostMapping">Performing additional initializations</h3>
 
 <p>It is often required to perform some additional initializations
     after all properties of a @ResourceModel are mapped. NEBA supports this use case with the @PostMapping and
@@ -626,7 +626,7 @@ this way, your View's render method is used to render the response. Alternativel
 response and either let the controller method return &quot;null&quot; or make it void. This is however bad practice
 and thus discouraged.</p>
 
-<h3 id="api/@ResourceParam">Resolving resource path parameters with the @ResourceParam annotation</h3>
+<h3 id="api_ResourceParam">Resolving resource path parameters with the @ResourceParam annotation</h3>
 
 <p>NEBA supports the common use case of handling resource paths in controllers with a convenience annotation:</p>
 
@@ -832,7 +832,7 @@ I contain the following pages:<br />
 <div class="divider-border"></div>
 
 <div class="one">
-    <h2 id="api/@SelfTest">Writing self-testing applications with NEBA</h2>
+    <h2 id="api_SelfTest">Writing self-testing applications with NEBA</h2>
     <p>
         NEBA supports the notion of <em>self-testing applications</em> via the @SelfTest annotation. This annotation can be used on any number of methods
         of singleton Spring beans. Methods annotated with @SelfTest must be public, void and must not expect an argument.
@@ -876,7 +876,7 @@ public class SomeSpringSingleton {
         Felix console greatly improves issue analysis in cases where serial access to the system is an issue.
     </p>
 
-    <h3 id="tooling/modelregistry">NEBA model registry</h3>
+    <h3 id="tooling_modelregistry">NEBA model registry</h3>
     <p>
         The <em>model registry</em> allows viewing all currently registered resource models, their source bundle and the resource types they are mapping to. In addition, the models
         can be filtered to find models mapping to specific content or models compatible to specific classes.
@@ -884,7 +884,7 @@ public class SomeSpringSingleton {
     <p><a href="images/userguide/modelregistry-large.png" data-rel="prettyPhoto"><img src="images/userguide/modelregistry-large.png" alt="The NEBA model registry" /></a></p>
 
 
-    <h3 id="tooling/modelstatistics">NEBA model statistics</h3>
+    <h3 id="tooling_modelstatistics">NEBA model statistics</h3>
     <p>
         For every detected resource model, NEBA extracts metadata that is reused to efficiently map resources to these models. Whenever resources are mapped to models,
         NEBA gathers data regarding the mapping duration. This combined resource model data is available via a JSON REST API in the model statistics console (/system/console/modelstatistics/api/statistics).
@@ -1103,7 +1103,7 @@ public class SomeSpringSingleton {
         <div id="target"></div>
     </div>
 
-    <h3 id="tooling/logviewer">The  log viewer</h3>
+    <h3 id="tooling_logviewer">The  log viewer</h3>
     <p>
         Developers do not always have serial access to a system in order to analyze log files - however, being able to investigate the log files of a Sling instance
         is often key to finding and resolving issues timely. Here, NEBA provides the log viewer Felix console plugin - a safe way to view analyze and obtain the configured
