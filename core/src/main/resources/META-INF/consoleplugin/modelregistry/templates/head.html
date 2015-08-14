@@ -66,6 +66,14 @@ img.componentIcon {
     margin-right: 5px;
 }
 
+#filters label {
+    margin-left: 10px;
+}
+
+#applyFilter {
+    margin-left: 5px;
+}
+
 </style>
 <div id="neba-heading">%d Model(s) registered. You may use the filters to explore resource model mapping behavior.</div>
 
@@ -76,10 +84,10 @@ img.componentIcon {
                 id="unresolvedToggle">Only show mappings to unresolvable resource types</button>
         <span id="filters">
             Filter:
-            <label for="fromResource">mapping to</label>
-            <input type="text" id="fromResource" title="Only show resource models mapping to the following resource.">
-            <label for="toType">compatible to</label>
-            <input type="text" id="toType" title="Only show resource models compatible to the specified type or any type in the specified package.">
+            <label for="fromResource">Adaptable from</label>
+            <input type="text" id="fromResource" title="Only show resource models that can be adapted from the following resource" placeholder="/resource/path">
+            <label for="toType">Assignable from</label>
+            <input type="text" id="toType" title="Only show resource models assignable from the specified type or any type in the specified package." placeholder="some.type.Name">
             <button type="button" id="applyFilter">Apply filter</button>
         </span>
 	</div>

@@ -59,7 +59,7 @@
     </developers>
 
     <properties>
-        <spring.version>3.2.13.RELEASE_1</spring.version>
+        <spring.version>3.2.13.RELEASE_2</spring.version>
         <gemini.version>2.0.0.M02</gemini.version>
         <language.level>1.6</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
