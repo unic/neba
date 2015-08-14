@@ -537,20 +537,3 @@ $(function () {
         });
     });
 });
-
-/**************************************
- * Page-Scroll to id - for User Guide *
- **************************************/
-
-// IMPORTANT!
-// Doesn't work if href="#..." includes any strange characters!
-// ID's first character MUST be a letter not a number!
-// ALLOWED CHARACTERS are: letters (a to z, A to Z), numbers (0-9), hyphens (-), underscores (_), colons (:) and periods (.).
-
-(function ($) {
-    $(window).load(function () {
-        $(".plain-list a").mPageScroll2id({
-            offset: "10"
-        });
-    });
-})(jQuery);

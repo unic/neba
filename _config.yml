@@ -2,6 +2,6 @@ pygments: true
 github: [Repository metadata]
 markdown: kramdown
 url: http://www.neba.io
-nebaVersion: 3.5.0
+nebaVersion: 3.6.0
 springDocumentationVersion: 3.2.x
 contextpath:

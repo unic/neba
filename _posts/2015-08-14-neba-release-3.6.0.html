@@ -1,0 +1,120 @@
+---
+title: NEBA 3.6.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.6.0 Release notes
+---
+<div class="section-title">
+
+    <h1 class="title">NEBA <span>Release 3.6.0</span></h1>
+
+</div><!--END SECTION TITLE-->
+
+<div id="inner-content" class="blog1">
+
+    <div class="post">
+
+        <div class="post-info">
+            <div class="date"><span class="month">Aug</span><span class="day">14</span><span class="month">2015</span></div>
+        </div><!--END POST-INFO-->
+
+        <div class="post-content">
+
+            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
+
+            <div class="post-title">
+                <h2 class="title">Release 3.6.0</h2>
+            </div><!--END POST-TITLE-->
+
+            <div class="post-meta">
+                <ul>
+                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
+                </ul>
+            </div><!--END POST-META-->
+
+            <div class="divider-border"></div>
+
+            <div class="one">
+                <h2>Highlights in this release</h2>
+            </div>
+
+            <div class="one">
+                <h3>AEM 5.6 to AEM 6.1 support: Getting the filter order right</h3>
+                <div class="one">
+                    <p>
+                        From AEM 5.6 to AEM 6.1, the <a href="https://issues.apache.org/jira/browse/SLING-2920">meaning of the filter.order property</a> of sling filters changed. To support both
+                        versions, NEBA 3.6.0 automatically detects the AEM version it is running on and adjusts the order of its filters accordingly. Using NEBA 3.6.x is thus strongly recommended
+                        for AEM versions > 5.6 or Sling versions with Sling engine > 2.3.2.
+                    </p>
+                </div>
+            </div>
+
+            <div class="one">
+                <h3>Handling rotated logfiles in the log file viewer</h3>
+                <div class="one-half">
+                    <a href="/images/neba-in-a-nutshell/logviewer-large.png" data-rel="prettyPhoto" rel="prettyPhoto"><img src="/images/neba-in-a-nutshell/logviewer.png" alt="The NEBA log viewer"></a>
+                </div>
+                <div class="one-half last">
+                    <p>
+                        Since 3.6.0, the <a href="/userguide.html#tooling_logviewer">log viewer console</a> automatically hides rotated logfile versions, giving administrators a focus on the mos recent log files.
+                    </p>
+                </div>
+            </div>
+
+            <div class="one">
+                <h3>Improved filtering in the NEBA model statistics console</h3>
+                <div class="one-half">
+                    <a href="/images/neba-in-a-nutshell/statistics-large.png" data-rel="prettyPhoto" rel="prettyPhoto"><img src="/images/neba-in-a-nutshell/statistics.png" alt="The NEBA model statistics console"></a>
+                </div>
+                <div class="one-half last">
+                    <p>
+                        The model statistics console now got even better at automatically completing filter expressions. Any expression can now quickly be created by
+                        typing and applying the autocompletion suggestions.
+                    </p>
+                </div>
+            </div>
+
+            <div class="one">
+                <h3>HTTP OPTIONS and TRACE requests now passed to @Controllers</h3>
+                <div class="one">
+                    <p>
+                        In Spring, OPTIONS and TRACE requests are usually answered with a default response by the DispatcherServlet [<a href="#options-and-trace">1</a>]. NEBA
+                        now overrides this default and forwards delegates these methods to registered controllers, thus enabling proper implementation of CORS in REST endpoints.
+                        [<a name="options-and-trace">1</a>] <a href="http://stackoverflow.com/questions/23103832/spring-mvc-does-not-handle-requestmethod-options">http://stackoverflow.com/questions/23103832/spring-mvc-does-not-handle-requestmethod-options</a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="divider-border"></div>
+
+            <div class="one">
+                <h2>Release notes</h2>
+
+                <h3>Improvements</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/issues/64">#64 Improve labels in model registry</a><br />
+                    <a href="https://github.com/unic/neba/issues/63">#63 Improve the filter expression autocompletion of model statistics console</a><br />
+                    <a href="https://github.com/unic/neba/issues/61">#61 NEBA log viewer: pre-filter rotated logs</a><br />
+                    <a href="https://github.com/unic/neba/issues/58">#58 AEM 6.1: Dynamically adjust service.ranking of filters with regard to the Sling engine version</a><br />
+                    <a href="https://github.com/unic/neba/issues/45">#45 Spring MVC: Pass OPTIONS and TRACE requests to handlers</a><br />
+                    <a href="https://github.com/unic/neba/issues/42">#42 @Reference append parameter does not work with "relative notation"</a><br />
+                </p>
+
+                <h3>Fixed bugs</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/issues/54">#54 AnnotationFieldMapper does not work on primitive types</a>
+                </p>
+
+                <h3>Upgrading from 3.5.0</h3>
+
+                <p>
+                    Simply upgrade your dependencies and re-deploy NEBA - there are no incompatible API changes in this release. Note that the version of Spring
+                    contained in the <a href="/download.html#installation">delivery package</a> was updated from 3.2.13 RELEASE 1 to 3.2.13 RELEASE 2, which should be reflected in
+                    project dependencies as well.
+                </p>
+            </div>
+        </div><!--END POST-CONTENT -->
+
+    </div><!--END POST-->
+
+</div><!--END INNER-CONTENT-->
