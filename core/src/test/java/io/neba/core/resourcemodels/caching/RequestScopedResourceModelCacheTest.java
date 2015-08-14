@@ -79,7 +79,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testLookupOfModel() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 withResourcePath("/junit/test/1");
@@ -97,7 +97,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testLookupOfDifferentResourcePaths() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -118,7 +118,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsNotSelectorSensitiveWithoutSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -138,7 +138,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsNotSuffixSensitiveWithoutSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -158,7 +158,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsNotPagePathSensitiveWithoutSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -180,7 +180,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsNotSensitiveToQueryStringWithoutSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -200,7 +200,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsSelectorSensitiveInSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -221,7 +221,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsSuffixSensitiveInSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -242,7 +242,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsPagePathSensitiveInSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -265,7 +265,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsNotSensitiveToPathChangesBelowCurrentPageInSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -288,7 +288,7 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheIsSensitiveToQueryStringInSafeMode() throws Exception {
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
 
@@ -325,7 +325,7 @@ public class RequestScopedResourceModelCacheTest {
         enableStatistics();
         withRequestUri("/arbitrary/request/uri.html");
 
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 withResourcePath("/junit/test/1");
@@ -348,7 +348,7 @@ public class RequestScopedResourceModelCacheTest {
         withRequestUri("/junit/test/1.html");
         enableStatistics();
 
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 withResourcePath("/junit/test/1");
@@ -360,7 +360,7 @@ public class RequestScopedResourceModelCacheTest {
         verifyNothingIsReported();
 
         withRequestUri("/junit/test/2.html");
-        request(new Callable() {
+        request(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 withResourcePath("/junit/test/2");
@@ -439,8 +439,8 @@ public class RequestScopedResourceModelCacheTest {
         doReturn(uri).when(this.request).getRequestURI();
     }
 
-    private void request(final Callable callable) throws Exception {
-        doAnswer(new Answer() {
+    private void request(final Callable<Object> callable) throws Exception {
+        doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
                 return callable.call();

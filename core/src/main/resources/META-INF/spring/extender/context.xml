@@ -21,7 +21,7 @@
            http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd">
 
 	<context:component-scan base-package="io.neba.core" />
-	
+
 	<task:annotation-driven  proxy-target-class="true"/>
 
     <task:executor id="singlethreaded" pool-size="1" queue-capacity="1" rejection-policy="DISCARD_OLDEST" />
@@ -56,6 +56,10 @@
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelCache" availability="optional">
 			<bp:reference-listener ref="resourceModelCaches" bind-method="add" unbind-method="remove" />
 		</bp:reference-list>
+		<!-- All custom injectors are used by the resource to model mapper -->
+		<bp:reference-list interface="io.neba.api.resourcemodels.AnnotatedFieldMapper" availability="optional">
+			<bp:reference-listener ref="annotatedFieldMappers" bind-method="add" unbind-method="remove" />
+		</bp:reference-list>
 
 		<!-- Beans not providable by classpath scanning -->
 		<bp:bean class="org.springframework.web.filter.RequestContextFilter" id="requestContextFilter" />
@@ -69,7 +73,7 @@
 		</bp:bean>
 
 		<!-- Beans exported as OSGi services -->
-		<bp:service ref="requestScopedResourceModelCache" ranking="-9999">
+		<bp:service ref="requestScopedResourceModelCache" id="requestScopedResourceModelCacheService">
             <bp:interfaces>
                 <bp:value>io.neba.api.resourcemodels.ResourceModelCache</bp:value>
                 <bp:value>javax.servlet.Filter</bp:value>
@@ -93,7 +97,7 @@
 			</bp:service-properties>
 		</bp:service>
 
-		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" ranking="-10000">
+		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" id="requestContextFilterService">
 			<bp:service-properties>
 				<entry key="sling.filter.scope">
 					<array value-type="java.lang.String">
@@ -144,12 +148,12 @@
             </bp:service-properties>
         </bp:service>
 
-        <bp:service ref="modelMetadataConsolePlugin" interface="javax.servlet.Servlet" ranking="0">
+        <bp:service ref="modelStatisticsConsolePlugin" interface="javax.servlet.Servlet" ranking="0">
             <bp:service-properties>
-                <bp:entry key="felix.webconsole.label" value="modelmetadata"/>
+                <bp:entry key="felix.webconsole.label" value="modelstatistics"/>
                 <bp:entry key="service.vendor" value="neba.io"/>
                 <bp:entry key="service.description"
-                          value="Provides a Felix console plugin visualizing resource @ResourceModel metadata."/>
+                          value="Provides a Felix console plugin visualizing resource @ResourceModel statistics."/>
             </bp:service-properties>
         </bp:service>
 

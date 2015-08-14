@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 
 /**
@@ -164,7 +165,7 @@ import static java.lang.annotation.ElementType.FIELD;
  *
  * <pre>
  * ...
- * &#64;{@link Reference}(append = "/jcr:content")
+ * &#64;{@link Reference}(append = "jcr:content")
  * private List&lt;PageContent&gt; pageContents;
  * </pre>
  *
@@ -176,8 +177,11 @@ import static java.lang.annotation.ElementType.FIELD;
  * @author Olaf Otto
  */
 @Documented
-@Target(FIELD)
+@Target({FIELD, ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Reference {
+    /**
+     * Append this path segment to the reference path prior to resource resolution.
+     */
     String append() default "";
 }

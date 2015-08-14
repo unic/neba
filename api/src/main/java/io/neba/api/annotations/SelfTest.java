@@ -16,12 +16,13 @@
 
 package io.neba.api.annotations;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Methods annotated with {@link SelfTest} are considered selftests of a service
@@ -54,8 +55,8 @@ import java.lang.annotation.Target;
  * @author Olaf Otto
  */
 @Documented
-@Target(METHOD)
 @Retention(RUNTIME)
+@Target({METHOD, ANNOTATION_TYPE})
 public @interface SelfTest {
     /**
      * Short description of the test, e.g. &quot;Mailserver connectivity

@@ -16,7 +16,8 @@ The project documentation resides at [http://neba.io/](http://neba.io/).
 
 Getting support
 --------------------
-Consult the documentation at [http://neba.io](http://neba.io) and the [NEBA tag on Stack overflow](http://stackoverflow.com/questions/tagged/neba).
+Consult the documentation or ask a question in the site comments at [http://neba.io](http://neba.io),
+ask a question at [Stack overflow](http://stackoverflow.com/) or drop us a mail at neba at unic.com.
 
 Building from source
 --------------------

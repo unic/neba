@@ -21,6 +21,7 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiBeanSource;
+
 import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +60,7 @@ public class ResourceModelProviderImplTest {
     @Mock
 	private ResourceModelCaches caches;
 
-    private OsgiBeanSource<?> osgiBeanSource;
+    private OsgiBeanSource<Object> osgiBeanSource;
     private Object resolutionResult;
     private final Object model = new Object();
 
@@ -78,10 +79,12 @@ public class ResourceModelProviderImplTest {
 		});
 	}
 
-    @Before
+	@Before
     public void provideMockResourceModel() {
         LinkedList<LookupResult> lookupResults = new LinkedList<LookupResult>();
-        this.osgiBeanSource = mock(OsgiBeanSource.class);
+		@SuppressWarnings("unchecked")
+		OsgiBeanSource<Object> osgiBeanSource = mock(OsgiBeanSource.class);
+		this.osgiBeanSource = osgiBeanSource;
         lookupResults.add(this.lookupResult);
         doReturn(this.osgiBeanSource).when(this.lookupResult).getSource();
         when(this.osgiBeanSource.getBean()).thenReturn(this.model);

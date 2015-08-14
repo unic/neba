@@ -51,6 +51,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,7 +73,7 @@ public class LogfileViewerConsolePluginTest {
     @Mock
     private Configuration logConfiguration;
     @Mock
-    private Dictionary logConfigurationProperties;
+    private Dictionary<?, String> logConfigurationProperties;
     @Mock
     private ServletOutputStream outputStream;
 
@@ -103,14 +104,14 @@ public class LogfileViewerConsolePluginTest {
         when(this.logConfiguration.getProperties()).thenReturn(this.logConfigurationProperties);
         when(this.logConfigurationProperties.get(eq(ORG_APACHE_SLING_COMMONS_LOG_FILE))).thenReturn("logs/error.log");
 
-        Answer writeIntToByteArrayOutputStream = new Answer() {
+        Answer<Object> writeIntToByteArrayOutputStream = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 internalOutputStream.write((Integer) invocation.getArguments()[0]);
                 return null;
             }
         };
-        Answer writeBytesToByteArrayOutputStream = new Answer() {
+        Answer<Object> writeBytesToByteArrayOutputStream = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 byte[] b = (byte[]) invocation.getArguments()[0];
@@ -301,13 +302,26 @@ public class LogfileViewerConsolePluginTest {
         assertNextZipEntryIs(pathOf("remote-logs/error.log.2020-01-01"));
     }
 
+    @Test
+    public void testViewerFallsBackToDefaultLogsLocationIfNoConfigurationExists() throws Exception {
+        withNonexistingLoggingConfiguration();
+        withRequestPath("/system/console/logviewer");
+        doGet();
+        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log") + "\"");
+    }
+
+    private void withNonexistingLoggingConfiguration() {
+        doReturn(null).when(this.logConfiguration).getProperties();
+    }
+
     private void verifyLogFilesAreSendAs(String filename) {
         verify(this.response).setHeader(eq("Content-Disposition"), eq("attachment;filename=" + filename));
     }
 
     private void withAdditionalLogfile(String additionalLogfile) throws IOException, InvalidSyntaxException {
         Configuration configuration = mock(Configuration.class);
-        Dictionary properties = mock(Dictionary.class);
+        @SuppressWarnings("unchecked")
+		Dictionary<?, String> properties = mock(Dictionary.class);
         String absoluteLogfilePath = this.testLogfileDirectory.getAbsolutePath() + File.separator + additionalLogfile;
         when(properties.get(eq(ORG_APACHE_SLING_COMMONS_LOG_FILE))).thenReturn(absoluteLogfilePath);
         when(configuration.getProperties()).thenReturn(properties);

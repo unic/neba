@@ -16,17 +16,21 @@
 
 package io.neba.core.util;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.framework.Bundle;
 import org.springframework.beans.factory.BeanFactory;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.osgi.framework.Bundle.ACTIVE;
+import static org.osgi.framework.Bundle.UNINSTALLED;
 
 /**
  * @author Olaf Otto
@@ -35,8 +39,11 @@ import org.springframework.beans.factory.BeanFactory;
 public class OsgiBeanSourceTest {
     @Mock
     private BeanFactory factory;
+    @Mock
+    private Bundle bundleOne;
+    @Mock
+    private Bundle bundleTwo;
 
-    private long bundleId = 123L;
     private String beanName = "testBean";
     private String beanSourceAsString;
 
@@ -44,7 +51,11 @@ public class OsgiBeanSourceTest {
 
     @Before
     public void prepareBeanSource() {
-        this.testee = new OsgiBeanSource<Object>(this.beanName, this.factory, this.bundleId);
+        doReturn(ACTIVE).when(this.bundleOne).getState();
+        doReturn(ACTIVE).when(this.bundleTwo).getState();
+        doReturn(123L).when(this.bundleOne).getBundleId();
+        doReturn(1234L).when(this.bundleTwo).getBundleId();
+        this.testee = new OsgiBeanSource<Object>(this.beanName, this.factory, this.bundleOne);
     }
     
     @Test
@@ -66,27 +77,51 @@ public class OsgiBeanSourceTest {
     }
 
     @Test
+    public void testIsValidIsTrueWhenBundleIsActive() throws Exception {
+        assertSourceIsValid();
+    }
+
+    @Test
+    public void testIsValidIsTrueWhenBundleIsNotActive() throws Exception {
+        withUninstalledBundles();
+        assertSourceIsInvalid();
+    }
+
+    @Test
     public void testHashCodeAndEquals() throws Exception {
-        OsgiBeanSource<?> one = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), 123L);
-        OsgiBeanSource<?> two = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), 123L);
+        OsgiBeanSource<?> one = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), this.bundleOne);
+        OsgiBeanSource<?> two = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), this.bundleOne);
 
         assertThat(one.hashCode()).isEqualTo(two.hashCode());
         assertThat(one).isEqualTo(two);
         assertThat(two).isEqualTo(one);
 
-        one = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), 123L);
-        two = new OsgiBeanSource<Object>("two", mock(BeanFactory.class), 123L);
+        one = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), this.bundleOne);
+        two = new OsgiBeanSource<Object>("two", mock(BeanFactory.class), this.bundleOne);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
         assertThat(one).isNotEqualTo(two);
         assertThat(two).isNotEqualTo(one);
 
-        one = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), 123L);
-        two = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), 1234L);
+        one = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), this.bundleOne);
+        two = new OsgiBeanSource<Object>("one", mock(BeanFactory.class), this.bundleTwo);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
         assertThat(one).isNotEqualTo(two);
         assertThat(two).isNotEqualTo(one);
+    }
+
+    private void assertSourceIsInvalid() {
+        assertThat(this.testee.isValid()).isFalse();
+    }
+
+    private void withUninstalledBundles() {
+        doReturn(UNINSTALLED).when(this.bundleOne).getState();
+        doReturn(UNINSTALLED).when(this.bundleTwo).getState();
+    }
+
+    private void assertSourceIsValid() {
+        assertThat(this.testee.isValid()).isTrue();
     }
 
     private void verifyBeanSourceGetsBeanTypeFromFactory() {

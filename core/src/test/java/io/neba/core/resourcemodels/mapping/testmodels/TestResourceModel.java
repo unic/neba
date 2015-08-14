@@ -22,6 +22,7 @@ import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.annotations.This;
 import io.neba.api.annotations.Unmapped;
+import io.neba.api.resourcemodels.Optional;
 import org.apache.sling.api.resource.Resource;
 
 import javax.inject.Inject;
@@ -38,7 +39,7 @@ import java.util.List;
  */
 @ResourceModel(types = "ignored/junit/test/type")
 public class TestResourceModel {
-    private static String STATIC_FIELD;
+    private static String staticField;
     private final String finalField = "finalValue";
     private String stringField;
     private int primitiveIntField;
@@ -51,18 +52,28 @@ public class TestResourceModel {
     private Calendar calendarField;
 
     @This
-    private Resource resource;
+    private Resource thisResource;
+
+    @CustomAnnotationWithThisMetaAnnotation
+    private Resource thisResourceWithMetaAnnotation;
 
     @Reference
     @Path("resourcePath")
     private Resource referencedResource;
+
+    @CustomAnnotationWithReferenceMetaAnnotation
+    @Path("resourcePath")
+    private Resource referencedResourceWithMetaAnnotation;
 
     @Reference
     @Path("listResourcePathsWithSimpleTypeParameter")
     private List<Resource> referencedResourcesListWithSimpleTypeParameter;
 
     @Reference(append = "/jcr:content")
-    private OtherTestResourceModel referencedResourceModelWithAppendedReferencePath;
+    private OtherTestResourceModel referencedResourceModelWithAbsoluteAppendedReferencePath;
+
+    @Reference(append = "jcr:content")
+    private OtherTestResourceModel referencedResourceModelWithRelativeAppendedReferencePath;
 
     @Path("namespace:customName")
     private String stringFieldWithRelativePathAnnotation;
@@ -70,19 +81,36 @@ public class TestResourceModel {
     @Path("/absolute/path")
     private String stringFieldWithAbsolutePathAnnotation;
 
+    @CustomAnnotationWithPathMetaAnnotation
+    private String stringFieldWithPathMetaAnnotation;
+
     @Path("titleText${language}")
     private String stringFieldWithPlaceholder;
 
     @Children
     private List<Resource> childrenAsResources;
 
+    @CustomAnnotationWithChildrenMetaAnnotation
+    private List<Resource> childrenAsResourcesWithMetaAnnotation;
+
     @Children(resolveBelowEveryChild = "/jcr:content")
     private List<Resource> childContentResourcesAsResources;
+
+    @Children
+    private Optional<List<Resource>> optionalChildContentResourcesAsResources;
+
+    @Reference
+    private Optional<OtherTestResourceModel> lazyReferenceToOtherModel;
+
+    private Optional<OtherTestResourceModel> lazyReferenceToChildAsOtherModel;
 
     private Collection<String> collectionOfStrings;
 
     @Unmapped
     private String transientStringField;
+
+    @CustomAnnotationWithUnmappedMetaAnnotation
+    private String transientStringFieldWithUnmappedMetaAnnotation;
 
     @Inject
     private String injectedField;
@@ -92,6 +120,6 @@ public class TestResourceModel {
     }
 
     public Resource getResource() {
-        return resource;
+        return thisResource;
     }
 }

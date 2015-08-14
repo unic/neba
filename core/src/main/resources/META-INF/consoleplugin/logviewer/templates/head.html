@@ -89,8 +89,12 @@ form .buttonGroup button {
     padding: 5px;
 }
 
-#showOptions input {
+#showOptions input, #dropdownSettings input {
     vertical-align: text-bottom;
+}
+
+#dropdownSettings {
+    margin-right: 5px;
 }
 </style>
 
@@ -102,7 +106,7 @@ form .buttonGroup button {
 <!-- buttons top -->
 <form method="GET" enctype="multipart/form-data" action="#">
     <div class="ui-widget-header ui-corner-top buttonGroup">
-        <button type="button" id="downloadButton" title="Stream all logfiles as a ZIP file.">Download all logfiles</button>
+        <button type="button" id="downloadButton" title="Stream all logfiles as a ZIP file, including rotated version.">Download all</button>
         <span style="font-weight: normal;">Show</span>
         <span id="showOptions">
             <input type="checkbox" name="show" value="ERROR" id="showERROR" checked="checked" /><label for="showERROR"> Error</label>
@@ -113,11 +117,15 @@ form .buttonGroup button {
         </span>
 
         <label for="numberOfLines">Tail</label>
-        <input type="text" id="numberOfLines" value="10" />
-        <label for="logfile">lines of logfile</label>
+        <input type="text" id="numberOfLines" value="100" />
+        <label for="logfile">lines of </label>
         <select id="logfile">
             %s
         </select>
+        <span id="dropdownSettings">
+            <input type="checkbox" name="hideRotated" id="hideRotated" checked="checked"/>
+            <label for="hideRotated" title="Hide rotated log file versions in the dropdown"> hide rotated</label>
+        </span>
         <button id="reloadButton" title="Refresh the contents of the selected logfile.">Reload</button>
         <button id="followButton" title="Periodically load changes.">Follow</button>
     </div>

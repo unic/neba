@@ -19,7 +19,7 @@
  * {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData resource model metadata}
  * created during both resource model registration and usage. This metadata is used during the lookup and adaptation of the resource models
  * to avoid costly superfluous reflection on the resource model types at runtime. Furthermore,
- * the {@link io.neba.core.resourcemodels.metadata.ModelMetadataConsolePlugin metadata console plugin}
+ * the {@link io.neba.core.resourcemodels.metadata.ModelStatisticsConsolePlugin metadata console plugin}
  * leverages the static resource model metadata in combination with
  * {@link io.neba.core.resourcemodels.metadata.ResourceModelStatistics statistical resource model data collected at runtime}. to
  * display and visualize runtime behavior.

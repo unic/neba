@@ -18,6 +18,7 @@ package io.neba.core.resourcemodels.mapping;
 
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +47,10 @@ public class CyclicMappingSupportTest {
     @Mock
     private ResourceModelMetaData metaData;
 
-    private Mapping mapping;
+    private Mapping<?> mapping;
     private Mapping<?> alreadyOngoingMapping;
-    private Set<Mapping> ongoingMappings;
+    @SuppressWarnings("rawtypes")
+	private Set<Mapping> ongoingMappings;
 
 	@InjectMocks
     private CyclicMappingSupport testee;
@@ -144,7 +146,6 @@ public class CyclicMappingSupportTest {
         assertThat(this.alreadyOngoingMapping).isNotNull();
     }
 
-    @SuppressWarnings("unchecked")
     private void beginMapping() {
         this.alreadyOngoingMapping = this.testee.begin(this.mapping);
     }

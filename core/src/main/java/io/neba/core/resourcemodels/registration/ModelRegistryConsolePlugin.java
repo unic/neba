@@ -24,8 +24,6 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
-import org.eclipse.gemini.blueprint.context.BundleContextAware;
-import org.osgi.framework.BundleContext;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -63,7 +61,7 @@ import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
  * @author Olaf Otto
  */
 @Service
-public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin implements BundleContextAware {
+public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     public static final String LABEL = "modelregistry";
     public static final String PREFIX_STATIC = "/static";
 
@@ -80,8 +78,6 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin impleme
     private ResourceResolverFactory resourceResolverFactory;
     @Inject
     private ModelRegistry registry;
-
-    private BundleContext bundleContext;
 
     public String getCategory() {
         return "NEBA";
@@ -146,7 +142,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin impleme
         writer.write("<tbody>");
         for (Entry<String, Collection<OsgiBeanSource<?>>> entry : this.registry.getTypeMappings().entrySet()) {
             for (OsgiBeanSource<?> source : entry.getValue()) {
-                String sourceBundleName = displayNameOf(this.bundleContext.getBundle(source.getBundleId()));
+                String sourceBundleName = displayNameOf(source.getBundle());
 
                 writer.write("<tr data-modeltype=\"" + source.getBeanType().getName() + "\">");
                 String resourceType = buildCrxDeLinkToResourceType(req, entry.getKey());
@@ -342,10 +338,5 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin impleme
             resolver.close();
             closeQuietly(in);
         }
-    }
-
-    @Override
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 }

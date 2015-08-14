@@ -17,10 +17,12 @@
 package io.neba.api.annotations;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks a parameter of a Spring &#64;RequestMapping method as containing a resource path.
@@ -42,15 +44,26 @@ import java.lang.annotation.Target;
  *          return page.getTitle();
  *      }
  *  }
- *
  *  </pre>
  *
  *  In the above example, a request parameter "page" is expected. The parameter value is regarded as a
- *  resource path and the corresponding resource is {@link org.apache.sling.api.resource.ResourceResolver#resolve(javax.servlet.http.HttpServletRequest, String) resolved}.
+ *  resource path and the corresponding resource is
+ *  {@link org.apache.sling.api.resource.ResourceResolver#resolve(javax.servlet.http.HttpServletRequest, String) resolved}.
  *  The resolved resource is subsequently adapted to "Page":
  *
  *  <pre>GET /bin/mvc.do/echoTitle?path=/content/site/en: "English page title".</pre>
 
+ * </p>
+ * <p>
+ *     One may also append a segment to the path prior to resolution, for instance to target
+ *     a sub resource of the provided path, like so:
+ *  <pre>
+ *      public String echoTitle(&#64;ResourceParam(append = "jcr:content") PageContent content) {
+ *          return page.getTitle();
+ *      }
+ *  </pre>
+ *
+ *  The append path is also applied to the default value, if provided.
  * </p>
  *
  * By default, &#64;{@link ResourceParam} parameters are {@link ResourceParam#required() required}. If the parameter is missing,
@@ -64,8 +77,8 @@ import java.lang.annotation.Target;
  *
  * @author Olaf Otto
  */
-@Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RUNTIME)
+@Target({PARAMETER, ANNOTATION_TYPE})
 @Documented
 public @interface ResourceParam {
     /**
@@ -84,4 +97,9 @@ public @interface ResourceParam {
      *         Providing a default value implies {@link #required()} = false.
      */
     String defaultValue() default "";
+
+    /**
+     * Append this path segment to the provided path prior to resource resolution.
+     */
+    String append() default "";
 }

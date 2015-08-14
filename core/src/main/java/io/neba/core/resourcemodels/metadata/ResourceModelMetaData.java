@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.Unmapped;
+import io.neba.core.util.Annotations;
 import org.springframework.util.ReflectionUtils;
 
 import javax.inject.Inject;
@@ -26,6 +27,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static io.neba.core.util.Annotations.annotations;
 import static org.springframework.util.ReflectionUtils.doWithFields;
 import static org.springframework.util.ReflectionUtils.doWithMethods;
 
@@ -99,8 +101,8 @@ public class ResourceModelMetaData {
          */
         private boolean isMappingCandidate(Field field) {
             return !isStatic(field) &&
-                    !isFinal(field) &&
-                    !isUnmapped(field);
+                   !isFinal(field) &&
+                   !isUnmapped(field);
         }
 
         private boolean isFinal(Field field) {
@@ -116,8 +118,8 @@ public class ResourceModelMetaData {
          * @return whether the field is explicitly excluded from OCM, e.g. via &#64;{@link Unmapped}.
          */
         private boolean isUnmapped(Field field) {
-            return field.isAnnotationPresent(Unmapped.class) ||
-                    field.isAnnotationPresent(Inject.class);
+            final Annotations element = annotations(field);
+            return element.contains(Unmapped.class) || element.contains(Inject.class);
         }
     }
 
