@@ -57,6 +57,16 @@
                     filter.val(filter.attr("data-default-value"));
                 }
             },
+            cursorPosition = function () {
+                if (document.selection) {
+                    var selection = document.selection.createRange();
+                    selection.moveStart ('character', -filter.value().length);
+                    return selection.text.length;
+                }  else if (filter[0].selectionStart || filter[0].selectionStart == '0') {
+                    return filter[0].selectionStart;
+                }
+                return 0;
+            },
             processFilterExpression = function(force) {
                 var val = filter.val();
                 if (!force) {
@@ -105,8 +115,8 @@
                             bottom: 20,
                             left: 70
                         },
-                        width = 300 - margin.left - margin.right,
-                        height = 300 - margin.top - margin.bottom,
+                        width = 320 - margin.left - margin.right,
+                        height = 320 - margin.top - margin.bottom,
                         labelMargin = 8,
                        // Defines the fields include in entire.modelData. If the field has a label, it is also
                        // diagram dimension.
@@ -255,11 +265,18 @@
                 } catch (e) {
                     invalid();
                     if(e.expected) {
+                        // special case: use enters spaces only - remove spaces to allow starting to type a valid expression
+                        if (/^\s+/.test(request.term)) {
+                            request.term = "";
+                            filter.val("");
+                        }
+
                         var validTextPortion = request.term.substr(0, e.column - 1),
+                            invalidTextPortion = request.term.substr(e.column - 1, cursorPosition()),
                             // if there is invalid text and any of the suggestions starts with it, present the suggestion.
                             // otherwise, present all suggestions
                             showSpecific = e.found && e.expected.some(function (element) {
-                                            return element.value && element.value.indexOf(e.found) == 0;
+                                            return element.value && element.value.indexOf(invalidTextPortion) == 0;
                                            });
                         suggestions = e.expected
                             .filter(function(element) {
@@ -267,7 +284,7 @@
                                 // include all elements in case no specific element matches.
                                 return element.description &&
                                     element.description.length && (
-                                        !showSpecific ||  element.value && element.value.indexOf(e.found) == 0
+                                        !showSpecific ||  element.value && element.value.indexOf(invalidTextPortion) == 0
                                     );
                             }).map(function(expected) {
                                 // The completion metadata key is either the value, or, if not present, the description.
@@ -279,13 +296,16 @@
                                     hint: completion ? completion.hint : ""
                                 }, expected.value ? {
                                     label: expected.value,
-                                    value: (validTextPortion + expected.value).trim(),
-                                    highlightLength: showSpecific ? e.found.length : 0
+                                    value: (validTextPortion + expected.value),
+                                    highlightLength: showSpecific ? invalidTextPortion.length : 0
                                 } : {
                                     label: expected.description,
-                                    value: validTextPortion.trim(),
+                                    value: validTextPortion,
                                     highlightLength: 0
                                 });
+                            }).map(function (suggestion) {
+                                suggestion.value = suggestion.value.length ? suggestion.value : "NONE";
+                                return suggestion;
                             }).sort(function(left, right) {
                                 return left.order - right.order;
                             });
@@ -302,6 +322,14 @@
                 filter.autoApply = true;
                 processFilterExpression();
                 filter.valid || filter.autocomplete("search");
+            },
+            select: function(e, ui) {
+                filter.val(ui.item.value == "NONE" ? "" : ui.item.value);
+                return false;
+            },
+            focus: function(e, ui) {
+                filter.val(ui.item.value == "NONE" ? "" : ui.item.value);
+                return false;
             },
             appendTo: "#plotarea"
         }).on('change keyup paste mouseup', function() {
