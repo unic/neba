@@ -87,7 +87,7 @@ public class AnnotatedFieldMappers {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
         this.state.getAndIncrement();
-        this.fieldMappers.remove(mapper.getAnnotationType());
+        this.fieldMappers.removeValue(mapper);
         this.cache.clear();
     }
 

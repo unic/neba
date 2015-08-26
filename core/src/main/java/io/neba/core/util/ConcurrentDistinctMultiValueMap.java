@@ -16,12 +16,8 @@
 
 package io.neba.core.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -104,5 +100,19 @@ public class ConcurrentDistinctMultiValueMap<K, V> {
 
     public boolean isEmpty() {
         return this.store.isEmpty();
+    }
+
+    /**
+     * Removes the given value from all collections stored under any key.
+     *
+     * @param value must not be <code>null</code>.
+     */
+    public void removeValue(V value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Method argument value must not be null.");
+        }
+        for (Collection<V> values : values()) {
+            values.remove(value);
+        }
     }
 }

@@ -38,9 +38,7 @@ import java.util.List;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apache.commons.lang3.reflect.FieldUtils.getDeclaredField;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -54,11 +52,11 @@ public class AnnotatedFieldMappersTest {
     private CustomAnnotation1 metaAnnotation1 = CustomAnnotation2.class.getAnnotation(CustomAnnotation1.class);
 
     @Retention(RUNTIME)
-    private static @interface CustomAnnotation1 {}
+    private @interface CustomAnnotation1 {}
 
     @CustomAnnotation1
     @Retention(RUNTIME)
-    private static @interface CustomAnnotation2 {}
+    private @interface CustomAnnotation2 {}
 
     private static class TestModel1 {
         @CustomAnnotation1
@@ -70,19 +68,13 @@ public class AnnotatedFieldMappersTest {
     }
 
     @Mock
-    private MappedFieldMetaData metadata1;
-    @Mock
-    private MappedFieldMetaData metadata2;
+    private MappedFieldMetaData metadata1, metadata2;
 
     @Mock
-    private Annotations annotations1;
-    @Mock
-    private Annotations annotations2;
+    private Annotations annotations1, annotations2;
 
     @Mock
-    private AnnotatedFieldMapper mapper1;
-    @Mock
-    private AnnotatedFieldMapper mapper2;
+    private AnnotatedFieldMapper mapper1, mapper2, mapper3;
 
     @InjectMocks
     private AnnotatedFieldMappers testee;
@@ -94,6 +86,9 @@ public class AnnotatedFieldMappersTest {
 
         doReturn(CustomAnnotation2.class).when(this.mapper2).getAnnotationType();
         doReturn(Resource.class).when(this.mapper2).getFieldType();
+
+        doReturn(CustomAnnotation2.class).when(this.mapper3).getAnnotationType();
+        doReturn(Resource.class).when(this.mapper3).getFieldType();
 
         doReturn(this.field1).when(this.metadata1).getField();
         doReturn(this.field1.getType()).when(this.metadata1).getType();
@@ -200,6 +195,20 @@ public class AnnotatedFieldMappersTest {
         assertMetadataHasAnnotations(this.metadata1, this.annotation1);
 
         verifyAnnotationsWhereQueriedOnlyOnce();
+    }
+
+    @Test
+    public void testAdditionAndRemovalOfMappersForSameAnnotationType() throws Exception {
+        add(this.mapper2);
+        add(this.mapper3);
+
+        assertMetadataHasMappers(this.metadata2, this.mapper2, this.mapper3);
+
+        remove(mapper2);
+        assertMetadataHasMappers(this.metadata2, this.mapper3);
+
+        remove(mapper3);
+        assertMetadataHasMappers(this.metadata2);
     }
 
     private void verifyAnnotationsWhereQueriedOnlyOnce() {
