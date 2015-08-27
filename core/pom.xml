@@ -155,12 +155,12 @@
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
         </dependency>
+
+        <!-- Test dependencies -->
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
         </dependency>
-
-        <!-- Test dependencies -->
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>

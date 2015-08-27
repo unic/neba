@@ -15,6 +15,7 @@
 
     <properties>
         <neba.installation.path>/apps/neba/install</neba.installation.path>
+        <spring.artifacts.workdir>${project.build.directory}/spring-artifacts</spring.artifacts.workdir>
     </properties>
 
     <dependencies>
@@ -34,10 +35,6 @@
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -83,7 +80,22 @@
             <groupId>org.eclipse.gemini.blueprint</groupId>
             <artifactId>gemini-blueprint-io</artifactId>
         </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+        </dependency>
     </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -115,52 +127,7 @@
                         </embedded>
                         <embedded>
                             <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
                             <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
                             <target>${neba.installation.path}</target>
                         </embedded>
                         <embedded>
@@ -193,18 +160,70 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-spring-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
+                            <excludeArtifactIds>org.apache.servicemix.bundles.aopalliance</excludeArtifactIds>
+                            <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
+                            <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>transform-javax-import-versions</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>io.neba.delivery.JavaxInjectManifestTransformer</mainClass>
+                    <arguments>
+                        <argument>${spring.artifacts.workdir}</argument>
+                        <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
             <!-- Resources are not considered when <packaging> is "pom" - re-enable resource processing. -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <outputDirectory>${project.build.directory}</outputDirectory>
-                </configuration>
                 <executions>
                     <execution>
+                        <id>generate-resources</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>resources</goal>
                         </goals>
-                        <phase>prepare-package</phase>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-test-resources</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>testResources</goal>
+                        </goals>
+                        <configuration>
+                            <includeEmptyDirs>true</includeEmptyDirs>
+                            <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

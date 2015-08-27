@@ -27,19 +27,14 @@ import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import javax.inject.Inject;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -147,7 +142,7 @@ public class ModelRegistry {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicInteger state = new AtomicInteger(0);
 
-    @Inject
+    @Autowired
     private AdministrativeResourceResolver resourceResolver;
 
     /**

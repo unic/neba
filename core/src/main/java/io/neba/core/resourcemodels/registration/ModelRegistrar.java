@@ -24,10 +24,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static org.apache.commons.lang.StringUtils.join;
@@ -49,11 +48,11 @@ import static org.springframework.beans.factory.BeanFactoryUtils.beanNamesForTyp
 @Service
 public class ModelRegistrar {
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    @Inject
+    @Autowired
     private ModelRegistry registry;
-    @Inject
+    @Autowired
     private ResourceToModelAdapterUpdater resourceToModelAdapterUpdater;
-    @Inject
+    @Autowired
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     private void discoverResourceModels(ConfigurableListableBeanFactory factory, Bundle bundle) {

@@ -56,7 +56,6 @@
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="IllegalImport"/>
-        <module name="AvoidStarImport"/>
 
         <!--  Size constraints -->
 

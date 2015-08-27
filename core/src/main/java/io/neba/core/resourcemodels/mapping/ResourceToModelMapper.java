@@ -25,9 +25,9 @@ import org.apache.sling.api.resource.Resource;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,13 +46,13 @@ import static org.springframework.util.Assert.notNull;
 @Service
 public class ResourceToModelMapper {
     private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<ResourceModelPostProcessor>();
-    @Inject
+    @Autowired
     private ModelProcessor modelProcessor;
-    @Inject
+    @Autowired
     private CyclicMappingSupport cyclicMappingSupport;
-    @Inject
+    @Autowired
     private AnnotatedFieldMappers annotatedFieldMappers;
-    @Inject
+    @Autowired
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     /**

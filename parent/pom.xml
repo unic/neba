@@ -254,12 +254,6 @@
                 <version>1.2.2</version>
                 <scope>provided</scope>
             </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-                <version>1_1</version>
-                <scope>provided</scope>
-            </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -404,6 +398,12 @@
             </dependency>
 
             <!-- Test dependencies -->
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+                <version>1_1</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>
@@ -624,6 +624,11 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.4.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -20,7 +20,6 @@ import io.neba.api.annotations.Unmapped;
 import io.neba.core.util.Annotations;
 import org.springframework.util.ReflectionUtils;
 
-import javax.inject.Inject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -118,8 +117,8 @@ public class ResourceModelMetaData {
          * @return whether the field is explicitly excluded from OCM, e.g. via &#64;{@link Unmapped}.
          */
         private boolean isUnmapped(Field field) {
-            final Annotations element = annotations(field);
-            return element.contains(Unmapped.class) || element.contains(Inject.class);
+            final Annotations annotations = annotations(field);
+            return annotations.contains(Unmapped.class) || annotations.containsName("javax.inject.Inject");
         }
     }
 

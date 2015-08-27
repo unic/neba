@@ -21,9 +21,9 @@ import org.apache.commons.collections.ExtendedProperties;
 import org.apache.sling.api.resource.Resource;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.io.InputStream;
 
 /**
@@ -33,7 +33,7 @@ import java.io.InputStream;
  */
 @Service
 public class JcrResourceLoader extends ResourceLoader {
-    @Inject
+    @Autowired
     private AdministrativeResourceResolver resourceResolver;
 
     @Override

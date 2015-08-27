@@ -24,9 +24,9 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,26 +34,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static io.neba.core.util.ClassHierarchyIterator.hierarchyOf;
 import static java.lang.Character.isUpperCase;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.substringAfterLast;
-import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
-import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
-import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
+import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.sling.api.resource.ResourceUtil.*;
 
 /**
  * Shows a table with all detected type -&gt; model mappings in the felix console.
@@ -74,9 +64,9 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     private static final String PARAM_TYPENAME = "modelTypeName";
     private static final String PARAM_PATH = "path";
 
-    @Inject
+    @Autowired
     private ResourceResolverFactory resourceResolverFactory;
-    @Inject
+    @Autowired
     private ModelRegistry registry;
 
     public String getCategory() {

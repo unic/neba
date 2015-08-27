@@ -29,10 +29,10 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,14 +41,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Dictionary;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -57,11 +50,7 @@ import java.util.zip.ZipOutputStream;
 import static java.util.regex.Pattern.compile;
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.substringBefore;
+import static org.apache.commons.lang.StringUtils.*;
 
 /**
  * A web console plugin for tailing and downloading the CQ logfiles placed within the sling log directory as configured in the
@@ -103,7 +92,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
     private BundleContext context;
     private File slingHomeDirectory;
 
-    @Inject
+    @Autowired
     private ConfigurationAdmin configurationAdmin;
 
     @PostConstruct
