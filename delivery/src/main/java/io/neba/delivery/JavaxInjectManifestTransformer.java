@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.jar.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.compile;
@@ -22,7 +23,7 @@ import static java.util.regex.Pattern.compile;
 public class JavaxInjectManifestTransformer {
     public static final String MANIFEST_LOCATION = "META-INF/MANIFEST.MF";
     public static final String IMPORT_PACKAGE_HEADER = "Import-Package";
-    public static final Pattern JAVAX_INJECT_IMPORT_DIRECTIVE = compile("javax\\.inject;version=\"(\\[|\\()[^\\]\\)]+(\\]|\\))\"");
+    public static final Pattern JAVAX_INJECT_IMPORT_DIRECTIVE = compile("(javax\\.inject[^,\\n]*;version=\")(\\[|\\()[^\\]\\)]+(\\]|\\))(\")");
 
     public static void main(String[] args) {
         if (args == null || args.length != 2) {
@@ -71,8 +72,15 @@ public class JavaxInjectManifestTransformer {
                 continue;
             }
 
-            importPackageDirectives = JAVAX_INJECT_IMPORT_DIRECTIVE.matcher(importPackageDirectives).replaceAll("javax.inject;version=\"[0,2)\"");
-            mainAttributes.putValue(IMPORT_PACKAGE_HEADER, importPackageDirectives);
+            Matcher matcher = JAVAX_INJECT_IMPORT_DIRECTIVE.matcher(importPackageDirectives);
+            StringBuffer buffer = new StringBuffer(importPackageDirectives.length());
+            while (matcher.find()) {
+                String replacement = matcher.group(1) + "[0,2)" + matcher.group(4);
+                matcher.appendReplacement(buffer, replacement);
+            }
+
+            matcher.appendTail(buffer);
+            mainAttributes.putValue(IMPORT_PACKAGE_HEADER, buffer.toString());
             write(dir, manifest);
             repackageArtifact(dir);
         }
