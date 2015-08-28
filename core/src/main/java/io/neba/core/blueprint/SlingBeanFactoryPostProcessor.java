@@ -23,10 +23,9 @@ import io.neba.core.spring.applicationcontext.configuration.PlaceholderVariableR
 import io.neba.core.spring.applicationcontext.configuration.RequestScopeConfigurator;
 import org.eclipse.gemini.blueprint.extender.OsgiBeanFactoryPostProcessor;
 import org.osgi.framework.BundleContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 /**
  * Post-processes {@link ConfigurableListableBeanFactory bean factories}
@@ -38,15 +37,15 @@ import javax.inject.Inject;
  */
 @Service
 public class SlingBeanFactoryPostProcessor implements OsgiBeanFactoryPostProcessor {
-    @Inject
+    @Autowired
     private PlaceholderVariableResolverRegistrar variableResolverRegistrar;
-    @Inject
+    @Autowired
     private ModelRegistrar modelRegistrar;
-    @Inject
+    @Autowired
     private SelftestRegistrar selftestRegistrar;
-    @Inject
+    @Autowired
     private RequestScopeConfigurator requestScopeConfigurator;
-    @Inject
+    @Autowired
     private MvcServlet dispatcherServlet;
     
     @Override

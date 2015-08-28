@@ -24,9 +24,9 @@ import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.Collection;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
@@ -46,11 +46,11 @@ import static io.neba.core.util.Key.toKey;
  */
 @Service
 public class ResourceModelProviderImpl implements ResourceModelProvider {
-	@Inject
+	@Autowired
 	private ModelRegistry registry;
-	@Inject
+	@Autowired
 	private ResourceToModelMapper mapper;
-	@Inject
+	@Autowired
 	private ResourceModelCaches caches;
 
     @Override

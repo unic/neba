@@ -37,18 +37,18 @@ public class AnnotationsTest {
 
     @Retention(RUNTIME)
     @MetaAnnotation
-    private static @interface TestAnnotation {
+    private @interface TestAnnotation {
     }
 
     @Retention(RUNTIME)
     @CyclicAnnotation
-    private static @interface MetaAnnotation {
+    private @interface MetaAnnotation {
     }
 
     @Retention(RUNTIME)
     @MetaAnnotation
     @CyclicAnnotation
-    private static @interface CyclicAnnotation {
+    private @interface CyclicAnnotation {
     }
 
     private Set<Annotation> allAnnotations;
@@ -81,6 +81,12 @@ public class AnnotationsTest {
     public void testDetectionOfCyclicMetaAnnotation() throws Exception {
         assertAnnotationIsPresent(CyclicAnnotation.class);
         assertAnnotationInstanceCanBeObtained(CyclicAnnotation.class);
+    }
+
+    @Test
+    public void testContainsAnnotationWithName() throws Exception {
+        assertAnnotationWithNameIsNotPresent("does.no.Exist");
+        assertAnnotationWithNameIsPresent(TestAnnotation.class.getName());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -122,5 +128,13 @@ public class AnnotationsTest {
 
     private void assertAnnotationIsPresent(Class<? extends Annotation> type) {
         assertThat(this.testee.contains(type)).isTrue();
+    }
+
+    private void assertAnnotationWithNameIsPresent(String typeName) {
+        assertThat(this.testee.containsName(typeName)).isTrue();
+    }
+
+    private void assertAnnotationWithNameIsNotPresent(String typeName) {
+        assertThat(this.testee.containsName(typeName)).isFalse();
     }
 }

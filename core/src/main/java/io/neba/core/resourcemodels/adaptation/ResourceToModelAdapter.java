@@ -24,9 +24,9 @@ import io.neba.core.util.Key;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.Collection;
 
 import static org.apache.commons.lang.StringUtils.join;
@@ -40,11 +40,11 @@ import static org.apache.commons.lang.StringUtils.join;
  */
 @Service
 public class ResourceToModelAdapter implements AdapterFactory {
-	@Inject
+	@Autowired
 	private ModelRegistry registry;
-	@Inject
+	@Autowired
 	private ResourceToModelMapper mapper;
-	@Inject
+	@Autowired
 	private ResourceModelCaches caches;
 	
 	/**
