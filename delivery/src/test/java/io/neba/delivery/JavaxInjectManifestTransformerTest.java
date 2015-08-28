@@ -28,7 +28,7 @@ public class JavaxInjectManifestTransformerTest {
     @Test
     public void testJavaxInjectRewrite() throws Exception {
         transformUnpackedArtifacts();
-        assertImportDirectiveContains("javax.inject;version=\"[0,2)\"");
+        assertImportDirectiveContains("javax.inject;resolution:=optional;version=\"[0,2)\"");
     }
 
     private void assertImportDirectiveContains(String expected) throws URISyntaxException, IOException {
