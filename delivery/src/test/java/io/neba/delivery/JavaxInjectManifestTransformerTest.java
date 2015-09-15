@@ -21,6 +21,7 @@ public class JavaxInjectManifestTransformerTest {
     @Before
     public void setUp() throws Exception {
         URL resource = getResource("sources");
+        assertThat(resource).isNotNull();
         this.source = new File(resource.toURI());
         this.target = new File(source.getParentFile(), "targetDir");
     }
