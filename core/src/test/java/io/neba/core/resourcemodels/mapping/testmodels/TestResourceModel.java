@@ -19,6 +19,7 @@ package io.neba.core.resourcemodels.mapping.testmodels;
 import io.neba.api.annotations.*;
 import io.neba.api.resourcemodels.Optional;
 import org.apache.sling.api.resource.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Inject;
 import java.util.Calendar;
@@ -102,13 +103,19 @@ public class TestResourceModel {
     private Collection<String> collectionOfStrings;
 
     @Unmapped
-    private String transientStringField;
+    private String unmappedStringField;
 
     @CustomAnnotationWithUnmappedMetaAnnotation
-    private String transientStringFieldWithUnmappedMetaAnnotation;
+    private String unmappedStringFieldWithUnmappedMetaAnnotation;
 
     @Inject
     private String injectedField;
+
+    @Autowired
+    private String autowiredField;
+
+    @javax.annotation.Resource
+    private String resourceField;
 
     public String getStringField() {
         return stringField;

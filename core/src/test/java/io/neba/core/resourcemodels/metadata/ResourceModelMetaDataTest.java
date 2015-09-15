@@ -46,32 +46,43 @@ public class ResourceModelMetaDataTest {
 	}
 	
     @Test
-    public void testMappingOfStaticField() throws Exception {
+    public void testStaticFieldsAreNotMappable() throws Exception {
     	assertMappableFieldsDoesNotContain("staticField");
     }
 
 	@Test
-    public void testMappingOfFinalField() throws Exception {
+    public void testFinalFieldsAreNotMappable() throws Exception {
 		assertMappableFieldsDoesNotContain("finalField");
     }
 
     @Test
-    public void testMappingOfUnmappedField() throws Exception {
-    	assertMappableFieldsDoesNotContain("transientStringField");
+    public void testFieldsAnnotatedWithUnmappedAreNotMappable() throws Exception {
+    	assertMappableFieldsDoesNotContain("unmappedStringField");
     }
 
 	@Test
-	public void testMappingOfUnmappedFieldWithMetaAnnotation() throws Exception {
-		assertMappableFieldsDoesNotContain("transientStringFieldWithUnmappedMetaAnnotation");
+	public void testFieldsMetaAnnotatedWithUnmappedAreNotMappable() throws Exception {
+		assertMappableFieldsDoesNotContain("unmappedStringFieldWithUnmappedMetaAnnotation");
 	}
 
+
     @Test
-    public void testMappingOfInjectedField() throws Exception {
+    public void testFieldsAnnotatedWithAtInjectAreNotMappable() throws Exception {
     	assertMappableFieldsDoesNotContain("injectedField");
     }
 
-    @Test
-    public void testMappingOfInheritedPrivateFields() throws Exception {
+	@Test
+	public void testFieldsAnnotatedWithAutowiredAreNotMappable() throws Exception {
+		assertMappableFieldsDoesNotContain("autowiredField");
+	}
+
+	@Test
+	public void testFieldsAnnotatedWithAtResourceAreNotMappable() throws Exception {
+		assertMappableFieldsDoesNotContain("resourceField");
+	}
+
+	@Test
+    public void testMappableFieldsAreInherited() throws Exception {
     	createMetadataFor(ExtendedTestResourceModel.class);
     	assertMetadataEqualsMetadataOf(TestResourceModel.class);
     }
