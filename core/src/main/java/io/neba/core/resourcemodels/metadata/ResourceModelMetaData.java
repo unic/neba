@@ -18,8 +18,10 @@ package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.Unmapped;
 import io.neba.core.util.Annotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -118,7 +120,10 @@ public class ResourceModelMetaData {
          */
         private boolean isUnmapped(Field field) {
             final Annotations annotations = annotations(field);
-            return annotations.contains(Unmapped.class) || annotations.containsName("javax.inject.Inject");
+            return annotations.contains(Unmapped.class) ||
+                    annotations.containsName("javax.inject.Inject") || // @Inject is an optional dependency, thus using a name constant
+                    annotations.containsName(Autowired.class.getName()) ||
+                    annotations.containsName(Resource.class.getName());
         }
     }
 
