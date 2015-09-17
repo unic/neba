@@ -1,18 +1,18 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ * <p/>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.mapping;
 
@@ -70,6 +70,10 @@ public class ResourceToModelMapper {
         final Class<?> beanType = modelSource.getBeanType();
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(beanType);
         final Mapping<T> mapping = new Mapping<T>(resource.getPath(), metaData);
+        // Do not track mapping time for nested resource models of the same type: this would yield
+        // a useless average and total mapping time as the mapping durations would sum up multiple times.
+        final boolean trackMappingDuration = !this.cyclicMappingSupport.hasOngoingMapping(metaData);
+
         final Mapping<T> alreadyOngoingMapping = this.cyclicMappingSupport.begin(mapping);
 
         if (alreadyOngoingMapping == null) {
@@ -86,13 +90,15 @@ public class ResourceToModelMapper {
                 // Phase 3: Map the bean (may create a cycle).
 
                 // Retain current time for statistics
-                final long startTimeInMs = currentTimeMillis();
+                final long startTimeInMs = trackMappingDuration ? currentTimeMillis() : 0;
 
                 model = map(resource, bean, metaData, modelSource.getFactory());
 
-                // Update statistics with mapping duration
-                final long endTimeInMs = currentTimeMillis();
-                metaData.getStatistics().countMappingDuration((int) (endTimeInMs - startTimeInMs));
+                if (trackMappingDuration) {
+                    // Update statistics with mapping duration
+                    metaData.getStatistics().countMappingDuration((int) (currentTimeMillis() - startTimeInMs));
+                }
+
             } finally {
                 this.cyclicMappingSupport.end(mapping);
             }

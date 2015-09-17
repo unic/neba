@@ -87,12 +87,12 @@ public class ResourceModelStatistics {
     }
 
     /**
-     * Adds the mappings to the statistics.
+     * Increments the number of subsequent mappings.
      *
      * @return this instance.
      */
-    public ResourceModelStatistics countMappings(int mappings) {
-        this.mappings += mappings;
+    public ResourceModelStatistics countSubsequentMapping() {
+        ++this.mappings;
         return this;
     }
 

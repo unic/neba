@@ -91,8 +91,8 @@ public class ModelStatisticsConsolePluginTest {
 
     @Test
     public void testRetrievalOfAllStatistics() throws Exception {
-        addStatistics("junit.test.type.NameOne", 123456L, 100L, 5, 0, 10, 20, new int[]{1, 2, 4, 8, 16}, new int[]{10, 20, 4, 1, 0});
-        addStatistics("junit.test.type.NameTwo", 234567L, 200L, 10, 1, 20, 40, new int[]{2, 4, 8, 16, 23}, new int[]{20, 40, 8, 2, 0});
+        addStatistics("junit.test.type.NameOne", 123456L, 100L, 5, 0, 1000, 10, 20, new int[]{1, 2, 4, 8, 16}, new int[]{10, 20, 4, 1, 0});
+        addStatistics("junit.test.type.NameTwo", 234567L, 200L, 10, 1, 1000, 20, 40, new int[]{2, 4, 8, 16, 23}, new int[]{20, 40, 8, 2, 0});
         withRequestPath("/system/console/modelstatistics/api/statistics");
         doGet();
         assertResponseIsEqualTo("[" +
@@ -105,6 +105,7 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"instantiations\":0," +
                                     "\"mappings\":100," +
                                     "\"averageMappingDuration\":10," +
+                                    "\"totalMappingDuration\":1000," +
                                     "\"maximumMappingDuration\":20," +
                                     "\"minimumMappingDuration\":0," +
                                     "\"mappingDurationMedian\":5" +
@@ -119,6 +120,7 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"instantiations\":0," +
                                     "\"mappings\":200," +
                                     "\"averageMappingDuration\":20," +
+                                    "\"totalMappingDuration\":1000," +
                                     "\"maximumMappingDuration\":40," +
                                     "\"minimumMappingDuration\":1," +
                                     "\"mappingDurationMedian\":10" +
@@ -128,7 +130,7 @@ public class ModelStatisticsConsolePluginTest {
 
     @Test
     public void testRetrievalOfStatisticsForSpecificType() throws Exception {
-        addStatistics("junit.test.type.NameOne", 123456L, 100L, 5, 0, 10, 20, new int[]{1, 2, 4, 8, 16}, new int[]{10, 20, 4, 1, 0});
+        addStatistics("junit.test.type.NameOne", 123456L, 100L, 5, 0, 1000, 10, 20, new int[]{1, 2, 4, 8, 16}, new int[]{10, 20, 4, 1, 0});
         withRequestPath("/system/console/modelstatistics/api/statistics/junit.test.type.NameOne");
         doGet();
         assertResponseIsEqualTo("{" +
@@ -140,6 +142,7 @@ public class ModelStatisticsConsolePluginTest {
                         "\"instantiations\":0," +
                         "\"mappings\":100," +
                         "\"averageMappingDuration\":10," +
+                        "\"totalMappingDuration\":1000," +
                         "\"maximumMappingDuration\":20," +
                         "\"minimumMappingDuration\":0," +
                         "\"mappingDurationMedian\":5," +
@@ -155,8 +158,8 @@ public class ModelStatisticsConsolePluginTest {
 
     @Test
     public void testResetOfStatistics() throws Exception {
-        addStatistics("junit.test.type.NameOne", 1, 1L, 1, 1, 1, 1, new int[]{}, new int[]{});
-        addStatistics("junit.test.type.NameTwo", 1, 1L, 1, 1, 1, 1, new int[]{}, new int[]{});
+        addStatistics("junit.test.type.NameOne", 1, 1L, 1, 1, 1, 1, 1, new int[]{}, new int[]{});
+        addStatistics("junit.test.type.NameTwo", 1, 1L, 1, 1, 1, 1, 1, new int[]{}, new int[]{});
 
         withRequestPath("/system/console/modelstatistics/api/reset");
         doGet();
@@ -179,6 +182,7 @@ public class ModelStatisticsConsolePluginTest {
                                long mappings,
                                double mappingDurationMedian,
                                double minimumMappingDuration,
+                               double totalMappingDuration,
                                double averageMappingDuration,
                                double maximumMappingDuration,
                                int[] mappingDurationIntervalBoundaries,
@@ -191,6 +195,7 @@ public class ModelStatisticsConsolePluginTest {
         doReturn(mappingDurationMedian).when(statistics).getMappingDurationMedian();
         doReturn(minimumMappingDuration).when(statistics).getMinimumMappingDuration();
         doReturn(averageMappingDuration).when(statistics).getAverageMappingDuration();
+        doReturn(totalMappingDuration).when(statistics).getTotalMappingDuration();
         doReturn(maximumMappingDuration).when(statistics).getMaximumMappingDuration();
         doReturn(mappableFields).when(metaData).getMappableFields();
         doReturn(statistics).when(metaData).getStatistics();
