@@ -167,4 +167,9 @@ public class ResourceModelMetaData {
     public ResourceModelStatistics getStatistics() {
         return statistics;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + getTypeName() + ']';
+    }
 }

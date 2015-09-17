@@ -87,7 +87,12 @@ public class ResourceModelMetaDataTest {
     	assertMetadataEqualsMetadataOf(TestResourceModel.class);
     }
 
-    private void assertMetadataEqualsMetadataOf(Class<?> otherModel) {
+	@Test
+	public void testToStringRepresentation() throws Exception {
+		assertThat(this.testee.toString()).isEqualTo("ResourceModelMetaData[" + TestResourceModel.class.getName() + "]");
+	}
+
+	private void assertMetadataEqualsMetadataOf(Class<?> otherModel) {
 		MappedFieldMetaData[] mappableFields = this.testee.getMappableFields();
         MethodMetaData[] preMappingMethods = this.testee.getPreMappingMethods();
 		MethodMetaData[] postMappingMethods = this.testee.getPostMappingMethods();

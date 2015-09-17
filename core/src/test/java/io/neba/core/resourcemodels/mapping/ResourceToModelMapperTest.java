@@ -1,27 +1,23 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ * <p/>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.api.resourcemodels.ResourceModelPostProcessor;
-import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
-import io.neba.core.resourcemodels.metadata.MethodMetaData;
-import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
-import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
-import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
+import io.neba.core.resourcemodels.metadata.*;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -42,14 +38,8 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -188,6 +178,57 @@ public class ResourceToModelMapperTest {
         mapResourceToModel();
         verifyMapperObtainsOriginalBeanFromAdvisedProxy();
         assertModelReturnedFromMapperIsOriginalModel();
+    }
+
+    @Test
+    public void testResourceModelInstantiationIsCountedIfMappingIsNotOngoing() throws Exception {
+        mapResourceToModel();
+        verifyModelInstantiationIsCounted();
+    }
+
+    @Test
+    public void testResourceModelInstantiationIsNotCountedIfMappingIsOngoing() throws Exception {
+        withAlreadyOngoingMapping();
+        mapResourceToModel();
+        verifyModelInstantiationIsNotCounted();
+    }
+
+    @Test
+    public void testResourceModelMappingDurationIsCountedIfResourceModelIsNotAlreadyMapped() throws Exception {
+        mapResourceToModel();
+        verifyMappingDurationIsTracked();
+    }
+
+    @Test
+    public void testResourceModelMappingDurationIsNotCountedIfResourceModelIsAlreadyMapped() throws Exception {
+        withOngoingMappingForSameResourceModel();
+        mapResourceToModel();
+        verifyMappingDurationIsNotTracked();
+    }
+
+    private void withOngoingMappingForSameResourceModel() {
+        doReturn(true).when(this.cyclicMappingSupport).hasOngoingMapping(this.resourceMetaData);
+    }
+
+    private void verifyMappingDurationIsTracked() {
+        verify(this.resourceModelStatistics).countMappingDuration(anyInt());
+    }
+
+    private void verifyMappingDurationIsNotTracked() {
+        verify(this.resourceModelStatistics, never()).countMappingDuration(anyInt());
+    }
+
+    private void withAlreadyOngoingMapping() {
+        doReturn(this.ongoingMapping).when(this.cyclicMappingSupport).begin(isA(Mapping.class));
+        doReturn(this.model).when(this.ongoingMapping).getMappedModel();
+    }
+
+    private void verifyModelInstantiationIsCounted() {
+        verify(this.resourceModelStatistics).countInstantiation();
+    }
+
+    private void verifyModelInstantiationIsNotCounted() {
+        verify(this.resourceModelStatistics, never()).countInstantiation();
     }
 
     private void verifyMapperObtainsOriginalBeanFromAdvisedProxy() throws Exception {

@@ -1,58 +1,45 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ * <p/>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.verification.VerificationMode;
 
 import java.util.Set;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CyclicMappingSupportTest {
-    @Mock
-    private ResourceModelStatistics statistics;
-    @Mock
-    private ResourceModelMetaData metaData;
-
     private Mapping<?> mapping;
     private Mapping<?> alreadyOngoingMapping;
     @SuppressWarnings("rawtypes")
-	private Set<Mapping> ongoingMappings;
+    private Set<Mapping> ongoingMappings;
 
-	@InjectMocks
+    @InjectMocks
     private CyclicMappingSupport testee;
 
     @Before
@@ -67,7 +54,7 @@ public class CyclicMappingSupportTest {
         beginMapping();
         assertAlreadyStartedMappingIsDetected();
     }
-    
+
     @Test
     public void testMappingCanBeginAgainAfterItHasEnded() throws Exception {
         beginMapping();
@@ -100,30 +87,73 @@ public class CyclicMappingSupportTest {
     }
 
     @Test
-    public void testTrackingOfMappingDepths() throws Exception {
+    public void testTrackingOfSubsequentMappings() throws Exception {
         beginMapping();
-        verifyMappingIsNotTracked();
+        verifyNumberOfSubsequentMappingsIs(0);
 
         withNewMapping();
         beginMapping();
-        verifyMappingIsTrackedWithDepth(1);
+        verifyNumberOfSubsequentMappingsIs(1, 0);
 
         withNewMapping();
         beginMapping();
-        verifyMappingIsTrackedWithDepth(times(2), 1);
-        verifyMappingIsTrackedWithDepth(2);
+        verifyNumberOfSubsequentMappingsIs(2, 1, 0);
     }
 
-    private void verifyMappingIsNotTracked() {
-        verify(this.statistics, never()).countMappingDuration(anyInt());
+    @Test
+    public void testSubsequentMappingsOfSameResourceModelAreOnlyCountedOnce() throws Exception {
+        beginMapping();
+        verifyNumberOfSubsequentMappingsIs(0);
+
+        withNewMappingForSameResourceModel();
+        beginMapping();
+        verifyNumberOfSubsequentMappingsIs(1, 1);
+
+        withNewMappingForSameResourceModel();
+        beginMapping();
+        verifyNumberOfSubsequentMappingsIs(2, 2, 2);
     }
 
-    private void verifyMappingIsTrackedWithDepth(VerificationMode times, int depth) {
-        verify(this.statistics, times).countMappings(depth);
+    @Test
+    public void testNoFalsePositiveDetectionOfResourceModelInOngoingMappings() throws Exception {
+        beginMapping();
+        withNewMapping();
+        assertNoMappingForCurrentResourceModelTypeExists();
     }
 
-    private void verifyMappingIsTrackedWithDepth(int depth) {
-        verifyMappingIsTrackedWithDepth(times(1), depth);
+    @Test
+    public void testDetectionOfResourceModelInOngoingMappings() throws Exception {
+        beginMapping();
+        assertMappingForCurrentResourceModelTypeExists();
+
+        withNewMappingForSameResourceModel();
+        beginMapping();
+        assertMappingForCurrentResourceModelTypeExists();
+
+        endMapping();
+        assertMappingForCurrentResourceModelTypeExists();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCheckingForResourceModelMappingDoesNotAcceptNull() throws Exception {
+        this.testee.hasOngoingMapping(null);
+    }
+
+    private void assertMappingForCurrentResourceModelTypeExists() {
+        assertThat(this.testee.hasOngoingMapping(this.mapping.getMetadata())).isTrue();
+    }
+
+    private void assertNoMappingForCurrentResourceModelTypeExists() {
+        assertThat(this.testee.hasOngoingMapping(this.mapping.getMetadata())).isFalse();
+    }
+
+    private void verifyNumberOfSubsequentMappingsIs(int... mappings) {
+        getOngoingMappings();
+        Mapping[] recordedMappings = this.ongoingMappings.toArray(new Mapping[this.ongoingMappings.size()]);
+        assertThat(recordedMappings).hasSize(mappings.length);
+        for (int i = 0; i < mappings.length; ++i) {
+            verify(recordedMappings[i].getMetadata().getStatistics(), times(mappings[i])).countSubsequentMapping();
+        }
     }
 
     private void assertOngoingMappingsContainMapping() {
@@ -156,7 +186,15 @@ public class CyclicMappingSupportTest {
 
     private void withNewMapping() {
         this.mapping = mock(Mapping.class);
-        doReturn(this.metaData).when(this.mapping).getMetadata();
-        doReturn(this.statistics).when(this.metaData).getStatistics();
+        ResourceModelMetaData metaData = mock(ResourceModelMetaData.class);
+        ResourceModelStatistics statistics = mock(ResourceModelStatistics.class);
+        doReturn(metaData).when(this.mapping).getMetadata();
+        doReturn(statistics).when(metaData).getStatistics();
+    }
+
+    private void withNewMappingForSameResourceModel() {
+        ResourceModelMetaData previousMetadata = this.mapping.getMetadata();
+        this.mapping = mock(Mapping.class);
+        doReturn(previousMetadata).when(this.mapping).getMetadata();
     }
 }

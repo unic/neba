@@ -134,7 +134,7 @@ public class ResourceModelStatisticsTest {
 
     @Test
     public void testMappingCount() throws Exception {
-        withMappings(1, 0, 100, 3, 10);
+        withMappings(114);
         calulateNumberOfMappings();
         assertNumberOfMappingsIs(114);
     }
@@ -208,9 +208,9 @@ public class ResourceModelStatisticsTest {
         }
     }
 
-    private void withMappings(int... mappings) {
-        for (int depth : mappings) {
-            this.testee.countMappings(depth);
+    private void withMappings(int mappings) {
+        for (int i = 0; i < mappings; ++i) {
+            this.testee.countSubsequentMapping();
         }
     }
 
