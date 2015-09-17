@@ -49,7 +49,7 @@ public class ResourceToModelMapper {
     @Autowired
     private ModelProcessor modelProcessor;
     @Autowired
-    private CyclicMappingSupport cyclicMappingSupport;
+    private NestedMappingSupport nestedMappingSupport;
     @Autowired
     private AnnotatedFieldMappers annotatedFieldMappers;
     @Autowired
@@ -72,9 +72,9 @@ public class ResourceToModelMapper {
         final Mapping<T> mapping = new Mapping<T>(resource.getPath(), metaData);
         // Do not track mapping time for nested resource models of the same type: this would yield
         // a useless average and total mapping time as the mapping durations would sum up multiple times.
-        final boolean trackMappingDuration = !this.cyclicMappingSupport.hasOngoingMapping(metaData);
+        final boolean trackMappingDuration = !this.nestedMappingSupport.hasOngoingMapping(metaData);
 
-        final Mapping<T> alreadyOngoingMapping = this.cyclicMappingSupport.begin(mapping);
+        final Mapping<T> alreadyOngoingMapping = this.nestedMappingSupport.begin(mapping);
 
         if (alreadyOngoingMapping == null) {
             try {
@@ -100,7 +100,7 @@ public class ResourceToModelMapper {
                 }
 
             } finally {
-                this.cyclicMappingSupport.end(mapping);
+                this.nestedMappingSupport.end(mapping);
             }
         } else {
             // Yield the currently mapped bean.
@@ -113,7 +113,7 @@ public class ResourceToModelMapper {
                 // thus we must raise an exception.
                 throw new CycleInBeanInitializationException("Unable to provide bean " + beanType +
                         " for resource " + resource + ". The bean initialization resulted in a cycle: "
-                        + join(this.cyclicMappingSupport.getOngoingMappings(), " >> ") + " >> " + mapping + ". " +
+                        + join(this.nestedMappingSupport.getOngoingMappings(), " >> ") + " >> " + mapping + ". " +
                         "Does the bean depend on itself to initialize, e.g. in a @PostConstruct method?");
             }
         }

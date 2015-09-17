@@ -33,14 +33,14 @@ import static org.mockito.Mockito.*;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CyclicMappingSupportTest {
+public class NestedMappingSupportTest {
     private Mapping<?> mapping;
     private Mapping<?> alreadyOngoingMapping;
     @SuppressWarnings("rawtypes")
     private Set<Mapping> ongoingMappings;
 
     @InjectMocks
-    private CyclicMappingSupport testee;
+    private NestedMappingSupport testee;
 
     @Before
     public void setUp() throws Exception {

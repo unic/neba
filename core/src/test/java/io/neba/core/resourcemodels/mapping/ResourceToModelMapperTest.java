@@ -64,7 +64,7 @@ public class ResourceToModelMapperTest {
     @Mock
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
     @Mock
-    private CyclicMappingSupport cyclicMappingSupport;
+    private NestedMappingSupport nestedMappingSupport;
     @Mock
     private ResourceModelMetaData resourceMetaData;
     @Mock
@@ -89,7 +89,7 @@ public class ResourceToModelMapperTest {
     public void prepareMapper() {
         when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(this.valueMap);
         when(this.resourceModelMetaDataRegistrar.get(isA(Class.class))).thenReturn(this.resourceMetaData);
-        when(this.cyclicMappingSupport.begin(isA(Mapping.class))).thenReturn(null);
+        when(this.nestedMappingSupport.begin(isA(Mapping.class))).thenReturn(null);
         when(this.resourceMetaData.getMappableFields()).thenReturn(new MappedFieldMetaData[]{});
         when(this.resourceMetaData.getPostMappingMethods()).thenReturn(new MethodMetaData[]{});
         when(this.resourceMetaData.getPreMappingMethods()).thenReturn(new MethodMetaData[]{});
@@ -207,7 +207,7 @@ public class ResourceToModelMapperTest {
     }
 
     private void withOngoingMappingForSameResourceModel() {
-        doReturn(true).when(this.cyclicMappingSupport).hasOngoingMapping(this.resourceMetaData);
+        doReturn(true).when(this.nestedMappingSupport).hasOngoingMapping(this.resourceMetaData);
     }
 
     private void verifyMappingDurationIsTracked() {
@@ -219,7 +219,7 @@ public class ResourceToModelMapperTest {
     }
 
     private void withAlreadyOngoingMapping() {
-        doReturn(this.ongoingMapping).when(this.cyclicMappingSupport).begin(isA(Mapping.class));
+        doReturn(this.ongoingMapping).when(this.nestedMappingSupport).begin(isA(Mapping.class));
         doReturn(this.model).when(this.ongoingMapping).getMappedModel();
     }
 
@@ -252,12 +252,12 @@ public class ResourceToModelMapperTest {
     }
 
     private void verifyCyclecheckIsNotEnded() {
-        verify(this.cyclicMappingSupport, never()).end(isA(Mapping.class));
+        verify(this.nestedMappingSupport, never()).end(isA(Mapping.class));
     }
 
     @SuppressWarnings("unchecked")
     private void withCycleCheckerReportingCycle() {
-        when(this.cyclicMappingSupport.begin(isA(Mapping.class))).thenReturn(this.ongoingMapping);
+        when(this.nestedMappingSupport.begin(isA(Mapping.class))).thenReturn(this.ongoingMapping);
     }
 
     private void withMappedModelReturnedFromMapping() {

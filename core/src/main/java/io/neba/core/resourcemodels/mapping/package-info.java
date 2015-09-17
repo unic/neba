@@ -18,7 +18,7 @@
  * Contains the {@link org.apache.sling.api.resource.Resource} to {@link io.neba.api.annotations.ResourceModel}
  * mapper implementation. Most importantly, the {@link io.neba.core.resourcemodels.mapping.FieldValueMappingCallback}
  * is used to traverse and map the fields of a resource model. Further aspects are the support
- * of {@link io.neba.core.resourcemodels.mapping.CyclicMappingSupport recursive (cyclic) mappings}
+ * of {@link io.neba.core.resourcemodels.mapping.NestedMappingSupport nested (cyclic) mappings}
  * as well as the collection of statistical data regarding these mappings.
  */
 package io.neba.core.resourcemodels.mapping;

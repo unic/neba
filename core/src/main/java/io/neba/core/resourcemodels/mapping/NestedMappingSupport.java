@@ -35,7 +35,7 @@ import static org.springframework.util.Assert.notNull;
  */
 @Service
 @SuppressWarnings("rawtypes")
-public class CyclicMappingSupport {
+public class NestedMappingSupport {
     /**
      * Represents the stack of the currently ongoing mappings.
      *
@@ -121,7 +121,7 @@ public class CyclicMappingSupport {
         @SuppressWarnings("unchecked")
         Mapping<T> alreadyExistingMapping = ongoingMappings.get(mapping);
         if (alreadyExistingMapping == null) {
-            trackSubsequentMapping(ongoingMappings);
+            trackNestedMapping(ongoingMappings);
             ongoingMappings.add(mapping);
         }
         return alreadyExistingMapping;
@@ -157,13 +157,10 @@ public class CyclicMappingSupport {
     }
 
     /**
-     * The ordered map of mappings also represents the mapping stack, i.e.
-     * the depth of the current branch of the mapping tree.
-     * The topmost mapping (root) thus contains a mapping with
-     * a depth equal to the length of the ongoing mappings. This information is provided to the
-     * {@link io.neba.core.resourcemodels.metadata.ResourceModelStatistics}.
+     * Record a subsequent mapping in the {@link io.neba.core.resourcemodels.metadata.ResourceModelStatistics statistics}
+     * of every {@link ResourceModelMetaData resource model} in the current mapping stack.
      */
-    private void trackSubsequentMapping(OngoingMappings ongoingMappings) {
+    private void trackNestedMapping(OngoingMappings ongoingMappings) {
         for (ResourceModelMetaData metaData : ongoingMappings.getMetaData()) {
             metaData.getStatistics().countSubsequentMapping();
         }
