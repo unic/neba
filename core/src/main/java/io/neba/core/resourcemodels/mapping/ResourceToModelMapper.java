@@ -1,18 +1,18 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ * <p/>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.mapping;
 
@@ -25,9 +25,9 @@ import org.apache.sling.api.resource.Resource;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,13 +46,13 @@ import static org.springframework.util.Assert.notNull;
 @Service
 public class ResourceToModelMapper {
     private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<ResourceModelPostProcessor>();
-    @Inject
+    @Autowired
     private ModelProcessor modelProcessor;
-    @Inject
-    private CyclicMappingSupport cyclicMappingSupport;
-    @Inject
+    @Autowired
+    private NestedMappingSupport nestedMappingSupport;
+    @Autowired
     private AnnotatedFieldMappers annotatedFieldMappers;
-    @Inject
+    @Autowired
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     /**
@@ -70,7 +70,11 @@ public class ResourceToModelMapper {
         final Class<?> beanType = modelSource.getBeanType();
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(beanType);
         final Mapping<T> mapping = new Mapping<T>(resource.getPath(), metaData);
-        final Mapping<T> alreadyOngoingMapping = this.cyclicMappingSupport.begin(mapping);
+        // Do not track mapping time for nested resource models of the same type: this would yield
+        // a useless average and total mapping time as the mapping durations would sum up multiple times.
+        final boolean trackMappingDuration = !this.nestedMappingSupport.hasOngoingMapping(metaData);
+
+        final Mapping<T> alreadyOngoingMapping = this.nestedMappingSupport.begin(mapping);
 
         if (alreadyOngoingMapping == null) {
             try {
@@ -86,15 +90,17 @@ public class ResourceToModelMapper {
                 // Phase 3: Map the bean (may create a cycle).
 
                 // Retain current time for statistics
-                final long startTimeInMs = currentTimeMillis();
+                final long startTimeInMs = trackMappingDuration ? currentTimeMillis() : 0;
 
                 model = map(resource, bean, metaData, modelSource.getFactory());
 
-                // Update statistics with mapping duration
-                final long endTimeInMs = currentTimeMillis();
-                metaData.getStatistics().countMappingDuration((int) (endTimeInMs - startTimeInMs));
+                if (trackMappingDuration) {
+                    // Update statistics with mapping duration
+                    metaData.getStatistics().countMappingDuration((int) (currentTimeMillis() - startTimeInMs));
+                }
+
             } finally {
-                this.cyclicMappingSupport.end(mapping);
+                this.nestedMappingSupport.end(mapping);
             }
         } else {
             // Yield the currently mapped bean.
@@ -107,7 +113,7 @@ public class ResourceToModelMapper {
                 // thus we must raise an exception.
                 throw new CycleInBeanInitializationException("Unable to provide bean " + beanType +
                         " for resource " + resource + ". The bean initialization resulted in a cycle: "
-                        + join(this.cyclicMappingSupport.getOngoingMappings(), " >> ") + " >> " + mapping + ". " +
+                        + join(this.nestedMappingSupport.getOngoingMappings(), " >> ") + " >> " + mapping + ". " +
                         "Does the bean depend on itself to initialize, e.g. in a @PostConstruct method?");
             }
         }

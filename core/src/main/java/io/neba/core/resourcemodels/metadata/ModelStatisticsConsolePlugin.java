@@ -20,9 +20,9 @@ import org.apache.commons.collections.Predicate;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,9 +33,7 @@ import java.util.Map;
 
 import static java.lang.Math.round;
 import static org.apache.commons.collections.CollectionUtils.find;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.*;
 
 /**
  * Provides a RESTFul JSON API for {@link io.neba.api.annotations.ResourceModel} metadata,
@@ -51,7 +49,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
     private static final String STATISTICS_API_PATH = "/api/statistics";
     private static final String RESET_API_PATH = "/api/reset";
 
-    @Inject
+    @Autowired
     private ResourceModelMetaDataRegistrar modelMetaDataRegistrar;
 
     public String getCategory() {
@@ -194,6 +192,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         data.put("instantiations", statistics.getInstantiations());
         data.put("mappings", statistics.getNumberOfMappings());
         data.put("averageMappingDuration", statistics.getAverageMappingDuration());
+        data.put("totalMappingDuration", statistics.getTotalMappingDuration());
         data.put("maximumMappingDuration", statistics.getMaximumMappingDuration());
         data.put("minimumMappingDuration", statistics.getMinimumMappingDuration());
         data.put("mappingDurationMedian", statistics.getMappingDurationMedian());

@@ -44,18 +44,32 @@ public class ConcurrentDistinctMultiValueMapTest {
 	public void testDifferentValuesAreAccepted() throws Exception {
 		put("test", "test1");
 		put("test", "test2");
-		assertMapContainsAll("test", "test1", "test2");
+		assertMapContains("test", "test1", "test2");
 	}
 	
 	@Test
-	public void testElementRemoval() throws Exception {
+	public void testRemoveKey() throws Exception {
 		put("test", "test1");
 		put("test", "test2");
-		remove("test");
+
+		removeKey("test");
+
 		assertMapDoesNotContain("test");
 	}
 
-    @Test
+	@Test
+	public void testRemoveValue() throws Exception {
+		put("test", "test1");
+		put("test", "test2");
+
+		removeValue("test1");
+		assertMapContainsOnly("test", "test2");
+
+		removeValue("test2");
+		assertMapContainsOnly("test");
+	}
+
+	@Test
     public void testIsEmpty() throws Exception {
         Assertions.assertThat(this.testee.isEmpty()).isTrue();
         put("test", "test1");
@@ -66,14 +80,22 @@ public class ConcurrentDistinctMultiValueMapTest {
 		assertThat(this.testee).doesNotContain(key);
 	}
 
-	private void remove(String key) {
+	private void removeKey(String key) {
 		this.testee.remove(key);
 	}
 
-	private ConcurrentMultivalueMapAssert assertMapContainsAll(String key, Object...value) {
+	private void removeValue(String value) {
+		this.testee.removeValue(value);
+	}
+
+	private ConcurrentMultivalueMapAssert assertMapContains(String key, Object... value) {
 		return assertThat(this.testee).contains(key, value);
 	}
-	
+
+	private ConcurrentMultivalueMapAssert assertMapContainsOnly(String key, Object... value) {
+		return assertThat(this.testee).containsOnly(key, value);
+	}
+
 	private ConcurrentMultivalueMapAssert assertOnlyOneValueFor(String key) {
 		return assertThat(this.testee).containsExactlyOneValueFor(key);
 	}

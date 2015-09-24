@@ -8,10 +8,10 @@
         finds models causing more than one subsequent resource to model mapping when instantiated. The query <span class="expressionExample">averageMappingDuration > average(averageMappingDuration)</span>
         finds resource models who's individual average mapping duration is higher than the average mapping duration of all resource models. All properties, except when enclosed in entire(...) or average(...), apply
         to the <em>individual</em> model. For instance, <span class="expressionExample">mappingDurationMedian < averageMappingDuration</span> translates to "find models who's mapping duration median is less than it's average mapping duration".
-        One can also employ sub clauses and arithmetic expressions. For instance, <span class="expressionExample">totalTime > entire(totalTime) * 0.05</span> finds models that are responsible for more than 5% of the entire mapping time.
+        One can also employ sub clauses and arithmetic expressions. For instance, <span class="expressionExample">totalMappingDuration > entire(totalMappingDuration) * 0.05</span> finds models that are responsible for more than 5% of the entire mapping time.
 
         <h2>The model visualization</h2>
-        The models are ordered by their total mapping time (totalTime). Each graph exhibits the following dimensions;
+        The models are ordered by their total mapping time (totalMappingDuration). Each graph exhibits the following dimensions;
         <table>
             <tbody>
                 <tr><th>Instantiations</th><td>The number of times the model was instantiated</td></tr>

@@ -71,7 +71,7 @@ numVar
    / v:"maximumMappingDuration" {return "modelData." + v}
    / v:"minimumMappingDuration" {return "modelData." + v}
    / v:"mappingDurationMedian" {return "modelData." + v}
-   / v:"totalTime" {return "modelData." + v}
+   / v:"totalMappingDuration" {return "modelData." + v}
 
 op_3
    = whitespace+ f:op_3 whitespace* {return f}

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>3.6.0</version>
+    <version>3.7.0</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
@@ -59,7 +59,7 @@
     </developers>
 
     <properties>
-        <spring.version>3.2.13.RELEASE_2</spring.version>
+        <spring.version>3.2.14.RELEASE_1</spring.version>
         <gemini.version>2.0.0.M02</gemini.version>
         <language.level>1.6</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
@@ -254,12 +254,6 @@
                 <version>1.2.2</version>
                 <scope>provided</scope>
             </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-                <version>1_1</version>
-                <scope>provided</scope>
-            </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -404,6 +398,12 @@
             </dependency>
 
             <!-- Test dependencies -->
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+                <version>1_1</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>
@@ -624,6 +624,11 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.4.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>

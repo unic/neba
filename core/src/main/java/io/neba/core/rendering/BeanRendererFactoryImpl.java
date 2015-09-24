@@ -22,8 +22,8 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.scripting.api.BindingsValuesProvider;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,12 +34,7 @@ import java.util.regex.Pattern;
 import static io.neba.api.Constants.DEFAULT_RENDERER_NAME;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.split;
-import static org.apache.velocity.runtime.RuntimeConstants.INPUT_ENCODING;
-import static org.apache.velocity.runtime.RuntimeConstants.OUTPUT_ENCODING;
-import static org.apache.velocity.runtime.RuntimeConstants.RESOURCE_LOADER;
-import static org.apache.velocity.runtime.RuntimeConstants.RUNTIME_LOG_LOGSYSTEM;
-import static org.apache.velocity.runtime.RuntimeConstants.VM_LIBRARY_AUTORELOAD;
-import static org.apache.velocity.runtime.RuntimeConstants.VM_PERM_INLINE_LOCAL;
+import static org.apache.velocity.runtime.RuntimeConstants.*;
 import static org.springframework.util.Assert.notNull;
 
 /**
@@ -53,7 +48,7 @@ public class BeanRendererFactoryImpl implements BeanRendererFactory {
     private final Pattern pathPattern = Pattern.compile("/[A-z\\-0-9/]+");
     private final Map<String, BeanRenderer> rendererMap = new ConcurrentHashMap<String, BeanRenderer>();
 
-    @Inject
+    @Autowired
     private ResourceLoader resourceLoader;
     private List<BindingsValuesProvider> bindingsValuesProviders = new ArrayList<BindingsValuesProvider>();
 

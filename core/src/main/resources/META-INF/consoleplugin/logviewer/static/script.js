@@ -126,7 +126,7 @@ $(function() {
 	}
 
     function showOrHideRotatedLogfiles() {
-        var display = $("#hideRotated").is(":checked") ? "none" : "inline";
+        var display = $("#hideRotated").is(":checked") ? "none" : "block";
         $("#logfile").find("option").not("[value$='.log']").css("display", display)
     }
 });

@@ -53,6 +53,14 @@ public class ConcurrentMultivalueMapAssert extends GenericAssert<ConcurrentMulti
         return myself;
     }
 
+    public ConcurrentMultivalueMapAssert containsOnly(Object key, Object... values) {
+        Collection<?> containedValues = valuesForKey(key);
+        if (containedValues.size() != values.length || !containedValues.containsAll(asList(values))) {
+            fail(values + " do not only contain " + Arrays.toString(values) + ".");
+        }
+        return myself;
+    }
+
     private Collection<?> valuesForKey(Object key) {
         return valuesOrFail(key);
     }

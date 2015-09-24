@@ -25,18 +25,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang.ClassUtils.getAllInterfaces;
 import static org.apache.commons.lang.ClassUtils.getAllSuperclasses;
@@ -65,9 +59,9 @@ import static org.osgi.framework.Bundle.STARTING;
 public class ResourceToModelAdapterUpdater implements BundleContextAware {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Inject
+    @Autowired
     private ModelRegistry registry;
-    @Inject
+    @Autowired
     private ResourceToModelAdapter adapter;
     
     private BundleContext context = null;

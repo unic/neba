@@ -17,11 +17,7 @@ package io.neba.core.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 import static io.neba.core.util.ReadOnlyIterator.readOnly;
 import static java.util.Arrays.asList;
@@ -68,6 +64,22 @@ public class Annotations implements Iterable<Annotation> {
             throw new IllegalArgumentException("Method argument type must not be null.");
         }
         return getAnnotationMap().get(type) != null;
+    }
+
+    /**
+     * @param name must not be <code>null</code>.
+     * @return whether the given type name matches one of the present annotations
+     */
+    public boolean containsName(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Method argument name must not be null.");
+        }
+        for (Class<? extends  Annotation> annotationType : getAnnotationMap().keySet()) {
+            if (annotationType.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

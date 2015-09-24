@@ -18,9 +18,9 @@ package io.neba.core.selftests;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.sling.commons.json.io.JSONWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,10 +30,7 @@ import java.net.URL;
 import java.util.List;
 
 import static org.apache.commons.lang.StringEscapeUtils.escapeXml;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.*;
 import static org.apache.commons.lang.exception.ExceptionUtils.getRootCause;
 import static org.apache.commons.lang.exception.ExceptionUtils.getStackTrace;
 
@@ -47,7 +44,7 @@ import static org.apache.commons.lang.exception.ExceptionUtils.getStackTrace;
 public class SelftestConsolePlugin extends AbstractWebConsolePlugin {
     private static final long serialVersionUID = -5152654100152618897L;
     public static final String LABEL = "selftests";
-    @Inject
+    @Autowired
     private SelftestRegistrar selftestRegistrar;
 
     public String getCategory() {
