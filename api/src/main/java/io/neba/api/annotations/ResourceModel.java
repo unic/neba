@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 /**
  * A resource model is a {@link Component} representing sling
  * {@link org.apache.sling.api.resource.Resource resources} with
- * specific sling resource types or JCR primary node types.
+ * specific sling resource types, JCR primary node types or mixin types.
  * <p>
  * Classes annotated with &#64;{@link ResourceModel} are subject to auto
  * detection by spring classpath scanning. The resulting bean definitions are
@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * The fields of a &#64;{@link ResourceModel} are automatically mapped from the properties
  * of the {@link org.apache.sling.api.resource.Resource resource} it represents,
- * unless they are static, final, injected (annotated with javax &#64;Inject) or
+ * unless they are static, final, injected (annotated with &#64;Inject, &#64;Autowired or &#64;Resource) or
  * annotated with &#64;{@link Unmapped}. See also &#64;{@link Path}, &#64;{@link This}
  * and &#64;{@link Reference} and refer to the NEBA user guide.
  * </p>
@@ -78,7 +78,7 @@ import org.springframework.stereotype.Component;
  * Therefore, if a {@link org.apache.sling.api.resource.Resource} has no
  * specific {@link ResourceModel}, i.e. no mapping to its
  * {@link org.apache.sling.api.resource.Resource#getResourceType()} or node
- * type, its resource hierarchy, followed by its node type hierarchy are
+ * type, its resource hierarchy, followed by its node type hierarchy (including mixin types) are
  * searched for a less specific model.<br />
  * Resource models have <em>prototype</em> scope since their values may be
  * mapped from a resource via content-to-object mapping (ocm) during
