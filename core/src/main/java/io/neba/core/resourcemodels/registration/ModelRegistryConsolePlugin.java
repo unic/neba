@@ -95,12 +95,13 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
 
     private void handleApiCall(String apiIdentifier, HttpServletRequest req, HttpServletResponse res) throws IOException {
-        res.setContentType("application/json;charset=UTF-8");
         try {
             if (apiIdentifier.startsWith(API_COMPONENTICON)) {
                 spoolComponentIcon(res, apiIdentifier);
                 return;
             }
+
+            res.setContentType("application/json;charset=UTF-8");
 
             if (apiIdentifier.startsWith(API_FILTER)) {
                 provideFilteredModelRegistryView(req, res);
@@ -165,8 +166,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                                                  "/crx/de/#" + resource.getPath() + "\" " +
                                           "class=\"crxdelink\">"
                                       + "<img class=\"componentIcon\" src=\""
-                                      + (iconResource == null ? request.getContextPath() + "/crx/de/icons/16x16/unstructured.png" :
-                                                                getLabel() + API_PATH + API_COMPONENTICON + resource.getPath())
+                                      + getLabel() + API_PATH + API_COMPONENTICON + (iconResource == null ? "" : resource.getPath())
                                       + "\"/>"
                                       + type + "</a>" :
                                       "<span class=\"unresolved\">" + type + "</span>";
@@ -315,12 +315,23 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private void spoolComponentIcon(HttpServletResponse response, String suffix) throws IOException {
+        response.setContentType("image/png");
+        String iconPath = suffix.substring(API_COMPONENTICON.length());
+        if (iconPath.isEmpty()) {
+            InputStream in = getClass().getResourceAsStream("/META-INF/consoleplugin/modelregistry/static/noicon.png");
+            try {
+                copy(in, response.getOutputStream());
+            } finally {
+                closeQuietly(in);
+            }
+            return;
+        }
+
         ResourceResolver resolver = getResourceResolver();
         InputStream in = null;
         try {
-            Resource componentIcon = resolver.getResource(suffix.substring(API_COMPONENTICON.length()) + "/icon.png");
+            Resource componentIcon = resolver.getResource(iconPath + "/icon.png");
             if (componentIcon != null) {
-                response.setContentType("image/png");
                 in = componentIcon.adaptTo(InputStream.class);
                 copy(in, response.getOutputStream());
             }
