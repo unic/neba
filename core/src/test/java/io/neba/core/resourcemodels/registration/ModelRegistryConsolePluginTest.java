@@ -34,27 +34,17 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import static java.lang.System.arraycopy;
+import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -134,7 +124,7 @@ public class ModelRegistryConsolePluginTest {
         renderContent();
         assertResponseContains("<a href=\"/crx/de/#" +
                 "/libs/foundation/components/primary/cq/Page\" class=\"crxdelink\">" +
-                "<img class=\"componentIcon\" src=\"/crx/de/icons/16x16/unstructured.png\"/>cq:Page</a>", Model.class, 123L, "beanName");
+                "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "beanName");
     }
 
     @Test
@@ -144,12 +134,20 @@ public class ModelRegistryConsolePluginTest {
     }
 
     @Test
-    public void testRenderingOfComponentIcons() throws Exception {
+    public void testRenderingOfExistingComponentIcon() throws Exception {
         withIconResource("/apps/project/components/myComponent/icon.png");
         get("/system/console/modelregistry/api/componenticon/apps/project/components/myComponent");
         verifyPluginResolvesResource("/apps/project/components/myComponent/icon.png");
         verifyResponseHasContentType("image/png");
         verifyIconResourceIsAdaptedToInputStream();
+    }
+
+    @Test
+    public void testRenderingOfDefaultComponentIcon() throws Exception {
+        get("/system/console/modelregistry/api/componenticon");
+        verifyResponseHasContentType("image/png");
+        verifyNoIconResourceIsResolved();
+        verifyDefaultComponentIconIsWritten();
     }
 
     @Test
@@ -293,6 +291,22 @@ public class ModelRegistryConsolePluginTest {
 
     private void verifyPluginResolvesResource(String resourcePath) {
         verify(this.resolver).getResource(resourcePath);
+    }
+
+    private void verifyNoIconResourceIsResolved() {
+        verify(this.resolver, never()).getResource(anyString());
+    }
+
+    private void verifyDefaultComponentIconIsWritten() throws IOException {
+        byte[] buffer = new byte[4096];
+        byte[] expected = toByteArray(getClass().getResourceAsStream("/META-INF/consoleplugin/modelregistry/static/noicon.png"));
+
+        arraycopy(expected, 0, buffer, 0, expected.length);
+        for (int i = expected.length; i < buffer.length; ++i) {
+            buffer[i] = 0;
+        }
+
+        verify(this.outputStream).write(buffer, 0, expected.length);
     }
 
     private void get(String requestUri) throws ServletException, IOException {
