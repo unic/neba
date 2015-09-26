@@ -20,6 +20,7 @@
 		<module>parent</module>
 		<module>api</module>
 		<module>core</module>
-        <module>delivery</module>
+        <module>delivery-aem</module>
+		<module>delivery-sling</module>
 	</modules>
 </project>

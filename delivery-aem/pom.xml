@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>io.neba.neba-delivery</artifactId>
-    <name>NEBA delivery</name>
-    <packaging>bundle</packaging>
+    <artifactId>io.neba.neba-delivery-aem</artifactId>
+    <name>NEBA delivery AEM</name>
+    <packaging>content-package</packaging>
 
-    <description>Packages NEBA with runtime dependencies</description>
+    <description>Packages NEBA with runtime dependencies for deployment in Adobe AEM</description>
 
     <parent>
         <groupId>io.neba</groupId>
@@ -100,7 +100,7 @@
         <resources>
             <!-- Process and filter all .xml resources  -->
             <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
+                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*.xml</include>
@@ -110,7 +110,7 @@
             </resource>
             <!-- Process and do not filter all non-xml resources (binaries)  -->
             <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
+                <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>**/*.xml</exclude>
                 </excludes>
@@ -119,6 +119,14 @@
             </resource>
         </resources>
         <plugins>
+            <!-- Omit the binary resources. They are shipped anyways. -->
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <excludeResources>true</excludeResources>
+                </configuration>
+            </plugin>
+
             <!-- Manifest customization: unpack all dependencies that require manifest transformation into a suitable directory -->
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -207,47 +215,7 @@
                         </filter>
                     </filters>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>create-content-package</id>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                        <phase>install</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Private-Package>
-                            !*
-                        </Private-Package>
-                        <Export-Package>
-                            !*
-                        </Export-Package>
-                        <Import-Package>
-                            !*
-                        </Import-Package>
-                        <Bundle-Description>Contains NEBA and its runtime dependencies</Bundle-Description>
-                        <Sling-Initial-Content>
-                            <!-- Provide the bundles to the JCR OSGi installer. Uninstall the bundles if the delivery bundle is uninstalled -->
-                            SLING-INF/content/install;overwrite:=true;ignoreImportProviders:=jar;uninstall:=true;path:=/apps/neba/install
-                        </Sling-Initial-Content>
-                        <Include-Resource>
-                            SLING-INF/content/install=${project.build.directory}/vault-work/jcr_root/apps/neba/install
-                        </Include-Resource>
-                        <Embed-Dependency>
-                            io.neba.neba-core|io.neba.neba-api|velocity|org.apache.servicemix.bundles.aopalliance|gemini-blueprint-core|gemini-blueprint-io
-                        </Embed-Dependency>
-                        <Embed-Directory>
-                            SLING-INF/content/install
-                        </Embed-Directory>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
