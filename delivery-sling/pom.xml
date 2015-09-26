@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>io.neba.neba-delivery-sling</artifactId>
+    <name>NEBA sling delivery</name>
+    <packaging>bundle</packaging>
+
+    <description>Provides NEBA with its runtime dependencies for installation in non-AEM Sling deployments</description>
+
+    <parent>
+        <groupId>io.neba</groupId>
+        <artifactId>io.neba.neba-parent</artifactId>
+        <version>3.7.0-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+        <!-- Internal dependencies -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>io.neba.neba-delivery-aem</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Manifest customization: unpack all dependencies that require manifest transformation into a suitable directory -->
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-spring-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>io.neba.neba-delivery-aem</includeArtifactIds>
+                            <includes>**/*.jar</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Sling-Initial-Content>
+                            <!-- Provide the bundles to the JCR OSGi installer. Uninstall the bundles if the delivery bundle is uninstalled -->
+                            SLING-INF/content/install;overwrite:=true;ignoreImportProviders:=jar;uninstall:=true;path:=/apps/neba/install
+                        </Sling-Initial-Content>
+                        <Include-Resource>
+                            SLING-INF/content/install=${project.build.directory}/dependency/jcr_root/apps/neba/install
+                        </Include-Resource>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
