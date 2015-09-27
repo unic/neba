@@ -38,9 +38,9 @@
                 "maximumMappingDuration" : {hint: "The maximum duration of a single resource to model mappings (in milliseconds)", order:90},
                 "minimumMappingDuration" : {hint: "The minimum duration of a single resource to model mappings (in milliseconds)", order:100},
                 "mappingDurationMedian" : {hint: "The median duration of a single resource to model mapping (in milliseconds)", order:110},
-                "totalTime" : {hint: "The total time spent instantiating and mapping the model (in milliseconds)", order:20},
-                "average(" : {hint: "The average of the specified property for all models, e.g. average(totalTime) is the average amount of time spent in resource model mapping.", order:15},
-                "entire(" : {hint: "The sum of the specified property for all models, e.g. entire(totalTime) is the total amount of time spent in resource model mapping.", order:16},
+                "totalMappingDuration" : {hint: "The total time spent instantiating and mapping the model (in milliseconds)", order:20},
+                "average(" : {hint: "The average of the specified property for all models, e.g. average(totalMappingDuration) is the average amount of time spent in resource model mapping.", order:15},
+                "entire(" : {hint: "The sum of the specified property for all models, e.g. entire(totalMappingDuration) is the total amount of time spent in resource model mapping.", order:16},
                 "a boolean" : {hint: "Enter a boolean value, either true or false", order:10},
                 "a number" : {hint: "Enter a number e.g. 0 or 0.5", order:0}
             },
@@ -68,10 +68,19 @@
                 return 0;
             },
             processFilterExpression = function(force) {
-                var val = filter.val();
+                var val = filter.val(),
+                    hasValueChanged = val == "" && lastValue && lastValue != val || val != "" && val != lastValue,
+                    hasVisualization = !d3.selectAll(".wrapper").empty();
+
+                if (hasVisualization && !hasValueChanged) {
+                    return;
+                }
+
                 if (!force) {
                     if (val == defaultValue) {
                         valid();
+                        // If there is no visualization yet, provide a default view.
+                        !hasVisualization && visualize();
                         return;
                     }
                     if (val == lastValue) {
@@ -125,7 +134,7 @@
                             {name: "mappingDurationMedian", max: 0, label: 'Median', unit: "ms"},
                             {name: "lazyFields", max: 0, label: 'Lazy fields'},
                             {name: "greedyFields", max: 0, label: 'Greedy fields'},
-                            {name: "totalTime", max: 0, label: 'Total time', unit: "ms"},
+                            {name: "totalMappingDuration", max: 0, label: 'Total time', unit: "ms"},
                             {name: "instantiations", max: 0, label: 'Instantiations'},
                             {name: "mappings", max: 0, label: 'Subsequent mappings'},
                             {name: "mappableFields", max: 0},
@@ -148,8 +157,6 @@
                         };
 
                     data.forEach(function (d) {
-                        d.totalTime = d.averageMappingDuration * d.instantiations;
-                        entire.modelData.add("totalTime", d.totalTime);
                         fields.forEach(function(field) {
                             entire.modelData.add(field.name, d[field.name]);
                             if (d[field.name] > field.max) {
@@ -161,7 +168,7 @@
                     data = data.filter(filter(entire));
 
                     data.sort(function (a, b) {
-                        return b.totalTime - a.totalTime;
+                        return b.totalMappingDuration - a.totalMappingDuration;
                     });
 
                     var star = d3.starPlot()
@@ -271,8 +278,8 @@
                             filter.val("");
                         }
 
-                        var validTextPortion = request.term.substr(0, e.column - 1),
-                            invalidTextPortion = request.term.substr(e.column - 1, cursorPosition()),
+                        var validTextPortion = request.term.substr(0, e.location.start.column - 1),
+                            invalidTextPortion = request.term.substr(e.location.start.column - 1, cursorPosition()),
                             // if there is invalid text and any of the suggestions starts with it, present the suggestion.
                             // otherwise, present all suggestions
                             showSpecific = e.found && e.expected.some(function (element) {
@@ -345,9 +352,6 @@
             }
         });
 
-        processFilterExpression();
-        provideDefaultValue();
-
         $("#resetStatistics").click(function() {
             $.ajax({
                 url: "modelstatistics/api/reset",
@@ -370,5 +374,8 @@
                 processFilterExpression();
             })
             .attr("title", "Apply this filter");
+
+        processFilterExpression();
+        provideDefaultValue();
     });
 })($);

@@ -1,0 +1,133 @@
+---
+title: NEBA 3.7.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.7.0 Release notes
+---
+<div class="section-title">
+
+    <h1 class="title">NEBA <span>Release 3.7.0</span></h1>
+
+</div><!--END SECTION TITLE-->
+
+<div id="inner-content" class="blog1">
+
+    <div class="post">
+
+        <div class="post-info">
+            <div class="date"><span class="month">Sep</span><span class="day">24</span><span class="month">2015</span></div>
+        </div><!--END POST-INFO-->
+
+        <div class="post-content">
+
+            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
+
+            <div class="post-title">
+                <h2 class="title">Release 3.7.0</h2>
+            </div><!--END POST-TITLE-->
+
+            <div class="post-meta">
+                <ul>
+                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
+                </ul>
+            </div><!--END POST-META-->
+
+            <div class="divider-border"></div>
+
+            <div class="one">
+                <h2>Highlights in this release</h2>
+            </div>
+
+            <div class="one">
+                <h3>AEM 6.x support: Transitioning to the the javax.inject package provided with AEM</h3>
+                <div class="one">
+                    <p>
+                        Since AEM 6.0, the javax.inject package is provided out of the box. To avoid conflicts between two different versions of javax.inject, the NEBA 3.7.0 delivery
+                        package no longer contains the <a href="http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.javax-inject/1_1/">javax.inject OSGi bundle</a>.
+                        Furthermore, the Spring artifacts shipped with NEBA support the javax.inject version shipped with AEM (0.0.0). See <a href="#upgrading">upgrade instructions</a> for the recommended
+                        way to use javax.inject with 3.7.0.
+                    </p>
+                </div>
+            </div>
+
+            <div class="one">
+                <h3>Improved model statistics</h3>
+                <div class="one-half">
+                    <a href="/images/neba-in-a-nutshell/statistics-large.png" data-rel="prettyPhoto" rel="prettyPhoto"><img src="/images/neba-in-a-nutshell/statistics.png" alt="The NEBA model statistics"></a>
+                </div>
+                <div class="one-half last">
+                    <p>
+                        Since 3.7.0, the <a href="/userguide.html#tooling_modelstatistics">model statistics</a> have an improved handling of nested mappings of the same resource model type. In such cases - for instance
+                        deep mapping hierarchies of pages - answering the question how many subsequent mappings or mapping durations the corresponding model exhibits becomes more difficult as the model effectively contains itself.
+                        Since 3.7.0, only the effective number of subsequent mappings are counted per model type. The same applies to the mapping duration. This gives a more realistic view of the effective mapping
+                        durations and subsequent mappings per resource model type.
+                    </p>
+                </div>
+            </div>
+
+            <div class="one">
+                <h3>New delivery bundle for standalone Sling installations</h3>
+                <p>
+                    Since 3.7.0, NEBA and all of its thirdparty dependencies can be installed to non-AEM Sling installations using just one delivery bundle. The OSGi bundle leverages Sling's <a href="https://sling.apache.org/documentation/bundles/content-loading-jcr-contentloader.html">content loading</a>
+                    to provide NEBA and its dependencies to Sling's JCR installer.
+                </p>
+           </div>
+
+            <div class="divider-border"></div>
+
+            <div class="one">
+                <h2>Release notes</h2>
+
+                <h3>Improvements</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/issues/69">#69 AEM6.1 / Sling-Models: Mitigate potential javax.inject import conflicts</a><br />
+                    <a href="https://github.com/unic/neba/issues/72">#72 Add delivery bundle for standalone Sling versions</a><br />
+                    <a href="https://github.com/unic/neba/issues/74">#74 Add fields annotated with @Resource and @Autowired to the automatically unmapped fields</a><br />
+                    <a href="https://github.com/unic/neba/issues/76">#76 Improve counting of subsequent mappings for the model statistics console</a><br />
+                    <a href="https://github.com/unic/neba/issues/80">#80 Upgrade to Spring 3.2.14</a><br />
+                    <a href="https://github.com/unic/neba/issues/83">#83 Improve default component icons in the model registry</a><br />
+                </p>
+
+                <h3>Fixed bugs</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/issues/67">#67 AnnotatedFieldMapper doesn't allow implementations of the same @Annotation from different bundles</a> (Thanks <a href="https://github.com/djessup">@djessup</a> for reporting this!)<br />
+                    <a href="https://github.com/unic/neba/issues/78">#78 Log file viewer: Display of rotated logfile version options may be inlined</a><br />
+                </p>
+
+                <h3 id="upgrading">Upgrading from 3.6.0</h3>
+
+                <h4>Changes in javax.inject support</h4>
+
+                <p>
+                    If you are using javax.inject with NEBA in an AEM or Sling version that does not provide javax.inject yet (e.g. AEM < 6.0), make sure to deploy the <a href="http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.javax-inject/1_1/">javax.inject bundle</a>
+                    with your application - it is <a href="https://github.com/unic/neba/issues/69">no longer included in the delivery package</a>.
+                    Otherwise, make sure to transition to the out of the box javax.inject version provided via org.apache.sling.scripting.java, e.g. in AEM 6.1:
+
+                    {% highlight xml %}
+<dependency>
+    <groupId>org.apache.sling</groupId>
+    <artifactId>org.apache.sling.scripting.java</artifactId>
+    <version>2.0.12</version>
+    <scope>provided</scope>
+</dependency>
+                    {% endhighlight %}
+
+                </p>
+
+                <h4>AEM delivery package with new artifact ID</h4>
+                <p>
+                    The artifact id of the AEM delivery packages was changed for disambiguation due to the introduction of a delivery package for Sling standalone (<a href="https://github.com/unic/neba/issues/72">#72</a>).
+                    The artifact ID is now <em>io.neba.neba-delivery-aem</em>. Please update your dependencies accordingly.
+                </p>
+
+                <h4>Minor Spring upgrade</h4>
+                <p>
+                    Note that the version of Spring contained in the <a href="/download.html#installation">delivery package</a> was updated from 3.2.13
+                    RELEASE 2 to 3.2.14 RELEASE 1, which should be reflected in project dependencies as well.
+                </p>
+            </div>
+        </div><!--END POST-CONTENT -->
+
+    </div><!--END POST-->
+
+</div><!--END INNER-CONTENT-->
