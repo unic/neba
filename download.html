@@ -16,7 +16,7 @@ twitterAuthor: nebaframework
     e.g. Spring and Gemini Blueprint.</p>
 
     <p>
-        <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-aem&v=LATEST&p=zip" class="button large rounded grey">Download the AEM&#8482; package for NEBA {{site.nebaVersion}}</a>
+        <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-aem&v={{site.nebaVersion}}&p=zip" class="button large rounded grey">Download the AEM&#8482; package for NEBA {{site.nebaVersion}}</a>
     </p>
 </div>
 
@@ -26,7 +26,7 @@ twitterAuthor: nebaframework
     <p>The following JAR file is an OSGi bundle installing both NEBA and the runtime dependencies not provided by Sling,
         e.g. Spring and Gemini Blueprint.</p>
     <p>
-        <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-sling&v=LATEST&p=jar" class="button large rounded grey">Download the Sling delivery bundle for NEBA {{site.nebaVersion}}</a>
+        <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-sling&v={{site.nebaVersion}}&p=jar" class="button large rounded grey">Download the Sling delivery bundle for NEBA {{site.nebaVersion}}</a>
     </p>
 
     <p>Installing and activating this bundle installs NEBA and its runtime dependencies. Uninstalling the delivery bundle uninstalls NEBA as well.</p>
