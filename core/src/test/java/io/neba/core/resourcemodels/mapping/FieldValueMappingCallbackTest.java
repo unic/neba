@@ -52,6 +52,7 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -79,6 +80,8 @@ public class FieldValueMappingCallbackTest {
     private Factory lazyLoadingCollectionFactory;
     @Mock
     private AnnotatedFieldMappers annotatedFieldMappers;
+    @Mock
+    private AnnotatedFieldMapper annotatedFieldMapper;
 
     private LazyLoader lazyLoadingCollectionCallback;
 
@@ -500,7 +503,6 @@ public class FieldValueMappingCallbackTest {
      * Test the explicitly lazy retrieval of the children of the current resources with adaptation to
      * the desired target type (component type of the collection).
      * <p/>
-     * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {
@@ -525,6 +527,40 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIsOptional();
         loadOptionalField();
         assertMappedFieldValueIsCollectionContainingTargetValue();
+    }
+
+    /**
+     * Tests that {@link AnnotatedFieldMapper annotated field mappers} are supported on
+     * {@link Optional lazy-oding} resource model fields, i.e. that these mappers are invoked when the
+     * lazy loading callback is triggered in a case such as this:
+     * <p />
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;MyCustomAnnotation
+     *         private {@link io.neba.api.resourcemodels.Optional}&lt;AnyType&gt; anyField;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testCustomMappersAreAppliedWhenOptionalFieldsAreLoaded() throws Exception {
+        withField(Collection.class);
+        withOptionalField();
+        withCollectionTypedField();
+        withInstantiableCollectionTypedField();
+        withCustomFieldMapperMappingTo(new ArrayList<Object>());
+
+        mapField();
+
+        assertMappedFieldValueIsOptional();
+
+        assertCustomFieldMapperIsNotObtained();
+        assertCustomFieldMapperIsNotUsedToMapField();
+
+        loadOptionalField();
+
+        assertCustomFieldMapperIsObtained();
+        assertCustomFieldMapperIsUsedToMapField();
     }
 
     /**
@@ -1322,8 +1358,7 @@ public class FieldValueMappingCallbackTest {
     @SuppressWarnings("unchecked")
     private void withCustomFieldMapperMappingTo(final Object value) {
         AnnotationMapping mapping = mock(AnnotationMapping.class);
-        AnnotatedFieldMapper mapper = mock(AnnotatedFieldMapper.class);
-        doReturn(mapper).when(mapping).getMapper();
+        doReturn(this.annotatedFieldMapper).when(mapping).getMapper();
 
         Collection<AnnotationMapping> mappings = new ArrayList<AnnotationMapping>();
         mappings.add(mapping);
@@ -1337,7 +1372,7 @@ public class FieldValueMappingCallbackTest {
                 return value;
             }
         };
-        doAnswer(retainMappingContext).when(mapper).map(isA(OngoingMapping.class));
+        doAnswer(retainMappingContext).when(this.annotatedFieldMapper).map(isA(OngoingMapping.class));
     }
 
     private void withmappedField(String fieldName) throws NoSuchFieldException {
@@ -1693,5 +1728,23 @@ public class FieldValueMappingCallbackTest {
     private void assertMappedFieldValueIsCollectionWithEntries(Object... entries) {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
         assertThat((Collection<?>) this.mappedFieldOfTypeObject).containsOnly(entries);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertCustomFieldMapperIsUsedToMapField() {
+        verify(this.annotatedFieldMapper).map(eq(this.ongoingMapping));
+    }
+
+    private void assertCustomFieldMapperIsObtained() {
+        verify(this.annotatedFieldMappers).get(eq(this.mappedFieldMetadata));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertCustomFieldMapperIsNotUsedToMapField() {
+        verify(this.annotatedFieldMapper, never()).map((OngoingMapping) any());
+    }
+
+    private void assertCustomFieldMapperIsNotObtained() {
+        verify(this.annotatedFieldMappers, never()).get((MappedFieldMetaData) any());
     }
 }

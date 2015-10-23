@@ -112,20 +112,7 @@ public class FieldValueMappingCallback {
             value = resolve(fieldData);
         }
 
-        // For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
-        // an empty collection, in case no non-<code>null</code> default value was provided.
-        boolean preventNullCollection =
-                value == null &&
-                metaData.isInstantiableCollectionType() &&
-                getField(metaData.getField(), this.model) == null;
-
-        @SuppressWarnings("unchecked")
-        Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) metaData.getType()) : null;
-
-        // Provide the custom mappers with the default value in case of empty collections for convenience
-        value = applyCustomMappings(metaData, fieldData, value == null ? defaultValue : value);
-
-        value = value == null ? defaultValue : value;
+        value = postProcessResolvedValue(fieldData, value);
 
         if (value != null) {
             setField(metaData.getField(), this.model, value);
@@ -133,13 +120,49 @@ public class FieldValueMappingCallback {
     }
 
     /**
+     * Resumes a mapping temporarily suspended by an {@link Optional} field, i.e.
+     * effectively loads a lazy-loaded field value.
+     *
+     * @param fieldData must not be <code>null</code>.
+     * @return the resolved value, or <code>null</code>.
+     */
+    private Object resumeMapping(FieldData fieldData) {
+        return postProcessResolvedValue(fieldData, resolve(fieldData));
+    }
+
+    /**
+     * Implements the field NEBA contracts (such as non-null collection-typed fields) and applies
+     * {@link AnnotatedFieldMapper custom field mappers}.
+     *
+     * @param fieldData must not be <code>null</code>.
+     * @param value can be <code>null</code>.
+     * @return the post-processed value, can be <code>null</code>.
+     */
+    private Object postProcessResolvedValue(FieldData fieldData, Object value) {
+        // For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
+        // an empty collection, in case no non-<code>null</code> default value was provided.
+        boolean preventNullCollection =
+                value == null &&
+                fieldData.metaData.isInstantiableCollectionType() &&
+                getField(fieldData.metaData.getField(), this.model) == null;
+
+        @SuppressWarnings("unchecked")
+        Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) fieldData.metaData.getType()) : null;
+
+        // Provide the custom mappers with the default value in case of empty collections for convenience
+        value = applyCustomMappings(fieldData, value == null ? defaultValue : value);
+
+        return value == null ? defaultValue : value;
+    }
+
+    /**
      * Applies all {@link io.neba.api.resourcemodels.AnnotatedFieldMapper registered field mappers}
      * to the provided value and returns the result.
      */
     @SuppressWarnings("unchecked")
-    private Object applyCustomMappings(MappedFieldMetaData metaData, FieldData fieldData, final Object value) {
+    private Object applyCustomMappings(FieldData fieldData, final Object value) {
         Object result = value;
-        for (final AnnotationMapping mapping : this.annotatedFieldMappers.get(metaData)) {
+        for (final AnnotationMapping mapping : this.annotatedFieldMappers.get(fieldData.metaData)) {
             result = mapping.getMapper().map(new OngoingFieldMapping(this.model, result, mapping, fieldData, this.resource, this.properties));
         }
         return result;
@@ -607,7 +630,7 @@ public class FieldValueMappingCallback {
          */
         private synchronized Object load() {
             if (this.value == NULL) {
-                this.value = this.callback.resolve(this.fieldData);
+                this.value = this.callback.resumeMapping(this.fieldData);
             }
             return this.value;
         }
