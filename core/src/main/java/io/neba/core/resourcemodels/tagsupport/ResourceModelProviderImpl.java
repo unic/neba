@@ -1,18 +1,18 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ * <p/>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.tagsupport;
 
@@ -41,17 +41,17 @@ import static io.neba.core.util.Key.toKey;
  * If multiple generic models specifically target the type of the given resource through their
  * {@link io.neba.api.annotations.ResourceModel#types()}, this provider
  * may return <code>null</code> since there are no means to automatically resolve such ambiguities.
- * 
+ *
  * @author Olaf Otto
  */
 @Service
 public class ResourceModelProviderImpl implements ResourceModelProvider {
-	@Autowired
-	private ModelRegistry registry;
-	@Autowired
-	private ResourceToModelMapper mapper;
-	@Autowired
-	private ResourceModelCaches caches;
+    @Autowired
+    private ModelRegistry registry;
+    @Autowired
+    private ResourceToModelMapper mapper;
+    @Autowired
+    private ResourceModelCaches caches;
 
     @Override
     public Object resolveMostSpecificModelWithBeanName(Resource resource, String beanName) {
@@ -80,30 +80,30 @@ public class ResourceModelProviderImpl implements ResourceModelProvider {
         return resolveMostSpecificModelForResource(resource, true, null);
     }
 
-	private Object resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String beanName) {
-        final Key key = toKey(resource.getPath(), includeBaseTypes, beanName);
+    private Object resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String beanName) {
+        final Key key = toKey(resource.getPath(), includeBaseTypes, beanName, resource.getResourceType());
         Object model = this.caches.lookup(key);
-		if (model == null) {
-		    Collection<LookupResult> models = (beanName == null) ? this.registry.lookupMostSpecificModels(resource) :
-                                                                   this.registry.lookupMostSpecificModels(resource, beanName);
-	        if (models != null && models.size() == 1) {
+        if (model == null) {
+            Collection<LookupResult> models = (beanName == null) ? this.registry.lookupMostSpecificModels(resource) :
+                    this.registry.lookupMostSpecificModels(resource, beanName);
+            if (models != null && models.size() == 1) {
                 LookupResult lookupResult = models.iterator().next();
                 if (includeBaseTypes || !isMappedFromGenericBaseType(lookupResult)) {
                     OsgiBeanSource<?> source = lookupResult.getSource();
                     model = this.mapper.map(resource, source);
                     this.caches.store(resource, model, key);
                 }
-	        }
-		}
+            }
+        }
 
         return model;
-	}
+    }
 
     private boolean isMappedFromGenericBaseType(LookupResult lookupResult) {
         final String resourceType = lookupResult.getResourceType();
 
         return "nt:unstructured".equals(resourceType) ||
-               "nt:base".equals(resourceType) ||
+                "nt:base".equals(resourceType) ||
                 SYNTHETIC_RESOURCETYPE_ROOT.equals(resourceType);
     }
 }
