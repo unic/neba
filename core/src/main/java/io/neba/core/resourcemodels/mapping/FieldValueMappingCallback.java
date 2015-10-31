@@ -140,9 +140,10 @@ public class FieldValueMappingCallback {
      */
     private Object postProcessResolvedValue(FieldData fieldData, Object value) {
         // For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
-        // an empty collection, in case no non-<code>null</code> default value was provided.
+        // an empty collection, in case no non-<code>null</code> default value was provided and field is not Optional.
         boolean preventNullCollection =
                 value == null &&
+                !fieldData.metaData.isOptional() &&
                 fieldData.metaData.isInstantiableCollectionType() &&
                 getField(fieldData.metaData.getField(), this.model) == null;
 
