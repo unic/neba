@@ -318,7 +318,8 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * @return the {@link java.lang.reflect.Field#getType() field type}.
+     * @return the type the resolved value for the field shall have, which is either the {@link java.lang.reflect.Field#getType() field type},
+     * or the generic parameter type in case of {@link #isOptional() optional} fields.
      */
     public Class<?> getType() {
         return this.fieldType;
