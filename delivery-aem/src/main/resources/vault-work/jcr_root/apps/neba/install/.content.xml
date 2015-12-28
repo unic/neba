@@ -7,6 +7,7 @@
     bundles are started before the spring bundles are installed.
      -->
     <org.apache.servicemix.bundles.aopalliance-1.0_6.jar />
+    <org.apache.servicemix.bundles.aspectj-1.7.4_1.jar />
     <org.apache.servicemix.bundles.javax-inject-1_1.jar />
     <velocity-1.7.jar />
     <org.apache.servicemix.bundles.spring-core-${spring.version}.jar />
