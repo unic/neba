@@ -62,6 +62,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
         </dependency>
         <dependency>
@@ -139,7 +143,7 @@
                         </goals>
                         <configuration>
                             <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
-                            <excludeArtifactIds>org.apache.servicemix.bundles.aopalliance</excludeArtifactIds>
+                            <excludeArtifactIds>org.apache.servicemix.bundles.aopalliance,org.apache.servicemix.bundles.aspectj</excludeArtifactIds>
                             <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                             <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
                         </configuration>
@@ -185,6 +189,11 @@
                         <embedded>
                             <groupId>org.apache.servicemix.bundles</groupId>
                             <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
                             <target>${neba.installation.path}</target>
                         </embedded>
                         <embedded>

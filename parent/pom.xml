@@ -287,6 +287,12 @@
                 <version>1.0_6</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
+                <version>1.7.4_1</version>
+                <scope>provided</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.sling</groupId>
