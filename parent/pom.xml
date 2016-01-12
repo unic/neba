@@ -318,6 +318,12 @@
                 <version>2.1.0</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.bgservlets</artifactId>
+                <version>1.0.0</version>
+                <scope>provided</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.eclipse.gemini.blueprint</groupId>
