@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 the original author or authors.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,10 +28,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Map;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -44,6 +43,8 @@ public class AdministrativeResourceResolverTest {
     private ResourceResolver resolver;
     @Mock
     private SlingHttpServletRequest request;
+
+    private ResourceResolver returnedResolver;
 
     private AdministrativeResourceResolver testee;
 
@@ -66,6 +67,20 @@ public class AdministrativeResourceResolverTest {
         get("/junit/test");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullResourceResolverFactoryIsNotAllowed() throws Exception {
+        withNullResourceResolverFactory();
+        bindFactory();
+    }
+
+    @Test
+    public void testResourceResolverIsReturnedIfPresent() throws Exception {
+        bindFactory();
+        getResolver();
+        verifyAdministrativeResourceResolverIsObtainedOnce();
+        assertReturnedResourceIsAdministrativeResourceResolver();
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testHandlingOfUninitializedResourceResolverFactoryInGetResolver() throws Exception {
         getResolver();
@@ -79,6 +94,20 @@ public class AdministrativeResourceResolverTest {
 
         unbindFactory();
         verifyResolverIsClosed();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testObtainingResourceResolverWhenFactoryIsUnavailableIsNotSupported() throws Exception {
+        bindFactory();
+        unbindFactory();
+        get("/some/path");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRetrievingResourceResolverWHenFactoryIsUnavailableIsNotSupported() throws Exception {
+        bindFactory();
+        unbindFactory();
+        getResolver();
     }
 
     @Test
@@ -115,6 +144,19 @@ public class AdministrativeResourceResolverTest {
         verifyAdministrativeResolverGets("/junit/test");
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testLoginExceptionsAreTreatedAsIllegalState() throws Exception {
+        bindFactory();
+        unbindFactory();
+        withLoginExceptionDuringAdministrativeLogin();
+        getResolver();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void withLoginExceptionDuringAdministrativeLogin() throws LoginException {
+        doThrow(new LoginException("THIS IS AN EXPECTED TEST EXCEPTION")).when(this.factory).getAdministrativeResourceResolver((Map<String, Object>) any());
+    }
+
     private void verifyAdministrativeResolverGets(String path) {
         verify(this.resolver).getResource(path);
     }
@@ -129,6 +171,10 @@ public class AdministrativeResourceResolverTest {
 
     private void verifyAdministrativeResolverResolves(String path) {
         verify(this.resolver).resolve(path);
+    }
+
+    private void withNullResourceResolverFactory() {
+        this.factory = null;
     }
 
     private void withClosedResourceResolver() {
@@ -148,6 +194,10 @@ public class AdministrativeResourceResolverTest {
         verify(this.factory).getAdministrativeResourceResolver((Map<String, Object>) any());
     }
 
+    private void assertReturnedResourceIsAdministrativeResourceResolver() {
+        assertThat(this.returnedResolver).isSameAs(resolver);
+    }
+
     private void unbindFactory() {
         this.testee.unbind(this.factory);
     }
@@ -165,6 +215,6 @@ public class AdministrativeResourceResolverTest {
     }
 
     private void getResolver() {
-        this.testee.getResolver();
+        this.returnedResolver = this.testee.getResolver();
     }
 }
