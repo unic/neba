@@ -14,17 +14,27 @@
  * limitations under the License.
  **/
 $(function() {
-	var ENTER = 13;
-	var timeout = null;
+    var ENTER = 13,
+		timeout = null,
+		$logfile = $("#logfile"),
+		$logfiles = $logfile.children().clone(),
+		$numberOfLines = $("#numberOfLines"),
+		$tail = $("#tail"),
+		$followButton = $("#followButton"),
+		$hideRotated = $("#hideRotated"),
+		$showOptions = $("#showOptions"),
+		$tailwrapper = $("#tailwrapper"),
+		$reloadButton = $("#reloadButton"),
+		$downloadButton = $("#downloadButton");
 
-    $("#logfile").change(updateSelectedLogExcerpt);
-    $("#reloadButton").click(updateSelectedLogExcerpt);
-    $("#followButton").click(toggleFollowMode);
-    $("#downloadButton").click(function() {
+	$logfile.change(updateSelectedLogExcerpt);
+	$followButton.click(toggleFollowMode);
+	$reloadButton.click(updateSelectedLogExcerpt);
+	$downloadButton.click(function() {
         window.location.href = pluginRoot + "/download";
     });
-    $("#showOptions").find("input").click(updateErrorLevelFilters);
-    $("#numberOfLines").keydown(function(event) {
+	$showOptions.find("input").click(updateErrorLevelFilters);
+    $numberOfLines.keydown(function(event) {
         if (event.which == ENTER) {
             updateSelectedLogExcerpt();
             return false;
@@ -32,7 +42,7 @@ $(function() {
 		return true;
     });
 
-    $("#hideRotated").change(showOrHideRotatedLogfiles);
+	$hideRotated.change(showOrHideRotatedLogfiles);
 
 	updateErrorLevelFilters();
 	adjustTailWindowToScreenHeight();
@@ -46,14 +56,14 @@ $(function() {
 		var spec = href.substr(stateHash + 1, href.length - stateHash).split(":");
 		var file = spec[0];
 		var numberOfLines = spec[1];
-		$("#numberOfLines").val(numberOfLines);
-		$("#logfile").find("option[value = '" + file +  "']").attr("selected", "true");
+		$numberOfLines.val(numberOfLines);
+		$logfile.find("option[value = '" + file +  "']").attr("selected", "true");
 		updateSelectedLogExcerpt();
 	}
 
 	function toggleFollowMode() {
-		if($("#followButton").toggleClass("ui-state-active").hasClass("ui-state-active")) {
-            $("#tail").each(function(idx, elem) {
+        if($followButton.toggleClass("ui-state-active").hasClass("ui-state-active")) {
+			$tail.each(function(idx, elem) {
                 $(elem).scrollTop(elem.scrollHeight);
             });
         }
@@ -63,7 +73,7 @@ $(function() {
 
 	function observeFollowMode() {
 		clearTimeout(timeout);
-		if($("#followButton").hasClass("ui-state-active")) {
+		if($followButton.hasClass("ui-state-active")) {
 			updateSelectedLogExcerpt(function() {
 				timeout = setTimeout(observeFollowMode, 1000);
 			});
@@ -73,8 +83,8 @@ $(function() {
 	}
 
 	function updateSelectedLogExcerpt(callback) {
-	    var file = $("#logfile").val();
-	    var numberOfLines = $("#numberOfLines").val();
+	    var file = $logfile.val();
+	    var numberOfLines = $numberOfLines.val();
 		var href = document.location.href;
 		var anchorPos = href.indexOf("#");
         var endPos = anchorPos == -1 ? href.length : anchorPos;
@@ -85,13 +95,11 @@ $(function() {
 	        cache: false,
 	        success: function(data) {
                 var scrollPercentage = NaN;
-                var $tail = $("#tail");
                 if ($tail.size() == 1) {
                     scrollPercentage = $tail.scrollTop() / ($tail[0].scrollHeight - $tail.height());
                 }
-	           $("#tailwrapper").html(data);
+				$tailwrapper.html(data);
 	           if (isFinite(scrollPercentage)) {
-                   $tail = $("#tail");
                    $tail.scrollTop(($tail[0].scrollHeight - $tail.height()) * scrollPercentage);
 	           }
 	           updateErrorLevelFilters();
@@ -112,21 +120,23 @@ $(function() {
 	        "TRACE": false
 	    };
 
-	    $("#showOptions").find("input:checked").each(function(idx, elem) {
+		$showOptions.find("input:checked").each(function(idx, elem) {
 	        $visible[elem.value] = true;
 	    });
 
-	    $("#tail").find("div").each(function(idx, elem) {
+	    $tail.find("div").each(function(idx, elem) {
 	        elem.style.display = $visible[elem.className] ? "block" : "none";
 	    });
 	}
 
 	function adjustTailWindowToScreenHeight() {
-		$("#tail").css("height", screen.height * 0.65)
+		$tail.css("height", screen.height * 0.65)
 	}
 
     function showOrHideRotatedLogfiles() {
-        var display = $("#hideRotated").is(":checked") ? "none" : "block";
-        $("#logfile").find("option").not("[value$='.log']").css("display", display)
+        $logfile.children().remove();
+		$logfile.append(
+			$hideRotated.is(":checked") ? $logfiles.filter("[value$='.log']") : $logfiles
+		);
     }
 });
