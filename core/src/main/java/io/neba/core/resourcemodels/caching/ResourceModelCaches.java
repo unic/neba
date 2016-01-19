@@ -71,11 +71,14 @@ public class ResourceModelCaches {
     	}
     }
 
-	public void add(ResourceModelCache cache) {
+	public void bind(ResourceModelCache cache) {
 		this.caches.add(cache);
 	}
 	
-	public void remove(ResourceModelCache cache) {
+	public void unbind(ResourceModelCache cache) {
+		if (cache == null) {
+			return;
+		}
 		this.caches.remove(cache);
 	}
 }

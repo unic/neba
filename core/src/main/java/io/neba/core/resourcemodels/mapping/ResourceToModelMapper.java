@@ -187,11 +187,14 @@ public class ResourceToModelMapper {
         return currentModel;
     }
 
-    public void add(ResourceModelPostProcessor postProcessor) {
+    public void bind(ResourceModelPostProcessor postProcessor) {
         this.postProcessors.add(postProcessor);
     }
 
-    public void remove(ResourceModelPostProcessor postProcessor) {
+    public void unbind(ResourceModelPostProcessor postProcessor) {
+        if (postProcessor == null) {
+            return;
+        }
         this.postProcessors.remove(postProcessor);
     }
 }
