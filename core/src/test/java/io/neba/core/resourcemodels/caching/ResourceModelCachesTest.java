@@ -30,11 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -58,16 +54,16 @@ public class ResourceModelCachesTest {
 
 	@Test
 	public void testUnsuccessfulLookup() throws Exception {
-		addCache();
-		addCache();
+		bindCache();
+		bindCache();
 		lookup();
 		verifyEachCacheIsUsedForLookup();
 	}
 	
 	@Test
 	public void testSuccessfulLookup() throws Exception {
-		addCache();
-		addCache();
+		bindCache();
+		bindCache();
 		withCachedObjectIn(0);
 		lookup();
 		verifyCacheReturnsOnFirstHit();
@@ -75,20 +71,25 @@ public class ResourceModelCachesTest {
 	
 	@Test
 	public void testRemovalOfCaches() throws Exception {
-		addCache();
-		addCache();
-		removeAllCaches();
+		bindCache();
+		bindCache();
+		unbindAllCaches();
 		lookup();
 		verifyNoCacheIsUsed();
 	}
 
     @Test
     public void testStorage() throws Exception {
-        addCache();
-        addCache();
+        bindCache();
+        bindCache();
         storeModel();
         verifyModelIsStoredInAllCaches();
     }
+
+	@Test
+	public void testRemovalOfNullCacheDoesNotCauseException() throws Exception {
+		this.testee.unbind(null);
+	}
 
     private void verifyModelIsStoredInAllCaches() {
         for (ResourceModelCache cache : this.mockedCaches) {
@@ -106,9 +107,9 @@ public class ResourceModelCachesTest {
 		}
 	}
 
-	private void removeAllCaches() {
+	private void unbindAllCaches() {
 		for (ResourceModelCache cache : this.mockedCaches) {
-			this.testee.remove(cache);
+			this.testee.unbind(cache);
 		}
 	}
 
@@ -140,9 +141,9 @@ public class ResourceModelCachesTest {
 		this.testee.lookup(lookupKey());
 	}
 	
-	private void addCache() {
+	private void bindCache() {
 		ResourceModelCache cache = mock(ResourceModelCache.class);
 		this.mockedCaches.add(cache);
-		this.testee.add(cache);
+		this.testee.bind(cache);
 	}
 }

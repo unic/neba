@@ -70,7 +70,7 @@ public class AnnotatedFieldMappers {
 
     private final AtomicInteger state = new AtomicInteger(0);
 
-    public synchronized void add(AnnotatedFieldMapper<?, ?> mapper) {
+    public synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
@@ -82,9 +82,9 @@ public class AnnotatedFieldMappers {
     /**
      * @param mapper must not be <code>null</code>.
      */
-    public synchronized void remove(AnnotatedFieldMapper<?, ?> mapper) {
+    public synchronized void unbind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
-            throw new IllegalArgumentException("Method argument mapper must not be null.");
+            return;
         }
         this.state.getAndIncrement();
         this.fieldMappers.removeValue(mapper);
