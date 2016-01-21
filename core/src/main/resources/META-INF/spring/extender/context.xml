@@ -44,10 +44,6 @@
 
         <bp:reference interface="org.osgi.service.cm.ConfigurationAdmin" id="configurationAdmin"/>
 
-		<!-- Only bindings values providers for all scripts or explicitly for velocity are considered. -->
-		<bp:reference-list interface="org.apache.sling.scripting.api.BindingsValuesProvider" availability="optional" filter="(|(javax.script.name=any)(javax.script.name=velocity))">
-			<bp:reference-listener ref="beanRendererFactory" bind-method="bind" unbind-method="unbind" />
-		</bp:reference-list>
 		<!-- All post processors are used by the mapper -->
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelPostProcessor" availability="optional">
 			<bp:reference-listener ref="resourceToModelMapper" bind-method="bind" unbind-method="unbind" />
@@ -68,10 +64,6 @@
 			<compendium:managed-properties persistent-id="io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration" autowire-on-update="true" />
 		</bp:bean>
 
-		<bp:bean class="io.neba.core.rendering.BeanRendererFactoryImpl" id="beanRendererFactory">
-			<compendium:managed-properties persistent-id="io.neba.core.rendering.BeanRendererFactoryConfiguration" update-method="refresh" autowire-on-update="true" />
-		</bp:bean>
-
 		<!-- Beans exported as OSGi services -->
 		<bp:service ref="requestScopedResourceModelCache" id="requestScopedResourceModelCacheService">
             <bp:interfaces>
@@ -86,13 +78,6 @@
                     </array>
                 </entry>
                 <entry key="service.description" value="A request-scoped resource model cache." />
-				<entry key="service.vendor" value="neba.io" />
-			</bp:service-properties>
-		</bp:service>
-		
-		<bp:service ref="beanRendererFactory" interface="io.neba.api.rendering.BeanRendererFactory">
-			<bp:service-properties>
-				<entry key="service.description" value="A factory for configurable bean renderers." />
 				<entry key="service.vendor" value="neba.io" />
 			</bp:service-properties>
 		</bp:service>
