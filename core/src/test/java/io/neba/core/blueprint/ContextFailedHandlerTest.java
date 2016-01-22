@@ -18,7 +18,6 @@ package io.neba.core.blueprint;
 
 import io.neba.core.mvc.MvcServlet;
 import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.selftests.SelftestRegistrar;
 import org.eclipse.gemini.blueprint.context.event.OsgiBundleApplicationContextEvent;
 import org.eclipse.gemini.blueprint.context.event.OsgiBundleContextFailedEvent;
 import org.eclipse.gemini.blueprint.context.event.OsgiBundleContextRefreshedEvent;
@@ -32,25 +31,14 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.osgi.framework.Bundle.ACTIVE;
-import static org.osgi.framework.Bundle.RESOLVED;
-import static org.osgi.framework.Bundle.STARTING;
-import static org.osgi.framework.Bundle.STOPPING;
+import static org.mockito.Mockito.*;
+import static org.osgi.framework.Bundle.*;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ContextFailedHandlerTest {
-    @Mock
-    private SelftestRegistrar selftestRegistrar;
     @Mock
     private ModelRegistrar modelRegistrar;
     @Mock
@@ -139,8 +127,7 @@ public class ContextFailedHandlerTest {
     }
 
     private void verifyInfrastructureIsUnregisteredInCorrectOrder() {
-        InOrder inOrder = inOrder(this.selftestRegistrar, this.modelRegistrar, this.dispatcherServlet);
-        inOrder.verify(this.selftestRegistrar).unregister(eq(this.bundle));
+        InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.modelRegistrar).unregister(eq(this.bundle));
         inOrder.verify(this.dispatcherServlet).disableMvc(eq(this.bundle));
     }

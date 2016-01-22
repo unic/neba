@@ -27,9 +27,6 @@
     <task:executor id="singlethreaded" pool-size="1" queue-capacity="1" rejection-policy="DISCARD_OLDEST" />
 	
 	<util:constant
-		static-field="io.neba.core.selftests.SelftestConsolePlugin.LABEL"
-		id="selftestLabel" />
-	<util:constant
 		static-field="io.neba.core.resourcemodels.registration.ModelRegistryConsolePlugin.LABEL"
 		id="modelRegistryLabel" />
 
@@ -104,14 +101,6 @@
                     </array>
 				</entry>
 				<entry key="service.description" value="A generic servlet that handles all requests using Spring MVC." />
-				<entry key="service.vendor" value="neba.io" />
-			</bp:service-properties>
-		</bp:service>
-
-		<bp:service ref="selftestConsolePlugin" interface="javax.servlet.Servlet">
-			<bp:service-properties>
-				<entry key="felix.webconsole.label" value-ref="selftestLabel" />
-				<entry key="service.description" value="Provides a felix console plugin to execute and list @SelfTest's" />
 				<entry key="service.vendor" value="neba.io" />
 			</bp:service-properties>
 		</bp:service>

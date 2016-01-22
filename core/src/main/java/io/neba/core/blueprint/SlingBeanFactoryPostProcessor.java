@@ -18,7 +18,6 @@ package io.neba.core.blueprint;
 
 import io.neba.core.mvc.MvcServlet;
 import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.selftests.SelftestRegistrar;
 import io.neba.core.spring.applicationcontext.configuration.PlaceholderVariableResolverRegistrar;
 import io.neba.core.spring.applicationcontext.configuration.RequestScopeConfigurator;
 import org.eclipse.gemini.blueprint.extender.OsgiBeanFactoryPostProcessor;
@@ -42,8 +41,6 @@ public class SlingBeanFactoryPostProcessor implements OsgiBeanFactoryPostProcess
     @Autowired
     private ModelRegistrar modelRegistrar;
     @Autowired
-    private SelftestRegistrar selftestRegistrar;
-    @Autowired
     private RequestScopeConfigurator requestScopeConfigurator;
     @Autowired
     private MvcServlet dispatcherServlet;
@@ -55,7 +52,6 @@ public class SlingBeanFactoryPostProcessor implements OsgiBeanFactoryPostProcess
             this.requestScopeConfigurator.registerRequestScope(beanFactory);
             this.variableResolverRegistrar.registerResolvers(bundleContext, beanFactory);
             this.modelRegistrar.registerModels(bundleContext, beanFactory);
-            this.selftestRegistrar.registerSelftests(beanFactory, bundleContext.getBundle());
             this.dispatcherServlet.enableMvc(beanFactory, bundleContext);
         } finally {
             EventhandlingBarrier.end();
