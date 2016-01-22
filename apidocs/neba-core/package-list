@@ -12,4 +12,5 @@ io.neba.core.resourcemodels.tagsupport
 io.neba.core.selftests
 io.neba.core.sling
 io.neba.core.spring.applicationcontext.configuration
+io.neba.core.spring.web.filter
 io.neba.core.util

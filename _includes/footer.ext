@@ -37,7 +37,7 @@
                 <h3>Latest posts</h3>
 
                 <ul>
-                    {% for post in site.posts %}
+                    {% for post in site.posts limit:5  %}
                     <li>
                         <a href="{{site.contextpath}}{{ post.url }}">{{ post.title }}</a>
                     </li>

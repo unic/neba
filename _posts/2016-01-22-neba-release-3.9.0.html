@@ -1,0 +1,89 @@
+---
+title: NEBA 3.9.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.9.0 Release notes
+---
+<div class="section-title">
+
+    <h1 class="title">NEBA <span>Release 3.9.0</span></h1>
+
+</div><!--END SECTION TITLE-->
+
+<div id="inner-content" class="blog1">
+
+    <div class="post">
+
+        <div class="post-info">
+            <div class="date"><span class="month">Jan</span><span class="day">22</span><span class="month">2016</span></div>
+        </div><!--END POST-INFO-->
+
+        <div class="post-content">
+
+            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
+
+            <div class="post-title">
+                <h2 class="title">Release 3.9.0</h2>
+            </div><!--END POST-TITLE-->
+
+            <div class="post-meta">
+                <ul>
+                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
+                </ul>
+            </div><!--END POST-META-->
+
+            <div class="divider-border"></div>
+
+            <div class="one">
+                <h2>Highlights of this release</h2>
+            </div>
+
+            <div class="one">
+                <h3>On the road to NEBA 4</h3>
+                <div class="one">
+                    <p>
+                        This release is the last <em>planned</em> 3.x release prior to NEBA 4, and thus the last planned release supporting legacy (&lt;AEM 6.0) versions of Apache Sling and AEM. While issues
+                        of the 3.x branch will continue to be fixed, active development of new features will now be focusing on NEBA 4 (<a href="https://github.com/unic/neba/milestones/4.0.0">see NEBA 4 road map</a>).
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="one">
+                <h3>Improved fault tolerance</h3>
+                <div class="one">
+                    <p>
+						NEBA now prevents potential exceptions in Sling BackgroundHttpServletRequest(s) occurring when access to the session is attempted (<a href="https://github.com/unic/neba/issues/95">#95</a>) and
+                        tolerates null arguments to reference listeners (<a href="https://github.com/unic/neba/issues/102">#102</a>). Furthermore, the error message reported when an application
+                        attempts to synchronously access the resource resolver factory during a restart has been improved (<a href="https://github.com/unic/neba/issues/96">#96</a>).
+                    </p>
+                </div>
+            </div>
+
+            <div class="divider-border"></div>
+
+            <div class="one">
+                <h2>Release notes</h2>
+
+                <h3>Improvements</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/issues/102">#102 Expect null arguments to OSGi reference listeners unbind methods</a><br />
+                    <a href="https://github.com/unic/neba/issues/96">#96 neba core: Improve error handling if the administrative resource resolver is called during a resource resolver factory restart</a><br />
+                    <a href="https://github.com/unic/neba/issues/95">#95 Explicitly support the Sling BackgroundHttpServletRequest in the Request Context Filter</a><br />
+                </p>
+
+                <h3>Fixed bugs</h3>
+                <p>
+                    <a href="https://github.com/unic/neba/issues/100">#100 Log file viewer: Hiding / showing rotated logfiles does not work in ie 8+</a><br />
+                </p>
+
+                <h3 id="upgrading">Upgrading from 3.8.0</h3>
+                <p>
+				  User of NEBA 3.8.0 can upgrade to 3.9.0 without any further changes.
+                </p>
+            </div>
+        </div><!--END POST-CONTENT -->
+
+    </div><!--END POST-->
+
+</div><!--END INNER-CONTENT-->
