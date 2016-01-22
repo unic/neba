@@ -206,6 +206,11 @@ public class ResourceToModelMapperTest {
         verifyMappingDurationIsNotTracked();
     }
 
+    @Test
+    public void testRemovalOfNullPostProcessorDoesNotCauseException() throws Exception {
+        this.testee.unbind(null);
+    }
+
     private void withOngoingMappingForSameResourceModel() {
         doReturn(true).when(this.nestedMappingSupport).hasOngoingMapping(this.resourceMetaData);
     }
@@ -294,7 +299,7 @@ public class ResourceToModelMapperTest {
 
     private void withPostProcessor(ResourceModelPostProcessor mock) {
         this.postProcessor = mock;
-        this.testee.add(this.postProcessor);
+        this.testee.bind(this.postProcessor);
     }
 
     @SuppressWarnings("unchecked")

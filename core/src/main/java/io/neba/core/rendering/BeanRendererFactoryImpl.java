@@ -190,11 +190,14 @@ public class BeanRendererFactoryImpl implements BeanRendererFactory {
         this.bindingsValuesProviders = bindingsValuesProviders;
     }
 
-    public void add(BindingsValuesProvider provider) {
+    public void bind(BindingsValuesProvider provider) {
         this.bindingsValuesProviders.add(provider);
     }
 
-    public void remove(BindingsValuesProvider provider) {
+    public void unbind(BindingsValuesProvider provider) {
+        if (provider == null) {
+            return;
+        }
         this.bindingsValuesProviders.remove(provider);
     }
 

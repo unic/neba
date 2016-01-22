@@ -212,6 +212,11 @@ public class BeanRendererFactoryImplTest {
         assertRendererWasCreated();
     }
 
+    @Test
+    public void testRemovalOfNullProviderDoesNotCauseException() throws Exception {
+        this.testee.unbind(null);
+    }
+
     private void assertRendererIsNull() {
         assertThat(this.renderer).isNull();
     }

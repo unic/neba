@@ -38,7 +38,7 @@
 
 	<bp:blueprint>
 		<!-- References to other OSGi services -->
-		<bp:reference interface="org.apache.sling.api.resource.ResourceResolverFactory" id="resourceResolverFactory" >
+		<bp:reference interface="org.apache.sling.api.resource.ResourceResolverFactory" id="resourceResolverFactory">
             <bp:reference-listener ref="administrativeResourceResolver" bind-method="bind" unbind-method="unbind"/>
 		</bp:reference>
 
@@ -46,19 +46,19 @@
 
 		<!-- Only bindings values providers for all scripts or explicitly for velocity are considered. -->
 		<bp:reference-list interface="org.apache.sling.scripting.api.BindingsValuesProvider" availability="optional" filter="(|(javax.script.name=any)(javax.script.name=velocity))">
-			<bp:reference-listener ref="beanRendererFactory" bind-method="add" unbind-method="remove" />
+			<bp:reference-listener ref="beanRendererFactory" bind-method="bind" unbind-method="unbind" />
 		</bp:reference-list>
 		<!-- All post processors are used by the mapper -->
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelPostProcessor" availability="optional">
-			<bp:reference-listener ref="resourceToModelMapper" bind-method="add" unbind-method="remove" />
+			<bp:reference-listener ref="resourceToModelMapper" bind-method="bind" unbind-method="unbind" />
 		</bp:reference-list>
 		<!-- All caches are used by the adapter factory -->
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelCache" availability="optional">
-			<bp:reference-listener ref="resourceModelCaches" bind-method="add" unbind-method="remove" />
+			<bp:reference-listener ref="resourceModelCaches" bind-method="bind" unbind-method="unbind" />
 		</bp:reference-list>
 		<!-- All custom injectors are used by the resource to model mapper -->
 		<bp:reference-list interface="io.neba.api.resourcemodels.AnnotatedFieldMapper" availability="optional">
-			<bp:reference-listener ref="annotatedFieldMappers" bind-method="add" unbind-method="remove" />
+			<bp:reference-listener ref="annotatedFieldMappers" bind-method="bind" unbind-method="unbind" />
 		</bp:reference-list>
 
 		<!-- Beans not providable by classpath scanning -->
