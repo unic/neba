@@ -1,6 +1,6 @@
 github: [Repository metadata]
 markdown: kramdown
-highlighter: rouge
+highlighter: pygments
 url: http://www.neba.io
 nebaVersion: 3.8.0
 springDocumentationVersion: 3.2.x
