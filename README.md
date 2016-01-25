@@ -94,5 +94,5 @@ On you local system, push the *develop* and *master* branch as well as the tags,
 simply push the new blog post on the gh-pages branch - the neba.io site is updated automatically. 
 
 ### Publication on twitter
-Publications are announced via the official [@nebaframework](https://twitter.com/nebaframework) twitter channel and must contain the tag #nebaframework. Tweets with this tag are automatically featured on the neba.io home poage.
+Publications are announced via the official [@nebaframework](https://twitter.com/nebaframework) twitter channel and must contain the tag #nebaframework. Tweets with this tag are automatically featured on the neba.io home page.
     
