@@ -209,8 +209,9 @@ public class PrimitiveSupportingValueMapTest {
         assertThat(this.testee.entrySet()).onProperty("key").contains(key);
     }
 
+    @SuppressWarnings("unchecked")
     private void withEntries(String key, String value) {
-        Set<Map.Entry<String, String>> entrySet = new HashSet<Map.Entry<String, String>>();
+        Set<Map.Entry<String, String>> entrySet = new HashSet<>();
         Map.Entry entry = mock(Map.Entry.class);
         doReturn(key).when(entry).getKey();
         doReturn(value).when(entry).getValue();
@@ -224,7 +225,7 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     private void withValues(String value) {
-        HashSet values = new HashSet();
+        Set<String> values = new HashSet<>();
         values.add(value);
         doReturn(values).when(this.wrapped).values();
     }
@@ -234,7 +235,7 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     private void withKeySet(String key) {
-        HashSet keySet = new HashSet();
+        Set<String> keySet = new HashSet<>();
         keySet.add(key);
         doReturn(keySet).when(this.wrapped).keySet();
     }

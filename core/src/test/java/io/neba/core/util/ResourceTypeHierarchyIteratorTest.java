@@ -23,7 +23,6 @@ import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -34,8 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -49,7 +47,7 @@ public class ResourceTypeHierarchyIteratorTest {
     private ResourceResolver administrativeResourceResolver;
 
 	private Resource resource;
-    private List<String> resourceHierarchy = new LinkedList<String>();
+    private List<String> resourceHierarchy = new LinkedList<>();
     private String resourceType;
     private String resourceSupertype;
     private String supertypeResourceType;
@@ -167,8 +165,7 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     private void assertHierarchyIs(String... expectedHierarchy) {
-        assertThat(this.resourceHierarchy.size(), is(expectedHierarchy.length));
-        assertThat(this.resourceHierarchy, JUnitMatchers.hasItems(expectedHierarchy));
+        assertThat(this.resourceHierarchy).containsExactly(expectedHierarchy);
     }
 
     private void resolveResourceHierarchy() {

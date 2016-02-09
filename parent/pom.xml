@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>3.10.0-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
@@ -61,7 +61,7 @@
     <properties>
         <spring.version>3.2.14.RELEASE_1</spring.version>
         <gemini.version>2.0.0.M02</gemini.version>
-        <language.level>1.6</language.level>
+        <language.level>1.8</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -236,6 +236,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>3.2.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>1.4</version>
@@ -374,14 +380,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.9.0</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity</artifactId>
-                <version>1.7</version>
+                <version>1.9.12</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -472,7 +471,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.11.0</version>
+                    <version>1.21.0</version>
                     <executions>
                         <execution>
                             <id>generate-scr-scrdescriptor</id>
@@ -481,6 +480,12 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <strictMode>true</strictMode>
+                        <properties>
+                            <service.vendor>neba.io</service.vendor>
+                        </properties>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -489,6 +494,11 @@
                         <source>${language.level}</source>
                         <target>${language.level}</target>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.google.code.maven-replacer-plugin</groupId>
+                    <artifactId>replacer</artifactId>
+                    <version>1.5.3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -590,7 +600,7 @@
                     <configuration>
                         <rules>
                             <requireMavenVersion>
-                                <version>[3.0.5,)</version>
+                                <version>[3.3.0,)</version>
                             </requireMavenVersion>
                             <requireJavaVersion>
                                 <version>${language.level}</version>

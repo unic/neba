@@ -34,7 +34,7 @@ public class ConcurrentMultiValueMapTest {
 
     @Before
     public void prepareMap() {
-        this.testee = new ConcurrentDistinctMultiValueMap<String, String>();
+        this.testee = new ConcurrentDistinctMultiValueMap<>();
     }
     
     @Test
@@ -88,7 +88,8 @@ public class ConcurrentMultiValueMapTest {
         this.testee.put(key, value);
     }
 
-    private <K> Collection<K> v(K... ks) {
+    @SafeVarargs
+    private final <K> Collection<K> v(K... ks) {
         return Arrays.asList(ks);
     }
 }

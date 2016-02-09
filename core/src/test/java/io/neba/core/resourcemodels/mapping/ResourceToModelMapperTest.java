@@ -223,6 +223,7 @@ public class ResourceToModelMapperTest {
         verify(this.resourceModelStatistics, never()).countMappingDuration(anyInt());
     }
 
+    @SuppressWarnings("unchecked")
     private void withAlreadyOngoingMapping() {
         doReturn(this.ongoingMapping).when(this.nestedMappingSupport).begin(isA(Mapping.class));
         doReturn(this.model).when(this.ongoingMapping).getMappedModel();

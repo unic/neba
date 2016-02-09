@@ -57,7 +57,7 @@ public class AnnotationsTest {
 
     @Before
     public void setUp() throws Exception {
-        this.allAnnotations = new HashSet<Annotation>();
+        this.allAnnotations = new HashSet<>();
         this.allAnnotations.addAll(asList(TestType.class.getAnnotations()));
         this.allAnnotations.addAll(asList(TestAnnotation.class.getAnnotations()));
         this.allAnnotations.addAll(asList(MetaAnnotation.class.getAnnotations()));
@@ -115,7 +115,8 @@ public class AnnotationsTest {
         assertThat(this.testee.iterator()).containsOnly(this.allAnnotations.toArray());
     }
 
-    private void assertAnnotationsAre(Class<? extends Annotation>... annotations) {
+    @SafeVarargs
+    private final void assertAnnotationsAre(Class<? extends Annotation>... annotations) {
         for (Class<? extends Annotation> annotationType : annotations) {
             assertThat(this.testee.contains(annotationType)).isTrue();
             assertThat(this.testee.get(annotationType)).isNotNull();
