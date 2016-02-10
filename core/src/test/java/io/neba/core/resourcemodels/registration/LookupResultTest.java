@@ -16,7 +16,6 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.util.OsgiBeanSource;
 import org.junit.Before;
 import org.junit.Test;

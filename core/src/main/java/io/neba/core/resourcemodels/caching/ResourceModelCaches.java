@@ -34,7 +34,7 @@ import java.util.List;
  */
 @Service
 public class ResourceModelCaches {
-	private final List<ResourceModelCache> caches = new ArrayList<ResourceModelCache>();
+	private final List<ResourceModelCache> caches = new ArrayList<>();
 
 	/**
 	 * Looks up the {@link #store(Resource, Object, Key) cached model}

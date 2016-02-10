@@ -100,6 +100,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
         this.slingHomeDirectory = new File(this.context.getProperty("sling.home"));
     }
 
+    @SuppressWarnings("unused")
     public String getCategory() {
         return "NEBA";
     }
@@ -256,7 +257,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
     private Queue<String> readLastLinesOf(int numberOfLines, File file) throws IOException {
         // Reverse line order using LIFO: The file is read bottom-up but the lines shall be displayed
         // in their correct order (top down).
-        Queue<String> readLines = Collections.asLifoQueue(new LinkedList<String>());
+        Queue<String> readLines = Collections.asLifoQueue(new LinkedList<>());
 
         ReverseFileByLineReader lineReader = new ReverseFileByLineReader(file, APPROX_BYTES_PER_LINE_IN_ERRORLOG);
         try {
@@ -274,11 +275,8 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
     @SuppressWarnings("unchecked")
     private Collection<File> resolveLogFiles() throws IOException {
         File logDir = getLogfileDirectory();
-        Collection<File> logFiles = new TreeSet<File>(new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                return o1.getPath().compareToIgnoreCase(o2.getPath());
-            }
+        Collection<File> logFiles = new TreeSet<>((o1, o2) -> {
+            return o1.getPath().compareToIgnoreCase(o2.getPath());
         });
 
         if (logDir == null) {
@@ -300,7 +298,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin impleme
     }
 
     private Collection<File> resolveFactoryConfiguredLogFiles() throws IOException {
-        Collection<File> logFiles = new ArrayList<File>();
+        Collection<File> logFiles = new ArrayList<>();
         Configuration[] configurations;
         try {
             configurations = this.configurationAdmin.listConfigurations("(service.factoryPid=" + LOG_FACTORY_PID + ")");

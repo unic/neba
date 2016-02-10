@@ -16,12 +16,11 @@
 
 package io.neba.core.spring.applicationcontext.configuration;
 
+import io.neba.api.configuration.PlaceholderVariableResolver;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
-
-import io.neba.api.configuration.PlaceholderVariableResolver;
 
 /**
  * Uses a {@link PlaceholderVariableResolver} as a {@link PlaceholderResolver} to enable

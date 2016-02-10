@@ -56,7 +56,6 @@
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="IllegalImport"/>
-        <module name="AvoidStarImport"/>
 
         <!--  Size constraints -->
 
@@ -82,7 +81,7 @@
                       value="BNOT, DEC, DOT, INC, LNOT, UNARY_MINUS, UNARY_PLUS"/>
         </module>
         <module name="WhitespaceAfter">
-            <property name="tokens" value="ARRAY_INIT, COMMA, SEMI, TYPECAST"/>
+            <property name="tokens" value="COMMA, SEMI, TYPECAST"/>
         </module>
         <module name="WhitespaceAround">
             <property name="tokens"
@@ -125,7 +124,6 @@
         <module name="NestedIfDepth">
             <property name="max" value="4"/>
         </module>
-        <module name="JUnitTestCase"/>
         <module name="CyclomaticComplexity">
             <property name="max" value="12"/>
         </module>

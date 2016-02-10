@@ -39,12 +39,12 @@ public class ReadOnlyIteratorTest {
 
     @Before
     public void setUp() throws Exception {
-        this.testee = new ReadOnlyIterator<Object>(this.iterator);
+        this.testee = new ReadOnlyIterator<>(this.iterator);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testIteratorDoesNotAcceptNullValues() throws Exception {
-        new ReadOnlyIterator<Object>(null);
+        new ReadOnlyIterator<>(null);
     }
 
     @Test

@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Olaf Otto
  */
 public class ConcurrentDistinctMultiValueMap<K, V> {
-    private final Map<K, Collection<V>> store = new ConcurrentHashMap<K, Collection<V>>(128);
+    private final Map<K, Collection<V>> store = new ConcurrentHashMap<>(128);
 
     public Collection<V> get(K key) {
         return this.store.get(key);
@@ -73,7 +73,7 @@ public class ConcurrentDistinctMultiValueMap<K, V> {
     private Collection<V> getOrCreate(K key) {
         Collection<V> vs = this.store.get(key);
         if (vs == null) {
-            vs = new ConcurrentLinkedDistinctQueue<V>();
+            vs = new ConcurrentLinkedDistinctQueue<>();
             this.store.put(key, vs);
         }
         return vs;
@@ -86,10 +86,10 @@ public class ConcurrentDistinctMultiValueMap<K, V> {
      *         collections returned as the map values. Never returns null.
      */
     public Map<K, Collection<V>> getContents() {
-        HashMap<K, Collection<V>> contents = new HashMap<K, Collection<V>>(this.store.size());
+        HashMap<K, Collection<V>> contents = new HashMap<>(this.store.size());
         Set<Entry<K, Collection<V>>> entries = this.store.entrySet();
         for (Entry<K, Collection<V>> entry : entries) {
-            contents.put(entry.getKey(), new ArrayList<V>(entry.getValue()));
+            contents.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         return contents;
     }

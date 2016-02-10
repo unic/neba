@@ -82,9 +82,12 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
     /**
      * Represents the contextual data of a field mapping during a resource to model mapping.
      *
+     * @param <FieldType> the {@link Field#getType() field type}
+     * @param <AnnotationType> the {@link Annotation type}
+     *
      * @author Olaf Otto
      */
-    public interface OngoingMapping<FieldType, AnnotationType> {
+    interface OngoingMapping<FieldType, AnnotationType> {
         /**
          * @return The currently resolved value of the field,
          * or <code>null</code> if no value could be resolved for the field. This value

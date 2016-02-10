@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static io.neba.core.util.ClassHierarchyIterator.hierarchyOf;
@@ -69,6 +70,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     @Autowired
     private ModelRegistry registry;
 
+    @SuppressWarnings("unused")
     public String getCategory() {
         return "NEBA";
     }
@@ -176,7 +178,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private void provideAllModelTypes(HttpServletResponse res) throws IOException, JSONException {
-        Set<String> typeNames = new HashSet<String>();
+        Set<String> typeNames = new HashSet<>();
         for (OsgiBeanSource<?> source: this.registry.getBeanSources()) {
             for (Class<?> type : hierarchyOf(source.getBeanType())) {
                 if (type == Object.class) {
@@ -247,7 +249,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
             types = resolveModelTypesFor(resourcePath);
         }
 
-        Set<String> matchingModelTypeNames = new HashSet<String>(64);
+        Set<String> matchingModelTypeNames = new HashSet<>(64);
         String typeNameCandidate = substringAfterLast(modelTypePrefix, ".");
 
         boolean exactMatch = !isEmpty(typeNameCandidate) && isUpperCase(typeNameCandidate.charAt(0));
@@ -270,7 +272,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private Collection<OsgiBeanSource<?>> resolveModelTypesFor(String resourcePath) {
-        Collection<OsgiBeanSource<?>> types = new ArrayList<OsgiBeanSource<?>>(64);
+        Collection<OsgiBeanSource<?>> types = new ArrayList<>(64);
 
         if (!isEmpty(resourcePath)) {
             ResourceResolver resolver = getResourceResolver();
@@ -283,9 +285,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 if (lookupResults == null) {
                     return types;
                 }
-                for (LookupResult result : lookupResults) {
-                    types.add(result.getSource());
-                }
+                types.addAll(lookupResults.stream().map(LookupResult::getSource).collect(Collectors.toList()));
             } finally {
                 resolver.close();
             }

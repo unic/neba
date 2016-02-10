@@ -16,13 +16,12 @@
 
 package io.neba.core.resourcemodels.mapping.testmodels;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
 import io.neba.api.annotations.Children;
+import io.neba.api.annotations.Reference;
 import org.apache.sling.api.resource.Resource;
 
-import io.neba.api.annotations.Reference;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * @author Olaf Otto

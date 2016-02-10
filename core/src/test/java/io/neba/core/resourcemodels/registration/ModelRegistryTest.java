@@ -40,10 +40,7 @@ import java.util.Set;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -76,7 +73,7 @@ public class ModelRegistryTest {
     public void setUp() throws LoginException {
         doReturn(new String[]{}).when(this.resolver).getSearchPath();
         doReturn(this.resolver).when(this.administrativeResourceResolver).getResolver();
-        this.resourceModelAnnotations = new HashSet<ResourceModel>();
+        this.resourceModelAnnotations = new HashSet<>();
     	withBundleId(12345L);
     }
     

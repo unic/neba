@@ -19,16 +19,9 @@ package io.neba.core.util;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
-import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
-import static io.neba.core.util.ReflectionUtil.isInstantiableCollectionType;
+import static io.neba.core.util.ReflectionUtil.*;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.springframework.util.ReflectionUtils.findField;

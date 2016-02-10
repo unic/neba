@@ -130,7 +130,7 @@ public class ReverseFileByLineReaderTest {
     }
 
     private void readLines(int numberOfLines) throws IOException {
-        List<String> lines = new ArrayList<String>(500);
+        List<String> lines = new ArrayList<>(500);
         for (int i = 0; i < numberOfLines; ++i) {
             String line = this.testee.readPreviousLine();
             lines.add(trim(line));

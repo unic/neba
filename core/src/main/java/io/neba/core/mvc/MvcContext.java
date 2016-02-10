@@ -25,11 +25,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.HandlerAdapter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.*;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
@@ -189,7 +185,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
             }
 
             // Add Sling-specific argument resolvers first
-            List<HandlerMethodArgumentResolver> resolvers = new LinkedList<HandlerMethodArgumentResolver>();
+            List<HandlerMethodArgumentResolver> resolvers = new LinkedList<>();
             resolvers.add(new RequestPathInfoArgumentResolver());
             resolvers.add(new ResourceResolverArgumentResolver());
             resolvers.add(new ResourceParamArgumentResolver());

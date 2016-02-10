@@ -24,9 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -41,11 +39,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -53,8 +47,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceToModelAdapterUpdaterTest {
 	//CHECKSTYLE:OFF
-	private static interface TestInterface {}
-	private static interface TestInterfaceExtended {}
+	private interface TestInterface {}
+	private interface TestInterfaceExtended {}
 	private static class TestModel implements TestInterface {}
 	private static class TestModelDerived extends TestModel implements TestInterfaceExtended {}
 	//CHECKSTYLE:ON
@@ -77,19 +71,17 @@ public class ResourceToModelAdapterUpdaterTest {
 	private ResourceToModelAdapterUpdater testee;
 
 	@Before
+	@SuppressWarnings("unchecked")
 	public void prepareTest() {
-		this.beanSources = new LinkedList<OsgiBeanSource<?>>();
+		this.beanSources = new LinkedList<>();
 		
 		when(this.registry.getBeanSources()).thenReturn(this.beanSources);
 
 		when(this.context.registerService(eq(AdapterFactory.class.getName()), eq(this.adapter), isA(Dictionary.class)))
-		.thenAnswer(new Answer<ServiceRegistration>() {
-			@SuppressWarnings("unchecked")
-			public ServiceRegistration answer(InvocationOnMock invocation) {
-				updatedProperties = (Dictionary<String, Object>) invocation.getArguments()[2];
-				return registration;
-			}
-		});
+		.thenAnswer(invocation -> {
+            updatedProperties = (Dictionary<String, Object>) invocation.getArguments()[2];
+            return registration;
+        });
 		when(this.context.getBundle()).thenReturn(this.bundle);
 		
 		this.testee.registerModelAdapter();

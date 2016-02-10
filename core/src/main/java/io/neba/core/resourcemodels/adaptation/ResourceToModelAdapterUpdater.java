@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.ClassUtils.getAllInterfaces;
 import static org.apache.commons.lang.ClassUtils.getAllSuperclasses;
@@ -116,7 +117,7 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
     }
 
     private Dictionary<String, Object> createResourceToModelAdapterProperties() {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         Set<String> fullyQualifiedNamesOfRegisteredModels = getAdapterTypeNames();
         properties.put(ADAPTER_CLASSES, fullyQualifiedNamesOfRegisteredModels.toArray());
         properties.put(ADAPTABLE_CLASSES, new String[] { Resource.class.getName() });
@@ -139,7 +140,7 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
     @SuppressWarnings("unchecked")
     private Set<String> getAdapterTypeNames() {
         List<OsgiBeanSource<?>> beanSources = this.registry.getBeanSources();
-        Set<String> modelNames = new HashSet<String>();
+        Set<String> modelNames = new HashSet<>();
         for (OsgiBeanSource<?> source : beanSources) {
             Class<?> c = source.getBeanType();
             modelNames.add(c.getName());
@@ -153,10 +154,8 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
     }
 
     private Collection<String> toClassnameList(List<Class<?>> l) {
-        List<String> classNames = new ArrayList<String>(l.size());
-        for (Class<?> c : l) {
-            classNames.add(c.getName());
-        }
+        List<String> classNames = new ArrayList<>(l.size());
+        classNames.addAll(l.stream().map(Class::getName).collect(Collectors.toList()));
         return classNames;
     }
 

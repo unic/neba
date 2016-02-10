@@ -45,7 +45,7 @@ import static org.springframework.util.Assert.notNull;
  */
 @Service
 public class ResourceToModelMapper {
-    private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<ResourceModelPostProcessor>();
+    private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
     @Autowired
     private ModelProcessor modelProcessor;
     @Autowired
@@ -69,7 +69,7 @@ public class ResourceToModelMapper {
 
         final Class<?> beanType = modelSource.getBeanType();
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(beanType);
-        final Mapping<T> mapping = new Mapping<T>(resource.getPath(), metaData);
+        final Mapping<T> mapping = new Mapping<>(resource.getPath(), metaData);
         // Do not track mapping time for nested resource models of the same type: this would yield
         // a useless average and total mapping time as the mapping durations would sum up multiple times.
         final boolean trackMappingDuration = !this.nestedMappingSupport.hasOngoingMapping(metaData);

@@ -16,9 +16,9 @@
 
 package io.neba.core.resourcemodels.mapping.testmodels;
 
-import java.util.List;
-
 import io.neba.api.annotations.ResourceModel;
+
+import java.util.List;
 
 /**
  * @author Olaf Otto

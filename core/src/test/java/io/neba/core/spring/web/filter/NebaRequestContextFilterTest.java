@@ -22,9 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -74,27 +72,21 @@ public class NebaRequestContextFilterTest {
 
     @Before
     public void setUp() throws IOException, ServletException {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                requestAttributes = getRequestAttributes();
+        doAnswer(invocationOnMock -> {
+            requestAttributes = getRequestAttributes();
 
-                if (requestAttributes != null) {
-                    requestAttributes.registerDestructionCallback("TEST CALLBACK", destructionCallback, SCOPE_REQUEST);
-                }
-
-                localeContext = getLocaleContext();
-
-                executorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        inheritedRequestAttributes = getRequestAttributes();
-                        inheritedLocalContext = getLocaleContext();
-                    }
-                }).get();
-
-                return null;
+            if (requestAttributes != null) {
+                requestAttributes.registerDestructionCallback("TEST CALLBACK", destructionCallback, SCOPE_REQUEST);
             }
+
+            localeContext = getLocaleContext();
+
+            executorService.submit((Runnable) () -> {
+                inheritedRequestAttributes = getRequestAttributes();
+                inheritedLocalContext = getLocaleContext();
+            }).get();
+
+            return null;
         }).when(chain).doFilter(isA(HttpServletRequest.class), isA(HttpServletResponse.class));
 
         doReturn(locale).when(request).getLocale();

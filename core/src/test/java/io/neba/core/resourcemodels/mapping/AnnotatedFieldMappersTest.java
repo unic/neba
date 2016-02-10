@@ -24,9 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -98,24 +96,14 @@ public class AnnotatedFieldMappersTest {
         doReturn(this.annotations1).when(this.metadata1).getAnnotations();
         doReturn(this.annotations2).when(this.metadata2).getAnnotations();
 
-        final List<Annotation> ann1 = new ArrayList<Annotation>();
+        final List<Annotation> ann1 = new ArrayList<>();
         ann1.add(annotation1);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return ann1.iterator();
-            }
-        }).when(this.annotations1).iterator();
+        doAnswer(invocationOnMock -> ann1.iterator()).when(this.annotations1).iterator();
 
-        final List<Annotation> ann2 = new ArrayList<Annotation>();
+        final List<Annotation> ann2 = new ArrayList<>();
         ann2.add(annotation2);
         ann2.add(metaAnnotation1);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return ann2.iterator();
-            }
-        }).when(this.annotations2).iterator();
+        doAnswer(invocationOnMock -> ann2.iterator()).when(this.annotations2).iterator();
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -61,14 +60,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 import static org.springframework.web.servlet.DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME;
 
 /**
@@ -89,7 +81,7 @@ public class MvcContextTest {
     @Mock
     private SlingHttpServletResponse response;
 
-    private List<?> registeredArgumentResolvers = new ArrayList<Object>();
+    private List<?> registeredArgumentResolvers = new ArrayList<>();
     private HandlerMapping handlerMapping;
 
     private MvcContext testee;
@@ -102,13 +94,9 @@ public class MvcContextTest {
         doReturn(this.applicationContext).when(this.event).getApplicationContext();
         doReturn(this.factory).when(this.applicationContext).getAutowireCapableBeanFactory();
 
-        Answer<Object> createMock = new Answer<Object>() {
-
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                final Class<?> beanType = (Class<?>) invocation.getArguments()[0];
-                return mockExistingBean(beanType);
-            }
+        Answer<Object> createMock = invocation -> {
+            final Class<?> beanType = (Class<?>) invocation.getArguments()[0];
+            return mockExistingBean(beanType);
         };
         doAnswer(createMock).when(this.factory).createBean(isA(Class.class));
 
@@ -305,12 +293,9 @@ public class MvcContextTest {
     }
 
     private void withRequestMappingHandlerCreatedOnDemand(final RequestMappingHandlerAdapter handler) {
-        Answer<RequestMappingHandlerAdapter> mockBeanCreation = new Answer<RequestMappingHandlerAdapter>() {
-            @Override
-            public RequestMappingHandlerAdapter answer(InvocationOnMock invocation) throws Throwable {
-                doReturn(handler).when(factory).getBean(eq(RequestMappingHandlerAdapter.class));
-                return handler;
-            }
+        Answer<RequestMappingHandlerAdapter> mockBeanCreation = invocation -> {
+            doReturn(handler).when(factory).getBean(eq(RequestMappingHandlerAdapter.class));
+            return handler;
         };
         doAnswer(mockBeanCreation).when(this.factory).createBean(eq(RequestMappingHandlerAdapter.class));
     }
@@ -320,12 +305,9 @@ public class MvcContextTest {
         RequestMappingHandlerAdapter requestMappingHandlerAdapter = mock(RequestMappingHandlerAdapter.class);
         HandlerMethodArgumentResolverComposite composite = mock(HandlerMethodArgumentResolverComposite.class);
         doReturn(composite).when(requestMappingHandlerAdapter).getArgumentResolvers();
-        Answer<Object> verifyList = new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                registeredArgumentResolvers = (List<?>) invocation.getArguments()[0];
-                return null;
-            }
+        Answer<Object> verifyList = invocation -> {
+            registeredArgumentResolvers = (List<?>) invocation.getArguments()[0];
+            return null;
         };
 
         doAnswer(verifyList).when(requestMappingHandlerAdapter).setArgumentResolvers(anyList());
@@ -431,7 +413,7 @@ public class MvcContextTest {
     private <T> T mockExistingBean(final Class<T> beanType) {
         T bean = mock(beanType, Mockito.RETURNS_MOCKS);
 
-        Map<String, Object> matchingBeans = new HashMap<String, Object>();
+        Map<String, Object> matchingBeans = new HashMap<>();
         matchingBeans.put("name", bean);
 
         ArgumentMatcher<Class<?>> isAssignableFromBeanType = new ArgumentMatcher<Class<?>>() {
