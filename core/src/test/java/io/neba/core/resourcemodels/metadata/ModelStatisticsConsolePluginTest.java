@@ -36,10 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -64,7 +61,7 @@ public class ModelStatisticsConsolePluginTest {
 
     @Before
     public void setUp() throws Exception {
-        this.metadata = new ArrayList<ResourceModelMetaData>();
+        this.metadata = new ArrayList<>();
         this.internalWriter = new StringWriter();
         Writer writer = new PrintWriter(this.internalWriter);
         doReturn(writer).when(this.response).getWriter();

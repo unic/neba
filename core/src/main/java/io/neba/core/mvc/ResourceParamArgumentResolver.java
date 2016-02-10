@@ -79,23 +79,11 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         final SlingHttpServletRequest request = (SlingHttpServletRequest) nativeRequest;
         final ResourceParam resourceParam = getParameterAnnotation(parameter);
         final String parameterName = resolveParameterName(parameter, resourceParam);
+        final boolean required = resourceParam.required() && isEmpty(resourceParam.defaultValue());
+        final String resourcePath = resolveResourcePath(request, resourceParam, parameterName, required);
 
-        String resourcePath = request.getParameter(parameterName);
-        if (isEmpty(resourcePath)) {
-            resourcePath = resourceParam.defaultValue();
-        }
-
-        boolean required = resourceParam.required() && isEmpty(resourceParam.defaultValue());
-
-        if (isEmpty(resourcePath)) {
-            if (required) {
-                throw new MissingServletRequestParameterException(parameterName, String.class.getSimpleName());
-            }
+        if (resourcePath == null) {
             return null;
-        }
-
-        if (!isEmpty(resourceParam.append())) {
-            resourcePath += resourceParam.append();
         }
 
         // We must resolve (and not use getResource()) as the resource path may be mapped.
@@ -121,6 +109,29 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         }
 
         return adapted;
+    }
+
+    private String resolveResourcePath(SlingHttpServletRequest request,
+                                       ResourceParam resourceParam,
+                                       String parameterName,
+                                       boolean required) throws MissingServletRequestParameterException {
+
+        String resourcePath = request.getParameter(parameterName);
+        if (isEmpty(resourcePath)) {
+            resourcePath = resourceParam.defaultValue();
+        }
+
+        if (isEmpty(resourcePath)) {
+            if (required) {
+                throw new MissingServletRequestParameterException(parameterName, String.class.getSimpleName());
+            }
+            return null;
+        }
+
+        if (!isEmpty(resourceParam.append())) {
+            resourcePath += resourceParam.append();
+        }
+        return resourcePath;
     }
 
     private String resolveParameterName(MethodParameter parameter, ResourceParam param) {

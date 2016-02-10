@@ -30,12 +30,7 @@ public class FelixTaskExecutorTest {
 
     @Test
     public void testSynchronousExecution() throws Exception {
-        execute(new Runnable() {
-            @Override
-            public void run() {
-                executed = true;
-            }
-        });
+        execute(() -> executed = true);
         assertThat(this.executed).isTrue();
     }
 

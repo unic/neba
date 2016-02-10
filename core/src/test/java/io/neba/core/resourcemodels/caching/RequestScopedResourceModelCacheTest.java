@@ -25,9 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -38,12 +36,7 @@ import java.util.concurrent.Callable;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -79,231 +72,198 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testLookupOfModel() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                withResourcePath("/junit/test/1");
+        request(() -> {
+            withResourcePath("/junit/test/1");
 
-                lookupModelFromCache();
-                assertModelIsNotInCache();
-                putModelInCache();
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+            putModelInCache();
 
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
+            return null;
         });
     }
 
     @Test
     public void testLookupOfDifferentResourcePaths() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withResourcePath("/junit/test/1");
-                putModelInCache();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
 
-                withResourcePath("/junit/test/2");
-                lookupModelFromCache();
-                assertModelIsNotInCache();
+            withResourcePath("/junit/test/2");
+            lookupModelFromCache();
+            assertModelIsNotInCache();
 
-                withResourcePath("/junit/test/1");
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
-                return null;
-            }
+            withResourcePath("/junit/test/1");
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsNotSelectorSensitiveWithoutSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withSelector("new.selector");
+            withSelector("new.selector");
 
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsNotSuffixSensitiveWithoutSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withSuffix("/newSuffix");
+            withSuffix("/newSuffix");
 
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsNotPagePathSensitiveWithoutSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withPath("/old/path");
+            withPath("/old/path");
 
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withPath("/new/path");
+            withPath("/new/path");
 
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsNotSensitiveToQueryStringWithoutSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withQueryString("new=parameter");
+            withQueryString("new=parameter");
 
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsSelectorSensitiveInSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withSafeMode();
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withSafeMode();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withSelector("new.selector");
+            withSelector("new.selector");
 
-                lookupModelFromCache();
-                assertModelIsNotInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsSuffixSensitiveInSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withSafeMode();
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withSafeMode();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withSuffix("/newSuffix");
+            withSuffix("/newSuffix");
 
-                lookupModelFromCache();
-                assertModelIsNotInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsPagePathSensitiveInSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withSafeMode();
-                withPath("/old/path");
+            withSafeMode();
+            withPath("/old/path");
 
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withPath("/new/path");
+            withPath("/new/path");
 
-                lookupModelFromCache();
-                assertModelIsNotInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsNotSensitiveToPathChangesBelowCurrentPageInSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withSafeMode();
-                withPath("/a/page");
+            withSafeMode();
+            withPath("/a/page");
 
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withPath("/a/page/jcr:content/parsys");
+            withPath("/a/page/jcr:content/parsys");
 
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
+            return null;
         });
     }
 
     @Test
     public void testCacheIsSensitiveToQueryStringInSafeMode() throws Exception {
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
+        request(() -> {
 
-                withSafeMode();
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                assertModelWasFoundInCache();
+            withSafeMode();
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelWasFoundInCache();
 
-                withQueryString("new=parameter");
+            withQueryString("new=parameter");
 
-                lookupModelFromCache();
-                assertModelIsNotInCache();
-                return null;
-            }
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+            return null;
         });
     }
 
@@ -325,15 +285,12 @@ public class RequestScopedResourceModelCacheTest {
         enableStatistics();
         withRequestUri("/arbitrary/request/uri.html");
 
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                lookupModelFromCache();
-                lookupModelFromCache();
-                return null;
-            }
+        request(() -> {
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            lookupModelFromCache();
+            lookupModelFromCache();
+            return null;
         });
 
         verifyStatisticsReportLogs("Request scoped cache report for GET /arbitrary/request/uri.html:\n" +
@@ -348,25 +305,19 @@ public class RequestScopedResourceModelCacheTest {
         withRequestUri("/junit/test/1.html");
         enableStatistics();
 
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                withResourcePath("/junit/test/1");
-                putModelInCache();
-                return null;
-            }
+        request(() -> {
+            withResourcePath("/junit/test/1");
+            putModelInCache();
+            return null;
         });
 
         verifyNothingIsReported();
 
         withRequestUri("/junit/test/2.html");
-        request(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                withResourcePath("/junit/test/2");
-                putModelInCache();
-                return null;
-            }
+        request(() -> {
+            withResourcePath("/junit/test/2");
+            putModelInCache();
+            return null;
         });
 
         verifyStatisticsReportLogs("Request scoped cache report for GET /junit/test/2.html:\n" +
@@ -440,12 +391,7 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     private void request(final Callable<Object> callable) throws Exception {
-        doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return callable.call();
-            }
-        }).when(this.chain).doFilter(eq(this.request), eq(this.response));
+        doAnswer(invocationOnMock -> callable.call()).when(this.chain).doFilter(eq(this.request), eq(this.response));
         this.testee.doFilter(this.request, this.response, this.chain);
     }
 

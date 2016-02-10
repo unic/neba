@@ -16,15 +16,15 @@
 
 package io.neba.core.mvc;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * @author christoph.huber

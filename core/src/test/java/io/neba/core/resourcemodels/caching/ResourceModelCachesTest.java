@@ -40,7 +40,7 @@ public class ResourceModelCachesTest {
 	@Mock
 	private Resource resource;
 	
-	private List<ResourceModelCache> mockedCaches = new LinkedList<ResourceModelCache>();
+	private List<ResourceModelCache> mockedCaches = new LinkedList<>();
 	private Class<Object> targetType = Object.class;
     private Object model = new Object();
 

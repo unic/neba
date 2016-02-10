@@ -105,6 +105,6 @@ public class OsgiBeanReferenceTest {
 	}
 
 	private OsgiBeanReference<Object> createReference() {
-		return new OsgiBeanReference<Object>(this.bean, this.bundleId);
+		return new OsgiBeanReference<>(this.bean, this.bundleId);
 	}
 }

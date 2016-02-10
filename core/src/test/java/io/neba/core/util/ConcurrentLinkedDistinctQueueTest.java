@@ -16,13 +16,13 @@
 
 package io.neba.core.util;
 
-import static org.fest.assertions.Assertions.assertThat;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
@@ -32,7 +32,7 @@ public class ConcurrentLinkedDistinctQueueTest {
 
 	@Before
 	public void prepare() {
-		this.testee = new ConcurrentLinkedDistinctQueue<String>();
+		this.testee = new ConcurrentLinkedDistinctQueue<>();
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class ConcurrentLinkedDistinctQueueTest {
 
 	@Test
 	public void testAddAll() {
-		List<String> other = new ArrayList<String>();
+		List<String> other = new ArrayList<>();
 		other.add("one");
 		other.add("one");
 		other.add("two");

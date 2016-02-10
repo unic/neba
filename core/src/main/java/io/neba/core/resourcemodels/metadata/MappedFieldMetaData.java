@@ -38,9 +38,7 @@ import java.util.Date;
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang.StringUtils.*;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.springframework.util.ReflectionUtils.makeAccessible;
 
@@ -155,12 +153,7 @@ public class MappedFieldMetaData {
      */
     private Factory prepareProxyFactoryForCollectionTypes() {
         if (this.isInstantiableCollectionType) {
-            return (Factory) Enhancer.create(this.fieldType, new LazyLoader() {
-                @Override
-                public Object loadObject() throws Exception {
-                    return null;
-                }
-            });
+            return (Factory) Enhancer.create(this.fieldType, (LazyLoader) () -> null);
         }
         return null;
     }

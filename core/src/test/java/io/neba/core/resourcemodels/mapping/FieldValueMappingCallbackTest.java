@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -38,12 +37,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
@@ -56,12 +50,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -113,12 +102,9 @@ public class FieldValueMappingCallbackTest {
 
     @Before
     public void mockLazyLoadingCollectionFactory() {
-        Answer<Object> loadImmediately = new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                lazyLoadingCollectionCallback = (LazyLoader) invocationOnMock.getArguments()[0];
-                return lazyLoadingCollectionCallback.loadObject();
-            }
+        Answer<Object> loadImmediately = invocationOnMock -> {
+            lazyLoadingCollectionCallback = (LazyLoader) invocationOnMock.getArguments()[0];
+            return lazyLoadingCollectionCallback.loadObject();
         };
         doAnswer(loadImmediately).when(lazyLoadingCollectionFactory).newInstance(isA(LazyLoader.class));
         doReturn(lazyLoadingCollectionFactory).when(this.mappedFieldMetadata).getCollectionProxyFactory();
@@ -545,7 +531,7 @@ public class FieldValueMappingCallbackTest {
         withOptionalField();
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
-        withCustomFieldMapperMappingTo(new ArrayList<Object>());
+        withCustomFieldMapperMappingTo(new ArrayList<>());
 
         mapField();
 
@@ -1373,17 +1359,14 @@ public class FieldValueMappingCallbackTest {
         AnnotationMapping mapping = mock(AnnotationMapping.class);
         doReturn(this.annotatedFieldMapper).when(mapping).getMapper();
 
-        Collection<AnnotationMapping> mappings = new ArrayList<AnnotationMapping>();
+        Collection<AnnotationMapping> mappings = new ArrayList<>();
         mappings.add(mapping);
 
         doReturn(mappings).when(this.annotatedFieldMappers).get(isA(MappedFieldMetaData.class));
 
-        Answer retainMappingContext = new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                ongoingMapping = (OngoingMapping) invocationOnMock.getArguments()[0];
-                return value;
-            }
+        Answer retainMappingContext = invocationOnMock -> {
+            ongoingMapping = (OngoingMapping) invocationOnMock.getArguments()[0];
+            return value;
         };
         doAnswer(retainMappingContext).when(this.annotatedFieldMapper).map(isA(OngoingMapping.class));
     }
@@ -1754,10 +1737,10 @@ public class FieldValueMappingCallbackTest {
 
     @SuppressWarnings("unchecked")
     private void assertCustomFieldMapperIsNotUsedToMapField() {
-        verify(this.annotatedFieldMapper, never()).map((OngoingMapping) any());
+        verify(this.annotatedFieldMapper, never()).map(any());
     }
 
     private void assertCustomFieldMapperIsNotObtained() {
-        verify(this.annotatedFieldMappers, never()).get((MappedFieldMetaData) any());
+        verify(this.annotatedFieldMappers, never()).get(any());
     }
 }

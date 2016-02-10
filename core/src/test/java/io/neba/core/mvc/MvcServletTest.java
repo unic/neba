@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
@@ -39,10 +38,7 @@ import java.io.IOException;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -72,12 +68,9 @@ public class MvcServletTest {
 
     @Before
     public void setUp() throws Exception {
-        Answer<Object> retainMvcContext = new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                injectedContext = (MvcContext) invocation.getArguments()[1];
-                return null;
-            }
+        Answer<Object> retainMvcContext = invocation -> {
+            injectedContext = (MvcContext) invocation.getArguments()[1];
+            return null;
         };
         doAnswer(retainMvcContext).when(this.factory).registerSingleton(anyString(), isA(MvcContext.class));
         doReturn(this.bundle).when(this.context).getBundle();

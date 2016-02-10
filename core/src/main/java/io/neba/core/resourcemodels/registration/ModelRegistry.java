@@ -37,6 +37,7 @@ import javax.jcr.RepositoryException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
 import static io.neba.core.util.BundleUtil.displayNameOf;
@@ -102,7 +103,7 @@ public class ModelRegistry {
     private static Collection<OsgiBeanSource<?>> filter(Collection<OsgiBeanSource<?>> sources, Class<?> compatibleType) {
         Collection<OsgiBeanSource<?>> compatibleSources = sources;
         if (sources != null && compatibleType != null) {
-            compatibleSources = new ArrayList<OsgiBeanSource<?>>(sources.size());
+            compatibleSources = new ArrayList<>(sources.size());
             for (OsgiBeanSource<?> source : sources) {
                 if (compatibleType.isAssignableFrom(source.getBeanType())) {
                     compatibleSources.add(source);
@@ -123,7 +124,7 @@ public class ModelRegistry {
     private static Collection<OsgiBeanSource<?>> filter(Collection<OsgiBeanSource<?>> sources, String beanName) {
         Collection<OsgiBeanSource<?>> sourcesWithBeanName = sources;
         if (sources != null && beanName != null) {
-            sourcesWithBeanName = new ArrayList<OsgiBeanSource<?>>(sources.size());
+            sourcesWithBeanName = new ArrayList<>(sources.size());
             for (OsgiBeanSource<?> source : sources) {
                 if (beanName.equals(source.getBeanName())) {
                     sourcesWithBeanName.add(source);
@@ -134,11 +135,11 @@ public class ModelRegistry {
     }
 
     private final ConcurrentDistinctMultiValueMap<String, OsgiBeanSource<?>>
-            typeNameToBeanSourcesMap = new ConcurrentDistinctMultiValueMap<String, OsgiBeanSource<?>>();
+            typeNameToBeanSourcesMap = new ConcurrentDistinctMultiValueMap<>();
     private final ConcurrentDistinctMultiValueMap<Key, LookupResult>
-            lookupCache = new ConcurrentDistinctMultiValueMap<Key, LookupResult>();
+            lookupCache = new ConcurrentDistinctMultiValueMap<>();
 
-    private final Map<Key, Object> unmappedTypesCache = new ConcurrentHashMap<Key, Object>();
+    private final Map<Key, Object> unmappedTypesCache = new ConcurrentHashMap<>();
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicInteger state = new AtomicInteger(0);
 
@@ -332,10 +333,8 @@ public class ModelRegistry {
      */
     public List<OsgiBeanSource<?>> getBeanSources() {
         Collection<Collection<OsgiBeanSource<?>>> sources = this.typeNameToBeanSourcesMap.values();
-        List<OsgiBeanSource<?>> linearizedSources = new LinkedList<OsgiBeanSource<?>>();
-        for (Collection<OsgiBeanSource<?>> entry : sources) {
-            linearizedSources.addAll(entry);
-        }
+        List<OsgiBeanSource<?>> linearizedSources = new LinkedList<>();
+        sources.forEach(linearizedSources::addAll);
         return linearizedSources;
     }
 
@@ -443,14 +442,12 @@ public class ModelRegistry {
      * @return never <code>null</code> but rather an empty collection.
      */
     private Collection<LookupResult> resolveBeanSources(Resource resource, Class<?> compatibleType, boolean resolveMostSpecific) {
-        Collection<LookupResult> sources = new ArrayList<LookupResult>(64);
+        Collection<LookupResult> sources = new ArrayList<>(64);
         for (final String resourceType : mappableTypeHierarchyOf(resource, this.resourceResolver.getResolver())) {
             Collection<OsgiBeanSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
             Collection<OsgiBeanSource<?>> sourcesForCompatibleType = filter(allSourcesForType, compatibleType);
             if (sourcesForCompatibleType != null && !sourcesForCompatibleType.isEmpty()) {
-                for (OsgiBeanSource<?> source : sourcesForCompatibleType) {
-                    sources.add(new LookupResult(source, resourceType));
-                }
+                sources.addAll(sourcesForCompatibleType.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
                 if (resolveMostSpecific) {
                     break;
                 }
@@ -469,14 +466,12 @@ public class ModelRegistry {
      * @return never <code>null</code> but rather an empty collection.
      */
     private Collection<LookupResult> resolveMostSpecificBeanSources(Resource resource, String beanName) {
-        Collection<LookupResult> sources = new ArrayList<LookupResult>();
+        Collection<LookupResult> sources = new ArrayList<>();
         for (final String resourceType : mappableTypeHierarchyOf(resource, this.resourceResolver.getResolver())) {
             Collection<OsgiBeanSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
             Collection<OsgiBeanSource<?>> sourcesWithMatchingBeanName = filter(allSourcesForType, beanName);
             if (sourcesWithMatchingBeanName != null && !sourcesWithMatchingBeanName.isEmpty()) {
-                for (OsgiBeanSource<?> source : sourcesWithMatchingBeanName) {
-                    sources.add(new LookupResult(source, resourceType));
-                }
+                sources.addAll(sourcesWithMatchingBeanName.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
                 break;
             }
         }

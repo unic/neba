@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
@@ -33,12 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.zip.ZipEntry;
@@ -50,11 +44,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -104,22 +94,16 @@ public class LogfileViewerConsolePluginTest {
         when(this.logConfiguration.getProperties()).thenReturn(this.logConfigurationProperties);
         when(this.logConfigurationProperties.get(eq(ORG_APACHE_SLING_COMMONS_LOG_FILE))).thenReturn("logs/error.log");
 
-        Answer<Object> writeIntToByteArrayOutputStream = new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                internalOutputStream.write((Integer) invocation.getArguments()[0]);
-                return null;
-            }
+        Answer<Object> writeIntToByteArrayOutputStream = invocation -> {
+            internalOutputStream.write((Integer) invocation.getArguments()[0]);
+            return null;
         };
-        Answer<Object> writeBytesToByteArrayOutputStream = new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                byte[] b = (byte[]) invocation.getArguments()[0];
-                int off = (Integer) invocation.getArguments()[1];
-                int len = (Integer) invocation.getArguments()[2];
-                internalOutputStream.write(b, off, len);
-                return null;
-            }
+        Answer<Object> writeBytesToByteArrayOutputStream = invocation -> {
+            byte[] b = (byte[]) invocation.getArguments()[0];
+            int off = (Integer) invocation.getArguments()[1];
+            int len = (Integer) invocation.getArguments()[2];
+            internalOutputStream.write(b, off, len);
+            return null;
         };
         doAnswer(writeIntToByteArrayOutputStream).when(this.outputStream).write(anyInt());
         doAnswer(writeBytesToByteArrayOutputStream).when(this.outputStream).write(isA(byte[].class), anyInt(), anyInt());

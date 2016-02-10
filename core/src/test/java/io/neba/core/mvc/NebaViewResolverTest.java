@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.web.servlet.FlashMapManager;
@@ -39,9 +38,7 @@ import java.util.HashMap;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.web.servlet.DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE;
 
 /**
@@ -68,12 +65,7 @@ public class NebaViewResolverTest {
         doReturn("").when(this.request).getContextPath();
         doReturn(this.dispatcher).when(this.request).getRequestDispatcher(anyString());
         doReturn(this.flashMapManager).when(this.request).getAttribute(FLASH_MAP_MANAGER_ATTRIBUTE);
-        Answer<Object> original = new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArguments()[0];
-            }
-        };
+        Answer<Object> original = invocation -> invocation.getArguments()[0];
         doAnswer(original).when(this.response).encodeRedirectURL(anyString());
     }
 
@@ -103,7 +95,7 @@ public class NebaViewResolverTest {
     }
 
     private void renderView() throws Exception {
-        this.resolvedView.render(new HashMap<String, Object>(), this.request, this.response);
+        this.resolvedView.render(new HashMap<>(), this.request, this.response);
     }
 
     private void assertViewHasType(Class<?> type) {

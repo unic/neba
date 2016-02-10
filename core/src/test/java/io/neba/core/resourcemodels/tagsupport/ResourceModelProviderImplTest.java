@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
@@ -42,12 +41,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -64,7 +58,7 @@ public class ResourceModelProviderImplTest {
     private LookupResult lookupResult;
     @Mock
     private ResourceModelCaches caches;
-    private Map<Key, Object> testCache = new HashMap<Key, Object>();
+    private Map<Key, Object> testCache = new HashMap<>();
 
     private OsgiBeanSource<Object> osgiBeanSource;
     private Object resolutionResult;
@@ -76,37 +70,27 @@ public class ResourceModelProviderImplTest {
     @Before
     @SuppressWarnings("unchecked")
     public void prepareContainerAdapter() {
-        Answer
-                storeInCache = new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                testCache.put((Key) invocation.getArguments()[2], invocation.getArguments()[1]);
-                return null;
-            }
+        Answer storeInCache = invocation -> {
+            testCache.put((Key) invocation.getArguments()[2], invocation.getArguments()[1]);
+            return null;
         },
-                lookupFromCache = new Answer() {
-                    @Override
-                    public Object answer(InvocationOnMock invocation) throws Throwable {
-                        Key key = (Key) invocation.getArguments()[0];
-                        return testCache.get(key);
-                    }
-                };
+        lookupFromCache = invocation -> {
+            Key key = (Key) invocation.getArguments()[0];
+            return testCache.get(key);
+        };
 
         doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), any(), isA(Key.class));
         doAnswer(lookupFromCache).when(this.caches).lookup(isA(Key.class));
 
-        when(this.mapper.map(isA(Resource.class), isA(OsgiBeanSource.class))).thenAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                OsgiBeanSource<Object> source = (OsgiBeanSource<Object>) invocation.getArguments()[1];
-                return source.getBean();
-            }
+        when(this.mapper.map(isA(Resource.class), isA(OsgiBeanSource.class))).thenAnswer(invocation -> {
+            OsgiBeanSource<Object> source = (OsgiBeanSource<Object>) invocation.getArguments()[1];
+            return source.getBean();
         });
     }
 
     @Before
     public void provideMockResourceModel() {
-        LinkedList<LookupResult> lookupResults = new LinkedList<LookupResult>();
+        LinkedList<LookupResult> lookupResults = new LinkedList<>();
         @SuppressWarnings("unchecked")
         OsgiBeanSource<Object> osgiBeanSource = mock(OsgiBeanSource.class);
         this.osgiBeanSource = osgiBeanSource;

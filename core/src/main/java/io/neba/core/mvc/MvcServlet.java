@@ -49,7 +49,7 @@ import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 @Service
 public class MvcServlet extends SlingAllMethodsServlet {
     private static final String MVC_ENABLER_BEAN_NAME = "_nebaMvcEnabler";
-    private final Map<Bundle, MvcContext> mvcCapableBundles = new ConcurrentHashMap<Bundle, MvcContext>();
+    private final Map<Bundle, MvcContext> mvcCapableBundles = new ConcurrentHashMap<>();
     private final Logger logger = LoggerFactory.getLogger("mvc");
 
     /**

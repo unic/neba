@@ -21,11 +21,8 @@ import org.osgi.framework.Bundle;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.util.ClassUtils.getUserClass;
 
@@ -52,16 +49,14 @@ public class ResourceModelMetaDataRegistrar {
         }
     }
 
-    private Map<Class<?>, ResourceModelMetadataHolder> cache = new HashMap<Class<?>, ResourceModelMetadataHolder>(512);
+    private Map<Class<?>, ResourceModelMetadataHolder> cache = new HashMap<>(512);
 
     /**
      * @return the {@link ResourceModelMetaData} of all currently known resource models.
      */
     public Collection<ResourceModelMetaData> get() {
-        Collection<ResourceModelMetaData> metaData = new ArrayList<ResourceModelMetaData>(256);
-        for (ResourceModelMetadataHolder holder : this.cache.values()) {
-            metaData.add(holder.metaData);
-        }
+        Collection<ResourceModelMetaData> metaData = new ArrayList<>(256);
+        metaData.addAll(this.cache.values().stream().map(holder -> holder.metaData).collect(Collectors.toList()));
         return metaData;
     }
 
@@ -107,7 +102,7 @@ public class ResourceModelMetaDataRegistrar {
     }
 
     private Map<Class<?>, ResourceModelMetadataHolder> copyCache() {
-        return new HashMap<Class<?>, ResourceModelMetadataHolder>(this.cache);
+        return new HashMap<>(this.cache);
     }
 
     @PreDestroy

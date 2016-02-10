@@ -16,10 +16,6 @@
 
 package io.neba.core.spring.applicationcontext.configuration;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.verify;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,6 +24,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestScope;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto

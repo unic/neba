@@ -63,7 +63,7 @@ public class JavaxInjectManifestTransformer {
     }
 
     public void run() {
-        for (File dir : unpackedArtifactsDir.listFiles()) {
+        for (File dir : listFiles(this.unpackedArtifactsDir)) {
             logger.info("Transforming manifest in " + dir + " ...");
             Manifest manifest = getManifest(dir);
             Attributes mainAttributes = manifest.getMainAttributes();
@@ -86,17 +86,19 @@ public class JavaxInjectManifestTransformer {
         }
     }
 
+    private File[] listFiles(File dir) {
+        File[] files = dir.listFiles();
+        return files == null ? new File[]{} : files;
+    }
+
     private void repackageArtifact(File dir) {
         File targetJarFile = getTargetJarFile(dir);
         try {
             Manifest manifest = getManifest(dir);
-            JarOutputStream out = new JarOutputStream(new FileOutputStream(targetJarFile), manifest);
-            try {
-                for (File file : dir.listFiles()) {
+            try (JarOutputStream out = new JarOutputStream(new FileOutputStream(targetJarFile), manifest)) {
+                for (File file : listFiles(dir)) {
                     pack(file, dir, out);
                 }
-            } finally {
-                out.close();
             }
         } catch (IOException e) {
             throw new IllegalStateException("Unable to create jar file " + targetJarFile.getPath(), e);
@@ -117,7 +119,7 @@ public class JavaxInjectManifestTransformer {
             entry.setTime(source.lastModified());
             target.putNextEntry(entry);
             target.closeEntry();
-            File[] files = source.listFiles();
+            File[] files = listFiles(source);
             if (files == null) {
                 return;
             }
@@ -154,11 +156,8 @@ public class JavaxInjectManifestTransformer {
     private void write(File dir, Manifest manifest) {
         File manifestFile = getManifestFile(dir);
         try {
-            FileOutputStream out = new FileOutputStream(manifestFile);
-            try {
+            try (FileOutputStream out = new FileOutputStream(manifestFile)) {
                 manifest.write(out);
-            } finally {
-                out.close();
             }
         } catch (IOException e) {
             throw new IllegalStateException("Unable to write the manifest " + manifest + " to " + manifestFile.getPath() + ".", e);
@@ -168,11 +167,8 @@ public class JavaxInjectManifestTransformer {
     private Manifest getManifest(File dir) {
         File manifestFile = getManifestFile(dir);
         try {
-            FileInputStream is = new FileInputStream(manifestFile);
-            try {
+            try (FileInputStream is = new FileInputStream(manifestFile)) {
                 return new Manifest(is);
-            } finally {
-                is.close();
             }
         } catch (IOException e) {
             throw new IllegalStateException("Could not locate manifest in " + manifestFile.getPath() + ".", e);

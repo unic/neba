@@ -29,11 +29,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
@@ -590,7 +586,7 @@ public class FieldValueMappingCallback {
         private final FieldValueMappingCallback callback;
         private Object value = NULL;
 
-        public OptionalFieldValue(FieldData fieldData, FieldValueMappingCallback callback) {
+        OptionalFieldValue(FieldData fieldData, FieldValueMappingCallback callback) {
             this.fieldData = fieldData;
             this.callback = callback;
         }
@@ -648,7 +644,7 @@ public class FieldValueMappingCallback {
         private final Resource resource;
         private final FieldValueMappingCallback mapper;
 
-        public LazyChildrenLoader(FieldData field, Resource resource, FieldValueMappingCallback callback) {
+        LazyChildrenLoader(FieldData field, Resource resource, FieldValueMappingCallback callback) {
             this.field = field;
             this.resource = resource;
             this.mapper = callback;
@@ -671,7 +667,7 @@ public class FieldValueMappingCallback {
         private final String[] paths;
         private final FieldValueMappingCallback callback;
 
-        public LazyReferencesLoader(FieldData field, String[] paths, FieldValueMappingCallback callback) {
+        LazyReferencesLoader(FieldData field, String[] paths, FieldValueMappingCallback callback) {
             this.field = field;
             this.paths = paths;
             this.callback = callback;
@@ -695,7 +691,7 @@ public class FieldValueMappingCallback {
         private final ValueMap properties;
         private final MappedFieldMetaData metaData;
 
-        public OngoingFieldMapping(Object model,
+        OngoingFieldMapping(Object model,
                                    Object resolvedValue,
                                    AnnotationMapping mapping,
                                    FieldData fieldData,

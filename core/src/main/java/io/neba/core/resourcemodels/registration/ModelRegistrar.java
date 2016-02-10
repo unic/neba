@@ -63,7 +63,7 @@ public class ModelRegistrar {
             ResourceModel resourceModel = factory.findAnnotationOnBean(beanName, ResourceModel.class);
             if (resourceModel != null) {
                 ++numberOfDiscoveredModels;
-                OsgiBeanSource<Object> source = new OsgiBeanSource<Object>(beanName, factory, bundle);
+                OsgiBeanSource<Object> source = new OsgiBeanSource<>(beanName, factory, bundle);
                 this.resourceModelMetaDataRegistrar.register(source);
                 this.registry.add(resourceModel.types(), source);
                 logger.debug("Registered bean " + beanName + " as a model for the resource types "

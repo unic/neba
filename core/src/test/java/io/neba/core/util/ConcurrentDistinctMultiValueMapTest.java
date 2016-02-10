@@ -30,7 +30,7 @@ public class ConcurrentDistinctMultiValueMapTest {
 	
 	@Before
 	public void prepareTest() {
-		this.testee = new ConcurrentDistinctMultiValueMap<String, Object>();
+		this.testee = new ConcurrentDistinctMultiValueMap<>();
 	}
 	
 	@Test

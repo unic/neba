@@ -101,8 +101,8 @@ public class Annotations implements Iterable<Annotation> {
     private Map<Class<? extends Annotation>, Annotation> getAnnotationMap() {
         if (this.annotations == null) {
             // We do not care about calculating the same thing twice in case of concurrent access.
-            HashMap<Class<? extends Annotation>, Annotation> annotations = new HashMap<Class<? extends Annotation>, Annotation>();
-            Queue<Annotation> queue = new LinkedList<Annotation>(asList(this.annotatedElement.getAnnotations()));
+            HashMap<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+            Queue<Annotation> queue = new LinkedList<>(asList(this.annotatedElement.getAnnotations()));
             while (!queue.isEmpty()) {
                 Annotation annotation = queue.remove();
                 // Prevent lookup loops (@A annotated with @B annotated with @A ...)
@@ -123,6 +123,6 @@ public class Annotations implements Iterable<Annotation> {
     }
 
     public Map<Class<? extends Annotation>, Annotation> getAnnotations() {
-        return new HashMap<Class<? extends Annotation>, Annotation>(getAnnotationMap());
+        return new HashMap<>(getAnnotationMap());
     }
 }

@@ -16,10 +16,10 @@
 
 package io.neba.core.util;
 
-import static org.springframework.util.Assert.notNull;
-
 import org.apache.commons.collections.Predicate;
 import org.osgi.framework.Bundle;
+
+import static org.springframework.util.Assert.notNull;
 
 /**
  * {@link #evaluate(Object)} returns <code>false</code> if the bundle matches to

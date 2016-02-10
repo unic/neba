@@ -16,13 +16,7 @@
 
 package io.neba.core.resourcemodels.caching;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.sort;
@@ -83,10 +77,10 @@ public class CacheKeyStatistics {
         }
     }
 
-    private final Set<Object> keys = new HashSet<Object>(1024);
-    private final Map<Object, AtomicInteger> misses = new HashMap<Object, AtomicInteger>(1024);
-    private final Map<Object, AtomicInteger> hits = new HashMap<Object, AtomicInteger>(1024);
-    private final Map<Object, AtomicInteger> writes = new HashMap<Object, AtomicInteger>(1024);
+    private final Set<Object> keys = new HashSet<>(1024);
+    private final Map<Object, AtomicInteger> misses = new HashMap<>(1024);
+    private final Map<Object, AtomicInteger> hits = new HashMap<>(1024);
+    private final Map<Object, AtomicInteger> writes = new HashMap<>(1024);
 
     public void reportMiss(Object key) {
         if (key == null) {
@@ -136,7 +130,7 @@ public class CacheKeyStatistics {
     }
 
     public List<KeyReport> getKeyReports() {
-        List<KeyReport> keyReports = new ArrayList<KeyReport>(this.keys.size());
+        List<KeyReport> keyReports = new ArrayList<>(this.keys.size());
         for (Object key: this.keys) {
             KeyReport keyReport = new KeyReport(key,
                                        getMisses(key).intValue(),
@@ -145,12 +139,7 @@ public class CacheKeyStatistics {
             keyReports.add(keyReport);
         }
 
-        sort(keyReports, new Comparator<KeyReport>() {
-            @Override
-            public int compare(KeyReport o1, KeyReport o2) {
-                return o2.hits - o1.hits;
-            }
-        });
+        sort(keyReports, (o1, o2) -> o2.hits - o1.hits);
 
         return keyReports;
     }

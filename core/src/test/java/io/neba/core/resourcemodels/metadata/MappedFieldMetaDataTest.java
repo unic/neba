@@ -16,11 +16,7 @@
 
 package io.neba.core.resourcemodels.metadata;
 
-import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidGenericFieldDeclaration;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidPathDeclaration;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithUnsupportedCollectionTypes;
+import io.neba.core.resourcemodels.mapping.testmodels.*;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 
