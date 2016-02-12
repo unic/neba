@@ -43,7 +43,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *              //...
  *          }
  *          &#064;{@link PostMapping}
- *          public void anotherMethodThatRequiresMappedProperties() throws Exception {
+ *          private void anotherMethodThatRequiresMappedProperties() throws Exception {
  *              ...
  *          }
  *     }
