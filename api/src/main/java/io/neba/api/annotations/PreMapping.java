@@ -41,7 +41,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *              this.resource = ...;
  *          }
  *          &#064;{@link PreMapping}
- *          public void anotherMethodThatNeedsExecutionBeforeMapping() throws Exception {
+ *          private void anotherMethodThatNeedsExecutionBeforeMapping() throws Exception {
  *              ...
  *          }
  *     }
