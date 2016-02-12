@@ -41,9 +41,10 @@ public class ModelProcessor {
     public <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
         for (MethodMetaData methodMetaData : metaData.getPostMappingMethods()) {
             Method method = methodMetaData.getMethod();
+            method.setAccessible(true);
             try {
                 method.invoke(model);
-            } catch (InvocationTargetException e) {
+            } catch (InvocationTargetException | SecurityException e) {
                 logger.error("Unable to invoke the @" + PostMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
@@ -54,9 +55,10 @@ public class ModelProcessor {
     public <T> void processBeforeMapping(ResourceModelMetaData metaData, T model) {
         for (MethodMetaData methodMetaData : metaData.getPreMappingMethods()) {
             Method method = methodMetaData.getMethod();
+            method.setAccessible(true);
             try {
                 method.invoke(model);
-            } catch (InvocationTargetException e) {
+            } catch (InvocationTargetException | SecurityException e) {
                 logger.error("Unable to invoke the @" + PreMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
