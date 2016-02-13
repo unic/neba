@@ -63,7 +63,7 @@ public class ModelProcessorTest {
         }
 
         @PreMapping
-        public void preMapping() {
+        public void publicPreMapping() {
             preMappingWasCalled();
         }
 
