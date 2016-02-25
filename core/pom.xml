@@ -216,7 +216,7 @@
                             org.springframework.scheduling.config,
                             org.springframework.web.filter,
                             org.aopalliance.aop,
-                            org.apache.sling.bgservlets;version=0.0.0,
+                            org.apache.sling.bgservlets;version=0.0.0;resolution:=optional,
                             *
                         </Import-Package>
                     </instructions>
