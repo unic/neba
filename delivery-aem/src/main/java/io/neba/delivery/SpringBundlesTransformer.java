@@ -1,37 +1,51 @@
 package io.neba.delivery;
 
+import aQute.bnd.header.Attrs;
+import aQute.bnd.header.Parameters;
+import aQute.bnd.osgi.Analyzer;
+import org.apache.commons.io.IOUtils;
+
 import java.io.*;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.*;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.compile;
+import static aQute.bnd.osgi.Constants.BUNDLE_SYMBOLICNAME;
+import static aQute.bnd.osgi.Constants.IMPORT_PACKAGE;
+import static aQute.bnd.osgi.Processor.printClauses;
+import static java.nio.file.Files.copy;
 
 /**
- * NEBA-69:  Mitigate potential javax.inject import conflicts
+ * <h1>This implementation addresses the following issues</h1>
  *
+ * <h2>NEBA-69: Mitigate potential javax.inject import conflicts</h2>
+ * <p>
  * Sling provides the javax.inject package as a default version (0.0.0). This may lead
  * to transitive dependency issues when this version collides with another javax.inject version, should
  * both reside on the dependency chains of the same bundle. To work around this, the javax.inject imports
- * of the thirdparty bundles deployed with NEBA are modified to import the default version ([0, 2)). This is what
- * this class is doing.
+ * of the Spring bundles deployed with NEBA are modified to import the default version ([0, 2)).
+ * </p>
+ *
+ * <h2>NEBA-49: Migrate to Spring 4</h2>
+ * <p>
+ * AEM 6.x ships with an incomplete export of the jackson library. The jackson package imports of Spring are thus removed in favor of an inlined solution.
+ * </p>
  *
  * @author Olaf Otto
  */
-public class JavaxInjectManifestTransformer {
+public class SpringBundlesTransformer {
     public static final String MANIFEST_LOCATION = "META-INF/MANIFEST.MF";
-    public static final String IMPORT_PACKAGE_HEADER = "Import-Package";
-    public static final Pattern JAVAX_INJECT_IMPORT_DIRECTIVE = compile("(javax\\.inject[^,\\n]*;version=\")(\\[|\\()[^\\]\\)]+(\\]|\\))(\")");
 
-    public static void main(String[] args) {
-        if (args == null || args.length != 2) {
-            throw new IllegalArgumentException("Expected exactly two arguments, got: " + Arrays.toString(args) + ".");
+    public static void main(String[] args) throws IOException {
+        if (args == null || args.length != 3) {
+            throw new IllegalArgumentException("Expected exactly three arguments, got: " + Arrays.toString(args) + ".");
         }
-        new JavaxInjectManifestTransformer(
+        new SpringBundlesTransformer(
                 asDirectory(args[0]),
-                asDirectory(args[1])
+                asDirectory(args[1]),
+                asDirectory(args[2])
         ).run();
     }
 
@@ -49,41 +63,92 @@ public class JavaxInjectManifestTransformer {
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final File unpackedArtifactsDir;
     private final File repackToDirectory;
+    private final File dependenciesDir;
 
-    public JavaxInjectManifestTransformer(File unpackedArtifactsDir, File repackToDirectory) {
+    public SpringBundlesTransformer(File unpackedArtifactsDir, File repackToDir, File dependenciesDir) {
         if (unpackedArtifactsDir == null) {
             throw new IllegalArgumentException("Method argument unpackedArtifactsDir must not be null.");
         }
-        if (repackToDirectory == null) {
-            throw new IllegalArgumentException("Method argument repackToDirectory must not be null.");
+        if (repackToDir == null) {
+            throw new IllegalArgumentException("Method argument repackToDir must not be null.");
+        }
+        if (dependenciesDir == null) {
+            throw new IllegalArgumentException("Method argument dependenciesDir must not be null.");
+
         }
 
         this.unpackedArtifactsDir = unpackedArtifactsDir;
-        this.repackToDirectory = repackToDirectory;
+        this.repackToDirectory = repackToDir;
+        this.dependenciesDir = dependenciesDir;
     }
 
-    public void run() {
+    public void run() throws IOException {
         for (File dir : listFiles(this.unpackedArtifactsDir)) {
             logger.info("Transforming manifest in " + dir + " ...");
+
             Manifest manifest = getManifest(dir);
             Attributes mainAttributes = manifest.getMainAttributes();
-            String importPackageDirectives = mainAttributes.getValue(IMPORT_PACKAGE_HEADER);
+            String importPackageDirectives = mainAttributes.getValue(IMPORT_PACKAGE);
+
             if (importPackageDirectives == null) {
                 continue;
             }
 
-            Matcher matcher = JAVAX_INJECT_IMPORT_DIRECTIVE.matcher(importPackageDirectives);
-            StringBuffer buffer = new StringBuffer(importPackageDirectives.length());
-            while (matcher.find()) {
-                String replacement = matcher.group(1) + "[0,2)" + matcher.group(4);
-                matcher.appendReplacement(buffer, replacement);
+            Parameters imports = new Analyzer().parseHeader(importPackageDirectives);
+
+            if (allowUnstableJavaxImports(imports) || inlineJacksonImports(dir, mainAttributes, imports)) {
+                updateImportPackageDirectives(mainAttributes, imports);
+                alterSymbolicNameToReflectCustomization(mainAttributes);
             }
 
-            matcher.appendTail(buffer);
-            mainAttributes.putValue(IMPORT_PACKAGE_HEADER, buffer.toString());
             write(dir, manifest);
             repackageArtifact(dir);
         }
+    }
+
+    private void alterSymbolicNameToReflectCustomization(Attributes mainAttributes) {
+        String symbolicName = mainAttributes.getValue(BUNDLE_SYMBOLICNAME);
+        mainAttributes.putValue(BUNDLE_SYMBOLICNAME, "io.neba." + symbolicName.substring("org.apache.servicemix.bundles.".length()));
+    }
+
+    private void updateImportPackageDirectives(Attributes mainAttributes, Parameters imports) throws IOException {
+        mainAttributes.putValue(IMPORT_PACKAGE, printClauses(imports));
+    }
+
+    private boolean allowUnstableJavaxImports(Parameters imports) {
+        Attrs attrs = imports.get("javax.inject");
+        if (attrs == null) {
+            return false;
+        }
+        attrs.put("version", "[0,2)");
+        return true;
+    }
+
+    private boolean inlineJacksonImports(File dir, Attributes mainAttributes, Parameters imports) throws IOException {
+        Set<String> jacksonImports = new HashSet<>();
+        imports.keySet().forEach(key -> {
+            if (key.startsWith("com.fasterxml.jackson")) {
+                jacksonImports.add(key);
+            }
+        });
+
+        jacksonImports.forEach(imports::remove);
+
+        if (jacksonImports.isEmpty()) {
+            return false;
+        }
+
+        File lib = new File(dir, "lib");
+        lib.mkdir();
+
+        Set<String> bundleClassPath = new HashSet<>();
+        for (File file : listFiles(dependenciesDir)) {
+            bundleClassPath.add("lib/" + file.getName());
+            copy(file.toPath(), new File(lib, file.getName()).toPath());
+        }
+
+        mainAttributes.putValue("Bundle-Classpath", bundleClassPath.stream().reduce(".", (a, b) -> a + "," + b));
+        return true;
     }
 
     private File[] listFiles(File dir) {
@@ -134,16 +199,8 @@ public class JavaxInjectManifestTransformer {
             JarEntry entry = new JarEntry(name);
             entry.setTime(source.lastModified());
             target.putNextEntry(entry);
-            InputStream in = new BufferedInputStream(new FileInputStream(source));
-            try {
-                byte[] buffer = new byte[4096];
-
-                int count;
-                while ((count = in.read(buffer)) != -1) {
-                    target.write(buffer, 0, count);
-                }
-            } catch (IOException e) {
-                in.close();
+            try (InputStream in = new BufferedInputStream(new FileInputStream(source))) {
+                IOUtils.copy(in, target);
             }
             target.closeEntry();
         }

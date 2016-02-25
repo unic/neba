@@ -31,7 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -48,10 +48,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyBoolean;
@@ -222,6 +219,7 @@ public class MvcContextTest {
     @Test(expected = IllegalStateException.class)
     public void testHandlingOfUninitializedArgumentsResolvers() throws Exception {
         RequestMappingHandlerAdapter adapter = mock(RequestMappingHandlerAdapter.class);
+        doReturn(null).when(adapter).getArgumentResolvers();
         withRequestMappingHandlerCreatedOnDemand(adapter);
 
         signalContextRefreshed();
@@ -303,8 +301,6 @@ public class MvcContextTest {
     @SuppressWarnings("unchecked")
     private RequestMappingHandlerAdapter mockRequestMappingHandler() {
         RequestMappingHandlerAdapter requestMappingHandlerAdapter = mock(RequestMappingHandlerAdapter.class);
-        HandlerMethodArgumentResolverComposite composite = mock(HandlerMethodArgumentResolverComposite.class);
-        doReturn(composite).when(requestMappingHandlerAdapter).getArgumentResolvers();
         Answer<Object> verifyList = invocation -> {
             registeredArgumentResolvers = (List<?>) invocation.getArguments()[0];
             return null;
