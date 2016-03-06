@@ -531,6 +531,11 @@
                     <groupId>external.atlassian.jgitflow</groupId>
                     <artifactId>jgitflow-maven-plugin</artifactId>
                     <version>1.0-m5.1</version>
+                    <configuration>
+                        <flowInitContext>
+                            <developBranchName>3.x</developBranchName>
+                        </flowInitContext>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
