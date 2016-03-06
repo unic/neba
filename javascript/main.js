@@ -420,13 +420,13 @@ $(function () {
         var knownTweets = [];
 
         loadTweets.push(function (data) {
-            $(data.body).find("li.tweet").each(function (_, elem) {
+            $(data.body).find("li.timeline-TweetList-tweet").each(function (_, elem) {
                 var tweet = {
                     type: "tweet"
                 };
                 var $elem = $(elem);
                 var tweetPermalink;
-                $elem.find("a.u-url.permalink").each(function (_, elem) {
+                $elem.find("a.timeline-Tweet-timestamp").each(function (_, elem) {
                     tweetPermalink = elem.href;
                 });
 
@@ -440,7 +440,7 @@ $(function () {
                 $elem.find("time.dt-updated").each(function (_, elem) {
                     tweet.time = parseTime(PATTERN_TWITTER_TIMESTAMP, elem.getAttribute("datetime"));
                 });
-                $elem.find("p.e-entry-title").each(function (_, elem) {
+                $elem.find("div.timeline-Tweet-text").each(function (_, elem) {
                     tweet.message = elem.innerHTML;
                 });
 
