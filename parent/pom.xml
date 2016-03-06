@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>3.9.0</version>
+    <version>3.10.0</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
@@ -531,6 +531,11 @@
                     <groupId>external.atlassian.jgitflow</groupId>
                     <artifactId>jgitflow-maven-plugin</artifactId>
                     <version>1.0-m5.1</version>
+                    <configuration>
+                        <flowInitContext>
+                            <developBranchName>3.x</developBranchName>
+                        </flowInitContext>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>

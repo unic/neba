@@ -31,6 +31,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -38,7 +40,10 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.reflect.core.Reflection.field;
+import static org.fest.reflect.core.Reflection.method;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocaleContext;
@@ -143,6 +148,42 @@ public class NebaRequestContextFilterTest {
     public void testContextAreNotInheritedByDefault() throws Exception {
         doFilter();
         assertContextsAreNotInherited();
+    }
+
+    @Test
+    public void testFilterToleratesAbsenceOfOptionalDependencyToBgHttpServletRequest() throws Exception {
+        ClassLoader classLoaderWithoutBgServlets = new ClassLoader(getClass().getClassLoader()) {
+            @Override
+            public Class<?> loadClass(String name) throws ClassNotFoundException {
+                if (BackgroundHttpServletRequest.class.getName().equals(name)) {
+                    // This optional dependency is not present on the class path in this test scenario.
+                    throw new ClassNotFoundException("THIS IS AN EXPECTED TEST EXCEPTION. The dependency to bgservlets is optional.");
+                }
+                if (NebaRequestContextFilter.class.getName().equals(name)) {
+                    // Define the test subject's class class in this class loader, thus its dependencies -
+                    // such as the background servlet request - are also loaded via this class loader.
+                    try {
+                        byte[] classFileData = toByteArray(getResourceAsStream(name.replace('.', '/').concat(".class")));
+                        return defineClass(name, classFileData, 0, classFileData.length);
+                    } catch (IOException e) {
+                        throw new ClassNotFoundException("Unable to load " + name + ".", e);
+                    }
+                }
+
+                return super.loadClass(name);
+            }
+        };
+
+        Class<?> filterClass = classLoaderWithoutBgServlets.loadClass(NebaRequestContextFilter.class.getName());
+
+        assertThat(field("IS_BGSERVLETS_PRESENT").ofType(boolean.class).in(filterClass).get()).isFalse();
+
+        Object filter = filterClass.newInstance();
+
+        method("doFilter")
+                .withParameterTypes(ServletRequest.class, ServletResponse.class, FilterChain.class)
+                .in(filter)
+                .invoke(request, response, chain);
     }
 
     private void assertContextsAreNotInherited() {

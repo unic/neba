@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.springframework.util.ClassUtils.isPresent;
+
 /**
  * A modified {@link RequestContextFilter} wrapping
  * {@link org.apache.sling.bgservlets.BackgroundHttpServletRequest sling background requests}
@@ -41,6 +43,9 @@ import java.io.IOException;
  * @see RequestContextFilter
  */
 public class NebaRequestContextFilter extends RequestContextFilter {
+    private static final boolean IS_BGSERVLETS_PRESENT = isPresent(
+            "org.apache.sling.bgservlets.BackgroundHttpServletRequest",
+            NebaRequestContextFilter.class.getClassLoader());
 
     private boolean threadContextInheritable = false;
 
@@ -81,7 +86,7 @@ public class NebaRequestContextFilter extends RequestContextFilter {
     }
 
     private ServletRequestAttributes createServletRequestAttributes(HttpServletRequest request) {
-        if (request instanceof BackgroundHttpServletRequest) {
+        if (IS_BGSERVLETS_PRESENT && request instanceof BackgroundHttpServletRequest) {
             return new ServletRequestAttributes(new BackgroundServletRequestWrapper(request));
         }
 

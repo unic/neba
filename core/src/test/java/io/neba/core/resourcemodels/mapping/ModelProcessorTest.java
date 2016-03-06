@@ -43,13 +43,43 @@ public class ModelProcessorTest {
      */
     private class TestModel {
         @PostMapping
-        public void postMapping() {
-            setPostMappingCalled(true);
+        public void publicPostMapping() {
+            postMappingWasCalled();
+        }
+
+        @PostMapping
+        protected void protectedPostMapping() {
+            postMappingWasCalled();
+        }
+
+        @PostMapping
+        private void privatePostMapping() {
+            postMappingWasCalled();
+        }
+
+        @PostMapping
+        void packagePrivatePostMapping() {
+            postMappingWasCalled();
         }
 
         @PreMapping
-        public void preMapping() {
-            setPreMappingCalled(true);
+        public void publicPreMapping() {
+            preMappingWasCalled();
+        }
+
+        @PreMapping
+        protected void protectedPreMapping() {
+            preMappingWasCalled();
+        }
+
+        @PreMapping
+        private void privatePreMapping() {
+            preMappingWasCalled();
+        }
+
+        @PreMapping
+        void packagePrivatePreMapping() {
+            preMappingWasCalled();
         }
     }
 
@@ -58,8 +88,8 @@ public class ModelProcessorTest {
     @Mock
     private Resource resource;
 
-    private boolean postMappingCalled;
-    private boolean preMappingCalled;
+    private int timesPostMappingCalled;
+    private int timesPreMappingCalled;
     private TestModel model;
     private ResourceModelMetaData metadata;
 
@@ -70,22 +100,24 @@ public class ModelProcessorTest {
     public void setUp() throws Exception {
         this.throwExceptionDuringPostMapping = false;
         this.throwExceptionDuringPreMapping = false;
+        this.timesPostMappingCalled = 0;
+        this.timesPreMappingCalled = 0;
     }
 
     @Test
     public void testPreMapping() throws Exception {
         withModel(new TestModel());
         processBeforeMapping();
-        assertPostMappingMethodIsNotInvoked();
-        assertPreMappingMethodIsInvoked();
+        assertPostMappingMethodsAreNotInvoked();
+        assertPreMappingMethodsAreInvoked();
     }
 
     @Test
     public void testPostMapping() throws Exception {
         withModel(new TestModel());
         processAfterMapping();
-        assertPreMappingMethodIsNotInvoked();
-        assertPostMappingMethodIsInvoked();
+        assertPreMappingMethodsAreNotInvoked();
+        assertPostMappingMethodsAreInvoked();
     }
 
     @Test
@@ -110,42 +142,34 @@ public class ModelProcessorTest {
         this.throwExceptionDuringPreMapping = true;
     }
 
-    public boolean isPostMappingCalled() {
-        return postMappingCalled;
-    }
-
-    public void setPostMappingCalled(boolean postMappingCalled) {
+    private void postMappingWasCalled() {
         if (throwExceptionDuringPostMapping) {
             throw new RuntimeException("THIS IS AN EXPECTED TEST EXCEPTION");
         }
-        this.postMappingCalled = postMappingCalled;
+        this.timesPostMappingCalled++;
     }
 
-    public boolean isPreMappingCalled() {
-        return preMappingCalled;
-    }
-
-    public void setPreMappingCalled(boolean preMappingCalled) {
+    private void preMappingWasCalled() {
         if (throwExceptionDuringPreMapping) {
             throw new RuntimeException("THIS IS AN EXPECTED TEST EXCEPTION");
         }
-        this.preMappingCalled = preMappingCalled;
+        this.timesPreMappingCalled++;
     }
 
-    private void assertPreMappingMethodIsNotInvoked() {
-        assertThat(this.preMappingCalled).isFalse();
+    private void assertPreMappingMethodsAreNotInvoked() {
+        assertThat(this.timesPreMappingCalled).isZero();
     }
 
-    private void assertPreMappingMethodIsInvoked() {
-        assertThat(this.preMappingCalled).isTrue();
+    private void assertPreMappingMethodsAreInvoked() {
+        assertThat(this.timesPreMappingCalled).isEqualTo(this.metadata.getPreMappingMethods().length);
     }
 
-    private void assertPostMappingMethodIsNotInvoked() {
-        assertThat(this.postMappingCalled).isFalse();
+    private void assertPostMappingMethodsAreNotInvoked() {
+        assertThat(this.timesPostMappingCalled).isZero();
     }
 
-    private void assertPostMappingMethodIsInvoked() {
-        assertThat(this.postMappingCalled).isTrue();
+    private void assertPostMappingMethodsAreInvoked() {
+        assertThat(this.timesPostMappingCalled).isEqualTo(this.metadata.getPostMappingMethods().length);
     }
 
     private void withModel(final TestModel testModel) {

@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -41,12 +40,13 @@ public class ModelProcessor {
     public <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
         for (MethodMetaData methodMetaData : metaData.getPostMappingMethods()) {
             Method method = methodMetaData.getMethod();
+            method.setAccessible(true);
             try {
                 method.invoke(model);
-            } catch (InvocationTargetException e) {
-                logger.error("Unable to invoke the @" + PostMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
+            } catch (Exception e) {
+                logger.error("Unable to invoke the @" + PostMapping.class.getSimpleName() + " method " + method + ".", e);
             }
         }
     }
@@ -54,12 +54,13 @@ public class ModelProcessor {
     public <T> void processBeforeMapping(ResourceModelMetaData metaData, T model) {
         for (MethodMetaData methodMetaData : metaData.getPreMappingMethods()) {
             Method method = methodMetaData.getMethod();
+            method.setAccessible(true);
             try {
                 method.invoke(model);
-            } catch (InvocationTargetException e) {
-                logger.error("Unable to invoke the @" + PreMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
+            } catch (Exception e) {
+                logger.error("Unable to invoke the @" + PreMapping.class.getSimpleName() + " method " + method + ".", e);
             }
         }
     }
