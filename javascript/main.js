@@ -440,7 +440,7 @@ $(function () {
                 $elem.find("time.dt-updated").each(function (_, elem) {
                     tweet.time = parseTime(PATTERN_TWITTER_TIMESTAMP, elem.getAttribute("datetime"));
                 });
-                $elem.find("div.timeline-Tweet-text").each(function (_, elem) {
+                $elem.find(".timeline-Tweet-text").each(function (_, elem) {
                     tweet.message = elem.innerHTML;
                 });
 
