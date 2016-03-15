@@ -25,7 +25,6 @@ CSS overview:
 				      RESET
 ---------------------------------------------------*/
 pre, code {
-    white-space: pre-wrap;
     padding: 20px;
 }
 
@@ -172,6 +171,7 @@ blockquote p {
 
 p {
     margin-bottom: 14px;
+    word-wrap: break-word;
 }
 
 p:last-child {
@@ -3706,4 +3706,16 @@ ul.item-nav li:hover {
 
 #footer-bottom {
     background-color: #BDE3FA;
+}
+
+
+/* ----------------------------------------------------------------- Code highlighting enhancements -------------------------------------------------------------------------------- */
+
+.highlight {
+    margin-right: 0;
+}
+
+.highlight pre {
+    overflow-y: hidden;
+    overflow-x: auto;
 }
