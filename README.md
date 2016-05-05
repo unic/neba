@@ -13,6 +13,11 @@ Documentation
 --------------------
 The project documentation resides at [http://neba.io/](http://neba.io/).
 
+License and included licenses
+--------------------
+NEBA is licensed under the terms of the Apache License, version 2.0. For the licenses of included products,
+see [NOTICE](NOTICE.txt)
+
 Getting support
 --------------------
 Consult the documentation or ask a question in the site comments at [http://neba.io](http://neba.io), Tweet to [@nebaframework](https://www.twitter.com/nebaframework) ask a question at [Stack overflow](http://stackoverflow.com/) or drop us a mail at neba at unic.com.

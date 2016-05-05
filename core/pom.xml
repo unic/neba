@@ -160,6 +160,10 @@
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.jetty</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
         </dependency>
@@ -221,6 +225,7 @@
                             org.springframework.web.filter,
                             org.aopalliance.aop,
                             org.apache.sling.bgservlets;version=0.0.0;resolution:=optional,
+                            org.eclipse.jetty.websocket.server,
                             *
                         </Import-Package>
                     </instructions>
