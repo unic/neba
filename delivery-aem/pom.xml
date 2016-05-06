@@ -76,6 +76,34 @@
             <groupId>org.eclipse.gemini.blueprint</groupId>
             <artifactId>gemini-blueprint-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-extender</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!-- build dependencies -->
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -140,6 +168,28 @@
                             <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>provide-jackson-dependencies</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.fasterxml.jackson.core</groupId>
+                                    <artifactId>jackson-core</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.fasterxml.jackson.core</groupId>
+                                    <artifactId>jackson-databind</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.fasterxml.jackson.core</groupId>
+                                    <artifactId>jackson-annotations</artifactId>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -157,11 +207,13 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>io.neba.delivery.JavaxInjectManifestTransformer</mainClass>
+                    <mainClass>io.neba.delivery.SpringBundlesTransformer</mainClass>
                     <arguments>
                         <argument>${spring.artifacts.workdir}</argument>
                         <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}</argument>
+                        <argument>${project.build.directory}/dependency</argument>
                     </arguments>
+                    <classpathScope>compile</classpathScope>
                 </configuration>
             </plugin>
 
@@ -178,6 +230,7 @@
                             <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
                             <target>${neba.installation.path}</target>
                         </embedded>
+
                         <embedded>
                             <groupId>org.eclipse.gemini.blueprint</groupId>
                             <artifactId>gemini-blueprint-core</artifactId>
@@ -188,6 +241,12 @@
                             <artifactId>gemini-blueprint-io</artifactId>
                             <target>${neba.installation.path}</target>
                         </embedded>
+                        <embedded>
+                            <groupId>org.eclipse.gemini.blueprint</groupId>
+                            <artifactId>gemini-blueprint-extender</artifactId>
+                            <target>${neba.installation.path}</target>
+                        </embedded>
+
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>io.neba.neba-core</artifactId>

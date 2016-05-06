@@ -23,7 +23,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.*;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
@@ -177,7 +176,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
         RequestMappingHandlerAdapter requestMappingHandlerAdapter = this.factory.getBean(RequestMappingHandlerAdapter.class);
 
         if (requestMappingHandlerAdapter != null) {
-            HandlerMethodArgumentResolverComposite argumentResolvers = requestMappingHandlerAdapter.getArgumentResolvers();
+            List<HandlerMethodArgumentResolver> argumentResolvers = requestMappingHandlerAdapter.getArgumentResolvers();
 
             if (argumentResolvers == null) {
                 throw new IllegalStateException("No argument resolvers found in " + requestMappingHandlerAdapter +
@@ -192,7 +191,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
 
             // Subsequently add all existing argument resolvers (they are order-sensitive, ending with a catch-all resolver,
             // thus the custom resolvers have to go first)
-            resolvers.addAll(argumentResolvers.getResolvers());
+            resolvers.addAll(argumentResolvers);
             requestMappingHandlerAdapter.setArgumentResolvers(resolvers);
         }
     }
