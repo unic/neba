@@ -25,9 +25,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Math.round;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.regex.Pattern.compile;
-import static org.apache.commons.lang3.math.NumberUtils.toInt;
+import static org.apache.commons.lang3.math.NumberUtils.toFloat;
 
 /**
  * Implements the tailing of logfiles provided by the {@link LogFiles}.
@@ -35,7 +36,7 @@ import static org.apache.commons.lang3.math.NumberUtils.toInt;
  * @author Olaf Otto
  */
 public class TailSocket extends WebSocketAdapter {
-    private static final Pattern TAIL_COMMAND = compile("tail:([1-9]+[0-9]*)(kb|mb):(.+)");
+    private static final Pattern TAIL_COMMAND = compile("tail:(([0-9]+\\.)?[0-9]+)mb:(.+)");
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private ExecutorService executorService = newSingleThreadExecutor();
 
@@ -55,7 +56,7 @@ public class TailSocket extends WebSocketAdapter {
 
     /**
      * @param message a tail command as specified by {@link #TAIL_COMMAND}.
-     *                immediately sends the last <code>n</code> lines of a specified
+     *                immediately sends the last <code>n</code> bytes of a specified
      *                log file, if present, and begins tailing the logfile thereafter.
      */
     @Override
@@ -73,8 +74,7 @@ public class TailSocket extends WebSocketAdapter {
         }
 
         try {
-            int including = toInt(m.group(1));
-            String unit = m.group(2);
+            float including = toFloat(m.group(1));
             String path = m.group(m.groupCount());
             File file = resolveLogFile(path);
 
@@ -82,7 +82,7 @@ public class TailSocket extends WebSocketAdapter {
                 return;
             }
 
-            long bytesToTail = "kb".equals(unit) ? including * 1024L : including * 1024L * 1024L;
+            long bytesToTail = round(including * 1024L * 1024L);
 
             tail(file, bytesToTail);
         } catch (IOException e) {

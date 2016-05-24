@@ -66,7 +66,7 @@ public class TailSocketTest extends TailTests {
     public void testTailing() throws Exception {
         File emptyLog = createTempFile("tailsocket-test-", ".log", getTestLogfileDirectory().getParentFile());
         this.availableLogFiles.add(emptyLog);
-        testee.onWebSocketText("tail:10kb:" + emptyLog.getAbsolutePath());
+        testee.onWebSocketText("tail:0.1mb:" + emptyLog.getAbsolutePath());
 
         doSleep(1000);
 
@@ -100,6 +100,16 @@ public class TailSocketTest extends TailTests {
         verifySocketRepliesAsynchronously("pong");
     }
 
+    @Test(expected = RuntimeException.class)
+    public void testHandlingOfIoException() throws Exception {
+        withIoExceptionDuringLogfileResolution();
+        tail("/does/not/exist");
+    }
+
+    private void withIoExceptionDuringLogfileResolution() throws IOException {
+        doThrow(new IOException("THIS IS AN EXPECTED TEST EXCEPTION")).when(this.logFiles).resolveLogFiles();
+    }
+
     private void verifySocketRepliesAsynchronously(String s) {
         verify(getRemote()).sendStringByFuture(s);
     }
@@ -113,6 +123,6 @@ public class TailSocketTest extends TailTests {
     }
 
     private void tail(String fileName) {
-        testee.onWebSocketText("tail:100kb:" + pathOf(fileName));
+        testee.onWebSocketText("tail:0.1mb:" + pathOf(fileName));
     }
 }
