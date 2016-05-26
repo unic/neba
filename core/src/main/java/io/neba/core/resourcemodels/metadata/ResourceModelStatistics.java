@@ -43,6 +43,7 @@ public class ResourceModelStatistics {
 
     private long instantiations;
     private long mappings;
+    private long cacheHits;
 
     public ResourceModelStatistics() {
         reset();
@@ -60,6 +61,7 @@ public class ResourceModelStatistics {
         fill(this.mappingDurationFrequencies, 0);
         this.instantiations = 0;
         this.mappings = 0;
+        this.cacheHits = 0;
     }
 
     /**
@@ -93,6 +95,24 @@ public class ResourceModelStatistics {
      */
     public ResourceModelStatistics countSubsequentMapping() {
         ++this.mappings;
+        return this;
+    }
+
+    /**
+     * @return The number of types a {@link io.neba.api.resourcemodels.ResourceModelCache} contained an instance
+     * of the resource model.
+     */
+    public long getCacheHits() {
+        return cacheHits;
+    }
+
+    /**
+     * Increment the number of cache hits for this model.
+     *
+     * @return this instance.
+     */
+    public ResourceModelStatistics countCacheHit() {
+        ++this.cacheHits;
         return this;
     }
 
