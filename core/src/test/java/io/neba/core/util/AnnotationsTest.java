@@ -25,7 +25,7 @@ import java.util.Set;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Arrays.asList;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
@@ -112,7 +112,7 @@ public class AnnotationsTest {
 
     @Test
     public void testIteratorProvidesExpectedAnnotations() throws Exception {
-        assertThat(this.testee.iterator()).containsOnly(this.allAnnotations.toArray());
+        assertThat(this.testee.iterator()).containsOnly(this.allAnnotations.toArray(new Annotation[]{}));
     }
 
     @SafeVarargs

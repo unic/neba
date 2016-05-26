@@ -33,7 +33,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletResponse;
 import java.util.concurrent.Callable;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;

@@ -18,7 +18,7 @@ package io.neba.core.resourcemodels.metadata;
 
 import io.neba.core.resourcemodels.mapping.testmodels.ExtendedTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
-import org.fest.assertions.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.util.ReflectionUtils.findField;
 
 /**
@@ -113,8 +113,8 @@ public class ResourceModelMetaDataTest {
     	Field field = findField(this.modelType, name);
 		assertThat(field).overridingErrorMessage("Field " + this.modelType.getSimpleName() + "." + name + " does not exist.").isNotNull();
 		assertThat(this.testee.getMappableFields())
-				.onProperty("field")
+				.extracting("field")
 				.overridingErrorMessage("The detected mappable fields must not contain the field " + field + ".")
-				.excludes(field);
+				.doesNotContain(field);
 	}
 }

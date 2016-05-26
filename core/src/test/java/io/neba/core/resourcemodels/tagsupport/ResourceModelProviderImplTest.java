@@ -36,7 +36,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;

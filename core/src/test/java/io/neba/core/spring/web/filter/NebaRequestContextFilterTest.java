@@ -34,17 +34,18 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.apache.commons.io.IOUtils.toByteArray;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.reflect.core.Reflection.field;
-import static org.fest.reflect.core.Reflection.method;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocaleContext;
+import static org.springframework.util.ReflectionUtils.findMethod;
 import static org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST;
 import static org.springframework.web.context.request.RequestContextHolder.getRequestAttributes;
 
@@ -86,7 +87,7 @@ public class NebaRequestContextFilterTest {
 
             localeContext = getLocaleContext();
 
-            executorService.submit((Runnable) () -> {
+            executorService.submit(() -> {
                 inheritedRequestAttributes = getRequestAttributes();
                 inheritedLocalContext = getLocaleContext();
             }).get();
@@ -168,14 +169,25 @@ public class NebaRequestContextFilterTest {
 
         Class<?> filterClass = classLoaderWithoutBgServlets.loadClass(NebaRequestContextFilter.class.getName());
 
-        assertThat(field("IS_BGSERVLETS_PRESENT").ofType(boolean.class).in(filterClass).get()).isFalse();
+        assertThat(valueOfField(filterClass, "IS_BGSERVLETS_PRESENT")).isFalse();
 
         Object filter = filterClass.newInstance();
 
-        method("doFilter")
-                .withParameterTypes(ServletRequest.class, ServletResponse.class, FilterChain.class)
-                .in(filter)
-                .invoke(request, response, chain);
+        invoke(filter, "doFilter", request, response, chain);
+    }
+
+    private void invoke(Object o, String methodName, Object... args) throws InvocationTargetException, IllegalAccessException {
+        findMethod(
+                o.getClass(),
+                methodName,
+                ServletRequest.class, ServletResponse.class, FilterChain.class)
+                .invoke(o, args);
+    }
+
+    private boolean valueOfField(Class type, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+        Field declaredField = type.getDeclaredField(fieldName);
+        declaredField.setAccessible(true);
+        return (boolean) declaredField.get(this.testee);
     }
 
     private void assertContextsAreNotInherited() {

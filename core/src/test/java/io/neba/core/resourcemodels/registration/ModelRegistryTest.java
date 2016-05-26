@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -425,7 +425,7 @@ public class ModelRegistryTest {
     }
 
     private void assertLookedUpModelTypesAre(Class<?>... types) {
-        assertThat(this.lookedUpModels).onProperty("source.beanType").containsOnly((Object[]) types);
+        assertThat(this.lookedUpModels).extracting("source.beanType").containsOnly((Object[]) types);
     }
 
 	private void assertNumberOfLookedUpBeanSourcesIs(int i) {

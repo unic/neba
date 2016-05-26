@@ -3,7 +3,7 @@ package io.neba.core.util;
 import org.junit.Test;
 
 import static io.neba.core.util.StringUtil.append;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Olaf Otto

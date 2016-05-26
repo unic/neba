@@ -14,7 +14,7 @@ import java.util.zip.ZipEntry;
 import static java.nio.file.Files.createTempDirectory;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Olaf Otto

@@ -28,7 +28,7 @@ import org.springframework.cglib.proxy.NoOp;
 
 import java.util.Collection;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.cglib.proxy.Enhancer.create;
 
@@ -133,7 +133,7 @@ public class ResourceModelMetaDataRegistrarTest {
     }
 
     private void assertAllMetadataConsistsOfMetadataFor(Class<?>... types) {
-        assertThat(this.allMetaData).onProperty("typeName").containsOnly((Object[]) typeNamesOf(types));
+        assertThat(this.allMetaData).extracting("typeName").containsOnly((Object[]) typeNamesOf(types));
     }
 
     private void getAllMetadata() {

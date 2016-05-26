@@ -23,7 +23,7 @@ import java.util.*;
 
 import static io.neba.core.util.ReflectionUtil.*;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.util.ReflectionUtils.findField;
 
 /**
