@@ -35,7 +35,7 @@ import java.util.List;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apache.commons.lang3.reflect.FieldUtils.getDeclaredField;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
@@ -216,11 +216,11 @@ public class AnnotatedFieldMappersTest {
     }
 
     private void assertMetadataHasMappers(MappedFieldMetaData metadata, AnnotatedFieldMapper... mappers) {
-        assertThat(this.testee.get(metadata)).onProperty("mapper").containsOnly(mappers);
+        assertThat(this.testee.get(metadata)).extracting("mapper").containsOnly(mappers);
     }
 
     private void assertMetadataHasAnnotations(MappedFieldMetaData metadata, Annotation... annotations) {
-        assertThat(this.testee.get(metadata)).onProperty("annotation").containsOnly(annotations);
+        assertThat(this.testee.get(metadata)).extracting("annotation").containsOnly(annotations);
     }
 
     private void bind(AnnotatedFieldMapper mapper) {

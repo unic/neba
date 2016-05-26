@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import static java.io.File.createTempFile;
 import static java.nio.file.Files.move;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 

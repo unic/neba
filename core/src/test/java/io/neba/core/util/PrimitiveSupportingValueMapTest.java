@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -203,8 +203,8 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     private void assertEntriesAre(String key, String value) {
-        assertThat(this.testee.entrySet()).onProperty("value").contains(value);
-        assertThat(this.testee.entrySet()).onProperty("key").contains(key);
+        assertThat(this.testee.entrySet()).extracting("value").contains(value);
+        assertThat(this.testee.entrySet()).extracting("key").contains(key);
     }
 
     @SuppressWarnings("unchecked")
