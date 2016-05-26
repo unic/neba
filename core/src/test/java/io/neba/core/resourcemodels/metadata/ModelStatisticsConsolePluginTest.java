@@ -105,7 +105,8 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"totalMappingDuration\":1000," +
                                     "\"maximumMappingDuration\":20," +
                                     "\"minimumMappingDuration\":0," +
-                                    "\"mappingDurationMedian\":5" +
+                                    "\"mappingDurationMedian\":5," +
+                                    "\"cacheHits\":0" +
                                     "}," +
 
                                     "{" +
@@ -120,7 +121,8 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"totalMappingDuration\":1000," +
                                     "\"maximumMappingDuration\":40," +
                                     "\"minimumMappingDuration\":1," +
-                                    "\"mappingDurationMedian\":10" +
+                                    "\"mappingDurationMedian\":10," +
+                                    "\"cacheHits\":0" +
                                     "}" +
                                 "]");
     }
@@ -143,6 +145,7 @@ public class ModelStatisticsConsolePluginTest {
                         "\"maximumMappingDuration\":20," +
                         "\"minimumMappingDuration\":0," +
                         "\"mappingDurationMedian\":5," +
+                        "\"cacheHits\":0," +
                         "\"mappingDurationFrequencies\":{" +
                             "\"[0, 1)\":10," +
                              "\"[1, 2)\":20," +

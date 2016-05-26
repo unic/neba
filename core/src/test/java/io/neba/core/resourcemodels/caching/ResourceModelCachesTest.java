@@ -17,6 +17,9 @@
 package io.neba.core.resourcemodels.caching;
 
 import io.neba.api.resourcemodels.ResourceModelCache;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
+import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.Key;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
@@ -39,6 +42,12 @@ import static org.mockito.Mockito.*;
 public class ResourceModelCachesTest {
 	@Mock
 	private Resource resource;
+	@Mock
+	private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
+	@Mock
+	private ResourceModelMetaData resourceModelMetaData;
+	@Mock
+	private ResourceModelStatistics resourceModelStatistics;
 	
 	private List<ResourceModelCache> mockedCaches = new LinkedList<>();
 	private Class<Object> targetType = Object.class;
@@ -50,6 +59,8 @@ public class ResourceModelCachesTest {
     @Before
 	public void prepareTest() {
 		this.mockedCaches.clear();
+		doReturn(this.resourceModelMetaData).when(this.resourceModelMetaDataRegistrar).get(any());
+		doReturn(this.resourceModelStatistics).when(this.resourceModelMetaData).getStatistics();
 	}
 
 	@Test
@@ -68,7 +79,22 @@ public class ResourceModelCachesTest {
 		lookup();
 		verifyCacheReturnsOnFirstHit();
 	}
-	
+
+	@Test
+	public void testSuccessfulLookupIsCountedAsCacheHitInResourceModelMetaData() throws Exception {
+		bindCache();
+		withCachedObjectIn(0);
+		lookup();
+		verifyCacheHitIsCounted();
+	}
+
+	@Test
+	public void testUnsuccessulLookupIsNotCountedAsCacheHit() throws Exception {
+		bindCache();
+		lookup();
+		verifyResourceModelStatisticsAreNotUsed();
+	}
+
 	@Test
 	public void testRemovalOfCaches() throws Exception {
 		bindCache();
@@ -135,6 +161,14 @@ public class ResourceModelCachesTest {
 		for (ResourceModelCache cache : this.mockedCaches) {
 			verify(cache, times(1)).get(eq(lookupKey()));
 		}
+	}
+
+	private void verifyCacheHitIsCounted() {
+		verify(this.resourceModelStatistics).countCacheHit();
+	}
+
+	private void verifyResourceModelStatisticsAreNotUsed() {
+		verify(this.resourceModelMetaDataRegistrar, never()).get(any());
 	}
 
 	private void lookup() {

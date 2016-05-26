@@ -122,20 +122,20 @@ public class ResourceModelStatisticsTest {
     @Test
     public void testMinimumMappingDurationCalculation() throws Exception {
         withDurations(1, 2, 3, 4, 250, 6, 7, 1);
-        calculatMinimumMappingDuration();
+        calculateMinimumMappingDuration();
         assertMinimumMappingDurationIs(1.5);
     }
 
     @Test
     public void testMinimumMappingDurationCalculationWithoutAnyElements() throws Exception {
-        calculatMinimumMappingDuration();
+        calculateMinimumMappingDuration();
         assertMinimumMappingDurationIs(0);
     }
 
     @Test
     public void testMappingCount() throws Exception {
         withMappings(114);
-        calulateNumberOfMappings();
+        calculateNumberOfMappings();
         assertNumberOfMappingsIs(114);
     }
 
@@ -158,6 +158,57 @@ public class ResourceModelStatisticsTest {
         assertNumberOfInstantiationsIs(2);
     }
 
+    @Test
+    public void testCacheHitCount() throws Exception {
+        assertNumberOfCacheHitsIs(0);
+
+        countCacheHit();
+
+        assertNumberOfCacheHitsIs(1);
+
+        countCacheHit();
+
+        assertNumberOfCacheHitsIs(2);
+    }
+
+    @Test
+    public void testReset() throws Exception {
+        countCacheHit();
+        countInstantiation();
+        withDurations(1, 1);
+        withMappings(2);
+
+        calculateMinimumMappingDuration();
+        calculateNumberOfMappings();
+
+        assertNumberOfInstantiationsIs(1);
+        assertNumberOfCacheHitsIs(1);
+        assertMinimumMappingDurationIs(1.5F);
+        assertNumberOfMappingsIs(2);
+
+        reset();
+
+        calculateMinimumMappingDuration();
+        calculateNumberOfMappings();
+
+        assertNumberOfInstantiationsIs(0);
+        assertNumberOfCacheHitsIs(0);
+        assertMinimumMappingDurationIs(0);
+        assertNumberOfMappingsIs(0);
+    }
+
+    private void reset() {
+        this.testee.reset();
+    }
+
+    private void countCacheHit() {
+        this.testee.countCacheHit();
+    }
+
+    private void assertNumberOfCacheHitsIs(int expected) {
+        assertThat(this.testee.getCacheHits()).isEqualTo(expected);
+    }
+
     private void countInstantiation() {
         this.testee.countInstantiation();
     }
@@ -174,7 +225,7 @@ public class ResourceModelStatisticsTest {
         assertThat(this.minimumDuration).isEqualTo(duration);
     }
 
-    private void calculatMinimumMappingDuration() {
+    private void calculateMinimumMappingDuration() {
         this.minimumDuration = this.testee.getMinimumMappingDuration();
     }
 
@@ -214,7 +265,7 @@ public class ResourceModelStatisticsTest {
         }
     }
 
-    private void calulateNumberOfMappings() {
+    private void calculateNumberOfMappings() {
         this.numberOfMappings = this.testee.getNumberOfMappings();
     }
 }

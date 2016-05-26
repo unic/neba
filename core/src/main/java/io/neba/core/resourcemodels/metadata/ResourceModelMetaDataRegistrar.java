@@ -1,18 +1,18 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.metadata;
 
@@ -21,9 +21,12 @@ import org.osgi.framework.Bundle;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.util.ClassUtils.getUserClass;
 
 /**
@@ -55,12 +58,14 @@ public class ResourceModelMetaDataRegistrar {
      * @return the {@link ResourceModelMetaData} of all currently known resource models.
      */
     public Collection<ResourceModelMetaData> get() {
-        Collection<ResourceModelMetaData> metaData = new ArrayList<>(256);
-        metaData.addAll(this.cache.values().stream().map(holder -> holder.metaData).collect(Collectors.toList()));
-        return metaData;
+        return this.cache.values()
+                .stream()
+                .map(holder -> holder.metaData)
+                .collect(toList());
     }
 
     /**
+     * @param modelType must not be <code>null</code>.
      * @return the {@link ResourceModelMetaData} of the specified model. Never <code>null</code> - throws an {@link IllegalStateException}
      *         if the model type is not known as a resource model must always be registered.
      */
@@ -68,16 +73,36 @@ public class ResourceModelMetaDataRegistrar {
         if (modelType == null) {
             throw new IllegalArgumentException("Method argument modelType must not be null.");
         }
-        ResourceModelMetadataHolder metaDataHolder = this.cache.get(getUserClass(modelType));
+
+        // Optimistic lookup: Most of the models types are most likely not enhanced by CGLib.
+        ResourceModelMetadataHolder metaDataHolder = this.cache.get(modelType);
+
+        if (metaDataHolder == null) {
+            // The model type might have been enhanced, explicitly lookup with the user (non-enhanced) class.
+            metaDataHolder = this.cache.get(getUserClass(modelType));
+        }
+
         if (metaDataHolder == null) {
             throw new IllegalStateException("Unable to obtain resource model metadata for " + modelType +
                     " - this type was either never registered or has been removed, i.e. " +
                     " it's source bundle was uninstalled.");
         }
+
         return metaDataHolder.metaData;
     }
 
+    /**
+     * Creates a new {@link ResourceModelMetaData} for the model represented
+     * yb the provided bean source.
+     *
+     * @param beanSource must not be <code>null</code>.
+     * @return the newly created meta data. Never <code>null</code>.
+     */
     public ResourceModelMetaData register(OsgiBeanSource<?> beanSource) {
+        if (beanSource == null) {
+            throw new IllegalArgumentException("method parameter beanSource must not be null");
+        }
+
         Class<?> beanType = beanSource.getBeanType();
         ResourceModelMetaData modelMetaData = new ResourceModelMetaData(beanType);
         ResourceModelMetadataHolder holder = new ResourceModelMetadataHolder(beanSource, modelMetaData);
@@ -89,7 +114,16 @@ public class ResourceModelMetaDataRegistrar {
         return modelMetaData;
     }
 
+    /**
+     * Removes the metadata of all models contained in the provided bundle from the registrar.
+     *
+     * @param bundle must not be <code>null</code>
+     */
     public void remove(Bundle bundle) {
+        if (bundle == null) {
+            throw new IllegalArgumentException("method parameter bundle must not be null");
+        }
+
         Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
         Iterator<Map.Entry<Class<?>, ResourceModelMetadataHolder>> it = newCache.entrySet().iterator();
         while (it.hasNext()) {

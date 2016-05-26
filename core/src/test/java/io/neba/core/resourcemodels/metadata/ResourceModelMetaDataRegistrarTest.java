@@ -118,6 +118,16 @@ public class ResourceModelMetaDataRegistrarTest {
         assertAllMetadataConsistsOfMetadataFor(TestResourceModel.class, OtherTestResourceModel.class);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullValuesAreNotToleratedForBundleDeRegistration() throws Exception {
+        this.testee.remove(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullValuesAreNotToleratedForModelRegistration() throws Exception {
+        this.testee.register(null);
+    }
+
     private void clearAllMetaData() {
         this.allMetaData.clear();
     }

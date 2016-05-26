@@ -193,6 +193,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         data.put("maximumMappingDuration", statistics.getMaximumMappingDuration());
         data.put("minimumMappingDuration", statistics.getMinimumMappingDuration());
         data.put("mappingDurationMedian", statistics.getMappingDurationMedian());
+        data.put("cacheHits", statistics.getCacheHits());
         return data;
     }
 
