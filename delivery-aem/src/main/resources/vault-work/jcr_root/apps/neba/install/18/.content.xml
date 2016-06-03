@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="sling:OrderedFolder">
+    <!--
+    Determines the order of items in the install folder, thus also the installation order.
+    This helps preventing exceptions due to missing namespace handlers when gemini blueprint
+    bundles are started before the spring bundles are installed.
+     -->
+    <gemini-blueprint-core-${gemini.version}.jar/>
+    <gemini-blueprint-io-${gemini.version}.jar />
+    <gemini-blueprint-extender-${gemini.version}.jar/>
+</jcr:root>

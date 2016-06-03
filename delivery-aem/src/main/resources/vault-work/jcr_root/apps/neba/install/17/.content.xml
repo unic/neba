@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="sling:OrderedFolder">
+    <!--
+    Determines the order of items in the install folder, thus also the installation order.
+    This helps preventing exceptions due to missing namespace handlers when gemini blueprint
+    bundles are started before the spring bundles are installed.
+     -->
+    <org.apache.servicemix.bundles.spring-aop-${spring.version}.jar />
+    <org.apache.servicemix.bundles.spring-core-${spring.version}.jar />
+    <org.apache.servicemix.bundles.spring-beans-${spring.version}.jar />
+    <org.apache.servicemix.bundles.spring-context-${spring.version}.jar />
+    <org.apache.servicemix.bundles.spring-context-support-${spring.version}.jar />
+    <org.apache.servicemix.bundles.spring-expression-${spring.version}.jar />
+    <org.apache.servicemix.bundles.spring-web-${spring.version}.jar />
+    <org.apache.servicemix.bundles.spring-webmvc-${spring.version}.jar />
+</jcr:root>
