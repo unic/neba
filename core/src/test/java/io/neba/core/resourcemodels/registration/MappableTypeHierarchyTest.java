@@ -43,7 +43,7 @@ public class MappableTypeHierarchyTest {
     @Mock
     private NodeType nodeType;
     @Mock
-    private ResourceResolver administrativeResourceResolver;
+    private ResourceResolver resolver;
 
     @Before
     public void prepareNodeTypeHierarchy() throws RepositoryException {
@@ -77,7 +77,7 @@ public class MappableTypeHierarchyTest {
     }
 
     private void iterateOnceWithMappableTypeHierarchy() {
-        Iterable<String> it = new MappableTypeHierarchy(this.resource, this.administrativeResourceResolver);
+        Iterable<String> it = new MappableTypeHierarchy(this.resource);
         it.iterator().next();
     }
 }

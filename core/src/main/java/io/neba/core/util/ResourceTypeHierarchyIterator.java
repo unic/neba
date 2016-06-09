@@ -18,7 +18,6 @@ package io.neba.core.util;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -26,7 +25,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
-import static org.apache.sling.api.resource.ResourceUtil.getResourceSuperType;
+import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
 
 /**
  * Iterates the type hierarchy of a {@link Resource} starting with the resource's
@@ -39,44 +38,39 @@ import static org.apache.sling.api.resource.ResourceUtil.getResourceSuperType;
  * if no "sling:resourceType" property is set; however the node type hierarchy
  * is covered by the {@link NodeTypeHierarchyIterator} and is not used by this iterator.
  * 
- * @see ResourceUtil#findResourceSuperType(Resource)
+ * @see ResourceResolver#getParentResourceType(String)
  * @author Olaf Otto
  */
 public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable<String> {
-    private final ResourceResolver resolver;
-
     /**
      * @param resource must not be <code>null</code>.
      * @return never <code>null</code>.
      */
-    public static ResourceTypeHierarchyIterator typeHierarchyOf(final Resource resource, final ResourceResolver resourceResolver) {
-        return new ResourceTypeHierarchyIterator(resource, resourceResolver);
+    public static ResourceTypeHierarchyIterator typeHierarchyOf(final Resource resource) {
+        return new ResourceTypeHierarchyIterator(resource);
     }
 
-    private Resource currentResource;
-    private String resourceType;
+    private final ResourceResolver resolver;
+
+    private String currentResourceType;
+    private String nextResourceType;
     private boolean isSyntheticResource;
 
     /**
      * @param resource must not be <code>null</code>.
      */
-    public ResourceTypeHierarchyIterator(final Resource resource, final ResourceResolver resourceResolver) {
+    public ResourceTypeHierarchyIterator(final Resource resource) {
         if (resource == null) {
             throw new IllegalArgumentException("Constructor parameter resource must not be null.");
         }
-        if (resourceResolver == null) {
-            throw new IllegalArgumentException("Method argument resourceResolver must not be null.");
-        }
-
-        this.resolver = resourceResolver;
-        this.currentResource = resource;
-        this.isSyntheticResource = ResourceUtil.isSyntheticResource(resource);
+        this.resolver = resource.getResourceResolver();
+        this.isSyntheticResource = isSyntheticResource(resource);
 
         if (this.isSyntheticResource) {
             // Synthetic resources do not represent nodes, thus their type is
             // intentionally provided by the resource implementation
             // and does not fall back to the primary type of a node.
-            this.resourceType = resource.getResourceType();
+            this.currentResourceType = resource.getResourceType();
         } else {
             String resourceType = resource.getResourceType();
             Node node = resource.adaptTo(Node.class);
@@ -88,45 +82,39 @@ public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable
                 try {
                     String nodeType = node.getPrimaryNodeType().getName();
                     if (!nodeType.equals(resourceType)) {
-                        this.resourceType = resourceType;
+                        this.currentResourceType = resourceType;
                     }
                 } catch (RepositoryException e) {
                     throw new RuntimeException("Unable to obtain the node type.", e);
                 }
             } else {
-                this.resourceType = resourceType;
+                this.currentResourceType = resourceType;
             }
         }
+
+        this.nextResourceType = this.currentResourceType;
     }
 
     public boolean hasNext() {
-        return this.resourceType != null || this.currentResource != null && resolveNext();
+        return this.nextResourceType != null || this.currentResourceType != null && resolveNext();
     }
 
     public String next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        String type = this.resourceType;
-        this.resourceType = null;
+        String type = this.nextResourceType;
+        this.nextResourceType = null;
+        this.currentResourceType = type;
         return type;
     }
 
     private boolean resolveNext() {
-        Resource nextResource = null;
-
-        String nextResourceType = this.currentResource.getResourceSuperType();
-        if (nextResourceType == null) {
-            nextResourceType = getResourceSuperType(this.resolver, this.currentResource.getResourceType());
-        }
-
-        if (nextResourceType != null) {
-            nextResource = findResource(nextResourceType);
-        } else if (isProvideSyntheticResourceRoot()) {
+        String nextResourceType = this.resolver.getParentResourceType(this.currentResourceType);
+        if (nextResourceType == null && isProvideSyntheticResourceRoot()) {
             nextResourceType = SYNTHETIC_RESOURCETYPE_ROOT;
         }
-        this.currentResource = nextResource;
-        this.resourceType = nextResourceType;
+        this.nextResourceType = nextResourceType;
         return nextResourceType != null;
     }
 
@@ -138,27 +126,7 @@ public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable
      * @see io.neba.api.Constants#SYNTHETIC_RESOURCETYPE_ROOT
      */
     public boolean isProvideSyntheticResourceRoot() {
-        return this.isSyntheticResource && !SYNTHETIC_RESOURCETYPE_ROOT.equals(this.resourceType);
-    }
-
-    private Resource findResource(String resourceSuperType) {
-        Resource resource = null;
-        if (isAbsolutePath(resourceSuperType)) {
-            resource = this.resolver.getResource(resourceSuperType);
-        } else {
-            for (String prefix : this.resolver.getSearchPath()) {
-                String absoluteResourcePath = prefix + resourceSuperType;
-                resource = this.resolver.getResource(absoluteResourcePath);
-                if (resource != null) {
-                    break;
-                }
-            }
-        }
-        return resource;
-    }
-
-    private boolean isAbsolutePath(String resourceSuperType) {
-        return resourceSuperType.charAt(0) == '/';
+        return this.isSyntheticResource && !SYNTHETIC_RESOURCETYPE_ROOT.equals(this.currentResourceType);
     }
 
     public void remove() {

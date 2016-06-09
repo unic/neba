@@ -17,12 +17,10 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.core.sling.AdministrativeResourceResolver;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,8 +57,6 @@ public class ModelRegistryTest {
 	private Bundle bundle;
     @Mock
     private ResourceResolver resolver;
-    @Mock
-    private AdministrativeResourceResolver administrativeResourceResolver;
 
     private Set<ResourceModel> resourceModelAnnotations;
     private long bundleId;
@@ -71,8 +67,6 @@ public class ModelRegistryTest {
 
     @Before
     public void setUp() throws LoginException {
-        doReturn(new String[]{}).when(this.resolver).getSearchPath();
-        doReturn(this.resolver).when(this.administrativeResourceResolver).getResolver();
         this.resourceModelAnnotations = new HashSet<>();
     	withBundleId(12345L);
     }
@@ -472,30 +466,16 @@ public class ModelRegistryTest {
 
     private Resource mockResourceWithType(String resourceTypeName, String resourceSuperType) {
         Resource resource = mock(Resource.class);
-        ValueMap values = mock(ValueMap.class);
-        when(values.get(eq("sling:resourceType"), eq(String.class))).thenReturn(resourceTypeName);
-        when(resource.adaptTo(eq(ValueMap.class))).thenReturn(values);
+
+        when(resource.getResourceResolver()).thenReturn(this.resolver);
         when(resource.getResourceType()).thenReturn(resourceTypeName);
-        if (resourceSuperType != null) {
-            when(resource.getResourceSuperType()).thenReturn(resourceSuperType);
-        }
+        when(this.resolver.getParentResourceType(resourceTypeName)).thenReturn(resourceSuperType);
         return resource;
     }
 
     private Resource mockResourceWithSupertype(String resourceSuperTypeTypeName) {
         final String resourceTypeName = "childOf/" + resourceSuperTypeTypeName;
-
-        Resource resource = mock(Resource.class);
-        Resource superResource = mock(Resource.class);
-
-        ValueMap values = mock(ValueMap.class);
-        when(values.get(eq("sling:resourceType"), eq(String.class))).thenReturn(resourceTypeName);
-        when(resource.adaptTo(eq(ValueMap.class))).thenReturn(values);
-        when(resource.getResourceType()).thenReturn(resourceTypeName);
-        when(resource.getResourceSuperType()).thenReturn(resourceSuperTypeTypeName);
-        when(superResource.getResourceType()).thenReturn(resourceSuperTypeTypeName);
-        when(this.resolver.getResource(eq(resourceSuperTypeTypeName))).thenReturn(superResource);
-        return resource;
+        return mockResourceWithType(resourceTypeName, resourceSuperTypeTypeName);
     }
     
     private void shutdownRegistry() {

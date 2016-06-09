@@ -16,7 +16,6 @@
 
 package io.neba.core.util;
 
-import io.neba.api.Constants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -33,10 +32,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -44,13 +43,10 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceTypeHierarchyIteratorTest {
     @Mock
-    private ResourceResolver administrativeResourceResolver;
+    private ResourceResolver resolver;
 
 	private Resource resource;
     private List<String> resourceHierarchy = new LinkedList<>();
-    private String resourceType;
-    private String resourceSupertype;
-    private String supertypeResourceType;
     private Node resourceNode;
     private NodeType resourceNodeType;
 
@@ -63,17 +59,15 @@ public class ResourceTypeHierarchyIteratorTest {
 
     @Test
     public void testHandlingOfSyntheticResources() throws Exception {
-        withSearchPath("/apps/", "/libs/", "/etc/");
         withSyntheticResource();
         withResourceType("virtual/resource/type");
         createIterator();
         resolveResourceHierarchy();
-        assertHierarchyIs("virtual/resource/type", Constants.SYNTHETIC_RESOURCETYPE_ROOT);
+        assertHierarchyIs("virtual/resource/type", SYNTHETIC_RESOURCETYPE_ROOT);
     }
     
     @Test
     public void testIteratorDoesNotUsePrimaryType() throws Exception {
-        withSearchPath("/apps/", "/libs/", "/etc/");
         withPrimaryType("cq:Page");
         createIterator();
         resolveResourceHierarchy();
@@ -81,44 +75,43 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     @Test
-    public void testPrecedenceOfDirectTypeHierarchy() throws Exception {
-        withResourceType("/junit/test1");
-        withResourceSupertype("/junit/test2");
-        withSupertypeResource("/junit/test3");
-        createIterator();
-        resolveResourceHierarchy();
-        assertHierarchyIsBasedOnDirectResourceSupertype();
-    }
-
-    @Test
-    public void testResoultionOfIndirectTypeHierarchWithRelativePath() throws Exception {
-        withSearchPath("/apps/", "/libs/", "/etc/");
+    public void testResolutionOfTypeHierarchy() throws Exception {
         withResourceType("junit/test1");
-        withResourceSupertype(null);
-        withResource("/libs/junit/test1", "junit/testrelative", "junit/test2");
-        withResource("/libs/junit/test2", "junit/test2", null);
+        withResourceSupertype("junit/test1", "junit/test2");
+        withResourceSupertype("junit/test2", "junit/test3");
+        withResourceSupertype("junit/test3", null);
         createIterator();
         resolveResourceHierarchy();
-        assertHierarchyIs("junit/test1", "junit/test2");
+        assertHierarchyIs("junit/test1", "junit/test2", "junit/test3");
     }
 
-    @Test
-    public void testUsageOfIndirectTypeHierarchy() throws Exception {
-        withResourceType("/junit/test1");
-        withResourceSupertype(null);
-        withSupertypeResource("/junit/test3");
-        createIterator();
-        resolveResourceHierarchy();
-        assertResourceHierarchyIsBasedOnSuperResourceType();
-    }
-    
+
     @Test(expected = NoSuchElementException.class)
     public void testNextInvocationWithoutNextElement() throws Exception {
         withResourceType("/junit/test1");
-        withResourceSupertype(null);
         createIterator();
         getNextElement();
         getNextElement();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testResourceMustNotBeNull() throws Exception {
+        new ResourceTypeHierarchyIterator(null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testIteratorIsReadOnly() throws Exception {
+        withResourceType("junit/test1");
+        createIterator();
+        removeElement();
+    }
+
+    private void removeElement() {
+        this.testee.remove();
+    }
+
+    private void withResourceType(String type) {
+        doReturn(type).when(resource).getResourceType();
     }
 
     private void withSyntheticResource() {
@@ -128,18 +121,14 @@ public class ResourceTypeHierarchyIteratorTest {
 
     private void withResource(final Resource mock) {
         this.resource = mock;
+        doReturn(this.resolver).when(this.resource).getResourceResolver();
     }
 
     private void withoutValueMap() {
         when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(null);
     }
 
-    private void withSearchPath(String... paths) {
-        when(this.administrativeResourceResolver.getSearchPath()).thenReturn(paths);
-    }
-
     private void withPrimaryType(String primaryType) throws Exception {
-        this.resourceType = primaryType;
         when(this.resource.getResourceType()).thenReturn(primaryType);
         this.resourceNode = mock(Node.class);
         this.resourceNodeType = mock(NodeType.class);
@@ -156,14 +145,6 @@ public class ResourceTypeHierarchyIteratorTest {
         assertHierarchyIs();
     }
 
-    private void assertHierarchyIsBasedOnDirectResourceSupertype() {
-        assertHierarchyIs(this.resourceType, this.resourceSupertype);
-    }
-
-    private void assertResourceHierarchyIsBasedOnSuperResourceType() {
-        assertHierarchyIs(this.resourceType, this.supertypeResourceType);
-    }
-
     private void assertHierarchyIs(String... expectedHierarchy) {
         assertThat(this.resourceHierarchy).containsExactly(expectedHierarchy);
     }
@@ -174,33 +155,11 @@ public class ResourceTypeHierarchyIteratorTest {
         }
     }
 
-    private void withResource(String resourcePath, String resourceType, String resourceSuperType) {
-        Resource resource = mock(Resource.class);
-        when(resource.getResourceType()).thenReturn(resourceType);
-        when(resource.getResourceSuperType()).thenReturn(resourceSuperType);
-        when(resource.getResourceResolver()).thenReturn(this.administrativeResourceResolver);
-        when(this.administrativeResourceResolver.getResource(eq(resourcePath))).thenReturn(resource);
-    }
-    
-    private void withSupertypeResource(String value) {
-        this.supertypeResourceType = value;
-        Resource resourceTypeResource = mock(Resource.class);
-        when(resourceTypeResource.getResourceResolver()).thenReturn(this.administrativeResourceResolver);
-        when(resourceTypeResource.getResourceSuperType()).thenReturn(this.supertypeResourceType);
-        when(this.administrativeResourceResolver.getResource(eq(this.resource.getResourceType()))).thenReturn(resourceTypeResource);
-    }
-
     private void createIterator() {
-        this.testee = new ResourceTypeHierarchyIterator(this.resource, this.administrativeResourceResolver);
+        this.testee = new ResourceTypeHierarchyIterator(this.resource);
     }
 
-    private void withResourceSupertype(String value) {
-        this.resourceSupertype = value;
-        when(this.resource.getResourceSuperType()).thenReturn(this.resourceSupertype);
-    }
-
-    private void withResourceType(String value) {
-        this.resourceType = value;
-        when(this.resource.getResourceType()).thenReturn(this.resourceType);
+    private void withResourceSupertype(String resourceType, String superType) {
+        when(this.resolver.getParentResourceType(resourceType)).thenReturn(superType);
     }
 }

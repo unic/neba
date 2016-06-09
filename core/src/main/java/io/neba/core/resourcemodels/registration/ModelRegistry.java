@@ -17,7 +17,6 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.blueprint.EventhandlingBarrier;
-import io.neba.core.sling.AdministrativeResourceResolver;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
 import io.neba.core.util.MatchedBundlesPredicate;
@@ -27,7 +26,6 @@ import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -142,9 +140,6 @@ public class ModelRegistry {
     private final Map<Key, Object> unmappedTypesCache = new ConcurrentHashMap<>();
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicInteger state = new AtomicInteger(0);
-
-    @Autowired
-    private AdministrativeResourceResolver resourceResolver;
 
     /**
      * Finds the most specific models for the given {@link Resource}. The model's bean
@@ -443,7 +438,7 @@ public class ModelRegistry {
      */
     private Collection<LookupResult> resolveBeanSources(Resource resource, Class<?> compatibleType, boolean resolveMostSpecific) {
         Collection<LookupResult> sources = new ArrayList<>(64);
-        for (final String resourceType : mappableTypeHierarchyOf(resource, this.resourceResolver.getResolver())) {
+        for (final String resourceType : mappableTypeHierarchyOf(resource)) {
             Collection<OsgiBeanSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
             Collection<OsgiBeanSource<?>> sourcesForCompatibleType = filter(allSourcesForType, compatibleType);
             if (sourcesForCompatibleType != null && !sourcesForCompatibleType.isEmpty()) {
@@ -467,7 +462,7 @@ public class ModelRegistry {
      */
     private Collection<LookupResult> resolveMostSpecificBeanSources(Resource resource, String beanName) {
         Collection<LookupResult> sources = new ArrayList<>();
-        for (final String resourceType : mappableTypeHierarchyOf(resource, this.resourceResolver.getResolver())) {
+        for (final String resourceType : mappableTypeHierarchyOf(resource)) {
             Collection<OsgiBeanSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
             Collection<OsgiBeanSource<?>> sourcesWithMatchingBeanName = filter(allSourcesForType, beanName);
             if (sourcesWithMatchingBeanName != null && !sourcesWithMatchingBeanName.isEmpty()) {
