@@ -18,7 +18,6 @@ package io.neba.core.resourcemodels.registration;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.Node;
 import java.util.Iterator;
@@ -40,20 +39,15 @@ import static io.neba.core.util.ResourceTypeHierarchyIterator.typeHierarchyOf;
  */
 public class MappableTypeHierarchy implements Iterable<String> {
     private final Resource resource;
-    private final ResourceResolver resourceResolver;
 
-    public static MappableTypeHierarchy mappableTypeHierarchyOf(final Resource resource, final ResourceResolver resourceResolver) {
-    	return new MappableTypeHierarchy(resource, resourceResolver);
+    public static MappableTypeHierarchy mappableTypeHierarchyOf(final Resource resource) {
+    	return new MappableTypeHierarchy(resource);
     }
     
-    public MappableTypeHierarchy(final Resource resource, final ResourceResolver resourceResolver) {
+    public MappableTypeHierarchy(final Resource resource) {
         if (resource == null) {
             throw new IllegalArgumentException("Constructor argument resource must not be null.");
         }
-        if (resourceResolver == null) {
-            throw new IllegalArgumentException("Method argument resourceResolver must not be null.");
-        }
-        this.resourceResolver = resourceResolver;
         this.resource = resource;
     }
     
@@ -61,7 +55,7 @@ public class MappableTypeHierarchy implements Iterable<String> {
     @SuppressWarnings("unchecked")
     public Iterator<String> iterator() {
         Iterator<String> it;
-        final Iterator<String> resourceTypeIterator = typeHierarchyOf(this.resource, this.resourceResolver);
+        final Iterator<String> resourceTypeIterator = typeHierarchyOf(this.resource);
         final Node node = this.resource.adaptTo(Node.class);
         // A virtual resource must not have a node.
         if (node != null) {

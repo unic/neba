@@ -35,9 +35,7 @@
 
 	<bp:blueprint>
 		<!-- References to other OSGi services -->
-		<bp:reference interface="org.apache.sling.api.resource.ResourceResolverFactory" id="resourceResolverFactory">
-            <bp:reference-listener ref="administrativeResourceResolver" bind-method="bind" unbind-method="unbind"/>
-		</bp:reference>
+		<bp:reference interface="org.apache.sling.api.resource.ResourceResolverFactory" id="resourceResolverFactory" />
 
         <bp:reference interface="org.osgi.service.cm.ConfigurationAdmin" id="configurationAdmin"/>
 
