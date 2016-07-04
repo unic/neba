@@ -23,11 +23,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 
 import static java.io.File.createTempFile;
+import static java.lang.Thread.currentThread;
 import static java.nio.file.Files.move;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -60,18 +63,32 @@ public class TailTest extends TailTests {
 
         write(logFile, "first line");
 
-        // Wait for the tail to pickup the line
-        doSleep(1000);
+        Thread unitTest = currentThread();
 
-        rotate(logFile);
+        doAnswer(__ -> {
+            // As soon as the first line is read from the logfile, rotate the logfile and resume testing.
+            rotate(logFile);
+            synchronized (unitTest) {
+                unitTest.interrupt();
+            }
+            return null;
+        }).when(getRemote()).sendBytes(isA(ByteBuffer.class));
 
-        // Provoke a file not found in the tailer by delaying the re-creation
-        // of the tailed log file
-        doSleep(800);
+        // Wait for tail to pickup the first log line, up tp five seconds.
+        try {
+            synchronized (unitTest) {
+                unitTest.wait(SECONDS.toMillis(5));
+            }
+        } catch (InterruptedException e) {
+            // This is expected
+        }
 
+        // Re-create a blank logfile since the original one was rotated.
         createFile(logFile.getAbsolutePath());
 
-        doSleep(1000);
+        // Tail might sleep for a while to let the file rotation complete.
+        // wait to make sure that Tail has picked up the rotation.
+        doSleep(1100);
 
         assertErrorMessageIsSent("file rotated");
     }
