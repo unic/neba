@@ -61,8 +61,6 @@ public class TailTest extends TailTests {
         // Wait for the tail to commence
         doSleep(500);
 
-        write(logFile, "first line");
-
         Thread unitTest = currentThread();
 
         doAnswer(__ -> {
@@ -74,7 +72,9 @@ public class TailTest extends TailTests {
             return null;
         }).when(getRemote()).sendBytes(isA(ByteBuffer.class));
 
-        // Wait for tail to pickup the first log line, up tp five seconds.
+        write(logFile, "first line");
+
+        // Wait for tail to pickup the first log line, up to five seconds.
         try {
             synchronized (unitTest) {
                 unitTest.wait(SECONDS.toMillis(5));
