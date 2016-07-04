@@ -55,10 +55,10 @@ public class ModelRegistry {
 
     /**
      * Generate a {@link Key} representing both the
-     * {@link org.apache.sling.api.resource.Resource#getResourceType() sling resource type}
-     * and the {@link javax.jcr.Node#getPrimaryNodeType() primary node type} of the resource, if any.
-     * Rationale: Resources may have the same <code>sling:resourceType</code>, but different primary types,
-     * thus potentially producing different results when mapped. The cache must thus use both
+     * {@link org.apache.sling.api.resource.Resource#getResourceType() sling resource type},
+     * {@link javax.jcr.Node#getPrimaryNodeType() primary node type} and the {@link Node#getMixinNodeTypes() mixin types}
+     * of the resource, if any. Rationale: Resources may have the same <code>sling:resourceType</code>, but different primary or mixin types,
+     * thus potentially producing different results when mapped. The cache must thus use these
      * types as a key for cached adaptation results.<br />
      *
      * @param resource           must not be <code>null</code>.
@@ -71,7 +71,12 @@ public class ModelRegistry {
         Node node = resource.adaptTo(Node.class);
         if (node != null) {
             try {
-                key = new Key(resource.getResourceType(), node.getPrimaryNodeType().getName(), furtherElementsKey);
+                key = new Key(
+                        resource.getResourceType(),
+                        resource.getResourceSuperType(),
+                        node.getPrimaryNodeType().getName(),
+                        Arrays.toString(node.getMixinNodeTypes()),
+                        furtherElementsKey);
             } catch (RepositoryException e) {
                 throw new RuntimeException("Unable to retrieve the primary type of " + resource + ".", e);
             }
@@ -303,7 +308,7 @@ public class ModelRegistry {
     public void shutdown() {
         this.logger.info("The model registry is shutting down.");
         clearRegisteredModels();
-        registryChanged();
+        clearLookupCaches();
     }
 
     /**
@@ -317,7 +322,7 @@ public class ModelRegistry {
         for (Collection<OsgiBeanSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
             CollectionUtils.filter(values, sourcesWithBundles);
         }
-        registryChanged();
+        clearLookupCaches();
         this.logger.info("Removed " + sourcesWithBundles.getFilteredElements()
                 + " resource models of bundle " + displayNameOf(bundle) + "...");
     }
@@ -343,7 +348,7 @@ public class ModelRegistry {
         for (String resourceType : types) {
             this.typeNameToBeanSourcesMap.put(resourceType, source);
         }
-        registryChanged();
+        clearLookupCaches();
     }
 
     /**
@@ -369,7 +374,7 @@ public class ModelRegistry {
                         if (!source.isValid()) {
                             this.logger.info("Reference to " + source + " is invalid, removing.");
                             it.remove();
-                            registryChanged();
+                            clearLookupCaches();
                         }
                     }
                 }
@@ -384,7 +389,7 @@ public class ModelRegistry {
      * Clears all quick lookup caches for resource models, but
      * not the registry itself.
      */
-    private synchronized void registryChanged() {
+    public synchronized void clearLookupCaches() {
         this.state.incrementAndGet();
         this.lookupCache.clear();
         this.unmappedTypesCache.clear();

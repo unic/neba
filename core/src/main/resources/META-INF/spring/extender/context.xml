@@ -130,5 +130,29 @@
         </bp:service>
 
         <bp:service ref="resourceModelProviderImpl" interface="io.neba.api.resourcemodels.ResourceModelProvider" />
+
+		<bp:service ref="mappableTypeHierarchyChangeListener" interface="org.osgi.service.event.EventHandler">
+			<bp:service-properties>
+				<entry key="event.topics" value="org/apache/sling/api/resource/Resource/CHANGED"/>
+				<!-- React to changes potentially altering the resource type hierarchy, unless they are occurring
+				     in a location known not to contain data relevant to the type hierarchy, such as /var or /content -->
+				<entry key="event.filter" value="(&amp;
+				 (!(path=/content/*))
+				 (!(path=/var/*))
+				 (!(path=/jcr:*))
+				 (!(path=/oak:*))
+				 (|
+						(resourceAddedAttributes=jcr:mixinTypes)
+						(resourceAddedAttributes=sling:resourceSuperType)
+						(resourceChangedAttributes=jcr:mixinTypes)
+						(resourceChangedAttributes=sling:resourceType)
+						(resourceChangedAttributes=sling:resourceSuperType)
+						(resourceRemovedAttributes=sling:resourceSuperType)
+						(resourceRemovedAttributes=jcr:mixinTypes)
+				))" />
+				<entry key="service.description" value="An event handler invalidating cache resource type hierarchy information." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
 	</bp:blueprint>
 </beans>
