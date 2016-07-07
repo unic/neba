@@ -1,80 +1,24 @@
-<!-- START FOOTER -->
-
+<!-- Footer -->
 <div id="footer">
+    <div class="container">
+        <section>
+            <header>
+                <h2>Get in touch</h2>
+                <span class="byline">Integer sit amet pede vel arcu aliquet pretium</span>
+            </header>
+            <ul class="contact">
+                <li><a href="#" class="fa fa-twitter"><span>Twitter</span></a></li>
+                <li class="active"><a href="#" class="fa fa-facebook"><span>Facebook</span></a></li>
+                <li><a href="#" class="fa fa-dribbble"><span>Pinterest</span></a></li>
+                <li><a href="#" class="fa fa-tumblr"><span>Google+</span></a></li>
+            </ul>
+        </section>
+    </div>
+</div>
 
-    <div id="footer-content">
-
-        <div id="footer-top" class="clear">
-
-            <div class="one-third">
-                <h3>About NEBA</h3>
-                <p>NEBA has been developed by <a href="https://www.unic.com/">Unic</a> since 2010, and was published as open source software on June 26, 2014</p><br />
-
-                <h3>Fork me on GitHub</h3>
-                <p>
-                    <a href="https://github.com/unic/neba/tree/develop" class="alignleft"><img src="{{site.contextpath}}/images/github-dark.png" alt="NEBA at GitHub" title="NEBA at GitHub"/></a>
-                    We're using git flow - check out the <a href="https://github.com/unic/neba/tree/develop">develop branch</a> for the latest and greatest version.
-                </p>
-            </div><!--END ONE-THIRD-->
-
-
-            <div class="one-third">
-                <h3>Contact</h3>
-                <p>
-                    <strong>E-Mail</strong>: <script>document.write('<a href="mailto:neba' + '@unic.com">neba' + "@unic.com</a>");</script>
-                </p>
-                <p>
-                    <strong>Unic AG</strong><br />
-                    Belpstrasse 48, 3007 Bern, Switzerland<br />
-                    <strong>Telephone</strong>: +41 31 560 12 12<br />
-                    <strong>Fax</strong>: +41 31 560 12 13
-                </p>
-
-            </div><!--END ONE-THIRD-->
-
-
-            <div class="one-third last">
-                <h3>Latest posts</h3>
-
-                <ul>
-                    {% for post in site.posts limit:5  %}
-                    <li>
-                        <a href="{{site.contextpath}}{{ post.url }}">{{ post.title }}</a>
-                    </li>
-                    {% endfor %}
-                </ul><!--END UL-->
-
-
-            </div><!--END ONE-THIRD LAST-->
-
-        </div><!--END FOOTER-TOP-->
-
-
-        <div id="footer-bottom" class="clear">
-
-            <div class="one-half">
-                <p>Copyright &copy; 2015. All rights reserved.</p>
-            </div><!--END ONE-HALF-->
-
-            <div class="one-half text-align-right last">
-                <p>Built with love and <a href="http://jekyllrb.com">Jekyll</a>. Hosted on <a href="https://pages.github.com/">GitHub pages</a>.</p>
-            </div><!--END ONE-HALF TRIGGER-FOOTER LAST-->
-
-        </div><!--END FOOTER-BOTTOM-->
-
-    </div><!--END FOOTER-CONTENT-->
-
-</div><!--END FOOTER-->
-
-<!-- END FOOTER -->
-
-<script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-53298897-1', 'auto');
-    ga('send', 'pageview');
-
-</script>
+<!-- Copyright -->
+<div id="copyright">
+    <div class="container">
+        Design: <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>)
+    </div>
+</div>

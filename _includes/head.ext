@@ -1,5 +1,10 @@
+<!--
+	Linear by TEMPLATED
+    templated.co @templatedco
+    Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
 <head>
-    <title>{{ page.title }}</title>
+    <title>{{ page.pageTitle }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
     <meta name="viewport" content="width=device-width" />
@@ -33,13 +38,15 @@
     <meta property="og:description" content="{{page.description}}" />
     <meta property="og:site_name" content="neba.io" />
 
-    <link rel="stylesheet" type="text/css" href="{{site.contextpath}}/css/style.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="{{site.contextpath}}/css/print.css" media="print" />
-    <link rel="stylesheet" type="text/css" href="{{site.contextpath}}/css/highlight.css" media="screen, print"/>
-
-    <link href='http://fonts.googleapis.com/css?family=Oswald:400,700,300' rel='stylesheet' type='text/css' />
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css' />
-
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script type="text/javascript" src="{{site.contextpath}}/javascript/main.js" async="async"></script>
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,700,500,900' rel='stylesheet' type='text/css'>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="js/skel.min.js"></script>
+    <script src="js/skel-panels.min.js"></script>
+    <script src="js/init.js"></script>
+    <link rel="stylesheet" href="css/highlight.css" />
+    <noscript>
+        <link rel="stylesheet" href="css/skel-noscript.css" />
+        <link rel="stylesheet" href="css/style.css" />
+        <link rel="stylesheet" href="css/style-desktop.css" />
+    </noscript>
 </head>
