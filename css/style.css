@@ -104,7 +104,6 @@
 	header
 	{
 		margin-bottom: 1.6em;
-		text-align: center;
 	}
 	
 		header h2
@@ -1029,4 +1028,13 @@
 			margin: 0;
 			font-weight: 300;
 			color: rgba(255,255,255,.6);
-		}	
+		}
+
+/***
+ NEBA additions
+**/
+
+section .info {
+	padding-left: 1em;
+	border-left: 1em solid #aabbff;
+}

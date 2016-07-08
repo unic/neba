@@ -1,3 +1,6 @@
+.highlight pre {
+    white-space: pre-wrap;
+}
 .highlight  { background: #f6f6f6; padding: 3px; margin-bottom: 14px; margin-left: 0; text-align: left}
 .highlight pre { padding-left: 5px;}
 .highlight .c { color: #999988; font-style: italic } /* Comment */

@@ -2,10 +2,9 @@
     <!-- Nav -->
     <nav id="nav">
         <ul>
-            <li class="active"><a href="about.html">About NEBA</a></li>
-            <li><a href="documentation.html">Documentation</a></li>
-            <li><a href="right-sidebar.html">Download</a></li>
-            <li><a href="no-sidebar.html">Community</a></li>
+            {% for item in site.mainNavItems %}
+                <li{%if page.url == item.path%} class="active"{% endif %}><a href="{{item.path}}" title="{{item.title}}">{{item.label}}</a></li>
+            {% endfor %}
         </ul>
     </nav>
 </div>
