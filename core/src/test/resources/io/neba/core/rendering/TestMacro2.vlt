@@ -1,4 +1,0 @@
-#macro(test)
-macro2
-#end
-#test()
