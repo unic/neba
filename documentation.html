@@ -5,7 +5,7 @@ twitterAuthor: nebaframework
 description: A comprehensive guide to using the NEBA features
 ---
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 	{% include head.ext %}
 	<body>
 	{% include header.ext %}
@@ -19,11 +19,12 @@ description: A comprehensive guide to using the NEBA features
                             <div class="3u">
                                 <section>
                                     <header>
-                                        <h2>Installing NEBA</h2>
+                                        <h2>Getting started</h2>
                                     </header>
                                     <ul class="default">
-                                        <li><a href="#">Download and Installation</a></li>
-                                        <li><a href="#">Maven dependencies</a></li>
+                                        <li><a href="#download_and_integrate">Downloading and integrating NEBA</a></li>
+                                        <li><a href="#add_osgi_blueprint_context">Adding an OSGi blueprint context</a></li>
+                                        <li><a href="#sample_project">Explore the sample project</a></li>
                                     </ul>
                                 </section>
                                 <section>
@@ -31,12 +32,12 @@ description: A comprehensive guide to using the NEBA features
                                         <h2>Writing @ResourceModels</h2>
                                     </header>
                                     <ul class="default">
-                                        <li><a href="#">Resources, resource types and resource models</a></li>
-                                        <li><a href="#">The neba:defineObjects tag</a></li>
-                                        <li><a href="#">Mapping properties and resources to models</a></li>
-                                        <li><a href="#">Annotations for advanced resource to model mapping</a></li>
-                                        <li><a href="#">Lazy loading</a></li>
-                                        <li><a href="#">Performing additional initializations</a></li>
+                                        <li><a href="#about_resource_models">Resources, resource types and resource models</a></li>
+                                        <li><a href="#using_models_in_views">Using models in views</a></li>
+                                        <li><a href="#mapping_resources_to_models">Mapping properties and resources to models</a></li>
+                                        <li><a href="#resource_model_annotations">Annotations for resource to model mapping</a></li>
+                                        <li><a href="#lazy_loading">Lazy loading</a></li>
+                                        <li><a href="#the_premapping_and_postmapping_annotations">Performing additional initializations</a></li>
                                     </ul>
                                 </section>
                             </div>
@@ -46,26 +47,18 @@ description: A comprehensive guide to using the NEBA features
                                         <h2>Using Spring MVC in Sling</h2>
                                     </header>
                                     <ul class="default">
-                                        <li><a href="#">Resolving resource parameters with the @ResourceParam annotation</a></li>
-                                        <li><a href="#">Configuring logging for MVC</a></li>
+                                        <li><a href="#the_resourceparam_annotation">Resolving resource parameters with the @ResourceParam annotation</a></li>
+                                        <li><a href="#configuring_mvc_logging">Configuring logging for MVC</a></li>
                                     </ul>
                                 </section>
                                 <section>
                                     <header>
-                                        <h2>NEBA tooling for developers and administrators</h2>
+                                        <h2>Tooling for developers and administrators</h2>
                                     </header>
                                     <ul class="default">
-                                        <li><a href="#">The model registry</a></li>
-                                        <li><a href="#">The model statistics</a></li>
-                                        <li><a href="#">The log viewer</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <header>
-                                        <h2>Sample projects</h2>
-                                    </header>
-                                    <ul class="default">
-                                        <li><a href="#">NEBA Directive: a sample application for the NEBA framework for Apache Sling</a></li>
+                                        <li><a href="#tooling_modelregistry">The model registry</a></li>
+                                        <li><a href="#tooling_modelstatistics">The model statistics</a></li>
+                                        <li><a href="#tooling_logviewer">The log viewer</a></li>
                                     </ul>
                                 </section>
                             </div>
@@ -84,11 +77,11 @@ description: A comprehensive guide to using the NEBA features
                                         <h2>The Architecture of NEBA</h2>
                                     </header>
                                     <ul class="default">
-                                        <li><a href="#">Container view</a></li>
-                                        <li><a href="#">Modules view</a></li>
-                                        <li><a href="#">Core packages view</a></li>
-                                        <li><a href="#">Application context post-processing</a></li>
-                                        <li><a href="#">Resource model registration and adapter factory provisioning</a></li>
+                                        <li><a href="#architecture_containerview">Container view</a></li>
+                                        <li><a href="#architecture_modules">Modules view</a></li>
+                                        <li><a href="#architecture_corepackages">Core packages view</a></li>
+                                        <li><a href="#architecture_postprocessing">Application context post-processing</a></li>
+                                        <li><a href="#architecture_modelregistration">Resource model registration and adapter factory provisioning</a></li>
                                     </ul>
                                 </section>
                             </div>
@@ -139,36 +132,83 @@ description: A comprehensive guide to using the NEBA features
  					<!-- Content -->
 					<div id="content">
 
-<section><header><h2 id="api_ResourceModel">Writing @ResourceModels</h2></header>
+<section><header><h2 id="getting_started">Geting started</h2></header>
 
-<h3 id="resourceModelDefinition">Resources, resource types and resource models</h3>
+<p>Getting started with NEBA only requires two simple steps:</p>
+
+<h3 id="download_and_integrate">Step 1: Download and integrate NEBA</h3>
+<p>
+    <a href="download.html">install the delivery package and integrate the NEBA API into your project.</a>
+</p>
+
+<h3 id="add_osgi_blueprint_context">Step 2: Add an OSGi blueprint context to your bundle(s)</h3>
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+   http://www.osgi.org/xmlns/blueprint/v1.0.0
+   http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+    <context:component-scan base-package="bundle.package.impl" />
+</beans>
+{% endhighlight %}
+
+<p>That's it - you may now proceed to <a href="#api_ResourceModel">Write resource models</a> or
+    <a href="#springmvc">Spring controllers</a> - for instance, use the sample project below as a starting point.</p>
+
+<h3 id="sample_project">NEBA directive: A sample project for NEBA</h3>
+<a href="https://github.com/unic/publication-neba-adaptto-2015"><span class="pennant"><span class="fa fa-github"></span></span> Checkout NEBA directive, a NEBA sample project created for the .adaptTo conference and continuously updated.</a>
+</section>
+
+<section><header><h2 id="writing_resourcemodels">Writing @ResourceModels</h2></header>
+
+<h3 id="about_resource_models">Resources, resource types and resource models</h3>
 
 <section class="info">
     <h4>Background: How NEBA uses resource types in Sling</h4>
     <p>The <a href="http://sling.apache.org/site/index.html">Sling webframework</a> is a REST architecture implementation.
-        Consequently, it treats each thing
-        it works with (every piece of content, every script, servlet) as a <a href="http://sling.apache.org/site/resources.html">Resource</a>.
-        Resources are strongly typed by their attribute <em>sling:resourceType</em>.
-        Thus, every component we are writing and every piece of content (i.e. concrete component instance created by an editor by
-        placing a component on a site) has a resource type. Resource types - very much like types in many other languages - also support inheritance
+        Consequently, it treats each thing it works with (every piece of content, every script, servlet) as a <a href="http://sling.apache.org/site/resources.html">Resource</a>.
+        Resources are typed using the property <em>sling:resourceType</em>. Resource types - very much like types in many other languages - also support inheritance
         by means of a <em>sling:resourceSuperType</em> attribute.</p>
 
     <p>Resource types are used by Sling to determine the view(s) that shall be used to render the resource. It does so by adding
         a prefix such as /apps or /libs to the resource type and checking whether it finds views for the
         resource in the corresponding directory.</p>
 
-    <p>Furthermore, any content stored in the JCR is represented by a javax.jcr.Node - this node also has a <em>primaryType</em>
-        as well as one or more <em>mixin types</em> and <em>super types</em>.</p>
+    <p>Furthermore, any content stored in the JCR is represented by a javax.jcr.Node. Nodes are strongly typed - they aways possess a <em>primaryType</em>
+        as well as an arbitrary number of<em>mixin types</em>. Both the primary type and the mixin types can have <em>super types</em>.</p>
 
     <p>In order to provide a JAVA model for a resource, it thus makes sense to either associate
-        it with the resource's sling:resourceType or the resource's JCR type. This association is represented using a @ResourceModel
+        it with the resource's sling:resourceType or the resource's Node type. This association is represented using a @ResourceModel
         annotation.</p>
 </section>
 
 <p>Let's assume we need a simple JAVA model for a sling component called &quot;carousel&quot;.
     The carousel has the sling:resourceType &quot;foundation/components/carousel&quot;. The component has the following properties:</p>
 
-<p><img src="images/userguide/geometrixx-carousel.png"></p>
+{%  highlight json %}
+{
+  "jcr:primaryType": "nt:unstructured",
+  "playSpeed": "6000",
+  "jcr:lastModifiedBy": "admin",
+  "pages": [
+    "/content/geometrixx/en/events/techsummit",
+    "/content/geometrixx/en/events/userconf",
+    "/content/geometrixx/en/events/shapecon",
+    "/content/geometrixx/en/events/dsc"
+  ],
+  "jcr:lastModified": "Tue Oct 05 2010 14:14:27 GMT+0200",
+  "transTime": "1000",
+  "sling:resourceType": "foundation/components/carousel",
+  "listFrom": "static"
+  }
+{% endhighlight %}
 
 <p>Create the following class in your bundle package (i.e. within or below the &quot;my.bundle.namespace&quot;
     package)</p>
@@ -179,21 +219,13 @@ public class Carousel {
 }
 {% endhighlight %}
 
-<p>Build it and install the bundle in the OSGi container. Make sure the bundle is active. Now open the <a
-        href="http://localhost:4502/system/console/modelregistry">NEBA model registry</a> tab in the sling console.
-    Your model should appear in the model list. If not, check the error.log; something might be wrong with your bundle -
-    e.g. it might not be detected by gemini-blueprint.</p>
-
-<h3>Leveraging the resource type hierarchy</h3>
-
-<p>The resource type given in the @ResourceModel annotation must not be the exact
-resource type of the resource; you may also specify  any resource super type of the resource, primary
-node type or mixin type. In our case, the resource super type of the carousel is &quot;foundation/components/list&quot;
-(see the carousel component in /libs/foundation/components/carousel). Try using this resource type in your
-model, and you will notice that it works, too.  This way, you can provide general models for super types,
-and more specific models for derived types, e.g. a generic model for pages and  a more specific model
-for specific page types.</p>
-
+<p>The resource type given in the @ResourceModel annotation does not have to be the exact
+    resource type of the resource. One may also specify any resource super type of the resource, primary
+    node type or mixin type. In our case, the resource super type of the carousel is &quot;foundation/components/list&quot;
+    (see the carousel component in /libs/foundation/components/carousel). Using this resource type in a
+    @ResourceModel would work, too. This way, one can provide general models for super types,
+    and more specific models for derived types, e.g. a generic model for pages and  a more specific model
+    for specific page types.</p>
 
 <section class="info">
     <h4>Background: @ResourceModels</h4>
@@ -210,40 +242,79 @@ for specific page types.</p>
         annotations such as @PostConstruct and @PreDestroy, @Scheduled methods and so forth.</p>
 </section>
 
-<p>To use this model in a JSP, add the neba:defineObjects tag to the carousel script: <a
-        href="http://localhost:4502/crx/de/index.jsp#/crx.default/jcr%3aroot/libs/foundation/components/carousel/carousel.jsp">/libs/foundation/components/carousel/carousel.jsp</a>:
-</p>
+<p>Once a bundle with NEBA models and a blueprint context is active, all of its models must appear in the <a
+        href="http://localhost:4502/system/console/modelregistry">NEBA model registry (/system/console/modelregistry)</a> in the sling console.
+    If not, the blueprint context likely failed to start. In such cases analyzing the error.log is advisable.</p>
 
-<h3 id="nebaDefineObjects">The neba:defineObjects tag</h3>
+<h3 id="using_models_in_views">Using models in views</h3>
 
-{% highlight java %}<%@taglib prefix="neba" uri="http://neba.io/1.0"%>
+<p>Resource models can be automatically provided in either Sightly or JSP views using the neba.js or neba:defineObjects tag library, respectively:</p>
+
+{% highlight html %}
+<sly data-sly-use.m="/apps/neba/neba.js"> ... </sly>
+{% endhighlight %}
+
+{% highlight html %}
+<%@taglib prefix="neba" uri="http://neba.io/1.0"%>
 <neba:defineObjects />
 {% endhighlight %}
 
-<p>neba:defineObjects looks up the most specific model for the current resource and publishes it into the JSP context under the key &quot;m&quot;.  You may now output the model like so:</p>
+<p>Both are looking up the most specific model for the current resource.
+    The neba:defineObjects tag always publishes the model into the scripting context under the key &quot;m&quot;.
+    In both examples above, you could access the model like so:</p>
 
 {% highlight java %}${m}{% endhighlight %}
 
 <p>
     The <em>most specific model</em> is the one who's <em>type</em> attribute points to the closest type within a resource's type
     hierarchy. For example, if the resource has the type "cq:Page" and the super type "nt:base", a  model
-    for "cq:Page" is <em>more specific</em> than one for "nt:base". If there are more than one most specific models, e.g. two models
-    for "cq:Page", the neba:defineObjectsTag will not provide the model automatically. Then, you can explicity specify the desired model's
-    bean name (you can lookup the bean name in the <a href="http://localhost:4502/system/console/modelregistry">model registry</a>):
+    for "cq:Page" is <em>more specific</em> than one for "nt:base". If there is more than one most specific model, e.g. two models
+    for "cq:Page", neba.js and the neba:defineObjectsTag will not provide the model automatically. In such cases, you could either
+    explicitly adapt to the desired model type or specify the desired model's
+    bean name (you can lookup the bean name in the <a href="http://localhost:4502/system/console/modelregistry">model registry</a>), like so:
 </p>
 
-{% highlight java %}
+{% highlight html %}
+<sly data-sly-use.m="${'/apps/neba/neba.js' @ beanName=carousel}"> ... </sly>
+{% endhighlight %}
+
+{% highlight html %}
 <neba:defineObjects useModelNamed="carousel"/>
 {% endhighlight %}
 
-<h3 id="resourceToModelMapping">Mapping properties and resources to models</h3>
+<p>However, one may also explicitly adapt the current resource to the model, like so:</p>
+
+{% highlight html %}
+<sly data-sly-use.m="my.package.MyModel"> ...</sly>
+{% endhighlight %}
+
+{% highlight java %}
+<% MyModel model = resource.adaptTo(my.package.MyModel.class); %>
+{% endhighlight %}
+
+<h3 id="mapping_resources_to_models">Mapping properties and resources to models</h3>
 
 <p>
-    To make it more interesting, we can now add some of the resource's properties to the model. You can see the
-    properties e.g. in the CRXDE light.</p>
-<p>
-    <img src="images/userguide/geometrixx-carousel.png">
-</p><p>Let's take &quot;pages&quot;, &quot;playSpeed&quot;, &quot;transTime&quot; and add them to the model:</p>
+    Following, we will map the properties of the carousel sample content, as defined in the previous chapter:
+{%  highlight json %}
+{
+  "jcr:primaryType": "nt:unstructured",
+  "playSpeed": "6000",
+  "jcr:lastModifiedBy": "admin",
+  "pages": [
+    "/content/geometrixx/en/events/techsummit",
+    "/content/geometrixx/en/events/userconf",
+    "/content/geometrixx/en/events/shapecon",
+    "/content/geometrixx/en/events/dsc"
+  ],
+  "jcr:lastModified": "Tue Oct 05 2010 14:14:27 GMT+0200",
+  "transTime": "1000",
+  "sling:resourceType": "foundation/components/carousel",
+  "listFrom": "static"
+  }
+{% endhighlight %}
+
+<p>Let's take &quot;pages&quot;, &quot;playSpeed&quot;, &quot;transTime&quot; and add them to the model:</p>
 
 {% highlight java %}
 @ResourceModel(types = "foundation/components/carousel")
@@ -264,7 +335,7 @@ public class Carousel {
 }
 {% endhighlight %}
 
-<p>Now build and deploy your bundle again and output the properties in the JSP like so:
+<p>Now build and deploy your bundle again and output the properties in the view like so:
 
 {% highlight java %}Play speed: ${m.playSpeed}<br />
 Trans time: ${m.transTime}<br />
@@ -278,14 +349,14 @@ Trans time: 1000
 Pages:
 {% endhighlight %}
 
-<h3 id="resourceAnnotations">Annotations for advanced resource to model mapping</h3>
+<h3 id="resource_model_annotations">Annotations for resource to model mapping</h3>
 
 <p>All NEBA annotations can also supported as meta-annotations - thus, custom annotations annotated with any of the annotations provided
 by NEBA are treated as if the corresponding NEBA annotation was directly applied.</p>
 
-<h4 id="api_Reference">Resolving references with the @Reference annotation</h4>
+<h4 id="the_reference_annotation">Resolving references with the @Reference annotation</h4>
 
-<p><span id="api_Unmapped">NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
+<p><span id="the_unmapped_annotation">NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
     annotated with @Unmapped</span>.  Notice that play speed and trans time are Strings in this example, whereas one would
     expect them to be integers. This is simply because these values are defined to be Strings in the component's CQ
     dialog. Had they been defined as integers, we could also retrieve them as integers. You will also notice that &quot;pages&quot;
@@ -329,7 +400,7 @@ private List<PageContent> pageContents;
 Here, instead of resolving and adapting the paths in the property "pages" directly, "/jcr:content" is appended to all of the paths prior to resolution.
 </p>
 
-<h4 id="api_Children">Resolving children with the @Children annotation</h4>
+<h4 id="the_children_annotation">Resolving children with the @Children annotation</h4>
 
 <p>While the resource hierarchy is conveniently
     navigable using the generic Resource model (i.e. using getChildren()), one often has to subsequently adapt the children. Consequently,
@@ -379,7 +450,7 @@ private List<Page> link;
 private List<PageContent> childPageContents;
 {% endhighlight %}
 
-<h4 id="api_Resource">Using the @Path annotation to specify property names or resource paths</h4>
+<h4 id="the_path_annotation">Using the @Path annotation to specify property names or resource paths</h4>
 
 <p>Now, lets add another property to the model, jcr:lastModified.</p>
 
@@ -402,7 +473,7 @@ private Date lastModified;
 private Resource en;
 {% endhighlight %}
 
-<p id="path-placeholders">Furthermore, one can use placeholders in the @Path to dynamically provide path elements.
+<p id="path_placeholders">Furthermore, one can use placeholders in the @Path to dynamically provide path elements.
     A better version of above example is:</p>
 
 {% highlight java %}
@@ -427,14 +498,18 @@ public class MyVariableResolver implements PlaceholderVariableResolver {
 }
 {% endhighlight %}
 
-<h4>The @This annotation</h4>
+<h4 id="the_this_annotation">The @This annotation</h4>
 
-<p id="api_This">The same applies to members injected with an absolute @Path and the @This annotation; if you have multiple
-    models compatible  to your resource, you may also write:</p>
+<p>Fields annotated with @This are injected with the current resource, or anything the resource is adaptable to. This annotation is thus not just useful for
+access to the plain Resource, but has significant architectural value. Using @This, one may split up a model into multiple aspects and compose them dynamically, like so:</p>
 
 {% highlight java %}
-@This
-private OtherModel resource;
+@ResourceModel(types = ...)
+public class MyModel {
+    @This
+    // OtherModel models a different aspect of the same resource.
+    private OtherModel resource;
+}
 {% endhighlight %}
 
 <p>You can also use the @This annotation to obtain the Resource that is mapped onto the model:</p>
@@ -447,17 +522,17 @@ private Resource resource;
 <h3>Models for crosscutting concerns</h3>
 <p>A @ResourceModel is not restricted to sling:resourceType's - you can also map
     it to the JCR primary node type or any of the mixin types of a Node.  For example, let's assume that you
-    have a requirement to implement a custom access protection of <em>arbitrary</em> content. In addition, a content manager may configure
+    have a requirement to implement a custom access protection of <em>arbitrary</em> content. In addition, a content manager may <em>configure</em>
     access restriction to <em>any</em> content (e.g. pages or a binary assets). In this case, we know neither the resource
     types nor the content paths to which the protection applies in advance.
     Here, using a mixin node type could help. A mixin can be assigned to any
     node at any time anywhere in the content hierarchy. It can define additional properties that can be set
     on the node, such as a set of properties defining how an access restriction is configured. Let us
-    assume a protected content is assigned the mixin &quot;myProject:AccessRestricted&quot;. You may then create
+    assume a protected content is assigned the mixin &quot;mix:AccessRestricted&quot;. You may then create
     a model for any access restricted content like so:</p>
 
 {% highlight java %}
-@ResourceModel(types = "myProject:AccessRestricted")
+@ResourceModel(types = "mix:AccessRestricted")
 public class AccessRestricted {
  ....
 }
@@ -470,7 +545,14 @@ public class AccessRestricted {
     spec</a>, <a href="http://dev.day.com/docs/en/crx/current/using_crx/nodetype_administration.html">administering
     node types</a>.</p>
 
-<h3 id="lazyLoading">Lazy loading</h3>
+<h3 id="lazy_loading">Lazy loading</h3>
+
+<p>
+    Reading data into an object graph - such as NEBA models referencing each other - bears the risk of loading
+    more data than required for rendering. Especially when there is a significant amount of repository content, being able to load
+    models <em>on demand</em> rather then up front is <em>crucial</em> for building high-performance implementations. To achieve this,
+    NEBA enables lazy-loading model relationships.
+</p>
 
 <h4>Lazy loading collections of references</h4>
 
@@ -494,7 +576,7 @@ The contents of these collection are loaded as soon as a collection method - suc
 The lazy-loading behavior for collections is thus completely transparent.
 </p>
 
-<h4 id="api_Optional">Declaring lazy-loading relationships using the Optional&lt;T&gt; interface</h4>
+<h4 id="the_optional_interface">Declaring lazy-loading relationships using the Optional&lt;T&gt; interface</h4>
 
 <p>
 1:1 relationships are not automatically lazy. In order to make them lazy-loading,
@@ -511,9 +593,10 @@ public class MyModel {
 }
 {% endhighlight %}
 
+With Optional, the relationships is loaded when one of Optional's methods for model retrieval is invoked.
 
 <section class="info">
-    <h4>Background: Why 1:1 relationships are not lazy by default</h4>
+    <h4>Background: Why 1:1 relationships cannot be lazy by default</h4>
     <p>
         Let us assume there is a resource model that references resource "r":
     </p>
@@ -533,17 +616,17 @@ public class MyModel {
     {% endhighlight %}
 
     <p>
-       Of course, any client working with "r" must know whether r exists. However, there is no natural "empty" representation for r.
-       It is either null or it exists. However, if r was provided as a lazy-loading proxy it could never be null - since determining whether r exists (is not null)
-       would mean loading it, which directly contradicts the idea of lazy-loading.
+       Of course, any client working with "r" must know it exists. However, there is no natural "empty" representation for Resource -
+       it is either null or not. Now, if r was provided as a lazy-loading proxy that proxy instance would never be null (since determining whether the resource represented by "r" exists
+       would mean having to load it, which defeats the purpose of lazy-loading).
     </p>
     <p>
-        A user of "r" would only find out that "r" does not exist when accessing a method of the "r" lazy-loading proxy (which is never null)  - and receiving an
-        unfriendly unchecked exception in return, since the proxy cannot dispatch the method call as the loaded "r" is null.
+        A user of "r" would only find out that "r" does not exist when accessing a method of the "r" lazy-loading proxy - and receiving an
+        unchecked exception in return, since the proxy cannot dispatch the method call as the loaded "r" is null.
     </p>
     <p>
-        Consequently, lazy 1:1 relationships <em>must</em> be explicit to allow clients to determine whether the relationship exists. This is not the case for
-        collection-typed references, since collections have a natural "empty" state (isEmpty()) and are guaranteed not to be null by NEBA.
+        Consequently, lazy 1:1 relationships <em>must</em> be explicit to allow clients to determine whether the relationship exists.
+        Collections, on the other hand, do have a natural representation of emptiness (isEmpty) and are thus automatically provided as lazy-loading proxies by NEBA.
     </p>
 </section>
 
@@ -569,7 +652,7 @@ public class MyModel {
 
 
 
-<h3 id="api_PreMapping-and-PostMapping">Performing additional initializations</h3>
+<h3 id="the_premapping_and_postmapping_annotations">Performing additional initializations</h3>
 
 <p>It is often required to perform some additional initializations
     after all properties of a @ResourceModel are mapped. NEBA supports this use case with the @PostMapping and
@@ -593,11 +676,11 @@ public class MyModel {
 
 </section>
 
-<section><header><h2 id="springmvc">Using Spring MVC in Sling</h2></header>
+<section><header><h2 id="spring_mvc">Using Spring MVC in Sling</h2></header>
 
-<p>By default, Sling supports two kinds of scripts: JSPs to render arbitrary JCR resources and <a href="http://sling.apache.org/site/servlets.html">Servlets</a>.
-    While the former is a decent way to render dynamic resources, i.e. content pages and components that have no fixed
-    URL, the latter is usually used to provide RESTful services with a fixed URL.  However, Servlets are quite
+<p>By default, Sling supports three kinds of scripts: JSPs, Sightly templates and plain <a href="http://sling.apache.org/site/servlets.html">Servlets</a>.
+    While the former two are decent to render dynamic resources, i.e. content pages and components that have no fixed
+    URL, servlets are often used to provide RESTful services with a fixed URL. However, Servlets are quite
     primitive. They do not provide separation of model, view and controller or common yet complex features such as
     form data binding. With NEBA, one can alternatively use all of Spring's MVC features to enable clean, simple and RESTful MVC with fixed URLs.</p>
 
@@ -668,7 +751,7 @@ this way, your View's render method is used to render the response. Alternativel
 response and either let the controller method return &quot;null&quot; or make it void. This is however bad practice
 and thus discouraged.</p>
 
-<h3 id="api_ResourceParam">Resolving resource path parameters with the @ResourceParam annotation</h3>
+<h3 id="the_resourceparam_annotation">Resolving resource path parameters with the @ResourceParam annotation</h3>
 
 <p>NEBA supports the common use case of handling resource paths in controllers with a convenience annotation:</p>
 
@@ -721,7 +804,7 @@ public class DemoController {
     The path specified in "append" is appended to the provided path or the specified default path prior to resolution.
 </p>
 
-<h3 id="configuring-mvc-logging">Configuring MVC logging</h3>
+<h3 id="configuring_mvc_logging">Configuring MVC logging</h3>
 <p>Internal errors during controller invocation, e.g. when
     required parameters are missing, are logged to the logs/error.log on &quot;warn&quot; level by default. It is highly
     recommended to configure a separate logfile for these messages and disable this logging on production, since it is
@@ -729,10 +812,10 @@ public class DemoController {
     custom logile, simply create a new Apache Sling Logging Logger Configuration using &quot;mvc&quot; as the Logger
     name, like so:</p>
 
-<img src="images/userguide/mvc-logger-configuration.png" />
+    <img src="images/userguide/mvc-logger-configuration.png" alt="Adding an info-level Logger named &quot;mvc&quot; to the &quot;Apache Sling Logging Configuration&quot;" class="image full" />
 </section>
 
-<section><header><h2 id="beanscopes">Support for web-specific bean scopes</h2></header>
+<section><header><h2 id="bean_scopes">Support for web-specific bean scopes</h2></header>
 <p>Beans in Spring have scopes. By default, beans are application scoped
     (i.e. singletons). @ResourceModels have prototypical scope, i.e. they are re-created every time they are obtained from
     the bean factory. In a web context, objects may also be scoped to the current request or the current session.<br/>
@@ -766,7 +849,7 @@ public class MyType {
         The <em>model registry</em> allows viewing all currently registered resource models, their source bundle and the resource types they are mapping to. In addition, the models
         can be filtered to find models mapping to specific content or models compatible to specific classes.
     </p>
-    <p><img src="images/userguide/modelregistry-large.png" alt="The NEBA model registry" class="image full"/></p>
+    <p><img src="images/userguide/modelregistry-large.png" alt="The NEBA model registry lists all resource models, their java type, bean name and source bundle id." class="image full"/></p>
 
 
     <h3 id="tooling_modelstatistics">NEBA model statistics</h3>
@@ -780,10 +863,225 @@ public class MyType {
         loading data from the repository. Give it a try:
     </p>
 
-    <script src="userguide/modelstatistics/lib/d3.v3.min.js" charset="utf-8"></script>
-    <script src="userguide/modelstatistics/lib/d3-star-plot-0.0.3.min.js" charset="utf-8"></script>
-    <script src="userguide/modelstatistics/lib/parser.js" charset="utf-8"></script>
-    <script src="userguide/modelstatistics/script.js" charset="utf-8"></script>
+    <form method="post" enctype="multipart/form-data">
+        <div class="ui-widget-header ui-corner-top buttonGroup">
+            <button type="button" id="helpWithExpressions"
+                    title="Displays a help text underneath the filter expression input field">Help</button>
+        </div>
+    </form>
+
+    <div id="plotarea">
+        <form>
+            <input type="text" id="filter" data-default-value="Begin typing to create a filter expression" />
+        </form>
+        <div id="expressionHelp">
+            <h2>Writing expressions</h2>
+            An expression filters the list of resource models. It allows finding models with specific performance characteristics. For instance, <span class="expressionExample">mappings &gt; instantiations</span>
+            finds models causing more than one subsequent resource to model mapping when instantiated. The query <span class="expressionExample">averageMappingDuration &gt; average(averageMappingDuration)</span>
+            finds resource models who's individual average mapping duration is higher than the average mapping duration of all resource models. All properties, except when enclosed in entire(...) or average(...), apply
+            to the <em>individual</em> model. For instance, <span class="expressionExample">mappingDurationMedian &lt; averageMappingDuration</span> translates to "find models who's mapping duration median is less than it's average mapping duration".
+            One can also employ sub clauses and arithmetic expressions. For instance, <span class="expressionExample">totalTime &gt; entire(totalTime) * 0.05</span> finds models that are responsible for more than 5% of the entire mapping time.
+
+            <h2>The model visualization</h2>
+            The models are ordered by their total mapping time (totalTime). Each graph exhibits the following dimensions;
+            <table>
+                <tbody>
+                <tr><th>Instantiations</th><td>The number of times the model was instantiated</td></tr>
+                <tr><th>Subsequent mappings</th><td>The total number of resource to model mappings initiated by a resource model, i.e. the subsequently used resource models.</td></tr>
+                <tr><th>&#x00D8; duration</th><td>The average duration of one resource to model mapping for this type</td></tr>
+                <tr><th>median</th><td>The median duration of one resource to model mapping for this type</td></tr>
+                <tr><th>Lazy fields</th><td>The number of lazy fields (Optional fields or lazy-loading collections) of this resource model</td></tr>
+                <tr><th>Greedy fields</th><td>The number of non-lazy fields (neither Optional nor lazy-loading collection) of this resource model</td></tr>
+                <tr><th>Total time</th><td>The total time spend mapping this model</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="target"></div>
+    </div>
+
+    <p>
+        This unique feature makes visible what could usually only be discovered through time-consuming analysis using a profiling tool.
+        Furthermore, the model statistics allow real-time performance monitoring and analysis on <em>any system</em>.
+        This is especially valuable for productive systems - there, content changes may trigger performance degradation and attaching a profiler
+        usually isn't an option. NEBA's model statistics console makes finding performance bottleneck's in resource models fast and easy - further
+        adding to better performing implementations.
+    </p>
+
+
+    <h3 id="tooling_logviewer">The  log viewer</h3>
+    <p>
+        Developers do not always have serial access to a system in order to analyze log files - however, being able to investigate the log files of a Sling instance
+        is often key to finding and resolving issues timely. Here, NEBA provides the log viewer Felix console plugin - a safe way to view analyze and obtain the configured
+        log files of a Sling instance for authenticated uses ot the Felix console.
+    </p>
+    <p>
+        The log viewer console allows filtering log files with regard to the log level, tailing and following logfile changes and instantly downloading
+        logfiles as ZIP compressed packages for offline analysis.
+    </p>
+
+    <p><img src="images/userguide/logviewer-large.png" alt="The NEBA log viewer allows downloading and following all default and configured log files." class="image full"/></p>
+    </section>
+
+<section>
+    <header>
+        <h2 id="extending_neba">Extending NEBA</h2>
+    </header>
+
+<header><h3>Customizing the Spring MVC infrastructure</h3></header>
+<p>You may provide implementations of
+    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerAdapter.html">Handler adapters</a>,
+    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerExceptionResolver.html">Handler exception resolvers</a>
+    and <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerMapping.html">Handler mappings</a>
+    in your application context and / or use Spring's &lt;mvc&gt; XML namespace configuration without
+    limitations.</p>
+
+<h3 id="post_processing_resourcemodels">Lifecycle callbacks</h3>
+
+<p>Additional functionality is usually provided by simply adjusting the
+    spring context configuration to the project needs (i.e. configuring <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html">beans</a>
+    and customizing the bean <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-factory-lifecycle">lifecycle</a>).
+</p>
+
+<p>However, there is an additional lifecycle phase of @ResourceModels in beans: after creation, dependency injection
+    and initialization, a resource model is injected with the properties of the resource which is adapted to the model.
+    For programmatic extensibility, the NEBA API contains the lifecycle callback interface <em>ResourceModelPostProcessor</em>.
+    <br/>
+    Providing an OSGi service with this interface allows customization and even overriding of a ResourceModel before and
+    / or after the resource properties are mapped on it.  The demo project's com.unic.cq.foundation.demo.i18n
+    package and context.xml contain an example of how this lifecycle callback can be used to support an additional
+    annotation on a resource model.
+</p>
+
+<h3 id="custom_annotation_based_field_mappers">First-class support for custom annotations</h3>
+
+<p>
+    NEBA allows registering custom mappers for annotated fields. A custom mapper is an OSGi service implementing the
+    <a href="apidocs/neba-api/io/neba/api/resourcemodels/AnnotatedFieldMapper.html">AnnotatedFieldMapper interface</a>.
+    Implementations may map any non-transient annotated field, including
+    fields directly or indirectly (meta-annotations) annotated with any of NEBA's standard annotations. Thus, AnnotatedFieldMappers are
+    allowed to extend or override NEBA's standard annotation-based mapping behavior.
+</p>
+
+<header><h3>Extending the tag library</h3></header>
+
+<p>
+    While NEBA's <em>DefineObjectsTag</em> is part of the NEBA API, writing a standalone tag
+    library is the recommended approach to avoid tight coupling to implementation details of the
+    NEBA tag library.
+</p>
+
+<h3 id="cache_extension">Caching and cache extension</h3>
+<p>
+NEBA's central and most performance critical feature is the adaptation of Resources to their corresponding resource models.
+There, resource and model resolution, content-to-object mapping and datatype conversion occurs.
+This core functionality features an extensible caching
+interface. Any OSGi service implementing the NEBA API interface <em>ResourceModelCache</em> will automatically be
+registered and used to cache the result of the resource to model adaptation.</p><p>NEBA ships with a safe and
+sensible default implementation of this interface contained in the core, the <em>request-scoped resource model
+cache.</em>
+This cache can be enabled or disabled via the Felix console (configuration tab). If you would like
+to provide your own caching implementation, consult the Javadoc of the <em>ResourceModelCache</em> <em>for further
+information.</em></p>
+</section>
+
+
+<section>
+    <header><h2>Architecture</h2></header>
+
+    <p>The following documentation is not meant to be complete in a sense of covering every implementation detail. It strives to illustrate
+        the core design ideas, as well as the most important components and processes of NEBA.
+    </p>
+    <p>
+        The diagrams in this document are created using <a href="http://www.sparxsystems.com/products/ea/">Sparx systems Enterprise Architect</a>. You can
+        <a href="assets/architecture/neba.eap">Download the EA file</a>.
+    </p>
+
+
+    <h3 id="architecture_containerview">Container view</h3>
+
+    <p>NEBA amends Sling's open core with further open source software, which in turn is internally structured in modules. We will refer to such
+    component compositions using the generic term <em>container</em>. NEBA is comprised of the following containers:</p>
+
+    <div class="image centered"><img src="images/architecture/project-technologies.svg" style="width:70em" alt="NEBA is composed of a core and api bundle. The core bundle extends the gemini-blueprint bundle as a fragment, and uses Spring and the Slign as well as the JCR API."></div>
+
+    <h3 id="architecture_modules">Modules view</h3>
+
+    <p>NEBA consists of the following modules. Each module is represented by a single OSGi bundle and a corresponding maven module.</p>
+
+    <div class="image centered"><img src="images/architecture/project-modules-overview.svg" style="width:40em" alt="NEBA consists of two modules, api and core. the api comprises annotations, interfaces and the neba:defineObjects tag library. The core implements the api and exports nothing."></div>
+
+    <h3 id="architecture_corepackages">Core packages view</h3>
+
+    <p>Each package of the core represents a semantically grouped amount of features. The following diagram shows the most important feature groups
+    and illustrates the overall design approach of the core</p>
+
+    <div class="image centered"><img src="images/architecture/io.neba.core.svg" style="width:65em" alt="The NEBA core module's internal package structure."></div>
+
+    <h3 id="architecture_postprocessing">Application context post-processing</h3>
+
+    <p>The central feature of NEBA is the registration of Spring beans using the NEBA API, for instance beans annotated with @ResourceModel.
+    To do so, NEBA attaches to the construction process
+    of Spring application contexts. As soon as all beans are successfully created, but prior to the publication of the context, NEBA post-processes the context
+    and looks up beans using NEBA API annotations or implementing NEBA API interfaces.</p>
+
+    <div class="image centered"><img src="images/architecture/abstract-registration-process.svg" style="width:65em" alt="Upon bundle activation, the gemini-blueprint ActivationHandler is triggered, which invokes the NEBA extension point responsible for resource model detection and context enrichment."></div>
+
+    <h3 id="architecture_modelregistration">Resource model registration and adapter factory provisioning</h3>
+
+    <p>The registration of resource models and the subsequent management of the resource model metadata for mapping purposes
+    account for the most valuable NEBA features. Likewise, they require a well-designed collaboration of context post-processing, metadata creation and -storage
+    as well as updates of the generic resource model adapter factory. The following communication diagram illustrates the complete resource
+    model registration process, from a bundle change event to the publication of the registered resource model metadata via a Sling adapter factory.</p>
+
+    <div class="image centered"><img src="images/architecture/resourcemodel-registration.svg" style="width:85em" alt="Detected resource models are tracked in the core's ModelRegistry and made available via a generic AdapterFactory."></div>
+</section>
+
+
+
+			</div>
+		</div>
+        </div>
+            </div>
+	<!-- /Main -->
+
+	<!-- Tweet -->
+		<div id="tweet">
+			<div class="container">
+				<section>
+					<blockquote>&ldquo;In posuere eleifend odio. Quisque semper augue mattis wisi. Maecenas ligula. Pellentesque viverra vulputate enim. Aliquam erat volutpat.&rdquo;</blockquote>
+				</section>
+			</div>
+		</div>
+	<!-- /Tweet -->
+
+	<!-- Footer -->
+		<div id="footer">
+			<div class="container">
+				<section>
+					<header>
+						<h2>Get in touch</h2>
+						<span class="byline">Integer sit amet pede vel arcu aliquet pretium</span>
+					</header>
+					<ul class="contact">
+						<li><a href="#" class="fa fa-twitter"><span>Twitter</span></a></li>
+						<li class="active"><a href="#" class="fa fa-facebook"><span>Facebook</span></a></li>
+						<li><a href="#" class="fa fa-dribbble"><span>Pinterest</span></a></li>
+						<li><a href="#" class="fa fa-tumblr"><span>Google+</span></a></li>
+					</ul>
+				</section>
+			</div>
+		</div>
+	<!-- /Footer -->
+
+	<!-- Copyright -->
+		<div id="copyright">
+			<div class="container">
+				Design: <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>)
+			</div>
+		</div>
+	</body>
+
+    <!-- styles and scripts for the resource statistics demo above -->
     <style scoped>
         #target {
             margin: 40px 0 0 0;
@@ -932,170 +1230,8 @@ public class MyType {
             padding-right: 2em;
         }
     </style>
-
-    <form method="post" enctype="multipart/form-data" action="">
-        <div class="ui-widget-header ui-corner-top buttonGroup">
-            <button type="button" id="helpWithExpressions"
-                    title="Displays a help text underneath the filter expression input field">Help</button>
-        </div>
-    </form>
-
-    <div id="plotarea">
-        <form>
-            <input type="text" id="filter" data-default-value="Begin typing to create a filter expression" />
-        </form>
-        <div id="expressionHelp">
-            <h2>Writing expressions</h2>
-            An expression filters the list of resource models. It allows finding models with specific performance characteristics. For instance, <span class="expressionExample">mappings > instantiations</span>
-            finds models causing more than one subsequent resource to model mapping when instantiated. The query <span class="expressionExample">averageMappingDuration > average(averageMappingDuration)</span>
-            finds resource models who's individual average mapping duration is higher than the average mapping duration of all resource models. All properties, except when enclosed in entire(...) or average(...), apply
-            to the <em>individual</em> model. For instance, <span class="expressionExample">mappingDurationMedian < averageMappingDuration</span> translates to "find models who's mapping duration median is less than it's average mapping duration".
-            One can also employ sub clauses and arithmetic expressions. For instance, <span class="expressionExample">totalTime > entire(totalTime) * 0.05</span> finds models that are responsible for more than 5% of the entire mapping time.
-
-            <h2>The model visualization</h2>
-            The models are ordered by their total mapping time (totalTime). Each graph exhibits the following dimensions;
-            <table>
-                <tbody>
-                <tr><th>Instantiations</th><td>The number of times the model was instantiated</td></tr>
-                <tr><th>Subsequent mappings</th><td>The total number of resource to model mappings initiated by a resource model, i.e. the subsequently used resource models.</td></tr>
-                <tr><th>&#x00D8; duration</th><td>The average duration of one resource to model mapping for this type</td></tr>
-                <tr><th>median</th><td>The median duration of one resource to model mapping for this type</td></tr>
-                <tr><th>Lazy fields</th><td>The number of lazy fields (Optional fields or lazy-loading collections) of this resource model</td></tr>
-                <tr><th>Greedy fields</th><td>The number of non-lazy fields (neither Optional nor lazy-loading collection) of this resource model</td></tr>
-                <tr><th>Total time</th><td>The total time spend mapping this model</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="target"></div>
-    </div>
-
-    <p>
-        This unique feature makes visible what could usually only be discovered through time-consuming analysis using a profiling tool.
-        Furthermore, the model statistics allow real-time performance monitoring and analysis on <em>any system</em>.
-        This is especially valuable for productive systems - there, content changes may trigger performance degradation and attaching a profiler
-        usually isn't an option. NEBA's model statistics console makes finding performance bottleneck's in resource models fast and easy - further
-        adding to better performing implementations.
-    </p>
-
-
-    <h3 id="tooling_logviewer">The  log viewer</h3>
-    <p>
-        Developers do not always have serial access to a system in order to analyze log files - however, being able to investigate the log files of a Sling instance
-        is often key to finding and resolving issues timely. Here, NEBA provides the log viewer Felix console plugin - a safe way to view analyze and obtain the configured
-        log files of a Sling instance for authenticated uses ot the Felix console.
-    </p>
-    <p>
-        The log viewer console allows filtering log files with regard to the log level, tailing and following logfile changes and instantly downloading
-        logfiles as ZIP compressed packages for offline analysis.
-    </p>
-
-    <p><img src="images/userguide/logviewer-large.png" alt="The NEBA log viewer" class="image full"/></p>
-    </section>
-
-<section>
-    <header>
-        <h2 id="extending">Extending NEBA</h2>
-    </header>
-
-<header><h3>Customizing the Spring MVC infrastructure</h3></header>
-<p>You may provide implementations of
-    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerAdapter.html">Handler adapters</a>,
-    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerExceptionResolver.html">Handler exception resolvers</a>
-    and <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerMapping.html">Handler mappings</a>
-    in your application context and / or use Spring's &lt;mvc&gt; XML namespace configuration without
-    limitations.</p>
-
-<h3 id="post-processing-resourcemodels">Lifecycle callbacks</h3>
-
-<p>Additional functionality is usually provided by simply adjusting the
-    spring context configuration to the project needs (i.e. configuring <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html">beans</a>
-    and customizing the bean <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-factory-lifecycle">lifecycle</a>).
-</p>
-
-<p>However, there is an additional lifecycle phase of @ResourceModels in beans: after creation, dependency injection
-    and initialization, a resource model is injected with the properties of the resource which is adapted to the model.
-    For programmatic extensibility, the NEBA API contains the lifecycle callback interface <em>ResourceModelPostProcessor</em>.
-    <br/>
-    Providing an OSGi service with this interface allows customization and even overriding of a ResourceModel before and
-    / or after the resource properties are mapped on it.  The demo project's com.unic.cq.foundation.demo.i18n
-    package and context.xml contain an example of how this lifecycle callback can be used to support an additional
-    annotation on a resource model.
-</p>
-
-<h3 id="custom-annotation-based-field-mappers">First-class support for custom annotations</h3>
-
-<p>
-    NEBA allows registering custom mappers for annotated fields. A custom mapper is an OSGi service implementing the
-    <a href="apidocs/neba-api/io/neba/api/resourcemodels/AnnotatedFieldMapper.html">AnnotatedFieldMapper interface</a>.
-    Implementations may map any non-transient annotated field, including
-    fields directly or indirectly (meta-annotations) annotated with any of NEBA's standard annotations. Thus, AnnotatedFieldMappers are
-    allowed to extend or override NEBA's standard annotation-based mapping behavior.
-</p>
-
-<header><h3>Extending the tag library</h3></header>
-
-<p>
-    While NEBA's <em>DefineObjectsTag</em> and <em>RenderTag</em> are part of the NEBA API, writing a standalone tag
-    library is the recommended approach to avoid tight coupling to implementation details of the
-    NEBA tag library.
-</p>
-
-<h3 id="cache-extension">Caching and cache extension</h3>
-<p>
-NEBA's central and most performance critical feature is the adaptation of Resources to their corresponding resource models.
-There, resource and model resolution, content-to-object mapping and datatype conversion occurs.
-This core functionality features an extensible caching
-interface. Any OSGi service implementing the NEBA API interface <em>ResourceModelCache</em> will automatically be
-registered and used to cache the result of the resource to model adaptation.</p><p>NEBA ships with a safe and
-sensible default implementation of this interface contained in the core, the <em>request-scoped resource model
-cache.</em>
-This cache can be enabled or disabled via the Felix console (configuration tab). If you would like
-to provide your own caching implementation, consult the Javadoc of the <em>ResourceModelCache</em> <em>for further
-information.</em></p>
-</section>
-
-			</div>
-		</div>
-        </div>
-            </div>
-	<!-- /Main -->
-
-	<!-- Tweet -->
-		<div id="tweet">
-			<div class="container">
-				<section>
-					<blockquote>&ldquo;In posuere eleifend odio. Quisque semper augue mattis wisi. Maecenas ligula. Pellentesque viverra vulputate enim. Aliquam erat volutpat.&rdquo;</blockquote>
-				</section>
-			</div>
-		</div>
-	<!-- /Tweet -->
-
-	<!-- Footer -->
-		<div id="footer">
-			<div class="container">
-				<section>
-					<header>
-						<h2>Get in touch</h2>
-						<span class="byline">Integer sit amet pede vel arcu aliquet pretium</span>
-					</header>
-					<ul class="contact">
-						<li><a href="#" class="fa fa-twitter"><span>Twitter</span></a></li>
-						<li class="active"><a href="#" class="fa fa-facebook"><span>Facebook</span></a></li>
-						<li><a href="#" class="fa fa-dribbble"><span>Pinterest</span></a></li>
-						<li><a href="#" class="fa fa-tumblr"><span>Google+</span></a></li>
-					</ul>
-				</section>
-			</div>
-		</div>
-	<!-- /Footer -->
-
-	<!-- Copyright -->
-		<div id="copyright">
-			<div class="container">
-				Design: <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>)
-			</div>
-		</div>
-
-
-	</body>
+    <script src="userguide/modelstatistics/lib/d3.v3.min.js" charset="utf-8"></script>
+    <script src="userguide/modelstatistics/lib/d3-star-plot-0.0.3.min.js" charset="utf-8"></script>
+    <script src="userguide/modelstatistics/lib/parser.js" charset="utf-8"></script>
+    <script src="userguide/modelstatistics/script.js" charset="utf-8"></script>
 </html>
