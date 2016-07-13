@@ -261,7 +261,7 @@ $(function () {
                     focusedViewDomNode.appendChild(node.cloneNode(true));
                 });
                 this.follow();
-                focusedViewDomNode.style.zIndex = 1001;
+                focusedViewDomNode.style.zIndex = 0;
             } else {
                 focusedViewDomNode.style.zIndex = -1;
             }
