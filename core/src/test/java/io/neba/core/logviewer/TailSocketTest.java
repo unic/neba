@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import static java.io.File.createTempFile;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.mockito.Mockito.*;
 
@@ -66,17 +67,16 @@ public class TailSocketTest extends TailTests {
     public void testTailing() throws Exception {
         File emptyLog = createTempFile("tailsocket-test-", ".log", getTestLogfileDirectory().getParentFile());
         this.availableLogFiles.add(emptyLog);
+
         testee.onWebSocketText("tail:0.1mb:" + emptyLog.getAbsolutePath());
 
-        doSleep(1000);
+        sleepUpTo(1, SECONDS);
 
         verifyNoTextWasSent();
 
         write(emptyLog, "test line");
 
-        doSleep(1000);
-
-        assertSendTextContains("test line");
+        eventually(() -> assertSendTextContains("test line"));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class TailSocketTest extends TailTests {
     public void testHandlingOfUnregisteredLogFile() throws Exception {
         tail("/does/not/exist");
 
-        doSleep(1000);
+        sleepUpTo(1, SECONDS);
 
         verifyNoTextWasSent();
     }
