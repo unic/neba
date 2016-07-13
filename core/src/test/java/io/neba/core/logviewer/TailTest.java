@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,14 +23,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 
 import static java.io.File.createTempFile;
-import static java.lang.Thread.currentThread;
 import static java.nio.file.Files.move;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -58,39 +57,22 @@ public class TailTest extends TailTests {
 
         tailAsynchronously(logFile);
 
-        // Wait for the tail to commence
-        doSleep(500);
-
-        Thread unitTest = currentThread();
-
-        doAnswer(__ -> {
-            // As soon as the first line is read from the logfile, rotate the logfile and resume testing.
-            rotate(logFile);
-            synchronized (unitTest) {
-                unitTest.interrupt();
-            }
-            return null;
-        }).when(getRemote()).sendBytes(isA(ByteBuffer.class));
+        // Synchronously rotate the file when the first line is received
+        uponWriteToRemoteDo(() -> rotate(logFile));
 
         write(logFile, "first line");
 
-        // Wait for tail to pickup the first log line, up to five seconds.
-        try {
-            synchronized (unitTest) {
-                unitTest.wait(SECONDS.toMillis(5));
-            }
-        } catch (InterruptedException e) {
-            // This is expected
-        }
+        eventually(() -> assertSendTextContains("first line"));
 
-        // Re-create a blank logfile since the original one was rotated.
+        // Wait before re-creating the rotated log file to make sure the file is temporarily not found by Tail
+        sleepUpTo(100, MILLISECONDS);
+
+        // At this point, the first line was read and the logfile was synchronously rotated immediately thereafter.
+        // Tail should have tolerated that the logfile was temporarily gone, and should now notice that the
+        // file was rotated as a new blank file is in the original file's place.
         createFile(logFile.getAbsolutePath());
 
-        // Tail might sleep for a while to let the file rotation complete.
-        // wait to make sure that Tail has picked up the rotation.
-        doSleep(1100);
-
-        assertErrorMessageIsSent("file rotated");
+        eventually(() -> assertErrorMessageIsSent("file rotated"));
     }
 
     @Test
@@ -99,41 +81,31 @@ public class TailTest extends TailTests {
 
         tailAsynchronously(logFile);
 
-        // Wait for the tail to commence
-        doSleep(500);
+        // When the first line is read, synchronously rotate and re-create the log file.
+        uponWriteToRemoteDo(() -> {
+            rotate(logFile);
+            createFile(logFile.getAbsolutePath());
+            return null;
+        });
 
         write(logFile, "first line");
 
-        // Wait for the tail to pickup the change
-
-        doSleep(1000);
-
-        assertSendTextContains("first line");
-
-        rotate(logFile);
-        createFile(logFile.getAbsolutePath());
-
-        doSleep(2000);
-
-        assertErrorMessageIsSent("file rotated");
+        eventually(() -> assertSendTextContains("first line"));
+        eventually(() -> assertErrorMessageIsSent("file rotated"));
     }
-
 
     @Test
     public void testHandlingOfRemovedLogFile() throws Exception {
         File logFile = createTempFile("tailsocket-test-", ".log", this.getTestLogfileDirectory().getParentFile());
-
         tailAsynchronously(logFile);
 
-        // Wait for the tail to commence
-        doSleep(500);
+        // Synchronously rotate the logfile when the first line is read. Do not re-created it.
+        uponWriteToRemoteDo(() -> rotate(logFile));
 
-        rotate(logFile);
+        write(logFile, "first line");
 
-        // Wait until the tolerance interval has passed
-        doSleep(2000);
-
-        assertErrorMessageIsSent("file not found");
+        eventually(() -> assertSendTextContains("first line"));
+        eventually(() -> assertErrorMessageIsSent("file not found"));
     }
 
     @Test
@@ -149,21 +121,21 @@ public class TailTest extends TailTests {
     public void testPreservationOfWhiteSpaces() throws Exception {
         tailAsynchronously("logs/error-withwhitespaces.log");
 
-        doSleep(1000);
-
-        assertSendTextContains("06.09.2013 15:03:50.719 *ERROR* error message with stacktrace\r\n" +
-                "  at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)\r\n" +
-                "        at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)");
+        eventually(() ->
+                assertSendTextContains(
+                        "06.09.2013 15:03:50.719 *ERROR* error message with stacktrace\r\n" +
+                        "  at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)\r\n" +
+                        "        at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)"));
     }
 
     @Test
     public void testTailErrorLogIsFullyRead() throws Exception {
         tailAsynchronously("logs/error.log");
 
-        doSleep(1000);
-
-        assertSendTextStartsWith("-- test logs/error.log first line --");
-        assertSendTextEndsWith("-- test logs/error.log last line --");
+        eventually(() -> {
+            assertSendTextStartsWith("-- test logs/error.log first line --");
+            assertSendTextEndsWith("-- test logs/error.log last line --");
+        });
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -184,8 +156,12 @@ public class TailTest extends TailTests {
         assertThat(this.getReceivedText().toString()).startsWith(s);
     }
 
-    private void assertErrorMessageIsSent(String message) throws IOException {
-        verify(this.getRemote()).sendString(message);
+    private void assertErrorMessageIsSent(String message) {
+        try {
+            verify(this.getRemote()).sendString(message);
+        } catch (IOException e) {
+            // Cannot happen, the remote is a mock.
+        }
     }
 
     private void tailSynchronously(String fileName) {
@@ -203,8 +179,8 @@ public class TailTest extends TailTests {
         this.executorService.execute(this.testee);
     }
 
-    private void rotate(File file) throws IOException {
-        move(file.toPath(), new File(file.getAbsolutePath() + ".rotated").toPath());
+    private Path rotate(File file) throws IOException {
+        return move(file.toPath(), new File(file.getAbsolutePath() + ".rotated").toPath());
     }
 
     private void createFile(String logFilePath) throws IOException {
