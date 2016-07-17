@@ -31,7 +31,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -48,7 +47,10 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyBoolean;
@@ -64,7 +66,7 @@ import static org.springframework.web.servlet.DispatcherServlet.MULTIPART_RESOLV
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MvcContextTest {
+public class BundleSpecificDispatcherServletTest {
     @Mock
     private ConfigurableListableBeanFactory factory;
     @Mock
@@ -81,7 +83,7 @@ public class MvcContextTest {
     private List<?> registeredArgumentResolvers = new ArrayList<>();
     private HandlerMapping handlerMapping;
 
-    private MvcContext testee;
+    private BundleSpecificDispatcherServlet testee;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -97,7 +99,17 @@ public class MvcContextTest {
         };
         doAnswer(createMock).when(this.factory).createBean(isA(Class.class));
 
-        this.testee = new MvcContext(this.factory);
+        this.testee = new BundleSpecificDispatcherServlet(this.servletConfig, this.factory);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullFactoryInConstructor() throws Exception {
+        new BundleSpecificDispatcherServlet(mock(ServletConfig.class), null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullServletConfigInConstructor() throws Exception {
+        new BundleSpecificDispatcherServlet(null, mock(ConfigurableListableBeanFactory.class));
     }
 
     @Test
@@ -113,14 +125,12 @@ public class MvcContextTest {
 
     @Test
     public void testInitializationIsIgnoredIfInfrastructureIsNotInitialized() throws Exception {
-        initDispatcherServlet();
         verifyApplicationContextIsNotUsed();
     }
 
     @Test
     public void testInitializationIsPerformedWhenInfrastructureIsInitialized() throws Exception {
         signalContextRefreshed();
-        initDispatcherServlet();
         verifyContextIsAskedFor(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
     }
 
@@ -199,7 +209,7 @@ public class MvcContextTest {
 
         signalContextRefreshed();
 
-        verifyViewResolverIsNotRegistered();
+        verifyViewResolverIsRegistered();
 
         verifyMultipartResolverIsRegistered();
         verifyExceptionResolversAreRegistered();
@@ -235,7 +245,6 @@ public class MvcContextTest {
     public void testOptionsRequestsArePassedToHandlers() throws Exception {
         withExistingHandlerMapping();
         signalContextRefreshed();
-        initDispatcherServlet();
 
         withMethod("OPTIONS");
         service();
@@ -247,7 +256,6 @@ public class MvcContextTest {
     public void testTraceRequestsArePassedToHandlers() throws Exception {
         withExistingHandlerMapping();
         signalContextRefreshed();
-        initDispatcherServlet();
 
         withMethod("TRACE");
         // Mock expected response type to prevent the default trace behavior
@@ -276,10 +284,6 @@ public class MvcContextTest {
 
     private void withMethod(String method) {
         doReturn(method).when(this.request).getMethod();
-    }
-
-    private void initDispatcherServlet() {
-        this.testee.initializeDispatcherServlet(this.servletConfig);
     }
 
     private void sendEvent(ApplicationEvent event) {
@@ -380,10 +384,6 @@ public class MvcContextTest {
         verifyBeanIsNeverCreatedInFactory(SlingMultipartResolver.class);
     }
 
-    private void verifyViewResolverIsNotRegistered() {
-        verifyBeanIsNeverCreatedInFactory(NebaViewResolver.class);
-    }
-
     private void verifyBeanIsNeverCreatedInFactory(Class<?> type) {
         verify(this.factory, never()).createBean(eq(type));
     }
@@ -403,7 +403,7 @@ public class MvcContextTest {
     }
 
     private void signalContextRefreshed() {
-        this.testee.onApplicationEvent(this.event);
+        this.testee.onApplicationEvent((ApplicationEvent) this.event);
     }
 
     private <T> T mockExistingBean(final Class<T> beanType) {

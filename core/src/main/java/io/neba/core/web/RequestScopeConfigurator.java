@@ -14,7 +14,7 @@
  * limitations under the License.
 **/
 
-package io.neba.core.spring.applicationcontext.configuration;
+package io.neba.core.web;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Service;

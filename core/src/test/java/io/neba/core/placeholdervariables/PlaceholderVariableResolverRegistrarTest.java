@@ -14,7 +14,7 @@
  * limitations under the License.
 **/
 
-package io.neba.core.spring.applicationcontext.configuration;
+package io.neba.core.placeholdervariables;
 
 import io.neba.api.configuration.PlaceholderVariableResolver;
 import org.junit.Before;

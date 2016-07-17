@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-package io.neba.core.spring.web.filter;
+package io.neba.core.web;
 
 import org.apache.sling.bgservlets.BackgroundHttpServletRequest;
 import org.springframework.context.i18n.LocaleContextHolder;

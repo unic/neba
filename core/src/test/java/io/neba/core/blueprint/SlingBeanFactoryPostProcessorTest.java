@@ -17,9 +17,10 @@
 package io.neba.core.blueprint;
 
 import io.neba.core.mvc.MvcServlet;
+import io.neba.core.placeholdervariables.PlaceholderVariableResolverRegistrar;
 import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.spring.applicationcontext.configuration.PlaceholderVariableResolverRegistrar;
-import io.neba.core.spring.applicationcontext.configuration.RequestScopeConfigurator;
+import io.neba.core.web.RequestScopeConfigurator;
+import io.neba.core.web.ServletInfrastructureAwareConfigurer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,8 @@ public class SlingBeanFactoryPostProcessorTest {
     @Mock
     private RequestScopeConfigurator requestScopeConfigurator;
     @Mock
+    private ServletInfrastructureAwareConfigurer servletInfrastructureAwareConfigurer;
+    @Mock
     private Bundle bundle;
     @Mock
     private MvcServlet dispatcherServlet;
@@ -69,11 +72,13 @@ public class SlingBeanFactoryPostProcessorTest {
         
         InOrder inOrder = inOrder(
     		this.requestScopeConfigurator,
+            this.servletInfrastructureAwareConfigurer,
     		this.variableResolver, 
     		this.modelRegistrar, 
         	this.dispatcherServlet);
         
         inOrder.verify(this.requestScopeConfigurator).registerRequestScope(eq(this.beanFactory));
+        inOrder.verify(this.servletInfrastructureAwareConfigurer).enableServletContextAwareness(eq(this.beanFactory));
         inOrder.verify(this.variableResolver).registerResolvers(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.modelRegistrar).registerModels(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.dispatcherServlet).enableMvc(eq(this.beanFactory), eq(this.context));

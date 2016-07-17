@@ -14,8 +14,9 @@
  * limitations under the License.
 **/
 
-package io.neba.core.spring.applicationcontext.configuration;
+package io.neba.core.web;
 
+import io.neba.core.web.RequestScopeConfigurator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

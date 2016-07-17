@@ -71,7 +71,6 @@ public class ResourceParamArgumentResolverTest {
     @InjectMocks
     private ResourceParamArgumentResolver testee;
 
-
     @Before
     public void setUp() throws Exception {
         doReturn(this.resourceParam).when(this.methodParameter).getParameterAnnotation(eq(ResourceParam.class));
@@ -98,6 +97,11 @@ public class ResourceParamArgumentResolverTest {
         resolveArgument();
 
         assertResolvedArgumentIsNull();
+    }
+
+    @Test
+    public void testResourceParamAnnotationIsSupported() throws Exception {
+        assertThat(this.testee.supportsParameter(this.methodParameter)).isTrue();
     }
 
     @Test(expected = UnresolvableResourceException.class)
