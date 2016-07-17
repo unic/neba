@@ -17,9 +17,10 @@
 package io.neba.core.blueprint;
 
 import io.neba.core.mvc.MvcServlet;
+import io.neba.core.placeholdervariables.PlaceholderVariableResolverRegistrar;
 import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.spring.applicationcontext.configuration.PlaceholderVariableResolverRegistrar;
-import io.neba.core.spring.applicationcontext.configuration.RequestScopeConfigurator;
+import io.neba.core.web.RequestScopeConfigurator;
+import io.neba.core.web.ServletInfrastructureAwareConfigurer;
 import org.eclipse.gemini.blueprint.extender.OsgiBeanFactoryPostProcessor;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +45,18 @@ public class SlingBeanFactoryPostProcessor implements OsgiBeanFactoryPostProcess
     private RequestScopeConfigurator requestScopeConfigurator;
     @Autowired
     private MvcServlet dispatcherServlet;
-    
+    @Autowired
+    private ServletInfrastructureAwareConfigurer servletInfrastructureAwareConfigurer;
+
     @Override
-    public void postProcessBeanFactory(BundleContext bundleContext, ConfigurableListableBeanFactory beanFactory) {
+    public void postProcessBeanFactory(BundleContext bundleContext, ConfigurableListableBeanFactory factory) {
         EventhandlingBarrier.begin();
         try {
-            this.requestScopeConfigurator.registerRequestScope(beanFactory);
-            this.variableResolverRegistrar.registerResolvers(bundleContext, beanFactory);
-            this.modelRegistrar.registerModels(bundleContext, beanFactory);
-            this.dispatcherServlet.enableMvc(beanFactory, bundleContext);
+            this.requestScopeConfigurator.registerRequestScope(factory);
+            this.servletInfrastructureAwareConfigurer.enableServletContextAwareness(factory);
+            this.variableResolverRegistrar.registerResolvers(bundleContext, factory);
+            this.modelRegistrar.registerModels(bundleContext, factory);
+            this.dispatcherServlet.enableMvc(factory, bundleContext);
         } finally {
             EventhandlingBarrier.end();
         }

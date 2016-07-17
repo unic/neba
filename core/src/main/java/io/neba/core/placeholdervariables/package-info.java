@@ -15,6 +15,7 @@
 **/
 
 /**
- * Contains customizations applied to every application context created by gemini blueprint.
+ * Contains the infrastructure for
+ * {@link io.neba.api.configuration.io.neba.api.configuration.PlaceholderVariableResolver placeholder variable resolvers}. .
  */
-package io.neba.core.spring.applicationcontext.configuration;
+package io.neba.core.placeholdervariables;

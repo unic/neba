@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.neba.core.spring.web.filter;
+package io.neba.core.web;
 
+import io.neba.core.web.BackgroundServletRequestWrapper;
+import io.neba.core.web.NebaRequestContextFilter;
 import org.apache.sling.bgservlets.BackgroundHttpServletRequest;
 import org.junit.After;
 import org.junit.Before;

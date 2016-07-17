@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.neba.core.spring.web.filter;
+package io.neba.core.web;
 
 
+import io.neba.core.web.BackgroundServletRequestWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

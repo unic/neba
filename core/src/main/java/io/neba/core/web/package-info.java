@@ -15,10 +15,7 @@
 **/
 
 /**
- * Contains the implementations connecting gemini blueprint with Sling and NEBA by means of
- * a {@link io.neba.core.blueprint.SlingBeanFactoryPostProcessor custom application context post processor},
- * {@link io.neba.core.blueprint.SlingOsgiBundleShutdownHandler shutdown handler},
- * {@link io.neba.core.blueprint.ContextFailedHandler context failure handler} and further implementations
- * for synchronization and consistency checking of changes in bundles containing resource models.
+ * Contains general web infrastructure, such as the Sling-specific implementation of the
+ * {@link org.springframework.web.filter.RequestContextFilter}, {@link io.neba.core.web.NebaRequestContextFilter}.
  */
-package io.neba.core.blueprint;
+package io.neba.core.web;
