@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 import static aQute.bnd.osgi.Constants.BUNDLE_SYMBOLICNAME;
 import static aQute.bnd.osgi.Constants.IMPORT_PACKAGE;
 import static aQute.bnd.osgi.Processor.printClauses;
-import static java.nio.file.Files.copy;
 
 /**
  * <h1>This implementation addresses the following issues</h1>
@@ -30,7 +29,8 @@ import static java.nio.file.Files.copy;
  *
  * <h2>NEBA-49: Migrate to Spring 4</h2>
  * <p>
- * AEM 6.x ships with an incomplete export of the jackson library. The jackson package imports of Spring are thus removed in favor of an inlined solution.
+ * AEM 6.x ships with an incomplete export of the jackson library. The jackson package imports of Spring are thus removed in favor of an explicit
+ * relationship to jackson bundles using the "Require-Bundle" header.
  * </p>
  *
  * @author Olaf Otto
@@ -39,13 +39,12 @@ public class SpringBundlesTransformer {
     public static final String MANIFEST_LOCATION = "META-INF/MANIFEST.MF";
 
     public static void main(String[] args) throws IOException {
-        if (args == null || args.length != 3) {
-            throw new IllegalArgumentException("Expected exactly three arguments, got: " + Arrays.toString(args) + ".");
+        if (args == null || args.length != 2) {
+            throw new IllegalArgumentException("Expected exactly two arguments, got: " + Arrays.toString(args) + ".");
         }
         new SpringBundlesTransformer(
                 asDirectory(args[0]),
-                asDirectory(args[1]),
-                asDirectory(args[2])
+                asDirectory(args[1])
         ).run();
     }
 
@@ -63,23 +62,17 @@ public class SpringBundlesTransformer {
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final File unpackedArtifactsDir;
     private final File repackToDirectory;
-    private final File dependenciesDir;
 
-    public SpringBundlesTransformer(File unpackedArtifactsDir, File repackToDir, File dependenciesDir) {
+    public SpringBundlesTransformer(File unpackedArtifactsDir, File repackToDir) {
         if (unpackedArtifactsDir == null) {
             throw new IllegalArgumentException("Method argument unpackedArtifactsDir must not be null.");
         }
         if (repackToDir == null) {
             throw new IllegalArgumentException("Method argument repackToDir must not be null.");
         }
-        if (dependenciesDir == null) {
-            throw new IllegalArgumentException("Method argument dependenciesDir must not be null.");
-
-        }
 
         this.unpackedArtifactsDir = unpackedArtifactsDir;
         this.repackToDirectory = repackToDir;
-        this.dependenciesDir = dependenciesDir;
     }
 
     public void run() throws IOException {
@@ -96,7 +89,7 @@ public class SpringBundlesTransformer {
 
             Parameters imports = new Analyzer().parseHeader(importPackageDirectives);
 
-            if (allowUnstableJavaxImports(imports) || inlineJacksonImports(dir, mainAttributes, imports)) {
+            if (allowUnstableJavaxImports(imports) || transformJacksonImportsToRequireBundle(mainAttributes, imports)) {
                 updateImportPackageDirectives(mainAttributes, imports);
                 alterSymbolicNameToReflectCustomization(mainAttributes);
             }
@@ -124,7 +117,7 @@ public class SpringBundlesTransformer {
         return true;
     }
 
-    private boolean inlineJacksonImports(File dir, Attributes mainAttributes, Parameters imports) throws IOException {
+    private boolean transformJacksonImportsToRequireBundle(Attributes mainAttributes, Parameters imports) throws IOException {
         Set<String> jacksonImports = new HashSet<>();
         imports.keySet().forEach(key -> {
             if (key.startsWith("com.fasterxml.jackson")) {
@@ -132,22 +125,17 @@ public class SpringBundlesTransformer {
             }
         });
 
-        jacksonImports.forEach(imports::remove);
-
         if (jacksonImports.isEmpty()) {
             return false;
         }
 
-        File lib = new File(dir, "lib");
-        lib.mkdir();
+        jacksonImports.forEach(imports::remove);
 
-        Set<String> bundleClassPath = new HashSet<>();
-        for (File file : listFiles(dependenciesDir)) {
-            bundleClassPath.add("lib/" + file.getName());
-            copy(file.toPath(), new File(lib, file.getName()).toPath());
-        }
-
-        mainAttributes.putValue("Bundle-Classpath", bundleClassPath.stream().reduce(".", (a, b) -> a + "," + b));
+        mainAttributes.putValue(
+                "Require-Bundle",
+                        "com.fasterxml.jackson.core.jackson-core," +
+                        "com.fasterxml.jackson.core.jackson-databind," +
+                        "com.fasterxml.jackson.core.jackson-annotations");
         return true;
     }
 

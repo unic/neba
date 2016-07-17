@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 
 import static java.nio.file.Files.createTempDirectory;
 import static org.apache.commons.io.FileUtils.copyDirectory;
@@ -22,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SpringBundlesTransformerTest {
     private File source;
     private File target;
-    private File dependenciesDir;
 
     @Before
     public void setUp() throws Exception {
@@ -32,7 +30,6 @@ public class SpringBundlesTransformerTest {
 
         this.source = createTempDirectory("neba-").toFile();
         this.target = createTempDirectory("neba-").toFile();
-        this.dependenciesDir = new File(sourceBlueprint.getParentFile(), "dependenciesDir");
 
         copyDirectory(sourceBlueprint, source);
     }
@@ -52,12 +49,14 @@ public class SpringBundlesTransformerTest {
     }
 
     @Test
-    public void testInliningOfJacksonImports() throws Exception {
+    public void testTransformationOfJacksonImportsToRequireBundle() throws Exception {
         transformUnpackedArtifacts();
 
         assertImportDirectiveDoesNotContain("jar.with-jackson.jar", "com.fasterxml.jackson");
-        assertBundleClasspathContains("jar.with-jackson.jar", "lib/some-jackson-library.jar", ".");
-        assertBundleContains("jar.with-jackson.jar", "lib/some-jackson-library.jar");
+        assertBundleRequiresBundles("jar.with-jackson.jar",
+                "com.fasterxml.jackson.core.jackson-core",
+                "com.fasterxml.jackson.core.jackson-databind",
+                "com.fasterxml.jackson.core.jackson-annotations");
         assertSymbolicNameIs("jar.with-jackson.jar", "io.neba.spring-webmvc");
     }
 
@@ -70,22 +69,14 @@ public class SpringBundlesTransformerTest {
 
     }
 
-    private void assertBundleContains(String fileName, String file) throws IOException, URISyntaxException {
+    private void assertBundleRequiresBundles(String fileName, String... symbolicNames) throws IOException, URISyntaxException {
         JarFile jarFile = getJarFile(fileName);
-        ZipEntry entry = jarFile.getEntry(file);
+        String requireBundleHeader = jarFile.getManifest().getMainAttributes().getValue("Require-Bundle");
         jarFile.close();
 
-        assertThat(entry).describedAs("The embedded jackson jar file").isNotNull();
-    }
-
-    private void assertBundleClasspathContains(String fileName, String... s) throws IOException, URISyntaxException {
-        JarFile jarFile = getJarFile(fileName);
-        String bundleClasspathHeader = jarFile.getManifest().getMainAttributes().getValue("Bundle-Classpath");
-        jarFile.close();
-
-        for (String expected : s) {
-            assertThat(bundleClasspathHeader).describedAs("The bundle class path header").contains(expected);
-        }
+        assertThat(requireBundleHeader.split(","))
+                .describedAs("The Require-Bundle header must exactly contain")
+                .containsExactlyInAnyOrder(symbolicNames);
     }
 
     private void assertImportDirectiveDoesNotContain(String fileName, String expected) throws IOException, URISyntaxException {
@@ -111,7 +102,7 @@ public class SpringBundlesTransformerTest {
     }
 
     private void transformUnpackedArtifacts() throws IOException {
-        new SpringBundlesTransformer(source, target, dependenciesDir).run();
+        new SpringBundlesTransformer(source, target).run();
     }
 
     private URL getResource(String path) {
