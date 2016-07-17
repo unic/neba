@@ -165,29 +165,9 @@
                             <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
                             <excludeArtifactIds>org.apache.servicemix.bundles.aopalliance</excludeArtifactIds>
                             <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
                             <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>provide-jackson-dependencies</id>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-core</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-databind</artifactId>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-annotations</artifactId>
-                                </artifactItem>
-                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
@@ -215,7 +195,6 @@
                     <arguments>
                         <argument>${spring.artifacts.workdir}</argument>
                         <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}/17</argument>
-                        <argument>${project.build.directory}/dependency</argument>
                     </arguments>
                     <classpathScope>compile</classpathScope>
                 </configuration>
@@ -233,6 +212,21 @@
                         <embedded>
                             <groupId>org.apache.servicemix.bundles</groupId>
                             <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+                            <target>${neba.installation.path}/16</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-core</artifactId>
+                            <target>${neba.installation.path}/16</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-databind</artifactId>
+                            <target>${neba.installation.path}/16</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-annotations</artifactId>
                             <target>${neba.installation.path}/16</target>
                         </embedded>
 
