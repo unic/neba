@@ -146,10 +146,17 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
      */
     private void configureExceptionResolvers() {
         Map<String, HandlerExceptionResolver> resolvers = this.factory.getBeansOfType(HandlerExceptionResolver.class);
+        DefaultHandlerExceptionResolver defaultResolver;
+
         if (resolvers.isEmpty()) {
             defineBean(ExceptionHandlerExceptionResolver.class);
             defineBean(ResponseStatusExceptionResolver.class);
-            DefaultHandlerExceptionResolver defaultResolver = defineBean(DefaultHandlerExceptionResolver.class);
+            defaultResolver = defineBean(DefaultHandlerExceptionResolver.class);
+        } else {
+            defaultResolver = this.factory.getBean(DefaultHandlerExceptionResolver.class);
+        }
+
+        if (defaultResolver != null) {
             defaultResolver.setWarnLogCategory("mvc");
         }
     }

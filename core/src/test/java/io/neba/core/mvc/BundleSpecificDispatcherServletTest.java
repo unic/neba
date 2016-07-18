@@ -148,11 +148,27 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfExistingExceptionResolver() throws Exception {
+    public void testHandlingOfExistingExceptionResolverButNoDefaultResolver() throws Exception {
         withBeanAlreadyExistingInApplicationContext(HandlerExceptionResolver.class);
 
         signalContextRefreshed();
         verifyExceptionResolversAreNotRegistered();
+        verifyDispatcherServletAttemptsToObtainDefaultResolver();
+
+        verifyMultipartResolverIsRegistered();
+        verifyHandlerAdaptersAreRegistered();
+        verifyHandlerMappingsAreRegistered();
+        verifyViewResolverIsRegistered();
+    }
+
+    @Test
+    public void testHandlingOfExistingDefaultExceptionResolver() throws Exception {
+        withBeanAlreadyExistingInApplicationContext(DefaultHandlerExceptionResolver.class);
+
+        signalContextRefreshed();
+        verifyExceptionResolversAreNotRegistered();
+        verifyDispatcherServletAttemptsToObtainDefaultResolver();
+        verifyDispatcherServletConfiguresWarnLogCategory("mvc");
 
         verifyMultipartResolverIsRegistered();
         verifyHandlerAdaptersAreRegistered();
@@ -398,6 +414,14 @@ public class BundleSpecificDispatcherServletTest {
         verify(this.factory).registerSingleton(anyString(), isA(type));
     }
 
+    private void verifyDispatcherServletAttemptsToObtainDefaultResolver() {
+        verify(this.factory).getBean(eq(DefaultHandlerExceptionResolver.class));
+    }
+
+    private void verifyDispatcherServletConfiguresWarnLogCategory(String category) {
+        verify(this.factory.getBean(DefaultHandlerExceptionResolver.class)).setWarnLogCategory(category);
+    }
+
     private void verifyApplicationContextIsNotUsed() {
         verifyZeroInteractions(this.applicationContext);
     }
@@ -427,6 +451,7 @@ public class BundleSpecificDispatcherServletTest {
         Map<String, Object> m = mock(Map.class);
         doReturn(false).when(m).isEmpty();
         doReturn(m).when(this.factory).getBeansOfType(argThat(isAssignableFromBeanType));
+        doReturn(bean).when(this.factory).getBean(beanType);
 
         return bean;
     }
