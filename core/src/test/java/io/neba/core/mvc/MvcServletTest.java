@@ -1,23 +1,24 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.mvc;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.ServletResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,9 +26,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import javax.servlet.ServletConfig;
@@ -58,6 +59,8 @@ public class MvcServletTest {
     private SlingHttpServletResponse response;
     @Mock
     private ServletConfig servletConfig;
+    @Mock
+    private ServletResolver servletResolver;
 
     private BundleSpecificDispatcherServlet injectedDispatcherServlet;
 
@@ -67,13 +70,15 @@ public class MvcServletTest {
 
     @Before
     public void setUp() throws Exception {
-        Answer<Object> retainMvcContext = invocation -> {
+        doAnswer(invocation -> {
             injectedDispatcherServlet = (BundleSpecificDispatcherServlet) invocation.getArguments()[1];
             return null;
-        };
-        doAnswer(retainMvcContext).when(this.factory).registerSingleton(anyString(), isA(BundleSpecificDispatcherServlet.class));
+        }).when(this.factory).registerSingleton(anyString(), isA(BundleSpecificDispatcherServlet.class));
+
         doReturn(this.bundle).when(this.context).getBundle();
-        doReturn(this.dispatcherServlet).when(this.testee).createBundleSpecificDispatcherServlet(factory);
+        doReturn("symbolic-name").when(this.bundle).getSymbolicName();
+        doReturn(new Version(1, 2, 3)).when(this.bundle).getVersion();
+        doReturn(this.dispatcherServlet).when(this.testee).createBundleSpecificDispatcherServlet(factory, context);
     }
 
     @Test
@@ -107,6 +112,22 @@ public class MvcServletTest {
 
         handleRequest();
         verifyMvcContextServicedRequestOnce();
+    }
+
+    @Test
+    public void testServletConfigurationProvidedToBundleSpecificDispatcherServletHasSensibleServletName() throws Exception {
+        withRealDispatcherServletCreated();
+        enableMvc();
+
+        assertServletNameOfBundleSpecificDispatcherServletIs("BundleSpecificDispatcherServlet for bundle symbolic-name 1.2.3");
+    }
+
+    private void withRealDispatcherServletCreated() {
+        doCallRealMethod().when(this.testee).createBundleSpecificDispatcherServlet(this.factory, this.context);
+    }
+
+    private void assertServletNameOfBundleSpecificDispatcherServletIs(String servletName) {
+        assertThat(this.injectedDispatcherServlet.getServletConfig().getServletName()).isEqualTo(servletName);
     }
 
     private void disableMvc() {

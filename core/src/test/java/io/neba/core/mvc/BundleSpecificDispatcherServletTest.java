@@ -1,22 +1,24 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.mvc;
 
+import io.neba.core.web.WebApplicationContextAdapter;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.ServletResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +78,8 @@ public class BundleSpecificDispatcherServletTest {
     @Mock
     private ServletConfig servletConfig;
     @Mock
+    private ServletResolver servletResolver;
+    @Mock
     private SlingMvcServletRequest request;
     @Mock
     private SlingHttpServletResponse response;
@@ -99,17 +103,43 @@ public class BundleSpecificDispatcherServletTest {
         };
         doAnswer(createMock).when(this.factory).createBean(isA(Class.class));
 
-        this.testee = new BundleSpecificDispatcherServlet(this.servletConfig, this.factory);
+        this.testee = new BundleSpecificDispatcherServlet(this.servletConfig, this.servletResolver, this.factory);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInConstructor() throws Exception {
-        new BundleSpecificDispatcherServlet(mock(ServletConfig.class), null);
+        new BundleSpecificDispatcherServlet(mock(ServletConfig.class), this.servletResolver, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullServletConfigInConstructor() throws Exception {
-        new BundleSpecificDispatcherServlet(null, mock(ConfigurableListableBeanFactory.class));
+        new BundleSpecificDispatcherServlet(null, this.servletResolver, mock(ConfigurableListableBeanFactory.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandlingOfNullServletResolverInConstructor() throws Exception {
+        new BundleSpecificDispatcherServlet(mock(ServletConfig.class), null, mock(ConfigurableListableBeanFactory.class));
+    }
+
+    @Test
+    public void testApplicationContextIsProvidedAsWebApplicationContext() throws Exception {
+        signalContextRefreshed();
+        assertDispatcherServletIsInitializedWithWebApplicationContextAdapter();
+    }
+
+    @Test
+    public void testWebApplicationContextDispatchesToOriginalApplicationContext() throws Exception {
+        signalContextRefreshed();
+        getBeanFromWebApplicationContext("anyBean");
+        verifyBeanIsFetchedFromApplicationContext("anyBean");
+    }
+
+    private void verifyBeanIsFetchedFromApplicationContext(String beanName) {
+        verify(this.applicationContext).getBean(beanName);
+    }
+
+    private void getBeanFromWebApplicationContext(String beanName) {
+        this.testee.getWebApplicationContext().getBean(beanName);
     }
 
     @Test
@@ -282,12 +312,43 @@ public class BundleSpecificDispatcherServletTest {
         verifyHandlerMappingIsUsedForRequest();
     }
 
+    @Test
+    public void testHasHandlerForIsAlwaysFalseWhenServletIsNotInitialized() throws Exception {
+        withExistingHandlerMapping();
+
+        assertServletHasNoHandlerForRequest();
+
+        verifyHandlerMappingIsNotUsedForRequest();
+    }
+
+    @Test
+    public void testHasHandlerForRequestChecksHandlerMappingsWhenServletIsInitialized() throws Exception {
+        withExistingHandlerMapping();
+        signalContextRefreshed();
+
+        assertServletHasHandlerForRequest();
+
+        verifyHandlerMappingIsUsedForRequest();
+    }
+
+    private void assertServletHasHandlerForRequest() {
+        assertThat(this.testee.hasHandlerFor(this.request)).isTrue();
+    }
+
+    private void assertServletHasNoHandlerForRequest() {
+        assertThat(this.testee.hasHandlerFor(this.request)).isFalse();
+    }
+
     private void withResponseContentType(String type) {
         doReturn(type).when(this.response).getContentType();
     }
 
     private void verifyHandlerMappingIsUsedForRequest() throws Exception {
         verify(this.handlerMapping).getHandler(eq(this.request));
+    }
+
+    private void verifyHandlerMappingIsNotUsedForRequest() throws Exception {
+        verify(this.handlerMapping, never()).getHandler(eq(this.request));
     }
 
     private void withExistingHandlerMapping() {
@@ -356,7 +417,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     private void verifyViewResolverIsRegistered() {
-        verifyContextDefinesBean(NebaViewResolver.class);
+        verify(this.factory).registerSingleton(anyString(), isA(NebaViewResolver.class));
     }
 
     private void verifyHandlerMappingsAreRegistered() {
@@ -428,6 +489,10 @@ public class BundleSpecificDispatcherServletTest {
 
     private void signalContextRefreshed() {
         this.testee.onApplicationEvent((ApplicationEvent) this.event);
+    }
+
+    private void assertDispatcherServletIsInitializedWithWebApplicationContextAdapter() {
+        assertThat(this.testee.getWebApplicationContext()).isInstanceOf(WebApplicationContextAdapter.class);
     }
 
     private <T> T mockExistingBean(final Class<T> beanType) {

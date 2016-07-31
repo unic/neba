@@ -43,6 +43,8 @@
 
 		<bp:reference interface="javax.servlet.ServletConfig" id="servletConfig" />
 
+		<bp:reference interface="org.apache.sling.api.servlets.ServletResolver" id="servletResolver" />
+
 		<!-- All post processors are used by the mapper -->
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelPostProcessor" availability="optional">
 			<bp:reference-listener ref="resourceToModelMapper" bind-method="bind" unbind-method="unbind" />
@@ -138,7 +140,7 @@
 		<bp:service ref="mappableTypeHierarchyChangeListener" interface="org.osgi.service.event.EventHandler">
 			<bp:service-properties>
 				<entry key="event.topics" value="org/apache/sling/api/resource/Resource/CHANGED"/>
-				<!-- React to changes potentially altering the resource type hierarchy, unless they are occurring
+				<!-- React to changes potentially altering the cacheable resource type hierarchy, unless they are occurring
 				     in a location known not to contain data relevant to the type hierarchy, such as /var or /content -->
 				<entry key="event.filter" value="(&amp;
 				 (!(path=/content/*))

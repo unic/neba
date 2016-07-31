@@ -1,21 +1,24 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.core.mvc;
 
+import io.neba.core.web.WebApplicationContextAdapter;
+import org.apache.sling.api.servlets.ServletResolver;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -53,10 +56,14 @@ import static org.springframework.beans.factory.BeanFactoryUtils.GENERATED_BEAN_
 public class BundleSpecificDispatcherServlet extends DispatcherServlet implements ApplicationListener<ApplicationEvent> {
     private final ServletConfig servletConfig;
     private final ConfigurableListableBeanFactory factory;
+    private final ServletResolver servletResolver;
 
     private boolean initialized = false;
 
-    public BundleSpecificDispatcherServlet(ServletConfig servletConfig, ConfigurableListableBeanFactory factory) {
+    public BundleSpecificDispatcherServlet(ServletConfig servletConfig,
+                                           ServletResolver servletResolver,
+                                           ConfigurableListableBeanFactory factory) {
+
         super();
         if (servletConfig == null) {
             throw new IllegalArgumentException("Constructor parameter servletConfig must not be null");
@@ -64,11 +71,15 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
         if (factory == null) {
             throw new IllegalArgumentException("method parameter factory must not be null");
         }
+        if (servletResolver == null) {
+            throw new IllegalArgumentException("method parameter servletResolver must not be null");
+        }
 
         this.servletConfig = servletConfig;
         this.factory = factory;
+        this.servletResolver = servletResolver;
 
-        setPublishEvents(false);
+        setPublishEvents(true);
         setDispatchOptionsRequest(true);
         setDispatchTraceRequest(true);
     }
@@ -82,6 +93,9 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ContextRefreshedEvent) {
             synchronized (this) {
+                ApplicationContext applicationContext = ((ContextRefreshedEvent) event).getApplicationContext();
+                setApplicationContext(new WebApplicationContextAdapter(applicationContext, this.servletConfig.getServletContext()));
+
                 // Configure the MVC infrastructure
                 configureMultipartResolver();
                 configureExceptionResolvers();
@@ -91,7 +105,7 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
                 addNebaViewResolver();
 
                 // Picks up the previously registered MVC infrastructure
-                onRefresh(((ContextRefreshedEvent) event).getApplicationContext());
+                onRefresh(applicationContext);
 
                 this.initialized = true;
             }
@@ -175,7 +189,9 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
     }
 
     private void addNebaViewResolver() {
-        defineBean(NebaViewResolver.class);
+        this.factory.registerSingleton(
+                generateBeanNameFor(NebaViewResolver.class),
+                new NebaViewResolver(this.servletResolver));
     }
 
     /**
