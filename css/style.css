@@ -1039,6 +1039,11 @@ section .info {
 	border-left: 1em solid #aabbff;
 }
 
+section .versions {
+	padding-left: 1em;
+	border-left: 1em solid #ffa92f;
+}
+
 #nav {
 	width: 1200px;
 	position: relative;
