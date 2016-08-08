@@ -103,8 +103,7 @@ description: A comprehensive guide to using the NEBA features
                                                 return false;
                                             }
 
-                                            // https://api.stackexchange.com/2.2/search/advanced?order=desc&sort=activity&body=NEBA&site=stackoverflow
-                                            $.get("/stackoverflow.json", function(data) {
+                                            $.get("https://api.stackexchange.com/2.2/search/advanced?order=desc&sort=activity&body=NEBA&site=stackoverflow", function(data) {
                                                 var $list = $('<ul class="style"></ul>');
                                                 data.items.forEach(function(item) {
                                                     // The tag search of the stack overflow search api is broken, thus we're filtering the results manually.
