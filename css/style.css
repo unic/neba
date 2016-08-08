@@ -1038,3 +1038,24 @@ section .info {
 	padding-left: 1em;
 	border-left: 1em solid #aabbff;
 }
+
+#nav {
+	width: 1200px;
+	position: relative;
+	margin: auto;
+}
+
+.home {
+	background: transparent url("../images/neba-logo.png") no-repeat scroll center center;
+	border-right: none;
+	position: absolute;
+	left: 0;
+}
+
+#nav ul li.home a {
+	color: transparent;
+}
+
+.references img {
+	padding: 2em;
+}

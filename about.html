@@ -1,0 +1,203 @@
+---
+pageTitle: About NEBA
+title: About NEBA
+twitterAuthor: nebaframework
+description: NEBA facts and figures
+---
+<!DOCTYPE HTML>
+<html lang="en">
+{% include head.ext %}
+<body>
+{% include header.ext %}
+<!-- Main -->
+<div id="main">
+    <div class="container">
+        <div class="row">
+            <div class="6u">
+                <section>
+                    <ul class="default">
+                        <li><a href="#about_neba">About NEBA</a></li>
+                        <li><a href="#license_model">License model</a></li>
+                        <li><a href="#neba_technology">NEBA's technology in a nutshell</a></li>
+                    </ul>
+                </section>
+            </div>
+            <div class="6u">
+                <section>
+                    <ul class="default">
+                        <li><a href="#history">NEBA's history</a></li>
+                        <li><a href="#technical_roadmap">Technical roadmap</a></li>
+                        <li><a href="#community_roadmap">Community roadmap</a></li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div id="content">
+
+            <section>
+                <header><h2 id="about_neba">About NEBA</h2></header>
+                <p>
+                    Key to successful Content Management Applications is a fast and comprehensible implementation of the
+                    underlying information architecture and the solution's ability to <em>scale</em>.
+                    As the solution matures, it must be able to bear the challenges that arise from an increasing amount
+                    of complexity and integrated systems - without degradation in terms of system quality or
+                    time spent developing solutions.
+                </p>
+
+                <section>
+                    <blockquote>
+                        Elegance is the kind of beauty that stems from simplicity
+                        <br/>
+                        <a href="https://twitter.com/paulg/status/752197983752585216"><span class="pennant"><span
+                                class="fa fa-twitter"></span></span> Paul Graham</a>
+                    </blockquote>
+                </section>
+
+                <p>
+                    NEBA increases your engineers speed and ability to tackle these challenges, giving them a simple,
+                    lightweight and stable API to implement solutions based on Apache Sling or Adobe AEM&trade;.
+                    Instead of coupling engineers to custom and hard-to learn solutions, NEBA integrates well-known
+                    standards. In particular, The Spring Framework allows using state-of-the-art
+                    implementations for Enterprise Application Integration, Database Integration, MVC, AOP and
+                    Dependency Injection (IoC).
+                </p>
+                <p>
+                    At the same time, NEBA is designed to scale in demanding environments, where high request volumes
+                    meet significant amounts of content. In addition, it ships with tooling that helps engineering
+                    understand application behavior and analyze issues quickly.
+                </p>
+                <section>
+                    <header><h3 id="license_model">License model</h3></header>
+                    <p>
+                        The License model is simple: NEBA is released under the Apache Software License. It is
+                        completely and irrevocably open source.
+                    </p>
+                </section>
+
+                <section>
+                    <header><h3 id="neba_technology">NEBA's technology in a Nutshell</h3></header>
+                    <p>
+                        NEBA integrates the <a href="https://www.spring.io">Spring Framework</a> into <a
+                            href="https://sling.apache.org">Apache Sling</a> exclusively using
+                        <a href="https://www.eclipse.org/gemini/blueprint/">Gemini-Blueprint</a>, the reference
+                        implementation of the OSGi blueprint specification.
+                        NEBA provides simple annotations that allow leveraging Spring POJOs as models for resources such
+                        as JCR content - and transparently provides a set of solutions
+                        for common engineering tasks for Spring-Based applications.
+                    </p>
+                    <p>
+                        NEBA does not alter or influence the default behavior of Sling or AEM&trade; and can be transparently
+                        used from within any out of the box solution, such as Sling servlets.
+                    </p>
+                    <a href="https://sling.apache.org/" class="image"><img src="images/sling-logo.png"/></a>
+                    <a href="https://projects.spring.io/spring-framework/" class="image"><img src="images/spring-framework-logo.png"/></a>
+                    <a href="https://www.eclipse.org/gemini/blueprint/" class="image"><img src="images/gemini-logo.png"/></a>
+                </section>
+
+                <section>
+                    <header><h3 id="history">NEBA's history</h3></header>
+                    <p>
+                        NEBA has been created by <a href="https://www.unic.com/en.html">Unic AG <span
+                            class="pennant"><span class="fa fa-external-link"></span></span></a>, Switzerland in 2010.
+                        After its continued success in many projects, it was published as open source
+                        in 2014. Since then, development is active and it has been leveraged by a large number of
+                        Enterprise Content Management Solutions.
+                    </p>
+                </section>
+            </section>
+
+            <section>
+                <header><h2 id="roadmap">Roadmap</h2></header>
+                <section>
+                    <header>
+                        <h3 id="technical_roadmap">Technical roadmap</h3>
+                    </header>
+
+                    <p>See also <a
+                            href="https://github.com/unic/neba/issues?q=is%3Aopen+milestone%3ARoadmap+label%3Aenhancement+">open
+                        enhancements in the roadmap milestone</a>.</p>
+
+                    <h3>Adaptation of Sling features added to AEM 6.x +</h3>
+                    <p>
+                        The latest Sling versions feature highly valuable additions in the area of <a
+                            href="https://cwiki.apache.org/confluence/display/SLING/Multitenancy+Support">multi-tenancy</a>,
+                        and <a href="https://bdelacretaz.files.wordpress.com/2014/09/artyom-thesis.pdf">continuous
+                        deployment</a> and scalability,
+                        most prominently through the transition to <a
+                            href="http://jackrabbit.apache.org/oak/docs/index.html">jackrabbit-oak</a>.
+                        The <a href="https://github.com/unic/neba/milestones/Sling@AEM6.x">NEBA API shall feature
+                        first-class support for these new concepts</a>.
+                    </p>
+
+                    <h3>Transition to Java 8+</h3>
+                    <p>
+                        For reasons of our commitment to long-term support, NEBA supports AEM 5.3.x to AEM 6.1.x based
+                        deployments. However, AEM 5.3 - AEM 5.6. will slowly disappear
+                        from the market in the foreseeable future. This makes possible the transition from supporting
+                        JDK 1.6x+ to supporting JDK 1.8x, leveraging the new features contained therein
+                    </p>
+
+                    <h3>Transition to Spring 4+</h3>
+                    <p>
+                        Along with the transition to Java 8+, we strive to transition to Spring 4 to benefit from <a
+                            href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/new-in-4.0.html">first-class
+                        support for web technologies</a> such as
+                        web sockets, SockJS and STOMP as well as extended Support for RESTful controllers. We suspect
+                        that this transition
+                        will have little to no impact on legacy applications running on Spring 3.2.x, as almost all of
+                        the core features and APIs remain supported
+                        in Spring 4.
+                    </p>
+
+                </section>
+
+                <section>
+                    <header><h2 id="community_roadmap">Community roadmap</h2></header>
+
+
+                    <p>See also <a
+                            href="https://github.com/unic/neba/issues?q=is%3Aopen+milestone%3ARoadmap+label%3Adocumentation+">open
+                        items in the roadmap milestone</a>.</p>
+
+                    <h3>Continued community growth</h3>
+                    <p>
+                        NEBA is developed by Unic since 2009. As such, it has widespread use for medium to large-scale
+                        projects for car manufacturers, financial industry, government and luxury industry.
+                        We now aim to see further projects - including projects solely using Apache Sling - benefit from
+                        the mature feature stack.
+                        <br/>
+                        We thus strive to continuously extend our base of contributors and interested engineers. For
+                        this purpose, NEBA is presented at conferences such as the <a
+                            href="http://adapt.to/2015/en.html">.adaptTo()</a>
+                        and the <a href="http://www.connectcon.ch/2014/en.html">Connect</a>.
+                    </p>
+
+                    <h3>Extension of documentation</h3>
+                    <p>
+                        To further improve the documentation, more examples - e.g. best practices and patterns, as well
+                        as screen casts shall be added to the neba.io Site in 2015.
+                    </p>
+                </section>
+            </section>
+
+            <section class="references">
+                <header><h2 id="references">Trusted by these and many other companies</h2></header>
+                <img src="images/references/audi-logo.png" alt="Audi"/> <img
+                    src="images/references/logo-kanton-bern.png" alt="Canton of Bern"/>
+                <img src="images/references/zvv-logo.png" alt="ZVV"/> <img src="images/references/cs.png"
+                                                                           alt="Credit Suisse"/>
+                <img src="images/references/swissgrid_logo.png" alt="Swissgrid"/> <img
+                    src="images/references/hausinfo.png" alt="Hausinfo"/>
+            </section>
+
+            {% include disqus.ext %}
+        </div>
+    </div>
+</div>
+<!-- /Main -->
+
+{% include footer.ext %}
+</body>
+</html>
