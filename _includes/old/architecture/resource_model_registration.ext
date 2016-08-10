@@ -2,9 +2,10 @@
     <header><h2 id="modelregistration">Resource model registration and adapter factory provisioning</h2></header>
 
     <p>The registration of resource models and the subsequent management of the resource model metadata for mapping purposes
-    account for the most valuable NEBA features. Likewise, they require a well-designed collaboration of context post-processing, metadata creation and -storage
-    as well as updates of the generic resource model adapter factory. The following communication diagram illustrates the complete resource
-    model registration process, from a bundle change event to the publication of the registered resource model metadata via a Sling adapter factory.</p>
+        account for the most valuable NEBA features. Likewise, they require a well-designed collaboration of context post-processing,
+        metadata creation and -storage as well as updates of the generic resource model adapter factory. The following communication diagram
+        illustrates the complete resource model registration process, from a bundle change event to the publication of the registered
+        resource model metadata via a Sling adapter factory.</p>
 
-    <img src="images/architecture/resourcemodel-registration.png">
+    <img src="old/images/architecture/resourcemodel-registration.png">
 </section>

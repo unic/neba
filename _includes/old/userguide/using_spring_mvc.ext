@@ -14,10 +14,11 @@
 		resources, too), the path /bin/mvc/url would not point to the /bin/mvc/ servlet. Thus, to have a request handled by
 		the MVC servlet, the pseudo-extension&quot;.do&quot; is used. A spring controller with the URL /my/controller/path
 		is thus always addressed using /bin/mvc.do/my/controller/path. One may also use an extension and selectors (e.g.
-		/bin/mvc.do/my/controller/path.selector1.selector2.xml). </p><p>Let's create a simple Controller called &quot;DemoController&quot;.
-	We will use Spring's @Controller annotation; other styles (such as mapping by bean names etc.) are also
-	supported.  The purpose of this controller is to echo a parameter that we provide in a RESTful way, i.e. as a
-	path element (this allows caching!).</p>
+		/bin/mvc.do/my/controller/path.selector1.selector2.xml). </p>
+
+	<p>Let's create a simple Controller called &quot;DemoController&quot;. We will use Spring's @Controller annotation; other styles
+		(such as mapping by bean names etc.) are also supported.  The purpose of this controller is to echo a parameter that we provide in
+		a RESTful way, i.e. as a path element (this allows caching!).</p>
 
 	{% highlight java %}
 	@Controller
@@ -68,11 +69,12 @@
 		forwarding views: returning &quot;redirect:/some/path&quot; from a controller method will cause a redirect to
 		/some/path, returning forward:/some/path will forward the request to /some/path, see also
 		<a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-redirecting">MVC
-			redirecting</a>.</p><p>You may also directly work with the response. For this, provide your own
-	org.springframework.web.servlet.View in the org.springframework.web.servlet.ModelAndView provided by the controller;
-	this way, your View's render method is used to render the response. Alternatively, you may also simply write to the
-	response and either let the controller method return &quot;null&quot; or make it void. This is however bad practice
-	and thus discouraged.</p>
+			redirecting</a>.</p>
+
+	<p>You may also directly work with the response. For this, provide your own org.springframework.web.servlet.View in the
+		org.springframework.web.servlet.ModelAndView provided by the controller; this way, your View's render method is used to render the
+		response. Alternatively, you may also simply write to the response and either let the controller method return &quot;null&quot; or
+		make it void. This is however bad practice and thus discouraged.</p>
 
 	<h3 id="api_ResourceParam">Resolving resource path parameters with the @ResourceParam annotation</h3>
 
@@ -92,8 +94,7 @@
 	<p>Here, a request parameter &quot;page&quot; is expected to contain a path to a resource. This resource is
 		resolved and adapted to the parameter type in case the parameter type is not &quot;Resource&quot;.
 		@ResourceParameters can be optional or required. In addition, they can have a default value (a default resource path) that will
-		be used in case the parameter is not present or empty:
-	</p>
+		be used in case the parameter is not present or empty:</p>
 
 	{% highlight java %}
 	@Controller
@@ -108,9 +109,7 @@
 
 	<p>Here, "page" is implicitly considered option (since there is a default value)</p>
 
-	<p>
-		Furthermore, the content paths resolved by the @ResourceParam annotations can be altered by appending an arbitrary sub-path:
-	</p>
+	<p>Furthermore, the content paths resolved by the @ResourceParam annotations can be altered by appending an arbitrary sub-path:</p>
 
 	{% highlight java %}
 	@Controller
@@ -123,9 +122,7 @@
 	}
 	{% endhighlight %}
 
-	<p>
-		The path specified in "append" is appended to the provided path or the specified default path prior to resolution.
-	</p>
+	<p>The path specified in "append" is appended to the provided path or the specified default path prior to resolution.</p>
 
 	<h3 id="configuring-mvc-logging">Configuring MVC logging</h3>
 	<p>Internal errors during controller invocation, e.g. when
@@ -135,5 +132,5 @@
 		custom logile, simply create a new Apache Sling Logging Logger Configuration using &quot;mvc&quot; as the Logger
 		name, like so:</p>
 
-	<img src="images/userguide/mvc-logger-configuration.png" />
+	<img src="old/images/userguide/mvc-logger-configuration.png" />
 </section>

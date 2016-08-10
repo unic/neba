@@ -45,11 +45,11 @@
                 "a number" : {hint: "Enter a number e.g. 0 or 0.5", order:0}
             },
             valid = function() {
-                filter.css("background", "url('userguide/modelstatistics/valid.png') no-repeat 4pt center");
+                filter.css("background", "url('old/userguide/modelstatistics/valid.png') no-repeat 4pt center");
                 filter.valid = true;
             },
             invalid = function() {
-                filter.css("background", "url('userguide/modelstatistics/invalid.png') no-repeat 4pt center");
+                filter.css("background", "url('old/userguide/modelstatistics/invalid.png') no-repeat 4pt center");
                 filter.valid = false;
             },
             provideDefaultValue = function() {
@@ -221,12 +221,12 @@
                 // create and fade-in the new diagrams.
                 var existingPlots = d3.selectAll(".wrapper");
                 if (existingPlots.empty()) {
-                    d3.json("userguide/modelstatistics/data.json", visualizeData);
+                    d3.json("old/userguide/modelstatistics/data.json", visualizeData);
                 } else {
                     var n = 0;
                     existingPlots.transition().style("opacity", 0).remove().each(function() { ++n}).each("end", function() {
                         if (!--n) {
-                            d3.json("userguide/modelstatistics/data.json", visualizeData);
+                            d3.json("old/userguide/modelstatistics/data.json", visualizeData);
                         }
                     });
                 }

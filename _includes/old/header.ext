@@ -1,14 +1,16 @@
 <!-- Header -->
-    <div id="header">
-    	{% include old/notice.ext %}
-        {% include old/navigation.ext %}
-        <div class="container">
+<div id="header">
+    {% include old/notice.ext %}
+    {% include old/navigation.ext %}
+    <div class="container">
 
-            <!-- Logo -->
-            <div id="logo">
-                <h1><a>{{page.title}}</a></h1>
-                <span class="tag">{{page.subTitle}}</span>
-            </div>
+        <!-- Logo -->
+        <div id="logo">
+            <h1><a>{{page.title}}</a></h1>
+            <span class="tag">{{page.subTitle}}</span>
         </div>
+        <!-- /Logo -->
+
     </div>
-<!-- Header -->
+</div>
+<!-- /Header -->

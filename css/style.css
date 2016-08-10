@@ -1039,11 +1039,6 @@ section .info {
 	border-left: 1em solid #aabbff;
 }
 
-section .versions {
-	padding-left: 1em;
-	border-left: 1em solid #ffa92f;
-}
-
 #nav {
 	width: 1200px;
 	position: relative;
@@ -1065,10 +1060,27 @@ section .versions {
 	padding: 2em;
 }
 
+/***
+ additions for old documentation
+***/
+
+section .versions {
+	padding-left: 1em;
+	border-left: 1em solid #ffa92f;
+}
+
+.versions a.active {
+	color: #777;
+
+	/* disables link */
+	pointer-events: none !important;
+	cursor: default;
+}
+
 #nav-wrapper.notice {
 	background: #ffa92f;
 
-	/* to fix notice at top of page */
+	/* always fixes notice at top of window */
 	position: fixed;
 	z-index: 2;
 }

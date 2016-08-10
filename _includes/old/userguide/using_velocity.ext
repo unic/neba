@@ -21,8 +21,10 @@
 
 	{% highlight java %}default:/apps/neba/views/{% endhighlight %}
 
-	<h3>Using Velocity templates with the NEBA taglib in JSP</h3><p>Let's continue by editing carousel JSP template
-	(/libs/foundation/components/carousel/carousel.jsp). Replace the ${m.lastModified} with the following JSP tag:</p>
+	<h3>Using Velocity templates with the NEBA taglib in JSP</h3>
+
+	<p>Let's continue by editing carousel JSP template (/libs/foundation/components/carousel/carousel.jsp). Replace the ${m.lastModified}
+		with the following JSP tag:</p>
 
 	{% highlight xml %}<neba:render object="${m.lastModified}" />{% endhighlight %}
 
@@ -60,14 +62,13 @@
 
 	{% highlight xml %}<neba:render object="${m.lastModified}" viewHint="US" />{% endhighlight %}
 
-	<div class="trigger-button"><span>Hint: Configuring the velocity rendering</span></div>
-	<div class="accordion">
+	<section class="info"><h4>Hint: Configuring the velocity rendering</h4>
 		<p>The velocity engine is configured to cache a template for 60 seconds; this is
 			configurable in the sling console (Unic sling spring bean renderer configuration).  You can also specify
 			&quot;fallback&quot; templates with view variants, e.g. the fallback for Date-CH.vlt would be Object-CH.vlt
 			(not Object.vlt).  If you configure multiple bean renderers, you can target the in the render tag by
 			providing their name via the &quot;renderer&quot; property.</p>
-	</div><!--END ACCORDION-->
+	</section>
 
 	<p>Rendering an object must not stop in the current template. The current BeanRenderer is always available in
 		your template under the name &quot;renderer&quot; (see Constants class in the API).  This is great when
