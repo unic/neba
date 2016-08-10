@@ -3,5 +3,5 @@
 
     <p>NEBA consists of the following modules. Each module is represented by a single OSGi bundle and a corresponding maven module.</p>
 
-    <img src="old/images/architecture/project-modules-overview.png">
+    <img src="images/architecture/project-modules-overview.png">
 </section>

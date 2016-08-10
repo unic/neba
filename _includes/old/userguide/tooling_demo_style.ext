@@ -49,7 +49,7 @@
         box-sizing: border-box;
         font-size: 100%;
         border: 1px solid #bfbfbf;
-        background: url("old/userguide/modelstatistics/valid.png") no-repeat 4pt center;
+        background: url("userguide/modelstatistics/valid.png") no-repeat 4pt center;
     }
 
     #plotarea .ui-helper-hidden-accessible {

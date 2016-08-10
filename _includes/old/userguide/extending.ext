@@ -28,7 +28,7 @@
 	<h3 id="custom-annotation-based-field-mappers">First-class support for custom annotations</h3>
 
 	<p>NEBA allows registering custom mappers for annotated fields. A custom mapper is an OSGi service implementing the
-		<a href="old/apidocs/neba-api/io/neba/api/resourcemodels/AnnotatedFieldMapper.html">AnnotatedFieldMapper interface</a>.
+		<a href="apidocs/neba-api/io/neba/api/resourcemodels/AnnotatedFieldMapper.html">AnnotatedFieldMapper interface</a>.
 		Implementations may map any non-transient annotated field, including
 		fields directly or indirectly (meta-annotations) annotated with any of NEBA's standard annotations. Thus, AnnotatedFieldMappers are
 		allowed to extend or override NEBA's standard annotation-based mapping behavior.</p>

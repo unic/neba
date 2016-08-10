@@ -1,6 +1,6 @@
 <section>
     <header><h2 id="installing">Installing and integrating NEBA</h2></h1></header>
 
-    //TODO: fix quickstart link
+    <!--TODO: fix quickstart link by adding the pages QUICKSTART.HTML and DOWNLOAD.HTML or simply delete this section-->
     <p>The fastest way to start with NEBA is to follow the <a href="quickstart.html">Quick start guide</a>.</p>
 </section>

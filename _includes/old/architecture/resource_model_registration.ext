@@ -7,5 +7,5 @@
         illustrates the complete resource model registration process, from a bundle change event to the publication of the registered
         resource model metadata via a Sling adapter factory.</p>
 
-    <img src="old/images/architecture/resourcemodel-registration.png">
+    <img src="images/architecture/resourcemodel-registration.png">
 </section>

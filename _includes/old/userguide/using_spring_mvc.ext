@@ -132,5 +132,5 @@
 		custom logile, simply create a new Apache Sling Logging Logger Configuration using &quot;mvc&quot; as the Logger
 		name, like so:</p>
 
-	<img src="old/images/userguide/mvc-logger-configuration.png" />
+	<img src="images/userguide/mvc-logger-configuration.png" />
 </section>

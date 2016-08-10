@@ -28,7 +28,7 @@
 	<p>Let's assume we need a simple JAVA model for a sling component called &quot;carousel&quot;.
 		The carousel has the sling:resourceType &quot;foundation/components/carousel&quot;. The component has the following properties:</p>
 
-	<p><img src="old/images/userguide/geometrixx-carousel.png"></p>
+	<p><img src="images/userguide/geometrixx-carousel.png"></p>
 
 	<section class="info">
 		<h4>Hint: Leveraging the resource type hierarchy</h4>
@@ -100,7 +100,7 @@
 	<p>To make it more interesting, we can now add some of the resource's properties to the model. You can see the
 		properties e.g. in the CRXDE light.</p>
 
-	<p><img src="old/images/userguide/geometrixx-carousel.png"></p>
+	<p><img src="images/userguide/geometrixx-carousel.png"></p>
 
 	<p>Let's take &quot;pages&quot;, &quot;playSpeed&quot;, &quot;transTime&quot; and add them to the model:</p>
 
@@ -267,7 +267,7 @@
 	{% endhighlight %}
 
 	<p>To resolve the ${language} placeholder, one simply provides a bean implementing the
-		<a href="old/apidocs/neba-api/io/neba/api/configuration/class-use/PlaceholderVariableResolver.html">PlaceholderVariableResolver interface</a>.
+		<a href="apidocs/neba-api/io/neba/api/configuration/class-use/PlaceholderVariableResolver.html">PlaceholderVariableResolver interface</a>.
 		Such a bean instance will be asked to resolve the value for a placeholder key, i.e. &quot;language&quot;
 		in the above example. A completely hardcoded example would be:</p>
 
@@ -352,7 +352,7 @@
 	<h4 id="api_Optional">Declaring lazy-loading relationships using the Optional&lt;T&gt; interface</h4>
 
 	<p>1:1 relationships are not automatically lazy. In order to make them lazy-loading,
-		NEBA provides the <a href="old/apidocs/neba-api/io/neba/api/resourcemodels/Optional.html">Optional</a> interface:</p>
+		NEBA provides the <a href="apidocs/neba-api/io/neba/api/resourcemodels/Optional.html">Optional</a> interface:</p>
 
 	{% highlight java %}
 	@ResourceModel(types = "...")

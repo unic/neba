@@ -22,7 +22,7 @@
 	<p>Following, the method is regarded as a self-test and is made available via the NEBA self-test console (/system/console/selftests).
 		These tests can be executed manually at any time. Furthermore, an XML file representing the execution results of all tests can be fetched via HTTP by authenticated users,
 		thus allowing connecting monitoring tools (such as nagios) to the self test console.
-		<img src="old/images/userguide/selftest-console.png" alt="The NEBA self test console"/>
+		<img src="images/userguide/selftest-console.png" alt="The NEBA self test console"/>
 	</p>
 
 	<p><em>Note:</em> Recent Sling versions contain <a href="http://sling.apache.org/documentation/bundles/sling-health-check-tool.html">Sling Health Check</a>, a feature

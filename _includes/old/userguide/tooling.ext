@@ -10,7 +10,7 @@
 	<p>The <em>model registry</em> allows viewing all currently registered resource models, their source bundle and the resource types they are mapping to. In addition, the models
 		can be filtered to find models mapping to specific content or models compatible to specific classes.</p>
 
-	<p><a class="image full" href="old/images/userguide/modelregistry-large.png"><img src="old/images/userguide/modelregistry-large.png" alt="The NEBA model registry" /></a></p>
+	<p><a class="image full" href="images/userguide/modelregistry-large.png"><img src="images/userguide/modelregistry-large.png" alt="The NEBA model registry" /></a></p>
 
 	<h3 id="tooling_modelstatistics">NEBA model statistics</h3>
 
@@ -18,7 +18,7 @@
 		NEBA gathers data regarding the mapping duration. This combined resource model data is available via a JSON REST API in the model statistics console (/system/console/modelstatistics/api/statistics).</p>
 
 	<section>
-		<p><a class="image left" href="old/images/userguide/modelstatistics-large.png"><img src="old/images/userguide/modelstatistics.png" alt="The NEBA model statistics" /></a></p>
+		<p><a class="image left" href="images/userguide/modelstatistics-large.png"><img src="images/userguide/modelstatistics.png" alt="The NEBA model statistics" /></a></p>
 
 		<p>The NEBA model statistics console (/system/console/modelstatistics) uses this data to visualize the corresponding model characteristics. In addition, the console
 			allows querying the data to display models with certain features, for instance to discover models performing below average and/or excessively
@@ -38,10 +38,10 @@
 
 		<p>Give the model statistics console a real try with a small set of sample data obtained from a real project.</p>
 
-		<script src="old/userguide/modelstatistics/lib/d3.v3.min.js" charset="utf-8"></script>
-		<script src="old/userguide/modelstatistics/lib/d3-star-plot-0.0.3.min.js" charset="utf-8"></script>
-		<script src="old/userguide/modelstatistics/lib/parser.js" charset="utf-8"></script>
-		<script src="old/userguide/modelstatistics/script.js" charset="utf-8"></script>
+		<script src="userguide/modelstatistics/lib/d3.v3.min.js" charset="utf-8"></script>
+		<script src="userguide/modelstatistics/lib/d3-star-plot-0.0.3.min.js" charset="utf-8"></script>
+		<script src="userguide/modelstatistics/lib/parser.js" charset="utf-8"></script>
+		<script src="userguide/modelstatistics/script.js" charset="utf-8"></script>
 
 		{% include old/userguide/tooling_demo_style.ext %}
 
@@ -94,5 +94,5 @@
 		logfiles as ZIP compressed packages for offline analysis.
 	</p>
 
-	<p><a class="image full" href="old/images/userguide/logviewer-large.png"><img src="old/images/userguide/logviewer-large.png" alt="The NEBA log viewer" /></a></p>
+	<p><a class="image full" href="images/userguide/logviewer-large.png"><img src="images/userguide/logviewer-large.png" alt="The NEBA log viewer" /></a></p>
 </section>

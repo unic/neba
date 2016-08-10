@@ -4,5 +4,5 @@
     <p>NEBA amends Sling's open core with further open source software, which in turn is internally structured in modules. We will refer to
         such component compositions using the generic term <em>container</em>. NEBA is comprised of the following containers:</p>
 
-    <img src="old/images/architecture/project-technologies.png">
+    <img src="images/architecture/project-technologies.png">
 </section>
