@@ -1,0 +1,9 @@
+<section>
+    <header><h2 id="postprocessing">Application context post-processing</h2></header>
+
+    <p>The most central feature of NEBA is the registration of Spring beans using the NEBA API, e.g. beans annotated with @ResourceModel, @Selftest and so forth. Here, NEBA attaches to the construction process
+    of Spring application contexts. As soon as all beans are successfully created, but prior to the publication of the context, NEBA post-processes the context
+    and looks up beans using NEBA API annotations or implementing NEBA API interfaces.</p>
+
+    <img src="images/architecture/abstract-registration-process.png">
+</section>

@@ -1,0 +1,12 @@
+<section>
+    <header><h1>Architecture:<span> The architecture of NEBA explained</span></h1></header>
+
+    <h2>About this documentation</h2>
+
+    <p>The following documentation is not meant to be complete in a sense of covering every implementation detail. It strives to illustrate
+    the core design ideas, as well as the most important components and processes of NEBA.</p>
+
+    <p>The diagrams in this document are created using <a href="http://www.sparxsystems.com/products/ea/">Sparx systems Enterprise Architect</a>.</p>
+
+    <a href="old/assets/architecture/neba.eap" class="button">Download the EA file</a>
+</section>
