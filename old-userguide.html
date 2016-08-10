@@ -2,142 +2,141 @@
 pageTitle: NEBA User Guide
 title: User Guide
 twitterAuthor: nebaframework
-description: A comprehensive guide to using the NEBA features
+description: A comprehensive guide to using the NEBA 3.10.0 features
 ---
 <!DOCTYPE HTML>
 <html lang="en">
-    {% include head.ext %}
-    <body>
-        {% include old/header.ext %}
-        <!--Main-->
-        <div id="main">
-            <div class="container">
+{% include head.ext %}
+<body>
+{% include old/header.ext %}
+<!--Main-->
+<div id="main">
+    <div class="container">
+        <div class="row">
+            <!--Sidebar-->
+            <div id="sidebar">
                 <div class="row">
-                    <!--Sidebar-->
-                    <div id="sidebar">
-                        <div class="row">
-                            <div class="3u">
-                                <section>
-                                    <header><h2>Topics</h2></header>
-                                </section>
-                                <section>
-                                    <ul class="default">
-                                        <li><a href="#installing">Installing NEBA</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <header><h3><a href="#api_ResourceModel">Writing @ResourceModels</a></h3></header>
-                                    <ul class="default">
-                                        <li><a href="#resourceModelDefinition">Resources, resource types and resource models</a></li>
-                                        <li><a href="#nebaDefineObjects">The neba:defineObjects tag</a></li>
-                                        <li><a href="#resourceToModelMapping">Mapping properties and resources to models</a></li>
-                                        <li><a href="#resourceAnnotations">Annotations for advanced resource to model mapping</a></li>
-                                        <li><a href="#lazyLoading">Lazy loading</a></li>
-                                        <li><a href="#api_PreMapping-and-PostMapping">Performing additional initializations</a></li>
-                                    </ul>
-                                </section>
-                            </div>
-                            <div class="3u">
-                                <section>
-                                    <header><h3><a href="#springmvc">Using Spring MVC in Sling</a></h3></header>
-                                    <ul class="default">
-                                        <li><a href="#api_ResourceParam">Resolving resource parameters with the @ResourceParam annotation</a></li>
-                                        <li><a href="#configuring-mvc-logging">Configuring logging for MVC</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <ul class="default">
-                                        <li><a href="#beanscopes">Support for web-specific bean scopes</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <ul class="default">
-                                        <li><a href="#using-velocity">Rendering beyond resources with Velocity</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <ul class="default">
-                                        <li><a href="#api_SelfTest">Writing self-testing applications with NEBA</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <header><h3><a href="#tooling">NEBA tooling for developers and administrators</a></h3></header>
-                                    <ul class="default">
-                                        <li><a href="#tooling_modelregistry">The NEBA model registry</a></li>
-                                        <li><a href="#tooling_modelstatistics">The NEBA model statistics</a></li>
-                                        <li><a href="#tooling_logviewer">The NEBA log viewer</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <ul class="default">
-                                        <li><a href="#extending">Extending NEBA</a></li>
-                                    </ul>
-                                </section>
-                            </div>
-                            <div class="3u">
-                                <section>
-                                    <header><h2>API</h2></header>
-                                </section>
-                                <section>
-                                    <header><h3>Annotations</h3></header>
-                                    <ul class="default">
-                                        <li><a href="#api_ResourceModel">@ResourceModel</a></li>
-                                        <li><a href="#api_This">@This</a></li>
-                                        <li><a href="#api_Reference">@Reference</a></li>
-                                        <li><a href="#api_Children">@Children</a></li>
-                                        <li><a href="#api_Resource">@Path</a></li>
-                                        <li><a href="#api_Unmapped">@Unmapped</a></li>
-                                        <li><a href="#api_SelfTest">@SelfTest</a></li>
-                                        <li><a href="#api_ResourceParam">@ResourceParam</a></li>
-                                        <li><a href="#api_PreMapping-and-PostMapping">@PostMapping, @PreMapping</a></li>
-                                    </ul>
-                                </section>
-                            </div>
-                            <div class="3u">
-                                <section>
-                                    <header><h3>Tag libraries</h3></header>
-                                    <ul class="default">
-                                        <li><a href="#nebaDefineObjects">neba:defineObjects</a></li>
-                                        <li><a href="#using-velocity">neba:render</a></li>
-                                    </ul>
-                                </section>
-                                <section>
-                                    <header><h3>Interfaces</h3></header>
-                                    <ul class="default">
-                                        <li><a href="#api_Optional">Optional&lt;T&gt;</a></li>
-                                        <li><a href="#path-placeholders">PlaceholderVariableResolver</a></li>
-                                        <li><a href="#configuring-velocity">BeanRenderer, BeanRendererFactory</a></li>
-                                        <li><a href="#cache-extension">ResourceModelCache</a></li>
-                                        <li><a href="#post-processing-resourcemodels">ResourceModelPostProcessor</a></li>
-                                        <li><a href="#custom-annotation-based-field-mappers">AnnotatedFieldMapper&lt;F, A&gt;</a></li>
-                                    </ul>
-                                </section>
-                            </div>
-                        </div>
+                    <div class="3u">
+                        <section>
+                            <header><h2>Topics</h2></header>
+                        </section>
+                        <section>
+                            <ul class="default">
+                                <li><a href="#installing">Installing NEBA</a></li>
+                            </ul>
+                        </section>
+                        <section>
+                            <header><h3><a href="#api_ResourceModel">Writing @ResourceModels</a></h3></header>
+                            <ul class="default">
+                                <li><a href="#resourceModelDefinition">Resources, resource types and resource models</a></li>
+                                <li><a href="#nebaDefineObjects">The neba:defineObjects tag</a></li>
+                                <li><a href="#resourceToModelMapping">Mapping properties and resources to models</a></li>
+                                <li><a href="#resourceAnnotations">Annotations for advanced resource to model mapping</a></li>
+                                <li><a href="#lazyLoading">Lazy loading</a></li>
+                                <li><a href="#api_PreMapping-and-PostMapping">Performing additional initializations</a></li>
+                            </ul>
+                        </section>
                     </div>
-
-                    <!-- Content -->
-                    <div id="content">
-
-                        {% include old/docs/installing_neba.ext %}
-                        {% include old/docs/writing_resource_models.ext %}
-                        {% include old/docs/using_spring_mvc.ext %}
-                        {% include old/docs/web_specific_bean_scopes.ext %}
-                        {% include old/docs/using_velocity.ext %}
-                        {% include old/docs/selftest.ext %}
-                        {% include old/docs/tooling.ext %}
-                        {% include old/docs/extending.ext %}
-
-                        {% include disqus.ext %}
+                    <div class="3u">
+                        <section>
+                            <header><h3><a href="#springmvc">Using Spring MVC in Sling</a></h3></header>
+                            <ul class="default">
+                                <li><a href="#api_ResourceParam">Resolving resource parameters with the @ResourceParam annotation</a></li>
+                                <li><a href="#configuring-mvc-logging">Configuring logging for MVC</a></li>
+                            </ul>
+                        </section>
+                        <section>
+                            <ul class="default">
+                                <li><a href="#beanscopes">Support for web-specific bean scopes</a></li>
+                            </ul>
+                        </section>
+                        <section>
+                            <ul class="default">
+                                <li><a href="#using-velocity">Rendering beyond resources with Velocity</a></li>
+                            </ul>
+                        </section>
+                        <section>
+                            <ul class="default">
+                                <li><a href="#api_SelfTest">Writing self-testing applications with NEBA</a></li>
+                            </ul>
+                        </section>
+                        <section>
+                            <header><h3><a href="#tooling">NEBA tooling for developers and administrators</a></h3></header>
+                            <ul class="default">
+                                <li><a href="#tooling_modelregistry">The NEBA model registry</a></li>
+                                <li><a href="#tooling_modelstatistics">The NEBA model statistics</a></li>
+                                <li><a href="#tooling_logviewer">The NEBA log viewer</a></li>
+                            </ul>
+                        </section>
+                        <section>
+                            <ul class="default">
+                                <li><a href="#extending">Extending NEBA</a></li>
+                            </ul>
+                        </section>
                     </div>
-                    <!--/Content-->
-
+                    <div class="3u">
+                        <section>
+                            <header><h2>API</h2></header>
+                        </section>
+                        <section>
+                            <header><h3>Annotations</h3></header>
+                            <ul class="default">
+                                <li><a href="#api_ResourceModel">@ResourceModel</a></li>
+                                <li><a href="#api_This">@This</a></li>
+                                <li><a href="#api_Reference">@Reference</a></li>
+                                <li><a href="#api_Children">@Children</a></li>
+                                <li><a href="#api_Resource">@Path</a></li>
+                                <li><a href="#api_Unmapped">@Unmapped</a></li>
+                                <li><a href="#api_SelfTest">@SelfTest</a></li>
+                                <li><a href="#api_ResourceParam">@ResourceParam</a></li>
+                                <li><a href="#api_PreMapping-and-PostMapping">@PostMapping, @PreMapping</a></li>
+                            </ul>
+                        </section>
+                    </div>
+                    <div class="3u">
+                        <section>
+                            <header><h3>Tag libraries</h3></header>
+                            <ul class="default">
+                                <li><a href="#nebaDefineObjects">neba:defineObjects</a></li>
+                                <li><a href="#using-velocity">neba:render</a></li>
+                            </ul>
+                        </section>
+                        <section>
+                            <header><h3>Interfaces</h3></header>
+                            <ul class="default">
+                                <li><a href="#api_Optional">Optional&lt;T&gt;</a></li>
+                                <li><a href="#path-placeholders">PlaceholderVariableResolver</a></li>
+                                <li><a href="#configuring-velocity">BeanRenderer, BeanRendererFactory</a></li>
+                                <li><a href="#cache-extension">ResourceModelCache</a></li>
+                                <li><a href="#post-processing-resourcemodels">ResourceModelPostProcessor</a></li>
+                                <li><a href="#custom-annotation-based-field-mappers">AnnotatedFieldMapper&lt;F, A&gt;</a></li>
+                            </ul>
+                        </section>
+                    </div>
                 </div>
             </div>
+
+            <!-- Content -->
+            <div id="content">
+                {% include old/userguide/installing_neba.ext %}
+                {% include old/userguide/writing_resource_models.ext %}
+                {% include old/userguide/using_spring_mvc.ext %}
+                {% include old/userguide/web_specific_bean_scopes.ext %}
+                {% include old/userguide/using_velocity.ext %}
+                {% include old/userguide/selftest.ext %}
+                {% include old/userguide/tooling.ext %}
+                {% include old/userguide/extending.ext %}
+
+                {% include disqus.ext %}
+            </div>
+            <!--/Content-->
+
         </div>
-        <!--/Main-->
+    </div>
+</div>
+<!--/Main-->
 
-    {% include footer.ext %}
+{% include footer.ext %}
 
-    </body>
+</body>
 </html>
