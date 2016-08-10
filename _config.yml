@@ -5,4 +5,5 @@ nebaVersion: 4.0.0
 springDocumentationVersion: 4.2.x
 collections:
   - mainNavItems
+  - oldNavItems
 contextpath:

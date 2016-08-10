@@ -1064,3 +1064,15 @@ section .versions {
 .references img {
 	padding: 2em;
 }
+
+#nav-wrapper.notice {
+	background: #ffa92f;
+
+	/* to fix notice at top of page */
+	position: fixed;
+	z-index: 2;
+}
+
+#nav-wrapper.old {
+	top: 74px;
+}
