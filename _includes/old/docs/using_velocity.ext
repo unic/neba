@@ -1,0 +1,111 @@
+<section>
+	<header><h2 id="using-velocity">Rendering beyond resources with velocity</h2></header>
+
+	<p>While JSP provides solid templating for Sling, it's not that great at rendering objects that are not resources. Custom models, e.g.
+		database entities or build-in types such as java.util.Date are quite often rendered repeatedly in different templates.
+		Also, you may want to render different variants of the same resource or object but may not be able to make use of selectors, suffixes or
+		extensions in the URL. Finally, rendering resources outside of a request - for instance in a scheduled task - may be desirable.
+		NEBA provides a simple solution: Any object can be rendered with velocity.</p>
+
+	<h3 id="configuring-velocity">Configuring Velocity rendering</h3>
+
+	<p><a href="http://velocity.apache.org/engine/devel/user-guide.html">Velocity</a> uses .vlt
+		templates. NEBA stores these templates in the JCR. Where exactly the templates are located is configurable via the
+		<a href="http://localhost:4502/system/console/configMgr">sling console</a>. Look up the configuration &quot;Sling
+		spring Bean Renderer configuration&quot;. Each line of the configuration binds a path in the repository to an
+		arbitrary name. The combination of name and path is used by NEBA to provide a BeanRenderer instance via the
+		BeanRendererFactory OSGi Service under the given name. This makes it possible to define multiple view repositories
+		(e.g. for rendering the same type of object in different ways for different sites).</p><p>By default, i.e. if no
+		renderer is explicitly specified, the renderer named &quot;default&quot; is used. If not yet configured, add the
+		following line to the configuration:</p>
+
+	{% highlight java %}default:/apps/neba/views/{% endhighlight %}
+
+	<h3>Using Velocity templates with the NEBA taglib in JSP</h3><p>Let's continue by editing carousel JSP template
+	(/libs/foundation/components/carousel/carousel.jsp). Replace the ${m.lastModified} with the following JSP tag:</p>
+
+	{% highlight xml %}<neba:render object="${m.lastModified}" />{% endhighlight %}
+
+	<p>If you have no model for the current resource, you may also simply use the properties object (a Map) provided
+		by sling, like so:</p>
+
+	{% highlight xml %}<neba:render object="${properties['jcr:lastModified'].time}" />{% endhighlight %}
+
+	<p>Reload - you will see no output. Let's create a template. Open <a
+			href="http://localhost:4502/crx/de/">CRXDE</a> and create the folder /apps/neba/views.  In this folder,
+		create the folder /java/lang/. In there, create a file named &quot;Object.vlt&quot; like so:</p>
+
+	{% highlight java %}Hello, I am: $m{% endhighlight %}
+
+	<p>Reload. You will see something like &quot;Hello, I am: Tue Dec 05 14:14:27 CEST 2011&quot;. How did this
+		happen? NEBA uses the type hierarchy of every object it renders to derive a template name. If no template exists for
+		a object's type, it will look for a template for the interfaces the object implements; if no template exists for any
+		of the interfaces, it will use the supertype and its interfaces and so on. This way, you can use the type hierarchy
+		to define default views for types and provide specialized views for derived types.  NEBA stores the templates in
+		a hierarchy matching the object types package name to avoid name collisions. for a type called my.package.Foo, the
+		template is thus &lt;renderer root path&gt;/my/package/Foo.vlt. Try it: create the folder /java/util/ in
+		/apps/neba/views/ and place a template called Date.vlt in it:</p>
+
+	{% highlight java %}I am the date: $m{% endhighlight %}
+
+	<p>Reload - NEBA will now use you Date.vlt template. Sweet - now no matter where you output a date you can
+		always use the render tag and thus re-use the same template. This mechanism can be used for any JAVA object!<br/>
+		You can also create variants of the same view. A java.util.Date, for instance, may be rendered in different ways
+		with regard to the current locale.  For this, the render tag allows the specification of a <em>viewHint</em>.
+		Create the following a templated called "Date-US.vlt" in the java/util folder:</p>
+
+	{% highlight java %}I am a US date: $m{% endhighlight %}
+
+	<p>You can now use this view like so:</p>
+
+	{% highlight xml %}<neba:render object="${m.lastModified}" viewHint="US" />{% endhighlight %}
+
+	<div class="trigger-button"><span>Hint: Configuring the velocity rendering</span></div>
+	<div class="accordion">
+		<p>The velocity engine is configured to cache a template for 60 seconds; this is
+			configurable in the sling console (Unic sling spring bean renderer configuration).  You can also specify
+			&quot;fallback&quot; templates with view variants, e.g. the fallback for Date-CH.vlt would be Object-CH.vlt
+			(not Object.vlt).  If you configure multiple bean renderers, you can target the in the render tag by
+			providing their name via the &quot;renderer&quot; property.</p>
+	</div><!--END ACCORDION-->
+
+	<p>Rendering an object must not stop in the current template. The current BeanRenderer is always available in
+		your template under the name &quot;renderer&quot; (see Constants class in the API).  This is great when
+		rendering objects that are composed of several other objects. You may, for example, render our Carousel model like
+		so:</p>
+
+	{% highlight xml %}<neba:render object="${m}" />{% endhighlight %}
+
+	<p>With a velocity template like so:</p>
+
+	{% highlight xml %}
+	I am a Carousel. I was last modified at $renderer.render($m.lastModified)<br />
+	I contain the following pages:<br />
+	<ul>
+		#foreach( $page in $m.pages )
+		$renderer.render($page, "listitem")
+		#end
+	</ul>
+	{% endhighlight %}
+
+	<p>Thus, each page resource would be rendered using the template "Resource-listitem.vlt":</p>
+
+	{% highlight xml %}<li>$m.path</li>{% endhighlight %}
+
+	<p>This yields optimal re-use of views per type.</p><p>You may also want to add additional utilities to the
+	rendering context to access using ${somekey}, such as a tool for message formatting and the like. For this, NEBA
+	supports the <a href="https://cwiki.apache.org/confluence/display/SLING/Scripting+variables">Sling scripting
+		variables configuration</a>. However, adding variables by supplying a HashMap service interface is not supported
+	(this is considered bad practice), i.e. to add scripting context variables, export a Service of the type
+	BindingsValuesProvider with service property &quot;javax.script.name&quot; = &quot;velocity&quot;.</p>
+
+	<h3>Providing additional context to velocity scripts</h3>
+
+	<p>Besides the <em>BindingsValuesProvider</em>, you can	also add additional key/value pairs to the context of a specific
+		&lt;neba:render ... /&gt; call by adding arbitrary attributes to the tag, like so:</p>
+
+	{% highlight xml %}<neba:render object="${m}" cssClasses="class1 class2" highlight="${highlight}" />{% endhighlight %}
+
+	<p>This will lead to the variables &quot;${cssClasses}&quot; and &quot;${highlight}&quot; to become available in
+		the velocity script of the corresponding rendering process.</p>
+</section>
