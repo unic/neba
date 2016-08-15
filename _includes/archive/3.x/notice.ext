@@ -1,0 +1,8 @@
+<div id="nav-wrapper" class="notice">
+    <!-- Notice -->
+    <nav id="nav">
+        <ul>
+            <li>YOU ARE VIEWING THE 3.x VERSION OF THE NEBA DOCUMENTATION<a href="/documentation.html">To the current version</a></li>
+        </ul>
+    </nav>
+</div>

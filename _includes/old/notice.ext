@@ -1,8 +1,0 @@
-<div id="nav-wrapper" class="notice">
-    <!-- Notice -->
-    <nav id="nav">
-        <ul>
-            <li>YOU ARE USING AN OLD VERSION OF THE NEBA DOCUMENTATION<a href="{{site.url}}">go back to neba.io</a></li>
-        </ul>
-    </nav>
-</div>

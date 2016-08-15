@@ -1,7 +1,7 @@
 <!-- Header -->
 <div id="header">
-    {% include old/notice.ext %}
-    {% include old/navigation.ext %}
+    {% include archive/3.x/notice.ext %}
+    {% include archive/3.x/navigation.ext %}
     <div class="container">
 
         <!-- Logo -->

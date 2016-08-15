@@ -6,9 +6,9 @@ description: A comprehensive guide to using the NEBA 3.10.0 features
 ---
 <!DOCTYPE HTML>
 <html lang="en">
-{% include old/head.ext %}
+{% include /archive/3.x/head.ext %}
 <body>
-{% include old/header.ext %}
+{% include /archive/3.x/header.ext %}
 <!-- Main -->
 <div id="main">
     <div class="container">
@@ -117,10 +117,7 @@ description: A comprehensive guide to using the NEBA 3.10.0 features
                             <header>
                                 <h2>Other Documentation Versions</h2>
                             </header>
-                            <ul class="versions">
-                                <li><a href="../documentation.html">NEBA 4.0.0</a></li>
-                                <li><a class="active" href="userguide.html">NEBA 3.10.0</a></li>
-                            </ul>
+                            {% include documentation/versions.ext %}
                         </section>
                     </div>
                 </div>
@@ -129,13 +126,13 @@ description: A comprehensive guide to using the NEBA 3.10.0 features
 
             <!-- Content -->
             <div id="content">
-                {% include old/userguide/writing_resource_models.ext %}
-                {% include old/userguide/using_spring_mvc.ext %}
-                {% include old/userguide/web_specific_bean_scopes.ext %}
-                {% include old/userguide/using_velocity.ext %}
-                {% include old/userguide/selftest.ext %}
-                {% include old/userguide/tooling.ext %}
-                {% include old/userguide/extending.ext %}
+                {% include /archive/3.x/userguide/writing_resource_models.ext %}
+                {% include /archive/3.x/userguide/using_spring_mvc.ext %}
+                {% include /archive/3.x/userguide/web_specific_bean_scopes.ext %}
+                {% include /archive/3.x/userguide/using_velocity.ext %}
+                {% include /archive/3.x/userguide/selftest.ext %}
+                {% include /archive/3.x/userguide/tooling.ext %}
+                {% include /archive/3.x/userguide/extending.ext %}
 
                 {% include disqus.ext %}
             </div>

@@ -43,7 +43,7 @@
 		<script src="userguide/modelstatistics/lib/parser.js" charset="utf-8"></script>
 		<script src="userguide/modelstatistics/script.js" charset="utf-8"></script>
 
-		{% include old/userguide/tooling_demo_style.ext %}
+		{% include archive/3.x/userguide/tooling_demo_style.ext %}
 
 		<form method="post" enctype="multipart/form-data" action="">
 			<div class="ui-widget-header ui-corner-top buttonGroup">
