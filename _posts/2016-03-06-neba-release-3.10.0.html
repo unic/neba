@@ -3,87 +3,55 @@ title: NEBA 3.10.0 released
 layout: post
 twitterAuthor: deploynix
 description: NEBA 3.10.0 Release notes
+abstract: NEBA 3.10.0 Improves Sling 8 standalone support and relaxes the @PostMapping and @PreMapping method contracts.
 ---
-<div class="section-title">
+<section>
+    <header>
+        <h2>Highlights of this release</h2>
+    </header>
+    <section>
+        <header><h3>Improved support of the Sling 8 standalone application</h3></header>
+        <p>
+            The <a href="http://sling.apache.org/downloads.cgi#application">Sling standalone application</a> no longer
+            ships with the bgservlets bundle by default. NEBA 3.10.0 thus made
+            the dependency to the corresponding package optional. Consequently, Sling 8 users must no longer deploy the
+            bgservlets bundle for NEBA to work (<a href="https://github.com/unic/neba/issues/108">#108</a>).
+            Thanks to <a href="https://twitter.com/mnimer">Mike Nimer</a> for reporting this!
+        </p>
+    </section>
+    <section>
+        <header><h3>Improved method contract for <a href="http://neba.io/userguide.html#api_PreMapping-and-PostMapping">@PostMapping
+            and @PreMapping</a></h3></header>
+        <p>
+            With 3.10.0, methods annotated with <a href="http://neba.io/userguide.html#api_PreMapping-and-PostMapping">@PostMapping
+            or @PreMapping</a> must no longer be public
+            (<a href="https://github.com/unic/neba/issues/106">#106</a>), thus users are no longer forced to potentially
+            publish implementation details as API.
+            Thanks to <a href="https://github.com/djessup">djessup</a> for the contribution!
+        </p>
+    </section>
+</section>l
 
-    <h1 class="title">NEBA <span>Release 3.10.0</span></h1>
-
-</div><!--END SECTION TITLE-->
-
-<div id="inner-content" class="blog1">
-
-    <div class="post">
-
-        <div class="post-info">
-            <div class="date"><span class="month">Mar</span><span class="day">06</span><span class="month">2016</span></div>
-        </div><!--END POST-INFO-->
-
-        <div class="post-content">
-
-            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
-
-            <div class="post-title">
-                <h2 class="title">Release 3.10.0</h2>
-            </div><!--END POST-TITLE-->
-
-            <div class="post-meta">
-                <ul>
-                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
-                </ul>
-            </div><!--END POST-META-->
-
-            <div class="divider-border"></div>
-
-            <div class="one">
-                <h2>Highlights of this release</h2>
-            </div>
-
-            <div class="one">
-                <h3>Improved support of the Sling 8 standalone application</h3>
-                <div class="one">
-                    <p>
-                        The <a href="http://sling.apache.org/downloads.cgi#application">Sling standalone application</a> no longer ships with the bgservlets bundle by default. NEBA 3.10.0 thus made
-                        the dependency to the corresponding package optional. Consequently, Sling 8 users must no longer deploy the bgservlets bundle for NEBA to work (<a href="https://github.com/unic/neba/issues/108">#108</a>).
-                        Thanks to <a href="https://twitter.com/mnimer">Mike Nimer</a> for reporting this!
-                    </p>
-                </div>
-            </div>
-
-
-            <div class="one">
-                <h3>Improved method contract for <a href="http://neba.io/userguide.html#api_PreMapping-and-PostMapping">@PostMapping and @PreMapping</a></h3>
-                <div class="one">
-                    <p>
-						With 3.10.0, methods annotated with <a href="http://neba.io/userguide.html#api_PreMapping-and-PostMapping">@PostMapping or @PreMapping</a> must no longer be public
-                        (<a href="https://github.com/unic/neba/issues/106">#106</a>), thus users are no longer forced to potentially publish implementation details as API.
-                        Thanks to <a href="https://github.com/djessup">djessup</a> for the contribution!
-                    </p>
-                </div>
-            </div>
-
-            <div class="divider-border"></div>
-
-            <div class="one">
-                <h2>Release notes</h2>
-
-                <h3>Improvements</h3>
-                <p>
-                    <a href="https://github.com/unic/neba/issues/108">#108 Make the dependency to bgservlets optional</a><br />
-                    <a href="https://github.com/unic/neba/issues/106">#106 @PostConstruct only works on public methods, forcing developers to expose implementation contracts </a><br />
-                </p>
-
-                <h3>Fixed bugs</h3>
-                <p>
-                    This release contains no bug fixes.
-                </p>
-
-                <h3 id="upgrading">Upgrading from 3.9.0</h3>
-                <p>
-				  User of NEBA 3.9.0 can upgrade to 3.10.0 without any further changes.
-                </p>
-            </div>
-        </div><!--END POST-CONTENT -->
-
-    </div><!--END POST-->
-
-</div><!--END INNER-CONTENT-->
+<section>
+    <header><h2>Release notes</h2></header>
+    <section>
+        <header><h3>Improvements</h3></header>
+        <p>
+            <a href="https://github.com/unic/neba/issues/108">#108 Make the dependency to bgservlets optional</a><br/>
+            <a href="https://github.com/unic/neba/issues/106">#106 @PostConstruct only works on public methods, forcing
+                developers to expose implementation contracts </a><br/>
+        </p>
+    </section>
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <p>
+            This release contains no bug fixes.
+        </p>
+    </section>
+    <section>
+        <header><h3 id="upgrading">Upgrading from 3.9.0</h3></header>
+        <p>
+            User of NEBA 3.9.0 can upgrade to 3.10.0 without any further changes.
+        </p>
+    </section>
+</section>

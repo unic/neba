@@ -76,6 +76,6 @@
     TweetsForWidget("535389938054094848").load(function(tweets) {
         if (!tweets.length) return;
         var tweet = tweets[0];
-        $("#tweet").find("blockquote").html('<a href="' + tweet.url + '"><img src="images/tweet.png" />' + new Date(tweet.time).toDateString() + '</a>: &ldquo;' + tweet.message + '&rdquo;')
+        $("#tweet").find("blockquote").html('<a href="' + tweet.url + '"><img src="/images/tweet.png" />' + new Date(tweet.time).toDateString() + '</a>: &ldquo;' + tweet.message + '&rdquo;')
     });
 })();

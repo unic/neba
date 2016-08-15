@@ -1,43 +1,38 @@
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE HTML>
+<html lang="en">
 {% include head.ext %}
-
-<body id="top">
-
+<body>
 {% include header.ext %}
+<!-- Main -->
+<div id="main">
+    <div class="container">
+        <div class="row">
 
-<div id="wrapper">
+            <!-- Content -->
+            <div id="content" class="8u skel-cell-important">
+                {{content}}
+            </div>
 
-    <!-- START BLOG -->
+            <!-- Sidebar -->
+            <div id="sidebar" class="4u">
+                <section>
+                    <header>
+                        <h2>Related posts</h2>
+                    </header>
+                    <ul class="style">
+                        {% for post in site.posts %}
+                        <li>
+                            <p class="posted">{{post.date | date: "%B %d, %Y" }}</p>
+                            <p><a href="{{post.url}}">{{ post.title }}</a></p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </div>
+        </div>
 
-    <div class="content-wrapper clear">
-
-        {{content}}
-
-        <div id="sidebar">
-
-            <div class="related-posts">
-                <h3 class="title">Related posts</h3>
-                <ul class="bra_recent_entries">
-                    {% for post in site.posts %}
-                    <li>
-                        <a href="{{site.contextpath}}{{ post.url }}">{{ post.title }}</a>
-                        <span class="date">{{post.date | date: "%B %d, %Y" }}</span>
-                    </li>
-                    {% endfor %}
-                </ul><!--END UL-->
-            </div><!--END WIDGET-->
-
-        </div><!--END SIDEBAR-->
-
-    </div><!--END CONTENT-WRAPPER-->
-
-    <!-- END BLOG -->
-
-</div><!--END WRAPPER-->
-
+    </div>
+</div>
 {% include footer.ext %}
-
 </body>
 </html>

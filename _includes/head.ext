@@ -21,33 +21,33 @@
     {% endif %}
 
     <!-- Iconography -->
-    <link rel="shortcut icon" type="image/x-icon" href="{{site.url}}{{site.contextpath}}/images/favicons/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="{{site.url}}/images/favicons/favicon.ico" />
 
-    <link rel="apple-touch-icon" href="{{site.url}}{{site.contextpath}}/images/favicons/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="114x114" href="{{site.url}}{{site.contextpath}}/images/favicons/apple-touch-icon-114.png" />
-    <link rel="apple-touch-icon" sizes="144x144" href="{{site.url}}{{site.contextpath}}/images/favicons/apple-touch-icon-144.png" />
+    <link rel="apple-touch-icon" href="{{site.url}}/images/favicons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="{{site.url}}/images/favicons/apple-touch-icon-114.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="{{site.url}}/images/favicons/apple-touch-icon-144.png" />
 
     <!-- Twitter Summary card images must be at least 200x200px -->
-    <meta name="twitter:image" content="{{site.url}}{{site.contextpath}}/images/summarycard.png" />
+    <meta name="twitter:image" content="{{site.url}}/images/summarycard.png" />
 
     <!-- Open Graph data -->
     <meta property="og:title" content="{{page.title}}" />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="{{site.url}}{{site.contextpath}}{{page.url}}" />
-    <meta property="og:image" content="{{site.url}}{{site.contextpath}}/images/summarycard.png" />
+    <meta property="og:url" content="{{site.url}}{{page.url}}" />
+    <meta property="og:image" content="{{site.url}}/images/summarycard.png" />
     <meta property="og:description" content="{{page.description}}" />
     <meta property="og:site_name" content="neba.io" />
 
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,700,500,900' rel='stylesheet' type='text/css'>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="js/skel.min.js"></script>
-    <script src="js/skel-panels.min.js"></script>
-    <script src="js/init.js"></script>
-    <script src="js/twitter.js" async></script>
-    <link rel="stylesheet" href="css/highlight.css" />
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/skel-panels.min.js"></script>
+    <script src="/js/init.js"></script>
+    <script src="/js/twitter.js" async></script>
+    <link rel="stylesheet" href="/css/highlight.css" />
     <noscript>
-        <link rel="stylesheet" href="css/skel-noscript.css" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="stylesheet" href="css/style-desktop.css" />
+        <link rel="stylesheet" href="/css/skel-noscript.css" />
+        <link rel="stylesheet" href="/css/style.css" />
+        <link rel="stylesheet" href="/css/style-desktop.css" />
     </noscript>
 </head>

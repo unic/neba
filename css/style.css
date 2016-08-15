@@ -1030,9 +1030,9 @@
 			color: rgba(255,255,255,.6);
 		}
 
-/***
- NEBA additions
-**/
+/*********************************************************************************/
+/* NEBA additions                                                                      */
+/*********************************************************************************/
 
 section .info {
 	padding-left: 1em;
@@ -1058,4 +1058,40 @@ section .info {
 
 .references img {
 	padding: 2em;
+}
+
+#fromtheblog {
+	padding: 6em 0;
+	position: relative;
+	background: #405ba1;
+	text-align: center;
+}
+
+#fromtheblog, #fromtheblog h2, #fromtheblog h3 {
+	color: #fff;
+}
+
+#fromtheblog h3 {
+	display: block;
+	font-weight: 300;
+}
+
+#fromtheblog .pennant {
+	font-size: 4em;
+}
+
+#fromtheblog .button {
+	margin-top: 1.5em;
+}
+
+.feature-header {
+	text-align: center;
+}
+
+#sidebar ul.style p {
+	margin: 0.2em;
+}
+
+#sidebar ul.style li {
+	padding: 0.2em;
 }

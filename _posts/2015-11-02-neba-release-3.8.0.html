@@ -3,69 +3,40 @@ title: NEBA 3.8.0 released
 layout: post
 twitterAuthor: deploynix
 description: NEBA 3.8.0 Release notes
+abstract: NEBA 3.8.0 Adds support for lazy-loading fields with custom annotations and improves mapping of synthetic resources.
 ---
-<div class="section-title">
+<section>
+    <header><h2>Highlights of this release</h2></header>
 
-    <h1 class="title">NEBA <span>Release 3.8.0</span></h1>
+    <section>
+        <header><h3>Lazy-loading support for custom annotation mappers</h3></header>
+        <p>
+            NEBA explicitly supports lazy-loading fields via the <a href="/userguide.html#api_Optional">Optional</a>
+            interface. With 3.8.0, <a href="/userguide.html#custom-annotation-based-field-mappers">fields with custom
+            annotations</a> can now
+            use the same interface. The custom annotation processors will then be applied in a lazy fashion.
+        </p>
+    </section>
+</section>
 
-</div><!--END SECTION TITLE-->
 
-<div id="inner-content" class="blog1">
+<section>
+    <header><h2>Release notes</h2></header>
 
-    <div class="post">
-
-        <div class="post-info">
-            <div class="date"><span class="month">Nov</span><span class="day">02</span><span class="month">2015</span></div>
-        </div><!--END POST-INFO-->
-
-        <div class="post-content">
-
-            <div class="post-media"><img src="{{site.contextpath}}/images/summarycard.png" alt=""/></div><!--END POST-MEDIA-->
-
-            <div class="post-title">
-                <h2 class="title">Release 3.8.0</h2>
-            </div><!--END POST-TITLE-->
-
-            <div class="post-meta">
-                <ul>
-                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
-                </ul>
-            </div><!--END POST-META-->
-
-            <div class="divider-border"></div>
-
-            <div class="one">
-                <h2>Highlights in this release</h2>
-            </div>
-
-            <div class="one">
-                <h3>Lazy-loading support for custom annotation mappers</h3>
-                <div class="one">
-                    <p>
-						NEBA explicitly supports lazy-loading fields via the <a href="/userguide.html#api_Optional">Optional</a> interface. With 3.8.0, <a href="/userguide.html#custom-annotation-based-field-mappers">fields with custom annotations</a> can now
-						use the same interface. The custom annotation processors will then be applied in a lazy fashion.
-                    </p>
-                </div>
-            </div>
-
-            <div class="divider-border"></div>
-
-            <div class="one">
-                <h2>Release notes</h2>
-
-                <h3>Fixed bugs</h3>
-                <p>
-                    <a href="https://github.com/unic/neba/issues/89">#89 The neba:defineObjects may yield the wrong model if the same synthetic resource is mapped to two different models within the same request</a><br />
-                    <a href="https://github.com/unic/neba/issues/88">#88 AnnotatedFieldMappers are not invoked on Optional&lt;...&gt; fields</a><br />
-                </p>
-
-                <h3 id="upgrading">Upgrading from 3.7.0</h3>
-                <p>
-				  User of NEBA 3.7.0 can upgrade to 3.8.0 without any further changes.
-                </p>
-            </div>
-        </div><!--END POST-CONTENT -->
-
-    </div><!--END POST-->
-
-</div><!--END INNER-CONTENT-->
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <p>
+            <a href="https://github.com/unic/neba/issues/89">#89 The neba:defineObjects may yield the wrong model if the
+                same
+                synthetic resource is mapped to two different models within the same request</a><br/>
+            <a href="https://github.com/unic/neba/issues/88">#88 AnnotatedFieldMappers are not invoked on Optional&lt;...&gt;
+                fields</a><br/>
+        </p>
+    </section>
+    <section>
+        <header><h3 id="upgrading">Upgrading from 3.7.0</h3></header>
+        <p>
+            User of NEBA 3.7.0 can upgrade to 3.8.0 without any further changes.
+        </p>
+    </section>
+</section>

@@ -22,7 +22,6 @@ keywords: Apache Sling,AEM,AEM6,Adobe AEM,Spring,Springframework,NEBA,CQ5
         <p>
             NEBA enables the development of clean, high-performing and easy to change solutions on Apache Sling-based applications such as Adobe AEM™. NEBA integrates the Spring Framework into Apache Sling, exclusively using the standardized reference implementation of the OSGi Compendium R4.2 specification.
             NEBA is 100% open source and published under the Apache license 2.0. <a href="https://www.github.com/unic/neba">Fork it on Github!</a>
-
         </p>
         <hr />
         <div class="row">
@@ -48,15 +47,31 @@ keywords: Apache Sling,AEM,AEM6,Adobe AEM,Spring,Springframework,NEBA,CQ5
     </div>
 </div>
 
+<div id="fromtheblog">
+    <div class="container">
+        <header>
+            <h2>Release announcements</h2>
+        </header>
+        <div class="row">
+        {% for post in site.posts limit:3 %}
+            <section class="4u">
+                <h3>{{post.title}}</h3>
+                <p>{{post.abstract}}</p>
+                <a href="{{ post.url }}" class="button">Read more</a>
+            </section>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+
 <!-- Main -->
 <div id="main">
     <section>
         <div class="container">
-        <header>
+        <header class="feature-header">
             <h2>Features</h2>
             <p>With NEBA, applications built with Sling shall be modular and free of system-level concerns, resulting in more stable, changeable and high-performing applications. At the same time, using NEBA shall be like using a good DSL: Simple, expressive and fun.</p>
         </header>
-        <hr />
         </div>
     <div id="content" class="container">
         <div class="row">
