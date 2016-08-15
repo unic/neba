@@ -10,9 +10,9 @@ description: NEBA 3.5.0 Release notes
     <section>
         <header><h3>A new model statistics console for real-time visualization of resource model performance</h3></header>
         <p>
-            In this release, the model metadata console was replaced with the <a href="/old/userguide.html#tooling/modelstatistics">model statistics console</a>.
+            In this release, the model metadata console was replaced with the <a href="/archive/3.x/userguide.html#tooling/modelstatistics">model statistics console</a>.
             This console visualizes resource model metadata collected in real-time and allows querying the collected data to find models with specific performance characteristics right in
-            the browser. <a href="/old/userguide.html#tooling/modelstatistics/demo">Try the interactive demo of the model statistics console</a>.
+            the browser. <a href="/archive/3.x/userguide.html#tooling/modelstatistics/demo">Try the interactive demo of the model statistics console</a>.
         </p>
     </section>
 
@@ -20,16 +20,16 @@ description: NEBA 3.5.0 Release notes
         <header><h3>First-class support for custom annotations</h3></header>
         <p>
             One of NEBA's key goals is to enable clean separation of the project-specific implementation and
-            the system-level concerns of Sling, AEM&trade; or NEBA. Consequently, NEBA offers <a href="/old/userguide.html#extending">extension points in its API</a>
+            the system-level concerns of Sling, AEM&trade; or NEBA. Consequently, NEBA offers <a href="/archive/3.x/userguide.html#extending">extension points in its API</a>
             to allow adding additional functionality without depending on NEBA's implementation details.
         </p>
         <p>
             The most common use cases for these extension points is supporting custom annotations. For instance, one project featured a @Translated annotation
             allowing the injection of internationalized values into resource models. Until now, such extensions could be implemented using
-            <a href="/old/userguide.html#post-processing-resourcemodels">custom post processors</a>. Now, NEBA features
-            <a href="/old/userguide.html#custom-annotation-based-field-mappers">first-class support for custom annotations</a>.
+            <a href="/archive/3.x/userguide.html#post-processing-resourcemodels">custom post processors</a>. Now, NEBA features
+            <a href="/archive/3.x/userguide.html#custom-annotation-based-field-mappers">first-class support for custom annotations</a>.
             Not only does this enable easy addition of semantic annotations - it also allows extending NEBA's
-            <a href="/old/userguide.html#resourceAnnotations">out-of-the-box annotations</a>.
+            <a href="/archive/3.x/userguide.html#resourceAnnotations">out-of-the-box annotations</a>.
         </p>
     </section>
 
@@ -53,7 +53,7 @@ description: NEBA 3.5.0 Release notes
         public @interface MyCustomAnnotation { ... }
         {% endhighlight %}
         <p>
-            META-annotations are supported for all of NEBA's annotations, including <a href="/old/userguide.html#api/@ResourceParam">MVC annotations</a>.
+            META-annotations are supported for all of NEBA's annotations, including <a href="/archive/3.x/userguide.html#api/@ResourceParam">MVC annotations</a>.
         </p>
     </section>
 
