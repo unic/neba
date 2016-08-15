@@ -4,59 +4,27 @@ layout: post
 twitterAuthor: deploynix
 description: What is NEBA, and why are we open sourcing it? This article sheds some light on the key ideas behind NEBA's Spring/Sling integration.
 ---
-<div class="section-title">
+<section>
+    <header><h2 class="title">What is NEBA, and why we are open sourcing it</h2></header>
+    <p>If I where to name the most significant characteristics of enterprise content management, I would choose an excessive amount of features, accompanied by
+        an impressive number of third-party systems to integrate. Top this off with the fact that such projects tend to be long-running, typical challenges arise: The architecture
+        is under constant pressure, having to maintain a great degree of modularity in order to keep our software running across the boundaries of product releases
+        and adapt to frequent changes.</p>
 
-    <h1 class="title">NEBA <span>initial release</span></h1>
+    <info><p>NEBA is a mature project. It is active and productive since three years. It runs in all of our projects, from small to very, very large.</p></info>
 
-</div><!--END SECTION TITLE-->
+    <p>Key to a decent modularization is to build systems out of modules that have focus - doing one thing right at a time and collaborating with one another
+        in a controlled manner. While a generic solution pattern for this is provided by OSGi, the presence of complex or simply tedious system-level concerns
+        in domain-specific implementation is difficult to overcome, and often leads to project-specific solutions that are hard to change and couple things that should be separate.</p>
 
-<div id="inner-content" class="blog1">
+    <p>However, the majority of system-level concerns are already solved - in elegant ways - by existing, open source frameworks. Most prominently, the
+        Spring Framework provides a simple, yet scalable way to re-use mature solution patterns for most of our concerns.</p>
 
-    <div class="post">
+    <p>What was needed, however, was a clean integration with Sling, an integration that would stick to the open core philosophy of the product, leverage
+        the architecture defined by OSGi and Sling while being simple, not to say beautiful to use.</p>
 
-        <div class="post-info">
-            <div class="date"><span class="month">June</span><span class="day">26</span><span class="month">2014</span></div>
-        </div><!--END POST-INFO-->
+    <p>NEBA is this missing part. It integrates Spring into Sling and provides additional, generic solution patterns for Sling - with the use of a handful of well-documented, semantic annotations.</p>
 
-        <div class="post-content">
-
-            <div class="post-media"><img src="{{site.contextpath}}/images/slider1.png" alt="" /></div><!--END POST-MEDIA-->
-
-            <div class="post-title">
-                <h2 class="title">What is NEBA, and why we're open sourcing it</h2>
-            </div><!--END POST-TITLE-->
-
-            <div class="post-meta">
-                <ul>
-                    <li><span>Posted by</span> {% if page.twitterAuthor%}<a href="https://www.twitter.com/{{page.twitterAuthor}}">{% endif %}Olaf Otto{% if page.twitterAuthor %}</a>{% endif %}</li>
-                </ul>
-            </div><!--END POST-META-->
-
-
-            <p>If I where to name the most significant characteristics of enterprise content management, I would choose an excessive amount of features, accompanied by
-            an impressive number of third-party systems to integrate. Top this off with the fact that such projects tend to be long-running, typical challenges arise: The architecture
-            is under constant pressure, having to maintain a great degree of modularity in order to keep our software running across the boundaries of product releases
-            and adapt to frequent changes.</p>
-
-            <blockquote><p>NEBA is a mature project. It is active and productive since three years. It runs in all of our projects, from small to very, very large.</p></blockquote>
-
-            <p>Key to a decent modularization is to build systems out of modules that have focus - doing one thing right at a time and collaborating with one another
-            in a controlled manner. While a generic solution pattern for this is provided by OSGi, the presence of complex or simply tedious system-level concerns
-            in domain-specific implementation is difficult to overcome, and often leads to project-specific solutions that are hard to change and couple things that should be separate.</p>
-
-            <p>However, the majority of system-level concerns are already solved - in elegant ways - by existing, open source frameworks. Most prominently, the
-            Spring Framework provides a simple, yet scalable way to re-use mature solution patterns for most of our concerns.</p>
-
-            <p>What was needed, however, was a clean integration with Sling, an integration that would stick to the open core philosophy of the product, leverage
-            the architecture defined by OSGi and Sling while being simple, not to say beautiful to use.</p>
-
-            <p>NEBA is this missing part. It integrates Spring into Sling and provides additional, generic solution patterns for Sling - with the use of a handful of well-documented, semantic annotations.</p>
-
-            <p>NEBA's continued success and the rising demand amongst both our customers and engineers to use it free of constraints has motivated us to open source it - we think it is a valuable
-            contribution to building great applications with Sling - and we'd like to share it.</p>
-
-        </div><!--END POST-CONTENT -->
-
-    </div><!--END POST-->
-
-</div><!--END INNER-CONTENT-->
+    <p>NEBA's continued success and the rising demand amongst both our customers and engineers to use it free of constraints has motivated us to open source it - we think it is a valuable
+        contribution to building great applications with Sling - and we'd like to share it.</p>
+</section>
