@@ -1,0 +1,16 @@
+<section>
+    <header><h2>Browse the NEBA Javadoc</h2></header>
+
+    <p>We have written extensive documentation for both API and CORE. The Javadoc is also shipped to
+        maven central, or you can browse them here. Enjoy:</p>
+
+    <div class="row">
+        <section class="3u">
+            <p><a href="apidocs/neba-api/index.html" class="button">NEBA API {{site.oldVersion}} Javadoc</a></p>
+        </section>
+
+        <section class="3u">
+            <p><a href="apidocs/neba-core/index.html" class="button">NEBA CORE {{site.oldVersion}} Javadoc</a></p>
+        </section>
+    </div>
+</section>

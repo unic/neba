@@ -4,7 +4,7 @@
         <ul>
             <li class="home"><a href="/index.html">Home</a></li>
             {% for item in site.mainNavItems %}
-                <li{%if page.url == item.path%} class="active"{% endif %}><a href="{{item.path}}" title="{{item.title}}">{{item.label}}</a></li>
+                <li{% if page.url == item.link %} class="active"{% endif %}><a href="{{item.link}}" title="{{item.title}}">{{item.label}}</a></li>
             {% endfor %}
         </ul>
     </nav>

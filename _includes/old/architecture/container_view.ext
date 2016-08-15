@@ -1,0 +1,8 @@
+<section>
+    <header><h2 id="containerview">Container view</h2></header>
+
+    <p>NEBA amends Sling's open core with further open source software, which in turn is internally structured in modules. We will refer to
+        such component compositions using the generic term <em>container</em>. NEBA is comprised of the following containers:</p>
+
+    <img src="images/architecture/project-technologies.png">
+</section>
