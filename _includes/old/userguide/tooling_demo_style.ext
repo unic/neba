@@ -1,0 +1,153 @@
+<style>
+    #target {
+        margin: 40px 0 0 0;
+        height: 600px;
+        overflow-y: scroll;
+    }
+
+    #plotarea .wrapper {
+        display: inline-block;
+    }
+
+    #plotarea .chart {
+        margin-bottom: 40px;
+    }
+
+    #plotarea .star-title {
+        font-size: 12px;
+    }
+
+    #plotarea .star-label {
+        font-size: 11px;
+        pointer-events: none;
+    }
+
+    #plotarea .star-origin {
+        fill: #333;
+    }
+
+    #plotarea .star-axis {
+        stroke: #ccc;
+        stroke-width: 2px;
+        stroke-dasharray: 4 5;
+    }
+
+    #plotarea .star-path {
+        stroke: #888;
+        stroke-width: 1px;
+        fill: #709CB1;
+        fill-opacity: 0.6;
+    }
+
+    #plotarea .star-interaction {
+        opacity: 0;
+    }
+
+    #filter {
+        width: 100%;
+        padding: 5pt 4pt 4pt 29px;
+        box-sizing: border-box;
+        font-size: 100%;
+        border: 1px solid #bfbfbf;
+        background: url("userguide/modelstatistics/valid.png") no-repeat 4pt center;
+    }
+
+    #plotarea .ui-helper-hidden-accessible {
+        display: none;
+    }
+
+    #plotarea ul.ui-autocomplete.ui-widget {
+        font-size: 100%;
+        background-color: white;
+        padding: 0;
+        border: 1px solid gray;
+        box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.75);
+    }
+
+    #plotarea ul.ui-autocomplete.ui-widget li {
+        padding: 3pt;
+        border-bottom: 1px solid #efefef;
+        list-style: none;
+        margin: 0;
+    }
+
+    #plotarea ul.ui-autocomplete.ui-widget li span {
+        color: #405ba1;
+        font-size: 90%;
+    }
+
+    #plotarea .ui-state-hover,
+    #plotarea .ui-widget-content .ui-state-hover,
+    #plotarea .ui-widget-header .ui-state-hover,
+    #plotarea .ui-state-focus,
+    #plotarea .ui-widget-content .ui-state-focus,
+    #plotarea .ui-widget-header .ui-state-focus {
+        font-weight: normal;
+        color: #212121;
+        background-color: #e0e0e0;
+    }
+
+    #plotarea .ui-menu .ui-menu-item {
+        width: auto;
+    }
+
+    #plotarea .ui-menu .ui-state-focus {
+        border: none;
+    }
+
+    #plotarea {
+        margin-top: 1em;
+        font-size: 120%;
+    }
+
+    form .buttonGroup {
+        text-align: left;
+    }
+
+    #helpWithExpressions {
+        padding: 5px;
+    }
+
+    #expressionHelp {
+        display: none;
+        border: 1px solid gray;
+        background-color: #f3f3f3;
+        margin: 1em 0 0 0;
+        padding: 0 1em 1em 1em;
+    }
+
+    #expressionHelp h2 {
+        font-size: 120%;
+        font-weight: bold;
+        margin: 1em 0;
+    }
+
+    #expressionHelp .expressionExample {
+        color: #0000b0;
+        font-family: Lucida Console, monospace;
+        cursor: pointer;
+    }
+
+    #expressionHelp .expressionExample:hover {
+        color: #0000ff;
+    }
+
+    #expressionHelp table {
+        margin-top: 1em;
+    }
+
+    #expressionHelp table tr {
+        border-bottom: 1px solid white;
+    }
+
+    #expressionHelp table th,
+    #expressionHelp table td {
+        text-align: left;
+        padding: 0.3em;
+    }
+
+    #expressionHelp table th {
+        font-weight: bold;
+        padding-right: 2em;
+    }
+</style>

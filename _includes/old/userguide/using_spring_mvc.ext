@@ -1,0 +1,136 @@
+<section>
+	<header><h2 id="springmvc">Using Spring MVC in Sling</h2></header>
+
+	<p>By default, Sling supports two kinds of scripts: JSPs to render arbitrary JCR resources and <a href="http://sling.apache.org/site/servlets.html">Servlets</a>.
+		While the former is a decent way to render dynamic resources, i.e. content pages and components that have no fixed
+		URL, the latter is usually used to provide RESTful services with a fixed URL.  However, Servlets are quite
+		primitive. They do not provide separation of model, view and controller or common yet complex features such as
+		form data binding. With NEBA, one can alternatively use all of Spring's MVC features to enable clean, simple and RESTful MVC with fixed URLs.</p>
+
+	<p>To avoid conflict with resource resolution and servlet mappings, <a
+			href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC</a>
+		is integrated into Sling using a Servlet with the fixed URL &quot;/bin/mvc&quot; (you may use servlet resolver
+		mapping to change this path). Since each distinct path in sling maps to a different resource (servlets are
+		resources, too), the path /bin/mvc/url would not point to the /bin/mvc/ servlet. Thus, to have a request handled by
+		the MVC servlet, the pseudo-extension&quot;.do&quot; is used. A spring controller with the URL /my/controller/path
+		is thus always addressed using /bin/mvc.do/my/controller/path. One may also use an extension and selectors (e.g.
+		/bin/mvc.do/my/controller/path.selector1.selector2.xml). </p>
+
+	<p>Let's create a simple Controller called &quot;DemoController&quot;. We will use Spring's @Controller annotation; other styles
+		(such as mapping by bean names etc.) are also supported.  The purpose of this controller is to echo a parameter that we provide in
+		a RESTful way, i.e. as a path element (this allows caching!).</p>
+
+	{% highlight java %}
+	@Controller
+	public class DemoController {
+	}
+	{% endhighlight %}
+
+	<p>A @Controller is automatically detected and registered (as a singleton) by Spring's classpath scanning.
+		Let's use Spring's REST support to both define the URL the controller listens to and the parameter we expect:</p>
+
+	{% highlight java %}
+	@Controller
+	public class DemoController {
+	@RequestMapping("/echo/{param}")
+	@ResponseBody
+	public String echo(@PathVariable("param") String paramToEcho) {
+	return paramToEcho;
+	}
+	}
+	{% endhighlight %}
+
+	<p>That's it. You may now call your controller e.g. with /bin/mvc.do/echo/HelloWorld.txt.</p>
+
+	<p>Furthermore, NEBA automatically provides <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/new-in-3.1.html#new-in-3.1-handler-method-controller-processing">handler method argument resolvers</a>
+		for Sling-specific request elements, SlingHttpServletRequest and -Response, RequestPathInfo and ResourceResolver, like so:</p>
+
+	{% highlight java %}
+	@Controller
+	public class DemoController {
+	@RequestMapping("/echoTitle")
+	@ResponseBody
+	public String echo(ResourceResolver resolver, RequestPathInfo info) {
+	...
+	}
+
+	@RequestMapping("/echoTitle")
+	@ResponseBody
+	public String echo(SlingHttpServletRequest request) {
+	...
+	}
+	}
+	{% endhighlight %}
+
+	<p>It is thus not necessary to obtain these elements from the request.</p>
+
+	<p>Note that the annotation-driven controllers have a lot more very powerful options. See the <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC
+		documentation</a> for more examples. NEBA also supports Spring&apos;s special view names for redirecting and
+		forwarding views: returning &quot;redirect:/some/path&quot; from a controller method will cause a redirect to
+		/some/path, returning forward:/some/path will forward the request to /some/path, see also
+		<a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-redirecting">MVC
+			redirecting</a>.</p>
+
+	<p>You may also directly work with the response. For this, provide your own org.springframework.web.servlet.View in the
+		org.springframework.web.servlet.ModelAndView provided by the controller; this way, your View's render method is used to render the
+		response. Alternatively, you may also simply write to the response and either let the controller method return &quot;null&quot; or
+		make it void. This is however bad practice and thus discouraged.</p>
+
+	<h3 id="api_ResourceParam">Resolving resource path parameters with the @ResourceParam annotation</h3>
+
+	<p>NEBA supports the common use case of handling resource paths in controllers with a convenience annotation:</p>
+
+	{% highlight java %}
+	@Controller
+	public class DemoController {
+	@RequestMapping("/echoTitle")
+	@ResponseBody
+	public String echo(@ResourceParam Page page) {
+	return page.getTitle();
+	}
+	}
+	{% endhighlight %}
+
+	<p>Here, a request parameter &quot;page&quot; is expected to contain a path to a resource. This resource is
+		resolved and adapted to the parameter type in case the parameter type is not &quot;Resource&quot;.
+		@ResourceParameters can be optional or required. In addition, they can have a default value (a default resource path) that will
+		be used in case the parameter is not present or empty:</p>
+
+	{% highlight java %}
+	@Controller
+	public class DemoController {
+	@RequestMapping("/echoTitle")
+	@ResponseBody
+	public String echo(@ResourceParam(defaultValue = "/default/resource/path") Page page) {
+	return page.getTitle();
+	}
+	}
+	{% endhighlight %}
+
+	<p>Here, "page" is implicitly considered option (since there is a default value)</p>
+
+	<p>Furthermore, the content paths resolved by the @ResourceParam annotations can be altered by appending an arbitrary sub-path:</p>
+
+	{% highlight java %}
+	@Controller
+	public class DemoController {
+	@RequestMapping("/echoTitle")
+	@ResponseBody
+	public String echo(@ResourceParam(append = "/jcr:content") PageContent pageContent) {
+	return pageContent.getTitle();
+	}
+	}
+	{% endhighlight %}
+
+	<p>The path specified in "append" is appended to the provided path or the specified default path prior to resolution.</p>
+
+	<h3 id="configuring-mvc-logging">Configuring MVC logging</h3>
+	<p>Internal errors during controller invocation, e.g. when
+		required parameters are missing, are logged to the logs/error.log on &quot;warn&quot; level by default. It is highly
+		recommended to configure a separate logfile for these messages and disable this logging on production, since it is
+		very likely for such exceptions to arise constantly due to user mistakes, bot activity and the like. To configure a
+		custom logile, simply create a new Apache Sling Logging Logger Configuration using &quot;mvc&quot; as the Logger
+		name, like so:</p>
+
+	<img src="images/userguide/mvc-logger-configuration.png" />
+</section>

@@ -48,7 +48,7 @@
 	strong, b
 	{
 		font-weight: 500;
-		color: #000000;
+		/*color: #000000;*/
 	}
 	
 	em, i
@@ -1030,9 +1030,9 @@
 			color: rgba(255,255,255,.6);
 		}
 
-/*********************************************************************************/
-/* NEBA additions                                                                      */
-/*********************************************************************************/
+/***
+ NEBA additions
+**/
 
 section .info {
 	padding-left: 1em;
@@ -1094,4 +1094,33 @@ section .info {
 
 #sidebar ul.style li {
 	padding: 0.2em;
+}
+
+/***
+ additions for old documentation
+***/
+
+section .versions {
+    padding-left: 1em;
+    border-left: 1em solid #ffa92f;
+}
+
+.versions a.active {
+    color: #777;
+
+    /* disables link */
+    pointer-events: none !important;
+    cursor: default;
+}
+
+#nav-wrapper.notice {
+    background: #ffa92f;
+
+    /* always fixes notice at top of window */
+    position: fixed;
+    z-index: 2;
+}
+
+#nav-wrapper.old {
+    top: 74px;
 }
