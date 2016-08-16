@@ -18,7 +18,7 @@ package io.neba.core.blueprint;
 
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
@@ -30,12 +30,7 @@ public class FelixTaskExecutorTest {
 
     @Test
     public void testSynchronousExecution() throws Exception {
-        execute(new Runnable() {
-            @Override
-            public void run() {
-                executed = true;
-            }
-        });
+        execute(() -> executed = true);
         assertThat(this.executed).isTrue();
     }
 

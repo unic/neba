@@ -28,10 +28,8 @@ import org.springframework.cglib.proxy.NoOp;
 
 import java.util.Collection;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 import static org.springframework.cglib.proxy.Enhancer.create;
 
 /**
@@ -120,12 +118,22 @@ public class ResourceModelMetaDataRegistrarTest {
         assertAllMetadataConsistsOfMetadataFor(TestResourceModel.class, OtherTestResourceModel.class);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullValuesAreNotToleratedForBundleDeRegistration() throws Exception {
+        this.testee.remove(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullValuesAreNotToleratedForModelRegistration() throws Exception {
+        this.testee.register(null);
+    }
+
     private void clearAllMetaData() {
         this.allMetaData.clear();
     }
 
     private void assertAllMetadataConsistsOfMetadataFor(Class<?>... types) {
-        assertThat(this.allMetaData).onProperty("typeName").containsOnly((Object[]) typeNamesOf(types));
+        assertThat(this.allMetaData).extracting("typeName").containsOnly((Object[]) typeNamesOf(types));
     }
 
     private void getAllMetadata() {

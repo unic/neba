@@ -25,12 +25,7 @@ import org.apache.sling.api.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -46,9 +41,9 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  * @author Olaf Otto
  */
 public class RequestScopedResourceModelCache implements ResourceModelCache, Filter {
-    private final ThreadLocal<Map<Object, Object>> cacheHolder = new ThreadLocal<Map<Object, Object>>();
-    private final ThreadLocal<SlingHttpServletRequest> requestHolder = new ThreadLocal<SlingHttpServletRequest>();
-    private final ThreadLocal<CacheKeyStatistics> staticsHolder = new ThreadLocal<CacheKeyStatistics>();
+    private final ThreadLocal<Map<Object, Object>> cacheHolder = new ThreadLocal<>();
+    private final ThreadLocal<SlingHttpServletRequest> requestHolder = new ThreadLocal<>();
+    private final ThreadLocal<CacheKeyStatistics> staticsHolder = new ThreadLocal<>();
     // The logger is not declared final to allow unit testing
     private Logger logger = LoggerFactory.getLogger(getClass());
     private boolean enabled = true;
@@ -147,7 +142,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
         final SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) request;
 
         this.requestHolder.set(slingHttpServletRequest);
-        this.cacheHolder.set(new HashMap<Object, Object>(1024));
+        this.cacheHolder.set(new HashMap<>(1024));
         if (isStatisticsEnabled()) {
             this.staticsHolder.set(new CacheKeyStatistics());
         }

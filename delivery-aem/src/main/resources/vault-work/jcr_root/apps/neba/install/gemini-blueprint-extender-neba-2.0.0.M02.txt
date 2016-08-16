@@ -1,1 +1,0 @@
-Contains the fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=403628

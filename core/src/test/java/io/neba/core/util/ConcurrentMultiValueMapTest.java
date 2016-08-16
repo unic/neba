@@ -16,15 +16,15 @@
 
 package io.neba.core.util;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.MapAssert.entry;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * @author Olaf Otto
@@ -34,7 +34,7 @@ public class ConcurrentMultiValueMapTest {
 
     @Before
     public void prepareMap() {
-        this.testee = new ConcurrentDistinctMultiValueMap<String, String>();
+        this.testee = new ConcurrentDistinctMultiValueMap<>();
     }
     
     @Test
@@ -49,8 +49,8 @@ public class ConcurrentMultiValueMapTest {
         assertThat(copy)
                   .isNotNull()
                   .hasSize(2)
-                  .includes(entry("a", v("v1", "v2")))
-                  .includes(entry("b", v("v1", "v2")));
+                  .contains(entry("a", v("v1", "v2")))
+                  .contains(entry("b", v("v1", "v2")));
     }
     
     @Test
@@ -67,20 +67,20 @@ public class ConcurrentMultiValueMapTest {
         assertThat(copy1)
         .isNotNull()
         .hasSize(1)
-        .includes(entry("b", v("v1", "v2")));
+        .contains(entry("b", v("v1", "v2")));
 
         Map<String, Collection<String>> copy2 = this.testee.getContents();
 
         assertThat(copy2)
         .isNotNull()
         .hasSize(2)
-        .includes(entry("a", v("v1", "v2")))
-        .includes(entry("b", v("v1", "v2")));
+        .contains(entry("a", v("v1", "v2")))
+        .contains(entry("b", v("v1", "v2")));
         
         copy1.get("b").add("v3");
         
-        assertThat(copy1).includes(entry("b", v("v1", "v2", "v3")));
-        assertThat(copy2).excludes(entry("b", v("v1", "v2", "v3")));
+        assertThat(copy1).contains(entry("b", v("v1", "v2", "v3")));
+        assertThat(copy2).doesNotContain(entry("b", v("v1", "v2", "v3")));
 
     }
 
@@ -88,7 +88,8 @@ public class ConcurrentMultiValueMapTest {
         this.testee.put(key, value);
     }
 
-    private <K> Collection<K> v(K... ks) {
+    @SafeVarargs
+    private final <K> Collection<K> v(K... ks) {
         return Arrays.asList(ks);
     }
 }

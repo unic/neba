@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:task="http://www.springframework.org/schema/task"
-	xmlns:compendium="http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xmlns:compendium="http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium"
 
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
            http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util-3.2.xsd
+           http://www.springframework.org/schema/util/spring-util-4.2.xsd
            http://www.springframework.org/schema/task
-           http://www.springframework.org/schema/task/spring-task-3.2.xsd
+           http://www.springframework.org/schema/task/spring-task-4.2.xsd
            http://www.osgi.org/xmlns/blueprint/v1.0.0
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-3.2.xsd
+           http://www.springframework.org/schema/context/spring-context-4.2.xsd
            http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium
            http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd">
 
@@ -27,9 +27,6 @@
     <task:executor id="singlethreaded" pool-size="1" queue-capacity="1" rejection-policy="DISCARD_OLDEST" />
 	
 	<util:constant
-		static-field="io.neba.core.selftests.SelftestConsolePlugin.LABEL"
-		id="selftestLabel" />
-	<util:constant
 		static-field="io.neba.core.resourcemodels.registration.ModelRegistryConsolePlugin.LABEL"
 		id="modelRegistryLabel" />
 
@@ -38,16 +35,16 @@
 
 	<bp:blueprint>
 		<!-- References to other OSGi services -->
-		<bp:reference interface="org.apache.sling.api.resource.ResourceResolverFactory" id="resourceResolverFactory">
-            <bp:reference-listener ref="administrativeResourceResolver" bind-method="bind" unbind-method="unbind"/>
-		</bp:reference>
+		<bp:reference interface="org.apache.sling.api.resource.ResourceResolverFactory" id="resourceResolverFactory" />
 
         <bp:reference interface="org.osgi.service.cm.ConfigurationAdmin" id="configurationAdmin"/>
 
-		<!-- Only bindings values providers for all scripts or explicitly for velocity are considered. -->
-		<bp:reference-list interface="org.apache.sling.scripting.api.BindingsValuesProvider" availability="optional" filter="(|(javax.script.name=any)(javax.script.name=velocity))">
-			<bp:reference-listener ref="beanRendererFactory" bind-method="bind" unbind-method="unbind" />
-		</bp:reference-list>
+		<bp:reference interface="javax.servlet.ServletContext" id="servletContext" />
+
+		<bp:reference interface="javax.servlet.ServletConfig" id="servletConfig" />
+
+		<bp:reference interface="org.apache.sling.api.servlets.ServletResolver" id="servletResolver" />
+
 		<!-- All post processors are used by the mapper -->
 		<bp:reference-list interface="io.neba.api.resourcemodels.ResourceModelPostProcessor" availability="optional">
 			<bp:reference-listener ref="resourceToModelMapper" bind-method="bind" unbind-method="unbind" />
@@ -68,10 +65,6 @@
 			<compendium:managed-properties persistent-id="io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration" autowire-on-update="true" />
 		</bp:bean>
 
-		<bp:bean class="io.neba.core.rendering.BeanRendererFactoryImpl" id="beanRendererFactory">
-			<compendium:managed-properties persistent-id="io.neba.core.rendering.BeanRendererFactoryConfiguration" update-method="refresh" autowire-on-update="true" />
-		</bp:bean>
-
 		<!-- Beans exported as OSGi services -->
 		<bp:service ref="requestScopedResourceModelCache" id="requestScopedResourceModelCacheService">
             <bp:interfaces>
@@ -86,13 +79,6 @@
                     </array>
                 </entry>
                 <entry key="service.description" value="A request-scoped resource model cache." />
-				<entry key="service.vendor" value="neba.io" />
-			</bp:service-properties>
-		</bp:service>
-		
-		<bp:service ref="beanRendererFactory" interface="io.neba.api.rendering.BeanRendererFactory">
-			<bp:service-properties>
-				<entry key="service.description" value="A factory for configurable bean renderers." />
 				<entry key="service.vendor" value="neba.io" />
 			</bp:service-properties>
 		</bp:service>
@@ -119,14 +105,6 @@
                     </array>
 				</entry>
 				<entry key="service.description" value="A generic servlet that handles all requests using Spring MVC." />
-				<entry key="service.vendor" value="neba.io" />
-			</bp:service-properties>
-		</bp:service>
-
-		<bp:service ref="selftestConsolePlugin" interface="javax.servlet.Servlet">
-			<bp:service-properties>
-				<entry key="felix.webconsole.label" value-ref="selftestLabel" />
-				<entry key="service.description" value="Provides a felix console plugin to execute and list @SelfTest's" />
 				<entry key="service.vendor" value="neba.io" />
 			</bp:service-properties>
 		</bp:service>
@@ -158,5 +136,29 @@
         </bp:service>
 
         <bp:service ref="resourceModelProviderImpl" interface="io.neba.api.resourcemodels.ResourceModelProvider" />
+
+		<bp:service ref="mappableTypeHierarchyChangeListener" interface="org.osgi.service.event.EventHandler">
+			<bp:service-properties>
+				<entry key="event.topics" value="org/apache/sling/api/resource/Resource/CHANGED"/>
+				<!-- React to changes potentially altering the cacheable resource type hierarchy, unless they are occurring
+				     in a location known not to contain data relevant to the type hierarchy, such as /var or /content -->
+				<entry key="event.filter" value="(&amp;
+				 (!(path=/content/*))
+				 (!(path=/var/*))
+				 (!(path=/jcr:*))
+				 (!(path=/oak:*))
+				 (|
+						(resourceAddedAttributes=jcr:mixinTypes)
+						(resourceAddedAttributes=sling:resourceSuperType)
+						(resourceChangedAttributes=jcr:mixinTypes)
+						(resourceChangedAttributes=sling:resourceType)
+						(resourceChangedAttributes=sling:resourceSuperType)
+						(resourceRemovedAttributes=sling:resourceSuperType)
+						(resourceRemovedAttributes=jcr:mixinTypes)
+				))" />
+				<entry key="service.description" value="An event handler invalidating cache resource type hierarchy information." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
 	</bp:blueprint>
 </beans>

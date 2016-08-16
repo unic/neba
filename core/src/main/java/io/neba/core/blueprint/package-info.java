@@ -15,7 +15,7 @@
 **/
 
 /**
- * Contains the implementations connecting gemini blueprint and NEBA by means of
+ * Contains the implementations connecting gemini blueprint with Sling and NEBA by means of
  * a {@link io.neba.core.blueprint.SlingBeanFactoryPostProcessor custom application context post processor},
  * {@link io.neba.core.blueprint.SlingOsgiBundleShutdownHandler shutdown handler},
  * {@link io.neba.core.blueprint.ContextFailedHandler context failure handler} and further implementations

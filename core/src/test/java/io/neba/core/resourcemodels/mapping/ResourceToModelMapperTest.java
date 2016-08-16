@@ -34,7 +34,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.NoOp;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -223,6 +223,7 @@ public class ResourceToModelMapperTest {
         verify(this.resourceModelStatistics, never()).countMappingDuration(anyInt());
     }
 
+    @SuppressWarnings("unchecked")
     private void withAlreadyOngoingMapping() {
         doReturn(this.ongoingMapping).when(this.nestedMappingSupport).begin(isA(Mapping.class));
         doReturn(this.model).when(this.ongoingMapping).getMappedModel();

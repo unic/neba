@@ -23,7 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Iterator;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -39,12 +39,12 @@ public class ReadOnlyIteratorTest {
 
     @Before
     public void setUp() throws Exception {
-        this.testee = new ReadOnlyIterator<Object>(this.iterator);
+        this.testee = new ReadOnlyIterator<>(this.iterator);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testIteratorDoesNotAcceptNullValues() throws Exception {
-        new ReadOnlyIterator<Object>(null);
+        new ReadOnlyIterator<>(null);
     }
 
     @Test

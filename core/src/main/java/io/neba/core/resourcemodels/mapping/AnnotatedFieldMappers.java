@@ -64,9 +64,9 @@ public class AnnotatedFieldMappers {
 
     private static final Collection<AnnotationMapping> EMPTY = emptyList();
     private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache
-          = new ConcurrentDistinctMultiValueMap<Field, AnnotationMapping>();
+          = new ConcurrentDistinctMultiValueMap<>();
     private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers
-          = new ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper>();
+          = new ConcurrentDistinctMultiValueMap<>();
 
     private final AtomicInteger state = new AtomicInteger(0);
 
@@ -108,7 +108,7 @@ public class AnnotatedFieldMappers {
 
         final int ticket = this.state.get();
 
-        List<AnnotationMapping> compatibleMappers = new ArrayList<AnnotationMapping>();
+        List<AnnotationMapping> compatibleMappers = new ArrayList<>();
         for (Annotation annotation : metaData.getAnnotations()) {
             Collection<AnnotatedFieldMapper> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
             if (mappersForAnnotation == null) {

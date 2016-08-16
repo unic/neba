@@ -16,7 +16,6 @@
 
 package io.neba.core.resourcemodels.metadata;
 
-import org.apache.commons.collections.Predicate;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.sling.commons.json.JSONArray;
 import org.apache.sling.commons.json.JSONObject;
@@ -52,6 +51,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
     @Autowired
     private ResourceModelMetaDataRegistrar modelMetaDataRegistrar;
 
+    @SuppressWarnings("unused")
     public String getCategory() {
         return "NEBA";
     }
@@ -111,12 +111,9 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private void provideStatisticsOfModel(final String typeName, HttpServletResponse res) {
-        ResourceModelMetaData metaData = (ResourceModelMetaData) find(this.modelMetaDataRegistrar.get(), new Predicate() {
-            @Override
-            public boolean evaluate(Object object) {
-                return ((ResourceModelMetaData) object).getTypeName().equals(typeName);
-            }
-        });
+        ResourceModelMetaData metaData = (ResourceModelMetaData) find(
+                this.modelMetaDataRegistrar.get(), object -> ((ResourceModelMetaData) object).getTypeName().equals(typeName)
+        );
 
         if (metaData != null) {
 
@@ -170,7 +167,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         ResourceModelStatistics statistics = metaData.getStatistics();
 
         //
-        Map<String, Object> data = new LinkedHashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<>();
 
         int lazyFields = 0, greedyFields = 0;
         for (MappedFieldMetaData field : metaData.getMappableFields()) {
@@ -196,6 +193,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         data.put("maximumMappingDuration", statistics.getMaximumMappingDuration());
         data.put("minimumMappingDuration", statistics.getMinimumMappingDuration());
         data.put("mappingDurationMedian", statistics.getMappingDurationMedian());
+        data.put("cacheHits", statistics.getCacheHits());
         return data;
     }
 

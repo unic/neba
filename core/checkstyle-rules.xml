@@ -34,7 +34,7 @@
         <!--  Naming -->
         <module name="PackageName">
             <property name="format"
-				value="^[a-z]{2,}\.[a-z]{2,}(\.[a-z0-9]+)*$" />
+                      value="^[a-z]{2,}\.[a-z]{2,}(\.[a-z0-9]+)*$" />
         </module>
         <module name="TypeName">
             <property name="format" value="^[A-Z][a-z0-9]+([A-Z][a-z0-9]+)*$"/>
@@ -67,7 +67,7 @@
         </module>
         <module name="ParameterNumber"/>
         <module name="LineLength">
-            <property name="max" value="160"/>
+            <property name="max" value="200"/>
         </module>
 
         <!--  Whitespace -->
@@ -81,7 +81,7 @@
                       value="BNOT, DEC, DOT, INC, LNOT, UNARY_MINUS, UNARY_PLUS"/>
         </module>
         <module name="WhitespaceAfter">
-            <property name="tokens" value="ARRAY_INIT, COMMA, SEMI, TYPECAST"/>
+            <property name="tokens" value="COMMA, SEMI, TYPECAST"/>
         </module>
         <module name="WhitespaceAround">
             <property name="tokens"
@@ -124,9 +124,8 @@
         <module name="NestedIfDepth">
             <property name="max" value="4"/>
         </module>
-        <module name="JUnitTestCase"/>
         <module name="CyclomaticComplexity">
-            <property name="max" value="13"/>
+            <property name="max" value="12"/>
         </module>
         <module name="VisibilityModifier"/>
         <module name="HideUtilityClassConstructor"/>
@@ -174,9 +173,9 @@
             <property name="message"
                       value="The Formatter classes are not synchronised, don't cache them."/>
             <property name="illegalPattern" value="true"/>
-		</module>
-		<module name="IllegalCatch">
-			<property name="illegalClassNames" value="java.lang.Throwable"/>
+        </module>
+        <module name="IllegalCatch">
+            <property name="illegalClassNames" value="java.lang.Throwable"/>
         </module>
     </module>
     <module name="SuppressionCommentFilter"/>

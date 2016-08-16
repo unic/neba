@@ -26,7 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Set;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 /**

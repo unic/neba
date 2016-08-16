@@ -15,7 +15,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>3.10.0</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -59,6 +59,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
         </dependency>
         <dependency>
@@ -88,6 +92,10 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -148,12 +156,12 @@
             <artifactId>org.apache.felix.webconsole</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <artifactId>org.apache.felix.http.jetty</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.jcr</groupId>
@@ -170,12 +178,8 @@
             <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-reflect</artifactId>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -197,7 +201,7 @@
                         <Bundle-Name>NEBA core</Bundle-Name>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Category>neba</Bundle-Category>
-                        <Fragment-Host>org.eclipse.gemini.blueprint.extender-neba</Fragment-Host>
+                        <Fragment-Host>org.eclipse.gemini.blueprint.extender</Fragment-Host>
                         <!-- Legacy support: Embed dependencies not available on older sling platforms -->
                         <Embed-Dependency>commons-lang3</Embed-Dependency>
                         <Embed-Directory>lib</Embed-Directory>
@@ -217,10 +221,32 @@
                             org.springframework.web.filter,
                             org.aopalliance.aop,
                             org.apache.sling.bgservlets;version=0.0.0;resolution:=optional,
+                            org.eclipse.jetty.websocket.server,
                             *
                         </Import-Package>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <executions>
+                    <execution>
+                        <!-- This is a workaround for FELIX-5173 -->
+                        <id>inline-scr-configuration-descriptions</id>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <delimiters>
+                                <delimiter>%*</delimiter>
+                            </delimiters>
+                            <file>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.xml</file>
+                            <tokenValueMap>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.properties</tokenValueMap>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

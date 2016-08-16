@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>3.10.0</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -32,10 +32,6 @@
         </dependency>
 
         <!-- External dependencies -->
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
@@ -80,6 +76,34 @@
             <groupId>org.eclipse.gemini.blueprint</groupId>
             <artifactId>gemini-blueprint-io</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-extender</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!-- build dependencies -->
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -91,8 +115,8 @@
             <artifactId>mockito-all</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
         </dependency>
     </dependencies>
 
@@ -141,11 +165,16 @@
                             <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
                             <excludeArtifactIds>org.apache.servicemix.bundles.aopalliance</excludeArtifactIds>
                             <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
                             <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- The JCR installer allows specifying the bundle start level via a path segment /install/<startlevel> -->
+            <!-- Following, the bundles are packaged with start levels deemed optimal for dependency resolution -->
 
             <!-- Customize the manifests of the unpacked dependencies and re-package them -->
             <plugin>
@@ -161,11 +190,13 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>io.neba.delivery.JavaxInjectManifestTransformer</mainClass>
+                    <mainClass>io.neba.delivery.SpringBundlesTransformer</mainClass>
+                    <!-- Spring bundles shall start after their dependencies at start level 17 -->
                     <arguments>
                         <argument>${spring.artifacts.workdir}</argument>
-                        <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}</argument>
+                        <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}/17</argument>
                     </arguments>
+                    <classpathScope>compile</classpathScope>
                 </configuration>
             </plugin>
 
@@ -177,35 +208,56 @@
                     <builtContentDirectory>${project.build.directory}/vault.work</builtContentDirectory>
                     <failOnMissingEmbed>true</failOnMissingEmbed>
                     <embeddeds>
-                        <embedded>
-                            <groupId>org.apache.velocity</groupId>
-                            <artifactId>velocity</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
+                        <!-- Spring dependencies shall start first at start level 16 -->
                         <embedded>
                             <groupId>org.apache.servicemix.bundles</groupId>
                             <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-                            <target>${neba.installation.path}</target>
+                            <target>${neba.installation.path}/16</target>
                         </embedded>
+                        <embedded>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-core</artifactId>
+                            <target>${neba.installation.path}/16</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-databind</artifactId>
+                            <target>${neba.installation.path}/16</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-annotations</artifactId>
+                            <target>${neba.installation.path}/16</target>
+                        </embedded>
+
+                        <!-- Gemini shall start after Spring has started at start level 18 -->
                         <embedded>
                             <groupId>org.eclipse.gemini.blueprint</groupId>
                             <artifactId>gemini-blueprint-core</artifactId>
-                            <target>${neba.installation.path}</target>
+                            <target>${neba.installation.path}/18</target>
                         </embedded>
                         <embedded>
                             <groupId>org.eclipse.gemini.blueprint</groupId>
                             <artifactId>gemini-blueprint-io</artifactId>
-                            <target>${neba.installation.path}</target>
+                            <target>${neba.installation.path}/18</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.eclipse.gemini.blueprint</groupId>
+                            <artifactId>gemini-blueprint-extender</artifactId>
+                            <target>${neba.installation.path}/18</target>
+                        </embedded>
+
+                        <!-- Finally, NEBA shall start after gemini was started, but before the application
+                             bundles start, at start level 19. -->
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>io.neba.neba-api</artifactId>
+                            <target>${neba.installation.path}/19</target>
                         </embedded>
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>io.neba.neba-core</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>io.neba.neba-api</artifactId>
-                            <target>${neba.installation.path}</target>
+                            <target>${neba.installation.path}/19</target>
                         </embedded>
                     </embeddeds>
                     <filters>

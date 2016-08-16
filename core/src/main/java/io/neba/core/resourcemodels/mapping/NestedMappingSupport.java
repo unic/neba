@@ -42,8 +42,8 @@ public class NestedMappingSupport {
      * @author Olaf Otto
      */
     private static class OngoingMappings {
-        private final Map<Mapping, Mapping> mappings = new LinkedHashMap<Mapping, Mapping>();
-        private final Map<ResourceModelMetaData, Count> metaData = new HashMap<ResourceModelMetaData, Count>();
+        private final Map<Mapping, Mapping> mappings = new LinkedHashMap<>();
+        private final Map<ResourceModelMetaData, Count> metaData = new HashMap<>();
 
         public void add(Mapping<?> mapping) {
             this.mappings.put(mapping, mapping);
@@ -103,7 +103,7 @@ public class NestedMappingSupport {
     }
 
     // Recursive mappings always occurs within the same thread.
-    private final ThreadLocal<OngoingMappings> ongoingMappings = new ThreadLocal<OngoingMappings>();
+    private final ThreadLocal<OngoingMappings> ongoingMappings = new ThreadLocal<>();
 
     /**
      * Contract: When invoked and <code>null</code> is returned,

@@ -44,7 +44,7 @@ public class ClassHierarchyIterator implements Iterable<Class<?>>, Iterator<Clas
         return new ClassHierarchyIterator(type);
     }
 
-    private Queue<Class<?>> queue = new LinkedList<Class<?>>();
+    private Queue<Class<?>> queue = new LinkedList<>();
     private Class<?> current;
     private Class<?> next = null;
 

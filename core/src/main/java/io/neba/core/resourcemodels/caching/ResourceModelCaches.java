@@ -12,13 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.caching;
 
 import io.neba.api.resourcemodels.ResourceModelCache;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
 import org.apache.sling.api.resource.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,58 +29,60 @@ import java.util.List;
 /**
  * Represents all currently registered {@link ResourceModelCache resource model cache services}.
  * <br />
- * 
+ *
  * Thread-safety must be provided by the underlying {@link ResourceModelCache caches}.
- * 
+ *
  * @author Olaf Otto
  */
 @Service
 public class ResourceModelCaches {
-	private final List<ResourceModelCache> caches = new ArrayList<ResourceModelCache>();
+    @Autowired
+    private ResourceModelMetaDataRegistrar metaDataRegistrar;
 
-	/**
-	 * Looks up the {@link #store(Resource, Object, Key) cached model}
-	 * of the given type for the given resource. 
-	 * Returns the first model found in the caches.
-	 * 
-	 * @param key must not be <code>null</code>.
-	 * @return can be <code>null</code>.
-	 */
+    private final List<ResourceModelCache> caches = new ArrayList<>();
+
+    /**
+     * Looks up the {@link #store(Resource, Object, Key) cached model}
+     * of the given type for the given resource.
+     * Returns the first model found in the caches.
+     *
+     * @param key must not be <code>null</code>.
+     * @return can be <code>null</code>.
+     */
     public <T> T lookup(Key key) {
-    	T model = null;
-
-    	for (ResourceModelCache cache : this.caches) {
-    		model = cache.get(key);
-    		if (model != null) {
-    			break;
-    		}
-    	}
-    	return model;
+        for (ResourceModelCache cache : this.caches) {
+            T model = cache.get(key);
+            if (model != null) {
+                metaDataRegistrar.get(model.getClass()).getStatistics().countCacheHit();
+                return model;
+            }
+        }
+        return null;
     }
-    
+
     /**
      * Stores the model representing the result of the
      * {@link Resource#adaptTo(Class) adaptation} of the given resource
      * to the given target type.
-     * 
+     *
      * @param resource must not be <code>null</code>.
      * @param model can be <code>null</code>.
      * @param key must not be <code>null</code>.
      */
     public <T> void store(Resource resource, T model, Key key) {
-    	for (ResourceModelCache cache : this.caches) {
-    		cache.put(resource, model, key);
-    	}
+        for (ResourceModelCache cache : this.caches) {
+            cache.put(resource, model, key);
+        }
     }
 
-	public void bind(ResourceModelCache cache) {
-		this.caches.add(cache);
-	}
-	
-	public void unbind(ResourceModelCache cache) {
-		if (cache == null) {
-			return;
-		}
-		this.caches.remove(cache);
-	}
+    public void bind(ResourceModelCache cache) {
+        this.caches.add(cache);
+    }
+
+    public void unbind(ResourceModelCache cache) {
+        if (cache == null) {
+            return;
+        }
+        this.caches.remove(cache);
+    }
 }

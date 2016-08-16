@@ -41,7 +41,7 @@ import java.util.*;
 import static java.lang.System.arraycopy;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -92,13 +92,13 @@ public class ModelRegistryConsolePluginTest {
     public void setUp() throws Exception {
         this.internalWriter = new StringWriter();
         Writer writer = new PrintWriter(this.internalWriter);
-        this.typeMappings = new HashMap<String, Collection<OsgiBeanSource<?>>>();
-        this.beanSources = new ArrayList<OsgiBeanSource<?>>();
+        this.typeMappings = new HashMap<>();
+        this.beanSources = new ArrayList<>();
 
         doReturn(writer).when(this.response).getWriter();
         doReturn(this.typeMappings).when(this.modelRegistry).getTypeMappings();
         doReturn(this.beanSources).when(this.modelRegistry).getBeanSources();
-        doReturn(this.resolver).when(this.factory).getAdministrativeResourceResolver((Map<String, Object>) any());
+        doReturn(this.resolver).when(this.factory).getAdministrativeResourceResolver(any());
         doReturn(new String[]{""}).when(this.resolver).getSearchPath();
         doReturn("").when(this.request).getContextPath();
         doReturn("/system/console").when(this.request).getServletPath();
@@ -245,7 +245,7 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withPathResourceLookedUp() {
-        Set<LookupResult> lookupResults = new HashSet<LookupResult>();
+        Set<LookupResult> lookupResults = new HashSet<>();
         for (OsgiBeanSource<?> source : this.beanSources) {
             LookupResult result = mock(LookupResult.class);
             doReturn(source).when(result).getSource();
@@ -256,7 +256,7 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withPathResourceChildren(String... paths) {
-        List<Resource> children = new ArrayList<Resource>();
+        List<Resource> children = new ArrayList<>();
         for (String path : paths) {
             Resource child = mock(Resource.class);
             doReturn(path).when(child).getPath();
@@ -286,7 +286,7 @@ public class ModelRegistryConsolePluginTest {
         doReturn(this.iconResource).when(this.resolver).getResource(eq(resourcePath));
         InputStream in = mock(InputStream.class);
         doReturn(in).when(this.iconResource).adaptTo(eq(InputStream.class));
-        doReturn(-1).when(in).read((byte[]) any());
+        doReturn(-1).when(in).read(any());
     }
 
     private void verifyPluginResolvesResource(String resourcePath) {
@@ -341,7 +341,7 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withRegisteredModel(String typeName, Class<Model> modelType, long bundleId, String beanName) {
-        List<OsgiBeanSource<?>> sources = new ArrayList<OsgiBeanSource<?>>();
+        List<OsgiBeanSource<?>> sources = new ArrayList<>();
         OsgiBeanSource<?> source = mock(OsgiBeanSource.class);
         doReturn(modelType).when(source).getBeanType();
         doReturn(bundleId).when(source).getBundleId();

@@ -16,18 +16,14 @@
 
 package io.neba.core.resourcemodels.metadata;
 
-import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidGenericFieldDeclaration;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidPathDeclaration;
-import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithUnsupportedCollectionTypes;
+import io.neba.core.resourcemodels.mapping.testmodels.*;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.util.ReflectionUtils.findField;
 import static org.springframework.util.ReflectionUtils.setField;
 

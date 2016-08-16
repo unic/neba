@@ -27,12 +27,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import static java.util.Collections.list;
@@ -55,7 +50,7 @@ public class MultipartSlingHttpServletRequest extends SlingHttpServletRequestWra
 	@Override
 	public Iterator<String> getFileNames() {
 		RequestParameterMap requestParameterMap = getRequestParameterMap();
-		List<String> names = new ArrayList<String>(requestParameterMap.size());
+		List<String> names = new ArrayList<>(requestParameterMap.size());
 		for (Entry<String, RequestParameter[]> entry : requestParameterMap.entrySet()) {
 			RequestParameter[] params = entry.getValue();
 			if (params != null && params.length > 0 && !params[0].isFormField()) {
@@ -78,7 +73,7 @@ public class MultipartSlingHttpServletRequest extends SlingHttpServletRequestWra
 	@Override
 	public List<MultipartFile> getFiles(String name) {
 		final RequestParameter[] requestParameters = getRequestParameters(name);
-		List<MultipartFile> files = new ArrayList<MultipartFile>();
+		List<MultipartFile> files = new ArrayList<>();
 		if (requestParameters != null) {
 			for (RequestParameter parameter : requestParameters) {
 				if (!parameter.isFormField()) {
@@ -92,7 +87,7 @@ public class MultipartSlingHttpServletRequest extends SlingHttpServletRequestWra
 	@Override
 	public Map<String, MultipartFile> getFileMap() {
 		RequestParameterMap requestParameterMap = getRequestParameterMap();
-		Map<String, MultipartFile> files = new HashMap<String, MultipartFile>(requestParameterMap.size());
+		Map<String, MultipartFile> files = new HashMap<>(requestParameterMap.size());
 		for (Entry<String, RequestParameter[]> entry : requestParameterMap.entrySet()) {
 			RequestParameter[] params = entry.getValue();
 			if (params != null && params.length > 0) {
@@ -109,12 +104,12 @@ public class MultipartSlingHttpServletRequest extends SlingHttpServletRequestWra
 	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
 		RequestParameterMap requestParameterMap = getRequestParameterMap();
-		MultiValueMap<String, MultipartFile> fileMap = new LinkedMultiValueMap<String, MultipartFile>(
-			requestParameterMap.size());
+		MultiValueMap<String, MultipartFile> fileMap = new LinkedMultiValueMap<>(
+				requestParameterMap.size());
 		for (Entry<String, RequestParameter[]> entry : requestParameterMap.entrySet()) {
 			RequestParameter[] params = entry.getValue();
 			if (params != null && params.length > 0) {
-				List<MultipartFile> files = new ArrayList<MultipartFile>(params.length);
+				List<MultipartFile> files = new ArrayList<>(params.length);
 				for (RequestParameter parameter : params) {
 					if (!parameter.isFormField()) {
 						files.add(new SlingMultipartFile(entry.getKey(), parameter));

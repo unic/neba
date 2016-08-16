@@ -17,15 +17,14 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiBeanSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
@@ -36,16 +35,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -56,7 +53,7 @@ public class ModelRegistrarTest {
     private Bundle bundle;
     private BundleContext context;
     private Map<String, OsgiBeanSource<Object>> addedBeanSources;
-    private Set<Object> beans = new HashSet<Object>();
+    private Set<Object> beans = new HashSet<>();
 
     @Mock
     private ModelRegistry registry;
@@ -70,16 +67,14 @@ public class ModelRegistrarTest {
     @Before
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void prepareModelRegistrar() {
-        this.addedBeanSources = new HashMap<String, OsgiBeanSource<Object>>();
-        Answer registerModel = new Answer() {
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                String[] resourceTypes = (String[]) invocation.getArguments()[0];
-                OsgiBeanSource<Object> osgiBeanSource = (OsgiBeanSource<Object>) invocation.getArguments()[1];
-                for (String type : resourceTypes) {
-                    addedBeanSources.put(type, osgiBeanSource);
-                }
-                return null;
+        this.addedBeanSources = new HashMap<>();
+        Answer registerModel = invocation -> {
+            String[] resourceTypes = (String[]) invocation.getArguments()[0];
+            OsgiBeanSource<Object> osgiBeanSource = (OsgiBeanSource<Object>) invocation.getArguments()[1];
+            for (String type : resourceTypes) {
+                addedBeanSources.put(type, osgiBeanSource);
             }
+            return null;
         };
         doAnswer(registerModel).when(this.registry).add(isA(String[].class), isA(OsgiBeanSource.class));
     }
@@ -117,10 +112,7 @@ public class ModelRegistrarTest {
     private void assertBeanSourcesForAllBeansAddedToRegistry() {
         assertThat(this.addedBeanSources, notNullValue());
         assertThat(this.addedBeanSources.size(), is(this.beans.size()));
-        Set<Object> beansFromBeanSources = new HashSet<Object>();
-        for (OsgiBeanSource<Object> source : this.addedBeanSources.values()) {
-            beansFromBeanSources.add(source.getBean());
-        }
+        Set<Object> beansFromBeanSources = this.addedBeanSources.values().stream().map(OsgiBeanSource::getBean).collect(Collectors.toSet());
         assertThat(this.beans, is(beansFromBeanSources));
     }
 

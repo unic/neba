@@ -16,7 +16,7 @@
 
 package io.neba.core.util;
 
-import org.fest.assertions.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ public class ConcurrentDistinctMultiValueMapTest {
 	
 	@Before
 	public void prepareTest() {
-		this.testee = new ConcurrentDistinctMultiValueMap<String, Object>();
+		this.testee = new ConcurrentDistinctMultiValueMap<>();
 	}
 	
 	@Test

@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -43,10 +44,10 @@ public class ModelProcessor {
             method.setAccessible(true);
             try {
                 method.invoke(model);
+            } catch (InvocationTargetException | SecurityException e) {
+                logger.error("Unable to invoke the @" + PostMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
-            } catch (Exception e) {
-                logger.error("Unable to invoke the @" + PostMapping.class.getSimpleName() + " method " + method + ".", e);
             }
         }
     }
@@ -57,10 +58,10 @@ public class ModelProcessor {
             method.setAccessible(true);
             try {
                 method.invoke(model);
+            } catch (InvocationTargetException | SecurityException e) {
+                logger.error("Unable to invoke the @" + PreMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
-            } catch (Exception e) {
-                logger.error("Unable to invoke the @" + PreMapping.class.getSimpleName() + " method " + method + ".", e);
             }
         }
     }

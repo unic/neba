@@ -16,16 +16,15 @@
 
 package io.neba.core.util;
 
-import static java.util.Arrays.asList;
-
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.nodetype.NodeType;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.nodetype.NodeType;
+import static java.util.Arrays.asList;
 
 /**
  * Iterates the {@link NodeType node type} hierarchy of a {@link Node}.
@@ -48,7 +47,7 @@ public class NodeTypeHierarchyIterator implements Iterator<String>, Iterable<Str
         return new NodeTypeHierarchyIterator(node);
     }
 
-    private final Queue<NodeType> queue = new LinkedList<NodeType>();
+    private final Queue<NodeType> queue = new LinkedList<>();
     private NodeType current;
     private NodeType next = null;
 

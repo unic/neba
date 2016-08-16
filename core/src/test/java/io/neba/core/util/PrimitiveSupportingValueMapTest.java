@@ -27,11 +27,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -205,12 +203,13 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     private void assertEntriesAre(String key, String value) {
-        assertThat(this.testee.entrySet()).onProperty("value").contains(value);
-        assertThat(this.testee.entrySet()).onProperty("key").contains(key);
+        assertThat(this.testee.entrySet()).extracting("value").contains(value);
+        assertThat(this.testee.entrySet()).extracting("key").contains(key);
     }
 
+    @SuppressWarnings("unchecked")
     private void withEntries(String key, String value) {
-        Set<Map.Entry<String, String>> entrySet = new HashSet<Map.Entry<String, String>>();
+        Set<Map.Entry<String, String>> entrySet = new HashSet<>();
         Map.Entry entry = mock(Map.Entry.class);
         doReturn(key).when(entry).getKey();
         doReturn(value).when(entry).getValue();
@@ -224,7 +223,7 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     private void withValues(String value) {
-        HashSet values = new HashSet();
+        Set<String> values = new HashSet<>();
         values.add(value);
         doReturn(values).when(this.wrapped).values();
     }
@@ -234,7 +233,7 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     private void withKeySet(String key) {
-        HashSet keySet = new HashSet();
+        Set<String> keySet = new HashSet<>();
         keySet.add(key);
         doReturn(keySet).when(this.wrapped).keySet();
     }

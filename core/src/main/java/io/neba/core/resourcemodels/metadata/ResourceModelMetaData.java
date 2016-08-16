@@ -46,8 +46,8 @@ public class ResourceModelMetaData {
      * @author Olaf Otto
      */
     private static class MethodMetadataCreator implements ReflectionUtils.MethodCallback {
-        private final Collection<MethodMetaData> postMappingMethods = new ArrayList<MethodMetaData>(32);
-        private final Collection<MethodMetaData> preMappingMethods = new ArrayList<MethodMetaData>(32);
+        private final Collection<MethodMetaData> postMappingMethods = new ArrayList<>(32);
+        private final Collection<MethodMetaData> preMappingMethods = new ArrayList<>(32);
 
         @Override
         public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
@@ -73,10 +73,10 @@ public class ResourceModelMetaData {
      * @author Olaf Otto
      */
     private static class FieldMetadataCreator implements ReflectionUtils.FieldCallback {
-        private final Collection<MappedFieldMetaData> mappableFields = new ArrayList<MappedFieldMetaData>();
+        private final Collection<MappedFieldMetaData> mappableFields = new ArrayList<>();
         private final Class<?> modelType;
 
-        public FieldMetadataCreator(Class<?> modelType) {
+        FieldMetadataCreator(Class<?> modelType) {
             if (modelType == null) {
                 throw new IllegalArgumentException("Constructor parameter modelType must not be null.");
             }

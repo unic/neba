@@ -1,48 +1,44 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.mvc;
 
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.servlets.ServletResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -56,15 +52,17 @@ public class MvcServletTest {
     @Mock
     private Bundle bundle;
     @Mock
-    private MvcContext mvcContext;
+    private BundleSpecificDispatcherServlet dispatcherServlet;
     @Mock
     private SlingHttpServletRequest request;
     @Mock
     private SlingHttpServletResponse response;
     @Mock
     private ServletConfig servletConfig;
+    @Mock
+    private ServletResolver servletResolver;
 
-    private MvcContext injectedContext;
+    private BundleSpecificDispatcherServlet injectedDispatcherServlet;
 
     @InjectMocks
     @Spy
@@ -72,16 +70,15 @@ public class MvcServletTest {
 
     @Before
     public void setUp() throws Exception {
-        Answer<Object> retainMvcContext = new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                injectedContext = (MvcContext) invocation.getArguments()[1];
-                return null;
-            }
-        };
-        doAnswer(retainMvcContext).when(this.factory).registerSingleton(anyString(), isA(MvcContext.class));
+        doAnswer(invocation -> {
+            injectedDispatcherServlet = (BundleSpecificDispatcherServlet) invocation.getArguments()[1];
+            return null;
+        }).when(this.factory).registerSingleton(anyString(), isA(BundleSpecificDispatcherServlet.class));
+
         doReturn(this.bundle).when(this.context).getBundle();
-        doReturn(this.mvcContext).when(this.testee).createMvcContext(isA(ConfigurableListableBeanFactory.class));
+        doReturn("symbolic-name").when(this.bundle).getSymbolicName();
+        doReturn(new Version(1, 2, 3)).when(this.bundle).getVersion();
+        doReturn(this.dispatcherServlet).when(this.testee).createBundleSpecificDispatcherServlet(factory, context);
     }
 
     @Test
@@ -118,34 +115,19 @@ public class MvcServletTest {
     }
 
     @Test
-    public void testLazyInitializationOfDispatcherServlet() throws Exception {
-        enableMvc();
-        withDispatcherServletInitializationPending();
-
-        handleRequest();
-
-        verifyDispatcherServletIsInitializedWithServletConfig();
-    }
-
-    @Test
-    public void testDispatcherServletIsNotInitializedWhenAlreadyInitialized() throws Exception {
+    public void testServletConfigurationProvidedToBundleSpecificDispatcherServletHasSensibleServletName() throws Exception {
+        withRealDispatcherServletCreated();
         enableMvc();
 
-        handleRequest();
-
-        verifyDispatcherServletIsNotInitializedWithServletConfig();
+        assertServletNameOfBundleSpecificDispatcherServletIs("BundleSpecificDispatcherServlet for bundle symbolic-name 1.2.3");
     }
 
-    private void verifyDispatcherServletIsNotInitializedWithServletConfig() {
-        verify(this.mvcContext, never()).initializeDispatcherServlet(this.servletConfig);
+    private void withRealDispatcherServletCreated() {
+        doCallRealMethod().when(this.testee).createBundleSpecificDispatcherServlet(this.factory, this.context);
     }
 
-    private void verifyDispatcherServletIsInitializedWithServletConfig() {
-        verify(this.mvcContext).initializeDispatcherServlet(this.servletConfig);
-    }
-
-    private void withDispatcherServletInitializationPending() {
-        doReturn(true).when(this.mvcContext).mustInitializeDispatcherServlet();
+    private void assertServletNameOfBundleSpecificDispatcherServletIs(String servletName) {
+        assertThat(this.injectedDispatcherServlet.getServletConfig().getServletName()).isEqualTo(servletName);
     }
 
     private void disableMvc() {
@@ -153,15 +135,15 @@ public class MvcServletTest {
     }
 
     private void verifyMvcContextServicedRequestOnce() throws ServletException, IOException {
-        verify(this.mvcContext).service(isA(SlingMvcServletRequest.class), isA(SlingHttpServletResponse.class));
+        verify(this.dispatcherServlet).service(isA(SlingMvcServletRequest.class), isA(SlingHttpServletResponse.class));
     }
 
     private void withMvcContextResponsible() {
-        doReturn(true).when(this.mvcContext).isResponsibleFor(isA(HttpServletRequest.class));
+        doReturn(true).when(this.dispatcherServlet).hasHandlerFor(isA(SlingMvcServletRequest.class));
     }
 
     private void verifyMvcContextDoesNotServiceRequest() throws ServletException, IOException {
-        verify(this.mvcContext, never()).service(isA(SlingMvcServletRequest.class), isA(SlingHttpServletResponse.class));
+        verify(this.dispatcherServlet, never()).service(isA(SlingMvcServletRequest.class), isA(SlingHttpServletResponse.class));
     }
 
     private void handleRequest() throws ServletException, IOException {
@@ -169,7 +151,7 @@ public class MvcServletTest {
     }
 
     private void assertInjectMvcContextIsNotNull() {
-        assertThat(this.injectedContext).isNotNull();
+        assertThat(this.injectedDispatcherServlet).isNotNull();
     }
 
     private void enableMvc() {
@@ -177,6 +159,6 @@ public class MvcServletTest {
     }
 
     private void verifyMvcContextIsInjectedIntoFactory() {
-        verify(this.factory).registerSingleton(anyString(), isA(MvcContext.class));
+        verify(this.factory).registerSingleton(anyString(), isA(BundleSpecificDispatcherServlet.class));
     }
 }

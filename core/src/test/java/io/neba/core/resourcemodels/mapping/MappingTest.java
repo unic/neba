@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -44,21 +44,21 @@ public class MappingTest {
     @Before
     public void prepareMapping() {
         this.source = "/src/path";
-        this.testee = new Mapping<Object>(this.source, this.metaData);
+        this.testee = new Mapping<>(this.source, this.metaData);
         doReturn("junit.test.Type").when(this.metaData).getTypeName();
     }
 
     @Test
     public void testHashCodeAndEquals() throws Exception {
-        Mapping<?> secondMapping = new Mapping<Object>(this.source, this.metaData);
+        Mapping<?> secondMapping = new Mapping<>(this.source, this.metaData);
         assertThat(this.testee.hashCode()).isEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isEqualTo(secondMapping);
         
-        secondMapping = new Mapping<Object>("/other/source", this.metaData);
+        secondMapping = new Mapping<>("/other/source", this.metaData);
         assertThat(this.testee.hashCode()).isNotEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isNotEqualTo(secondMapping);
 
-        secondMapping = new Mapping<Object>(this.source, mock(ResourceModelMetaData.class));
+        secondMapping = new Mapping<>(this.source, mock(ResourceModelMetaData.class));
         assertThat(this.testee.hashCode()).isNotEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isNotEqualTo(secondMapping);
     }

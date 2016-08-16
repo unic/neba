@@ -33,7 +33,7 @@ public class ReadOnlyIterator<T> implements Iterator<T> {
         if (iterator == null) {
             throw new IllegalArgumentException("Method argument iterator must not be null.");
         }
-        return new ReadOnlyIterator<T>(iterator);
+        return new ReadOnlyIterator<>(iterator);
     }
 
     /**

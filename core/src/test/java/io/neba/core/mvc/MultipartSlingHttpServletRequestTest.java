@@ -16,19 +16,6 @@
 
 package io.neba.core.mvc;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
@@ -41,6 +28,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -60,7 +55,7 @@ public class MultipartSlingHttpServletRequestTest {
 
 	@Before
 	public void prepareMultipartRequest() {
-		this.parameterMapEntries = new HashSet<Map.Entry<String, RequestParameter[]>>();
+		this.parameterMapEntries = new HashSet<>();
 		when(this.wrappedRequest.getRequestParameterMap()).thenReturn(this.parameterMap);
 		this.testee = new MultipartSlingHttpServletRequest(this.wrappedRequest);
 	}
@@ -148,14 +143,14 @@ public class MultipartSlingHttpServletRequestTest {
 		assertThat(actual.name()).isEqualTo(expected);
 	}
 
-	private void assertMultiFileMapHasEntries(Object... fileNames) {
+	private void assertMultiFileMapHasEntries(String... fileNames) {
 		MultiValueMap<String, MultipartFile> multiFileMap = this.testee.getMultiFileMap();
 		assertThat(multiFileMap).isNotNull();
 		assertThat(multiFileMap.keySet()).containsOnly(fileNames);
 		assertThat((Object) null).isNotIn(multiFileMap.values());
 	}
 
-	private void assertFileMapHasEntries(Object... fileNames) {
+	private void assertFileMapHasEntries(String... fileNames) {
 		Map<String, MultipartFile> fileMap = this.testee.getFileMap();
 		assertThat(fileMap).isNotNull();
 		assertThat(fileMap.keySet()).containsOnly(fileNames);
@@ -177,7 +172,7 @@ public class MultipartSlingHttpServletRequestTest {
 		assertThat(file).isNotNull();
 	}
 
-	private void assertExtractedFileNamesAre(Object... names) {
+	private void assertExtractedFileNamesAre(String... names) {
 		assertThat(this.testee.getFileNames()).containsOnly(names);
 	}
 

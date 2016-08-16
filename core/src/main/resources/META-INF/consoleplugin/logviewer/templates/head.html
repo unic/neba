@@ -3,65 +3,57 @@
    Note: percent signs must be be masked by duplication (%%) as this template
    is interpreted by the java template formatter.
  */
-#tailwrapper {
-    border:1px solid gray;
-    padding: 5px;
-    margin-bottom: 2em;
+
+#tailborder {
+    border: 1px solid #bfbfbf;
 }
 
-#tail {
+#tailwrapper {
+    margin: 5px;
+    position:relative;
+}
+
+.tail {
     font-family: monospace;
     max-height: 60em;
-    max-width: 100%%;
+    width: 100%%;
     overflow-y: scroll;
-    word-wrap: break-word;
     font-size: 9pt;
+    white-space: pre;
+    line-height: 1.35em;
+    color: black;
+    background-color: white;
 }
 
-#tail div {
+.tail div {
     margin-bottom:2px;
 }
 
-#tail div:hover {
-    background-color:#e0e0e0;
+.ui-menu .ui-menu {
+    z-index: 1;
 }
 
-#numberOfLines, #showOptions {
+#focusedView {
+    position: absolute;
+    z-index: -1;
+    top:0;
+}
+
+#focusedView .error {
+    border-left: none;
+}
+
+#amount, #unit {
     height: 2em;
 }
 
-#numberOfLines {
+#amount {
     width: 4em;
     text-align: center;
 }
 
 #downloadButton {
     margin: 0 10px;
-}
-
-#showOptions {
-    padding:0 4em 0 .1em;
-}
-
-#followButton.ui-state-active {
-    font-weight: bold;
-}
-
-div.INFO, div.ERROR, DIV.WARN, div.DEBUG, div.TRACE {
-    white-space: pre-wrap;
-}
-
-div.INFO {
-    color: #666688;
-}
-div.ERROR {
-    color: #f83030;
-}
-div.WARN {
-    color: #a83030;
-}
-div.DEBUG, div.TRACE {
-    color: #303030;
 }
 
 #neba-heading {
@@ -96,6 +88,20 @@ form .buttonGroup button {
 #dropdownSettings {
     margin-right: 5px;
 }
+
+#focusOnErrors {
+    display: none;
+}
+
+#numberOfDetectedErrors, .error {
+    color: #883B26;
+    font-weight: bold;
+}
+
+.error {
+    padding: 0.5em;
+    border-left: .2em solid #B23B26;
+}
 </style>
 
 <div id="neba-heading">
@@ -107,26 +113,19 @@ form .buttonGroup button {
 <form method="GET" enctype="multipart/form-data" action="#">
     <div class="ui-widget-header ui-corner-top buttonGroup">
         <button type="button" id="downloadButton" title="Stream all logfiles as a ZIP file, including rotated version.">Download all</button>
-        <span style="font-weight: normal;">Show</span>
-        <span id="showOptions">
-            <input type="checkbox" name="show" value="ERROR" id="showERROR" checked="checked" /><label for="showERROR"> Error</label>
-            <input type="checkbox" name="show" value="WARN" id="showWARN" checked="checked"/><label for="showWARN"> Warn</label>
-            <input type="checkbox" name="show" value="INFO" id="showINFO" checked="checked"/><label for="showINFO"> Info</label>
-            <input type="checkbox" name="show" value="DEBUG" id="showDEBUG" checked="checked"/><label for="showDEBUG"> Debug</label>
-            <input type="checkbox" name="show" value="TRACE" id="showTRACE" checked="checked"/><label for="showTRACE"> Trace</label>
-        </span>
 
-        <label for="numberOfLines">Tail</label>
-        <input type="text" id="numberOfLines" value="100" />
-        <label for="logfile">lines of </label>
+        <label for="amount">Tail</label>
+        <input id="amount" value="0.1" type="number" min="0" step="0.1" title="Tail this amount of megabytes of the selected log file"/>
+        <label for="logfile">MB of</label>
         <select id="logfile">
+            <option value="">Please select</option>
             %s
         </select>
         <span id="dropdownSettings">
             <input type="checkbox" name="hideRotated" id="hideRotated" checked="checked"/>
             <label for="hideRotated" title="Hide rotated log file versions in the dropdown"> hide rotated</label>
         </span>
-        <button id="reloadButton" title="Refresh the contents of the selected logfile.">Reload</button>
-        <button id="followButton" title="Periodically load changes.">Follow</button>
+        <button id="followButton" title="Automatically scroll to the bottom of the logfile">Follow</button>
+        <button id="focusOnErrors" title="Only show detected errors">Focus on <span id="numberOfDetectedErrors"></span> error(s)</button>
     </div>
 </form>

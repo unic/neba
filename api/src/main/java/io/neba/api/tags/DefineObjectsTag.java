@@ -19,21 +19,24 @@ package io.neba.api.tags;
 import io.neba.api.resourcemodels.ResourceModelProvider;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import tldgen.Tag;
 import tldgen.TagAttribute;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 
 import static io.neba.api.Constants.MODEL;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 /**
  * @author Olaf Otto
  */
 @Tag(description = "Adds the most specific @ResourceModel" +
                    " for the current resource under the key \"m\", if such a model exists.")
-public final class DefineObjectsTag extends TagWithBindings {
+public final class DefineObjectsTag extends TagSupport {
     private static final long serialVersionUID = 3746304163438347809L;
 
     private boolean includeGenericBaseTypes = false;
@@ -93,5 +96,26 @@ public final class DefineObjectsTag extends TagWithBindings {
     private Resource getResource() {
         SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) this.pageContext.getRequest();
         return slingRequest.getResource();
+    }
+
+    protected SlingBindings getBindings() {
+        return (SlingBindings) this.pageContext.getRequest().getAttribute(SlingBindings.class.getName());
+    }
+
+    protected SlingScriptHelper getScriptHelper() {
+        SlingBindings bindings = getBindings();
+
+        if (bindings == null) {
+            throw new IllegalStateException("No " + SlingBindings.class.getName() +
+                    " was found in the request, got null.");
+        }
+
+        SlingScriptHelper scriptHelper = (SlingScriptHelper) bindings.get(SLING);
+
+        if (scriptHelper == null) {
+            throw new IllegalStateException("No " + SlingScriptHelper.class.getName() +
+                    " was found in the sling bindings, got null.");
+        }
+        return scriptHelper;
     }
 }

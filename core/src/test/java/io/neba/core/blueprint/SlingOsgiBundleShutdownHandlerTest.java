@@ -18,7 +18,6 @@ package io.neba.core.blueprint;
 
 import io.neba.core.mvc.MvcServlet;
 import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.selftests.SelftestRegistrar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,8 +42,6 @@ public class SlingOsgiBundleShutdownHandlerTest {
     @Mock
     private ModelRegistrar modelRegistrar;
     @Mock
-    private SelftestRegistrar selftestRegistrar;
-    @Mock
     private BundleEvent event;
     @Mock
     private Bundle bundle;
@@ -64,7 +61,6 @@ public class SlingOsgiBundleShutdownHandlerTest {
     public void testDispatching() throws Exception {
         sendBundleStoppedEvent();
         verifyDispatcherServletReceivesEvent();
-        verifySelftestRegistrarReceivesEvent();
         verifyModelRegistrarReceivesEvent();
     }
 
@@ -105,9 +101,6 @@ public class SlingOsgiBundleShutdownHandlerTest {
         verify(this.modelRegistrar).unregister(eq(this.bundle));
     }
 
-    private void verifySelftestRegistrarReceivesEvent() {
-        verify(this.selftestRegistrar).unregister(eq(this.bundle));
-    }
 
     private void verifyDispatcherServletReceivesEvent() {
         verify(this.dispatcherServlet).disableMvc(eq(this.bundle));
