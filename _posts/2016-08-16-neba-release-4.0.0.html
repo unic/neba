@@ -1,0 +1,61 @@
+---
+title: NEBA 4.0.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 4.0.0 Release notes
+abstract: NEBA 4.0.0 Transition to Java 8+.
+---
+
+<section>
+    <header><h2>Hightlights of this release</h2></header>
+
+    <section>
+        <header><h3>Transitioned to Java 8+, Fade out support for CQ 5.3 - CQ 5.5</h3></header>
+        <p>
+            For reasons of legacy support, NEBA was still based on JDK 6. This changed along with <a href="https://github.com/unic/neba/issues/50">#50</a>,
+            i.e. once the majority of deployments have migrated to the current AEM versions and have upgraded to more recent JVM versions.
+
+            Transitioning to this version makes sense if the benefits outweigh the resulting backwards compatibility issues.
+            Also, just switching to the new version yields no benefit in itself. A Benefit would only result when refactoring
+            the NEBA core code to leverage the new functional programming elements - which effectively ends backwards compatibility.
+        </p>
+    </section>
+
+    <section>
+        <header><h3>Remove velocity support</h3></header>
+        <p>
+            NEBA uses Apache Velocity to support rendering beyond resources (http://neba.io/userguide.html#using-velocity).
+            However, there has been no update for velocity since 2010 (https://velocity.apache.org/). Furthermore, almost all
+            uses of bean rendering seen in practice were not as intended. For instance, velocity views are used to render
+            resource models or data otherwise stemming from resources.
+
+            With the availability of Sightly as a powerful templating language, velocity support was removed from NEBA. Users of velocity
+            are thus encouraged to use Sightly, the JSP expression language or custom tag libraries instead.
+        </p>
+    </section>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <p>
+
+        </p>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <p>
+            This release contains no bug fixes.
+        </p>
+    </section>
+
+    <section>
+        <header><h3 id="upgrading">Upgrading from 3.10.0</h3></header>
+        <p>
+            User of NEBA 3.10.0 can upgrade to 4.0.0 without any further changes.
+        </p>
+    </section>
+</section>
