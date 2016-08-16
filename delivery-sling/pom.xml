@@ -25,18 +25,19 @@
 
     <build>
         <plugins>
-            <!-- Manifest customization: unpack all dependencies that require manifest transformation into a suitable directory -->
+            <!-- Provide the bundles contained in the CRX delivery package for inclusion in the Sling delivery bundle -->
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack-spring-dependencies</id>
+                        <id>unpack-aem-delivery-package</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
                             <includeArtifactIds>io.neba.neba-delivery-aem</includeArtifactIds>
+                            <includeTypes>zip</includeTypes>
                             <includes>**/*.jar</includes>
                         </configuration>
                     </execution>
