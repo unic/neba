@@ -1088,6 +1088,10 @@ section .info {
 	text-align: center;
 }
 
+#features section p {
+	text-align: justify;
+}
+
 #sidebar ul.style p {
 	margin: 0.2em;
 }

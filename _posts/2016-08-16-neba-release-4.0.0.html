@@ -3,34 +3,88 @@ title: NEBA 4.0.0 released
 layout: post
 twitterAuthor: deploynix
 description: NEBA 4.0.0 Release notes
-abstract: NEBA 4.0.0 Transition to Java 8+.
+abstract: NEBA 4.0.0 ships with Spring 4, Java 8+ support and advanced Spring MVC features, supporting Sling Scripts as Views and the Spring Form Tag library.
 ---
 
 <section>
     <header><h2>Hightlights of this release</h2></header>
 
     <section>
-        <header><h3>Transitioned to Java 8+, Fade out support for CQ 5.3 - CQ 5.5</h3></header>
+        <header><h3>NEBA 4.0.0 ships with Spring 4</h3></header>
         <p>
-            For reasons of legacy support, NEBA was still based on JDK 6. This changed along with <a href="https://github.com/unic/neba/issues/50">#50</a>,
-            i.e. once the majority of deployments have migrated to the current AEM versions and have upgraded to more recent JVM versions.
-
-            Transitioning to this version makes sense if the benefits outweigh the resulting backwards compatibility issues.
-            Also, just switching to the new version yields no benefit in itself. A Benefit would only result when refactoring
-            the NEBA core code to leverage the new functional programming elements - which effectively ends backwards compatibility.
+           NEBA 4.0.0 ships with Spring 4, bringing with it <a href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/new-in-4.0.html">improved Java 8 support and many more valuable features, such as support for WebSockets</a>.
         </p>
     </section>
 
     <section>
-        <header><h3>Remove velocity support</h3></header>
+        <header><h3>Exclusive Support for Java 8</h3></header>
         <p>
-            NEBA uses Apache Velocity to support rendering beyond resources (http://neba.io/userguide.html#using-velocity).
-            However, there has been no update for velocity since 2010 (https://velocity.apache.org/). Furthermore, almost all
-            uses of bean rendering seen in practice were not as intended. For instance, velocity views are used to render
-            resource models or data otherwise stemming from resources.
+            Support for Java version less then 8 has been discontinued,
+            as they have officially reached <a href="http://www.oracle.com/technetwork/java/eol-135779.html">end of life</a> and are
+            <a href="https://docs.adobe.com/docs/en/aem/6-2/deploy/technical-requirements.html#Java%20Virtual%20Machines">no longer support by AEM 6.2</a>.
+            However, the NEBA 3.x branch - which is still actively maintained - continues to support these legacy versions.
+        </p>
+    </section>
 
-            With the availability of Sightly as a powerful templating language, velocity support was removed from NEBA. Users of velocity
-            are thus encouraged to use Sightly, the JSP expression language or custom tag libraries instead.
+    <section>
+        <header><h3>Extended Spring MVC support</h3></header>
+        <p>
+            With NEBA 4.0.0, one can now leverage all features of Spring MVC - including those requiring a WebApplicationContext, for instance
+            <a href="http://docs.spring.io/spring/docs/{{springDocumentationVersion}}/spring-framework-reference/html/view.html#view-jsp-formtaglib">the Spring Forms Tag Library</a>.
+        </p>
+        <p>In addition, NEBA 4.0.0 also enables <a href="/documentation.html#mvc_sling_views">using Sling scripts as Spring Controller Views, thus fusing the power of Spring MVC views with Sling's mighty Script resolution</a>.</p>
+    </section>
+
+    <section>
+        <header><h3>Out of the box support for automated Spring MVC JSON responses</h3></header>
+        <p>
+            NEBA 4.0.0 now ships with the jackson libraries required to automatically provide controller responses as JSON,
+            e.g. via content negotiation. All that is required is <a href="/documentation.html#spring_mvc">setting up the MVC infrastructure</a>
+            in the blueprint XML, like so:
+{% highlight xml %}
+<mvc:annotation-driven />
+{% endhighlight %}
+        </p>
+    </section>
+    <section>
+        <header><h3>Automated Model Lookup for Adobe HTL (formerly known as Sightly)</h3></header>
+        <p>
+            You no longer need to couple your HTL (Sightly) view to an explicit model class - just use
+{% highlight xml %}
+data-sly-use.<modelName>="/apps/neba/neba.js"
+{% endhighlight %}
+            and NEBA will <a href="/documentation.html#using_models_in_views">provide the most specific model automatically</a>.
+        </p>
+    </section>
+
+    <section>
+        <header><h3>A brand-new, Web Sockets based Log Viewer</h3></header>
+        <p>
+            The <a href="/documentation.html#tooling_logviewer">NEBA log viewer</a> now uses WebSockets to receive logfile updates
+            in real time. In addition, advanced stacktrace detection was added to the viewer - and requests in the request.log are automatically linked
+            to their response.
+            <img class="image full" src="/images/documentation/logviewer-large.png" alt="NEBA log viewer" title="The NEBA log viewer" />
+        </p>
+    </section>
+
+    <section>
+        <header><h3>Support for AEM 6.1+ and Sling 8+</h3></header>
+        <p>
+            With AEM 6.1 and Sling 8, significant improvements have been introduced to the underlying frameworks, including breaking API changes.
+            To better support these modern platforms, NEBA 4.x currently supports AEM versions 6.1+ and Sling 8+.
+            Previous Platforms are supported by the 3.x branch of NEBA, which will be actively maintained until the
+            <a href="https://www.adobe.com/support/products/enterprise/eol/eol_matrix.html">EOL of AEM 6.0</a> core support in June 2017.
+        </p>
+    </section>
+
+    <section>
+        <header><h3>Adobe HTL (formerly Sightly) Sling Healthchecks  replace Velocity rendering and @SelfTest </h3></header>
+        <p>
+            Since early versions of AEM 5.x, and Sling 7, features previously exclusive to NEBA have made it into the product core. To further the use
+            of product best-practices, NEBA no longer ships with support for velocity as a template mechanism and with @SelfTest support.
+            Users of these features can either continue to use NEBA 3.x, which is actively maintained until June 2017, or transition to
+            <a href="https://docs.adobe.com/docs/en/htl/overview.html">Adobe HTL</a> and
+            <a href="https://sling.apache.org/documentation/bundles/sling-health-check-tool.html">Sling Health Checks</a>.
         </p>
     </section>
 </section>
@@ -40,22 +94,32 @@ abstract: NEBA 4.0.0 Transition to Java 8+.
 
     <section>
         <header><h3>Improvements</h3></header>
-        <p>
-
-        </p>
+        <ul class="issue-list" data-milestone="10" data-labels="enhancement"></ul>
     </section>
 
     <section>
         <header><h3>Fixed bugs</h3></header>
-        <p>
-            This release contains no bug fixes.
-        </p>
+        <ul class="issue-list" data-milestone="10" data-labels="bug"></ul>
     </section>
 
     <section>
         <header><h3 id="upgrading">Upgrading from 3.10.0</h3></header>
         <p>
-            User of NEBA 3.10.0 can upgrade to 4.0.0 without any further changes.
+            NEBA 4.0.0 contains no breaking changes in the main Resource Model API, i.e. the annotations.
         </p>
+        <p>NEBA 4.0.0 Supports AEM 6.1+. Users of previous AEM versions can continue to use NEBA 3.x, which is actively maintained until June 2017. </p>
+        <p>NEBA 4.0.0 requires using JAVA 8+. Users of legacy Java versions can continue to use NEBA 3.x, which is actively maintained until June 2017.</p>
+        <p>
+            Users of @SelfTest are encouraged to transition to the platform standard,
+            <a href="https://sling.apache.org/documentation/bundles/sling-health-check-tool.html">Sling Health Checks</a>, as @SelfTest is discontinued in favor of these platform standards.
+        </p>
+        <p>
+            Users of Velocity templating, for instance the &lt;neba:render ...&gt; JSP tag library, are encouraged to transition to
+            either <a href="https://docs.adobe.com/docs/en/htl/overview.html">Adobe HTL</a> or
+            <a href="https://sling.apache.org/documentation/bundles/scripting/scripting-thymeleaf.html">Thymeleaf</a>, as Velocity support
+            is discontinued in favor of these platform standards.
+        </p>
+        <p>Neba 4.0.0 ships with Spring 4.2.6. Project dependencies must be updated to the
+            <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.apache.servicemix.bundles%22%20AND%20a%3Aorg.apache.servicemix.bundles.spring-*%20AND%20v%3A%224.2.6.RELEASE_1%22">respective Spring bundle versions</a>.</p>
     </section>
 </section>

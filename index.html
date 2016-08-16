@@ -66,7 +66,7 @@ keywords: Apache Sling,AEM,AEM6,Adobe AEM,Spring,Springframework,NEBA,CQ5
 
 <!-- Main -->
 <div id="main">
-    <section>
+    <section id="features">
         <div class="container">
         <header class="feature-header">
             <h2>Features</h2>
@@ -80,10 +80,10 @@ keywords: Apache Sling,AEM,AEM6,Adobe AEM,Spring,Springframework,NEBA,CQ5
                     <h2>Resource models</h2>
                 </header>
                 <p>
-                    POJOs annotated with @ResourceModel are
+                    <a href="/documentation.html#writing_resourcemodels">POJOs annotated with @ResourceModel</a> are
                     <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-introduction">Spring Beans</a> representing
                     specific resource types. Whenever a suitable resource is adapted to this model - or any of it's interfaces or super classes - the properties
-                    of the resource are automatically injected into the module. One can thus use the entire power of Spring and all of the Features of Sling and the JCR - with just
+                    of the resource are automatically injected into the model. One can thus use the entire power of Spring and all features of Sling and the JCR - with just
                     one annotation.
                 </p>
 {% highlight java %}
