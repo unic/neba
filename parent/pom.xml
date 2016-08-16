@@ -588,6 +588,7 @@
                             </goals>
                             <configuration>
                                 <quiet>true</quiet>
+                                <additionalparam>-Xdoclint:none</additionalparam>
                             </configuration>
                         </execution>
                     </executions>
