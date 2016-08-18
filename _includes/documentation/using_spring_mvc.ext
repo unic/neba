@@ -68,7 +68,7 @@ public class DemoController {
 
 <p>That's it. You may now call your controller e.g. with /bin/mvc.do/echo/HelloWorld.txt.</p>
 
-<p>Furthermore, NEBA automatically provides <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/new-in-3.1.html#new-in-3.1-handler-method-controller-processing">handler method argument resolvers</a>
+<p>Furthermore, NEBA automatically provides <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/method/support/HandlerMethodArgumentResolver.html">handler method argument resolvers</a>
     for Sling-specific request elements, SlingHttpServletRequest and -Response, RequestPathInfo and ResourceResolver, like so:</p>
 
 {% highlight java %}
@@ -101,8 +101,39 @@ org.springframework.web.servlet.View in the org.springframework.web.servlet.Mode
 this way, your View's render method is used to render the response. Alternatively, you may also simply write to the
 response and either let the controller method return &quot;null&quot; or make it void. This is however bad practice
 and thus discouraged.</p>
+<section>
+<section>
+<header><h3 id="mvc_sling_views">Using Sling Scripts as controller views</h3></header>
+<p>
+    Since Version 4, NEBA supports using sling scripts to render controller views.
+    NEBA provides a <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-viewresolver">view resolver</a>
+    that resolves resource type names to the corresponding sling scripts and uses these to render views. Consider the following controller method:
+</p>
 
-<h3 id="mvc_resourceparam_annotation">Resolving resource path parameters with the @ResourceParam annotation</h3>
+{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/myMethod")
+    public String echo(@ResourceParam Page page) {
+       // do something
+       return "app/controllerViews/myView"
+    }
+}
+{% endhighlight %}
+<p>
+    Here, NEBA's view resolver will resolve "app/controllerViews/myView" to the corresponding resource, e.g. "/apps/app/controllerViews/myView". It will then
+    look for a suitable default script for the type, e.g. "myView.html" for a Sightly template or "myView.jsp" for a JSP view. If no such script is found,
+    the view resolver will re-attempt to resolve the default view for the <em>super type</em> of the view resource. This enables inheritance and
+    overriding - just like for regular Sling resource views.
+</p>
+<p>
+   Note that, contrary to the standard view resolution for Sling resources, controller view resolution does not take into account request methods,
+   selectors or extensions. These aspects are used to address the Spring Controller and cannot be leveraged for view resolution without
+   conflicting the Spring controller mapping.
+</p>
+</section>
+<section>
+<header><h3 id="mvc_resourceparam_annotation">Resolving resource path parameters with the @ResourceParam annotation</h3></header>
 
 <p>NEBA supports the common use case of handling resource paths in controllers with a convenience annotation:</p>
 
@@ -154,43 +185,6 @@ public class DemoController {
 <p>
     The path specified in "append" is appended to the provided path or the specified default path prior to resolution.
 </p>
+</section>
 
-<h3 id="mvc_sling_views">Using Sling Scripts as controller views</h3>
-<p>
-    Since Version 4, NEBA supports using sling scripts to render controller views.
-    NEBA provides a <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-viewresolver">view resolver</a>
-    that resolves resource type names to the corresponding sling scripts and uses these to render views. Consider the following controller method:
-</p>
-
-{% highlight java %}
-@Controller
-public class DemoController {
-    @RequestMapping("/myMethod")
-    public String echo(@ResourceParam Page page) {
-       // do something
-       return "app/controllerViews/myView"
-    }
-}
-{% endhighlight %}
-<p>
-    Here, NEBA's view resolver will resolve "app/controllerViews/myView" to the corresponding resource, e.g. "/apps/app/controllerViews/myView". It will then
-    look for a suitable default script for the type, e.g. "myView.html" for a Sightly template or "myView.jsp" for a JSP view. If no such script is found,
-    the view resolver will re-attempt to resolve the default view for the <em>super type</em> of the view resource. This enables inheritance and
-    overriding - just like for regular Sling resource views.
-</p>
-<p>
-   Note that, contrary to the standard view resolution for Sling resources, controller view resolution does not take into account request methods,
-   selectors or extensions. These aspects are used to address the Spring Controller and cannot be leveraged for view resolution without
-   conflicting the Spring controller mapping.
-</p>
-
-<h3 id="configuring_mvc_logging">Configuring MVC logging</h3>
-<p>Internal errors during controller invocation, e.g. when
-    required parameters are missing, are logged to the logs/error.log on &quot;warn&quot; level by default. It is highly
-    recommended to configure a separate logfile for these messages and disable this logging on production, since it is
-    very likely for such exceptions to arise constantly due to user mistakes, bot activity and the like. To configure a
-    custom logile, simply create a new Apache Sling Logging Logger Configuration using &quot;mvc&quot; as the Logger
-    name, like so:</p>
-
-    <img src="images/documentation/mvc-logger-configuration.png" alt="Adding an info-level Logger named &quot;mvc&quot; to the &quot;Apache Sling Logging Configuration&quot;" class="image full" />
 </section>

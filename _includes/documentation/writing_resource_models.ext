@@ -74,7 +74,7 @@ public class Carousel {
 </section>
 
 <p>Once a bundle with NEBA models and a blueprint context is active, all of its models must appear in the <a
-        href="http://localhost:4502/system/console/modelregistry">NEBA model registry (/system/console/modelregistry)</a> in the sling console.
+        href="#tooling_modelregistry">NEBA model registry (/system/console/modelregistry)</a> in the sling console.
     If not, the blueprint context likely failed to start. In such cases analyzing the error.log is advisable.</p>
 
 <h3 id="using_models_in_views">Using models in views</h3>
@@ -102,7 +102,7 @@ public class Carousel {
     for "cq:Page" is <em>more specific</em> than one for "nt:base". If there is more than one most specific model, e.g. two models
     for "cq:Page", neba.js and the neba:defineObjectsTag will not provide the model automatically. In such cases, you could either
     explicitly adapt to the desired model type or specify the desired model's
-    bean name (you can lookup the bean name in the <a href="http://localhost:4502/system/console/modelregistry">model registry</a>), like so:
+    bean name (you can lookup the bean name in the <a href="#tooling_modelregistry">model registry</a>), like so:
 </p>
 
 {% highlight html %}
@@ -313,7 +313,7 @@ private Resource homepage;
 {% endhighlight %}
 
 <p>To resolve the ${language} placeholder, one simply provides a bean implementing the
-    <a href="apidocs/neba-api/io/neba/api/configuration/class-use/PlaceholderVariableResolver.html">PlaceholderVariableResolver interface</a>.
+    <a href="/apidocs/neba-api/io/neba/api/configuration/PlaceholderVariableResolver.html">PlaceholderVariableResolver interface</a>.
     Such a bean instance will be asked to resolve the value for a placeholder key, i.e. &quot;language&quot;
     in the above example. A completely hardcoded example would be:</p>
 
@@ -389,7 +389,7 @@ public class AccessRestricted {
 
 <p>
 All collection-typed references are automatically provided as lazy-loading proxies, for example in case of
-<a href="#api_Children">@Children</a> and <a href="#api_Reference">@Reference</a> collections:
+<a href="#the_children_annotation">@Children</a> and <a href="#the_reference_annotation">@Reference</a> collections:
 </p>
 
 {% highlight java %}
