@@ -139,14 +139,14 @@
 
 	<h3 id="resourceAnnotations">Annotations for advanced resource to model mapping</h3>
 
-	<p>All NEBA annotations can also supported as meta-annotations - thus, custom annotations annotated with any of the annotations provided
+	<p>All NEBA annotations are also supported as meta-annotations - thus, custom annotations annotated with any of the annotations provided
 		by NEBA are treated as if the corresponding NEBA annotation was directly applied.</p>
 
 	<h4 id="api_Reference">Resolving references with the @Reference annotation</h4>
 
 	<p><span id="api_Unmapped">NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
 		annotated with @Unmapped</span>.  Notice that play speed and trans time are Strings in this example, whereas one would
-		expect them to be integers. This is simply because these values are defined to be Strings in the component's CQ
+		expect them to be integers. This is simply because these values are defined to be Strings in the component's
 		dialog. Had they been defined as integers, we could also retrieve them as integers. You will also notice that &quot;pages&quot;
 		is null. And no wonder - the &quot;pages&quot; property is actually of type &quot;String[]&quot;, so the field
 		should also be of type String[] and not List&lt;Resource&gt;. However, NEBA offers a simple way to declare that a
@@ -191,7 +191,7 @@
 	<h4 id="api_Children">Resolving children with the @Children annotation</h4>
 
 	<p>While the resource hierarchy is conveniently navigable using the generic Resource model (i.e. using getChildren()), one often has to
-		subsequently adapt the children. Consequently, the children are adapted in a loop, including null check for each adaptation result.
+		subsequently adapt the children. Consequently, the children are adapted in a loop, including a null check for each adaptation result.
 		Here, NEBA offers another powerful annotation: @Children. This annotation can be used on a Collection, Set or List-typed field
 		(similar to the @Reference-annotation). Then, NEBA injects the children of either the current resource (if no other
 		annotation is present), or of the resource defined by the @Reference or @Path of the field:</p>

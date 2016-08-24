@@ -13,7 +13,7 @@
         a prefix such as /apps or /libs to the resource type and checking whether it finds views for the
         resource in the corresponding directory.</p>
 
-    <p>Furthermore, any content stored in the JCR is represented by a javax.jcr.Node. Nodes are strongly typed - they aways possess a <em>primaryType</em>
+    <p>Furthermore, any content stored in the JCR is represented by a javax.jcr.Node. Nodes are strongly typed - they always possess a <em>primaryType</em>
         as well as an arbitrary number of<em>mixin types</em>. Both the primary type and the mixin types can have <em>super types</em>.</p>
 
     <p>In order to provide a JAVA model for a resource, it thus makes sense to either associate
@@ -235,7 +235,7 @@ Here, instead of resolving and adapting the paths in the property "pages" direct
 
 <p>While the resource hierarchy is conveniently
     navigable using the generic Resource model (i.e. using getChildren()), one often has to subsequently adapt the children. Consequently,
-    the children are adapted in a loop, including null check for each adaptation result. Here, NEBA offers
+    the children are adapted in a loop, including a null check for each adaptation result. Here, NEBA offers
     another powerful annotation: @Children. This annotation can be used on a Collection, Set or List-typed field
     (similar to the @Reference-annotation). Then, NEBA injects the children of either the current resource (if no other
     annotation is present), or of the resource defined by the @Reference or @Path of the field:</p>

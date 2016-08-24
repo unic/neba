@@ -2,7 +2,7 @@
 	<header><h2 id="tooling">NEBA tooling for developers and administrators</h2></header>
 
 	<p>To support developers beyond writing resource models, NEBA ships with a set of useful development and administration tools for exploring resource model
-		characteristics as well as quickly resolving the resource model / content relationships. Finally, an log viewer integrated into the
+		characteristics as well as quickly resolving the resource model / content relationships. Finally, a log viewer integrated into the
 		Felix console greatly improves issue analysis in cases where serial access to the system is an issue.</p>
 
 	<h3 id="tooling_modelregistry">NEBA model registry</h3>
