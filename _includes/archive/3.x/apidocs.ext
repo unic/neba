@@ -6,11 +6,11 @@
 
     <div class="row">
         <section class="3u">
-            <p><a href="apidocs/neba-api/index.html" class="button">NEBA API 3.10.0 Javadoc</a></p>
+            <p><a href="apidocs/neba-api/index.html" class="button">NEBA API 3.11.0 Javadoc</a></p>
         </section>
 
         <section class="3u">
-            <p><a href="apidocs/neba-core/index.html" class="button">NEBA CORE 3.10.0 Javadoc</a></p>
+            <p><a href="apidocs/neba-core/index.html" class="button">NEBA CORE 3.11.0 Javadoc</a></p>
         </section>
     </div>
 </section>
