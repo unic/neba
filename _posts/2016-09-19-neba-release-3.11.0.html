@@ -1,0 +1,108 @@
+---
+title: NEBA 3.11.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 3.11.0 Release notes
+abstract: NEBA 3.11.0 continues support for AEM 5.x - 6.1, delivering on our promise to support these versions at least until the official EOL of AEM 6.1 in July 2017
+---
+
+<section>
+    <header><h2>Hightlights of this release</h2></header>
+
+    <section>
+        <header><h3>NEBA 3.11.0 continues support for AEM 5.x - 6.1</h3></header>
+        <p>
+            With NEBA 3.x, we are continuously supporting users of older AEM / Sling versions, delivering on our promise to support these versions
+            at least until the official EOL of AEM 6.1 in July 2017.
+        </p>
+    </section>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="14" data-labels="bug"></ul>
+    </section>
+
+    <section>
+        <header><h3 id="upgrading">Upgrading from 3.10.0</h3></header>
+        <p>
+            Users of NEBA 3.10.0 can update to this version without side effect.
+        </p>
+    </section>
+</section>
+
+<section>
+    <header><h2>Updating your maven dependencies</h2></header>
+<p>
+    NEBA is built using Maven. Core, API and delivery packages containing NEBA and it's runtime dependencies are available from maven central.
+    For developing with NEBA, including the API in your project is all you need to do:
+</p>
+
+<p>
+{% highlight xml %}
+<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-api</artifactId>
+    <version>3.11.0</version>
+</dependency>
+{% endhighlight %}
+</p>
+
+<p>If you'd also like to browse or debug the core, add it to your project's dependencies like so:</p>
+<p>
+{% highlight xml %}
+<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-core</artifactId>
+    <version>3.11.0</version>
+</dependency>
+{% endhighlight %}
+</p>
+
+<p>The convenience CRX deployment package for AEM can be referenced like so:</p>
+
+<p>
+{% highlight xml %}
+<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-delivery-aem</artifactId>
+    <version>3.11.0</version>
+    <type>zip</type>
+</dependency>
+{% endhighlight %}
+</p>
+
+<p>Or the Sling deployment bundle like so:</p>
+
+<p>
+    {% highlight xml %}
+    <dependency>
+        <groupId>io.neba</groupId>
+        <artifactId>io.neba.neba-delivery-sling</artifactId>
+        <version>3.11.0</version>
+    </dependency>
+    {% endhighlight %}
+</p>
+
+<p>Finally, in order to <a href="https://docs.adobe.com/docs/en/aem/6-2/develop/dev-tools/vlt-mavenplugin.html#install">install NEBA using the Content Package Maven Plugin</a> you may do:</p>
+
+<p>
+{% highlight xml %}
+<plugin>
+    <groupId>com.day.jcr.vault</groupId>
+    <artifactId>content-package-maven-plugin</artifactId>
+    <version>0.0.24</version>
+    <configuration>
+        <groupId>io.neba</groupId>
+        <artifactId>io.neba.neba-delivery-aem</artifactId>
+        <version>3.11.0</version>
+        <packaging>zip</packaging>
+        <targetURL>http://localhost:4502/crx/packmgr/service.jsp</targetURL>
+    </configuration>
+</plugin>
+{% endhighlight %}
+</p>
+</section>
