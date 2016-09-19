@@ -50,9 +50,9 @@ To release NEBA, credentials for the sonatype [OSS repository](https://oss.sonat
 ````
 
 
-In addition, a GPG installation exeuctable from the [maven-gpg-plugin](https://maven.apache.org/plugins/maven-gpg-plugin/) must be installed on the local system, e.g. [GPG4Win](https://www.gpg4win.org/) on windows. As the delivery artifacts are signed, you require a valid key pair, and the public key must have been [distributed to a public key server](https://www.gnupg.org/gph/en/manual/x457.html).
+In addition, a GPG installation executable from the [maven-gpg-plugin](https://maven.apache.org/plugins/maven-gpg-plugin/) must be installed on the local system, e.g. [GPG4Win](https://www.gpg4win.org/) on windows. As the delivery artifacts are signed, you require a valid key pair, and the public key must have been [distributed to a public key server](https://www.gnupg.org/gph/en/manual/x457.html).
  
-Furthermore, JDK 1.7 is required for building and releasing NEBA.
+Furthermore, JDK 1.8 is required for building and releasing NEBA.
  
 ### Write a release post for the neba.io site
 In a separate clone of the neba.io git repo, checkout the gh-pages branch and write a release post, such as https://github.com/unic/neba/blob/gh-pages/_posts/2016-01-22-neba-release-3.9.0.html. Testing the site locally requires running Jekyll including pygments for and Python 2.x for code highlighting, see http://jekyllrb.com/docs/installation/.
