@@ -80,44 +80,6 @@
             <groupId>org.eclipse.gemini.blueprint</groupId>
             <artifactId>gemini-blueprint-extender</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-
-        <!-- build dependencies -->
-        <dependency>
-            <groupId>biz.aQute.bnd</groupId>
-            <artifactId>biz.aQute.bndlib</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -151,56 +113,10 @@
                 </configuration>
             </plugin>
 
-            <!-- Manifest customization: unpack all dependencies that require manifest transformation into a suitable directory -->
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-spring-dependencies</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
-                            <excludeArtifactIds>org.apache.servicemix.bundles.aopalliance</excludeArtifactIds>
-                            <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
-                            <overWriteReleases>true</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- The JCR installer allows specifying the bundle start level via a path segment /install/<startlevel> -->
-            <!-- Following, the bundles are packaged with start levels deemed optimal for dependency resolution -->
-
-            <!-- Customize the manifests of the unpacked dependencies and re-package them -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>transform-javax-import-versions</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <phase>prepare-package</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>io.neba.delivery.SpringBundlesTransformer</mainClass>
-                    <!-- Spring bundles shall start after their dependencies at start level 17 -->
-                    <arguments>
-                        <argument>${spring.artifacts.workdir}</argument>
-                        <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}/17</argument>
-                    </arguments>
-                    <classpathScope>compile</classpathScope>
-                </configuration>
-            </plugin>
-
-            <!-- Build the content package including bundles with customized manifests (those are already copied to the target/vault-work directory) -->
+            <!--
+             Build the content package. Customized resources, such as the package icon,
+             are already placed in the vault-work working directory at this point.
+             -->
             <plugin>
                 <groupId>com.day.jcr.vault</groupId>
                 <artifactId>content-package-maven-plugin</artifactId>
@@ -208,29 +124,56 @@
                     <builtContentDirectory>${project.build.directory}/vault.work</builtContentDirectory>
                     <failOnMissingEmbed>true</failOnMissingEmbed>
                     <embeddeds>
-                        <!-- Spring dependencies shall start first at start level 16 -->
+                        <!-- Spring dependencies shall start first, at start level 16 -->
                         <embedded>
                             <groupId>org.apache.servicemix.bundles</groupId>
                             <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
                             <target>${neba.installation.path}/16</target>
                         </embedded>
+
+                        <!-- The Spring Framework shall start at level 17 -->
                         <embedded>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-core</artifactId>
-                            <target>${neba.installation.path}/16</target>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+                            <target>${neba.installation.path}/17</target>
                         </embedded>
                         <embedded>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-databind</artifactId>
-                            <target>${neba.installation.path}/16</target>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
+                            <target>${neba.installation.path}/17</target>
                         </embedded>
                         <embedded>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-annotations</artifactId>
-                            <target>${neba.installation.path}/16</target>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
+                            <target>${neba.installation.path}/17</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
+                            <target>${neba.installation.path}/17</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
+                            <target>${neba.installation.path}/17</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
+                            <target>${neba.installation.path}/17</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
+                            <target>${neba.installation.path}/17</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.apache.servicemix.bundles</groupId>
+                            <artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
+                            <target>${neba.installation.path}/17</target>
                         </embedded>
 
-                        <!-- Gemini shall start after Spring has started at start level 18 -->
+                        <!-- Gemini shall start after  the Spring Framework has started at start level 18 -->
                         <embedded>
                             <groupId>org.eclipse.gemini.blueprint</groupId>
                             <artifactId>gemini-blueprint-core</artifactId>
