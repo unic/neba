@@ -27,7 +27,7 @@ import static aQute.bnd.osgi.Processor.printClauses;
  * of the Spring bundles deployed with NEBA are modified to import the default version ([0, 2)).
  * </p>
  *
- * <h2>NEBA-49: Migrate to Spring 4</h2>
+ * <h2>NEBA-155: Make jackson library dependencies optional</h2>
  * <p>
  * AEM 6.x ships with an incomplete export of the jackson library. The jackson package imports of Spring are thus removed in favor of an explicit
  * relationship to jackson bundles using the "Require-Bundle" header.
@@ -133,9 +133,9 @@ public class SpringBundlesTransformer {
 
         mainAttributes.putValue(
                 "Require-Bundle",
-                        "com.fasterxml.jackson.core.jackson-core," +
-                        "com.fasterxml.jackson.core.jackson-databind," +
-                        "com.fasterxml.jackson.core.jackson-annotations");
+                        "com.fasterxml.jackson.core.jackson-core; bundle-version=\"[2,3)\"; resolution:=optional," +
+                        "com.fasterxml.jackson.core.jackson-databind; bundle-version=\"[2,3)\"; resolution:=optional," +
+                        "com.fasterxml.jackson.core.jackson-annotations; bundle-version=\"[2,3)\"; resolution:=optional");
         return true;
     }
 
