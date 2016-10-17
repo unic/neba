@@ -1,0 +1,58 @@
+---
+title: NEBA 4.1.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 4.1.0 Release notes
+abstract: NEBA 4.1.0 ships with Spring 4.2.8 and enhances compatibility with the latest AEM Social Component Framework&trade; updates
+---
+
+<section>
+    <header><h2>Hightlights of this release</h2></header>
+
+    <section>
+        <header><h3>NEBA 4.1.0 ships with Spring 4.2.8</h3></header>
+        <p>
+           NEBA 4.1.0 updates Spring 4.2 to 4.2.8, the current GA (generally available) version (<a href="https://jira.spring.io/secure/ReleaseNote.jspa?version=15596&styleName=Text&projectId=10000">release notes</a>).
+        </p>
+    </section>
+
+    <section>
+        <header><h3>Improved support for multiple version of the AEM Social Component Framework (SCF)</h3></header>
+        <p>
+            AEM ships with out of the box versions of the <a href="https://docs.adobe.com/docs/en/aem/6-2/develop/communities/scf.html">Social Component Framework</a>
+            that bring in a lot of third-party dependencies and package exports. Out of the box versions of
+            SCF, for instance, include a partial export of the fasterxml Jackson libraries residing on the private classpath of one of the SCF bundles.
+            This is incompatible with Spring, which (rightfully) relies on libraries being fully, not just partially, available.
+            However, recent upgrades to the SCF fixed this issue by providing the jackson libraries as as OSGi bundles.
+        </p>
+        <p>
+            This means NEBA needs to be able to run without these libraries, with a partial presence of these libraries and with the libraries being deployed as OSGi bundles.
+            In 4.1.0, the corresponding imports in the Spring bundles shipped with NEBA were adjusted to meet these requirements, making NEBA function seamlessly regardless of
+            the SCF deployment status.
+        </p>
+    </section>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="13" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="13" data-labels="bug"></ul>
+    </section>
+
+    <section>
+        <header><h3 id="upgrading">Upgrading from 4.0.0</h3></header>
+        <p>
+            Users of NEBA 4.0.0 can upgrade to 4.1.0 without code changes.
+        </p>
+        <p>Neba 4.1.0 ships with Spring 4.2.8. Project dependencies must be updated to the
+            <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.apache.servicemix.bundles%22%20AND%20a%3Aorg.apache.servicemix.bundles.spring-*%20AND%20v%3A%224.2.8.RELEASE_1%22">respective Spring bundle versions</a>.
+        </p>
+    </section>
+</section>
