@@ -1,5 +1,7 @@
 package io.neba.delivery;
 
+import aQute.bnd.header.Parameters;
+import aQute.bnd.osgi.Analyzer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,9 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.jar.JarFile;
 
 import static java.nio.file.Files.createTempDirectory;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,9 +58,9 @@ public class SpringBundlesTransformerTest {
 
         assertImportDirectiveDoesNotContain("jar.with-jackson.jar", "com.fasterxml.jackson");
         assertBundleRequiresBundles("jar.with-jackson.jar",
-                "com.fasterxml.jackson.core.jackson-core",
-                "com.fasterxml.jackson.core.jackson-databind",
-                "com.fasterxml.jackson.core.jackson-annotations");
+                "com.fasterxml.jackson.core.jackson-core;bundle-version=\"[2,3)\";resolution:=optional",
+                "com.fasterxml.jackson.core.jackson-databind;bundle-version=\"[2,3)\";resolution:=optional",
+                "com.fasterxml.jackson.core.jackson-annotations;bundle-version=\"[2,3)\";resolution:=optional");
         assertSymbolicNameIs("jar.with-jackson.jar", "io.neba.spring-webmvc");
     }
 
@@ -64,19 +68,20 @@ public class SpringBundlesTransformerTest {
         JarFile jarFile = getJarFile(fileName);
         String value = jarFile.getManifest().getMainAttributes().getValue("Bundle-SymbolicName");
         jarFile.close();
-
         assertThat(value).isEqualTo(symbolicName);
-
     }
 
-    private void assertBundleRequiresBundles(String fileName, String... symbolicNames) throws IOException, URISyntaxException {
+    private void assertBundleRequiresBundles(String fileName, String... expectedDirectives) throws IOException, URISyntaxException {
         JarFile jarFile = getJarFile(fileName);
         String requireBundleHeader = jarFile.getManifest().getMainAttributes().getValue("Require-Bundle");
         jarFile.close();
 
-        assertThat(requireBundleHeader.split(","))
+        Parameters parameters = new Analyzer().parseHeader(requireBundleHeader);
+        List<String> items = parameters.entrySet().stream().map(e -> e.getKey() + ";" + e.getValue()).collect(toList());
+
+        assertThat(items)
                 .describedAs("The Require-Bundle header must exactly contain")
-                .containsExactlyInAnyOrder(symbolicNames);
+                .containsExactlyInAnyOrder(expectedDirectives);
     }
 
     private void assertImportDirectiveDoesNotContain(String fileName, String expected) throws IOException, URISyntaxException {

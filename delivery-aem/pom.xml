@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -79,19 +79,6 @@
         <dependency>
             <groupId>org.eclipse.gemini.blueprint</groupId>
             <artifactId>gemini-blueprint-extender</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
         </dependency>
 
         <!-- build dependencies -->
@@ -212,21 +199,6 @@
                         <embedded>
                             <groupId>org.apache.servicemix.bundles</groupId>
                             <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-                            <target>${neba.installation.path}/16</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-core</artifactId>
-                            <target>${neba.installation.path}/16</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-databind</artifactId>
-                            <target>${neba.installation.path}/16</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-annotations</artifactId>
                             <target>${neba.installation.path}/16</target>
                         </embedded>
 

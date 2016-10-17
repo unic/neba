@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>4.0.0</version>
+    <version>4.1.0</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
@@ -62,7 +62,7 @@
     <properties>
         <!-- Properties for artifact versions are only used if the artifact versions is
              referenced outside the POM, such as in the delivery module's package definition. -->
-        <spring.version>4.2.6.RELEASE_1</spring.version>
+        <spring.version>4.2.8.RELEASE_1</spring.version>
         <gemini.version>2.0.0.RELEASE</gemini.version>
         <aopalliance.version>1.0_6</aopalliance.version>
         <language.level>1.8</language.level>
@@ -217,22 +217,6 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
                 <version>${spring.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.7.1-1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>2.7.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>2.7.1</version>
             </dependency>
 
             <dependency>
