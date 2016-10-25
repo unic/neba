@@ -13,7 +13,7 @@
             },
             success: function(issues) {
                 issues.forEach(function (issue) {
-                    $placeholder.append($('<li><a href="' + issue.url + '">#' + issue.number + ': ' + issue.title + '</a></li>'));
+                    $placeholder.append($('<li><a href="' + issue.html_url + '">#' + issue.number + ': ' + issue.title + '</a></li>'));
                 });
             },
             dataType: "json"
