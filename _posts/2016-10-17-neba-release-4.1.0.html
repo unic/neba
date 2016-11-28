@@ -23,7 +23,7 @@ abstract: NEBA 4.1.0 ships with Spring 4.2.8 and enhances compatibility with the
             that bring in a lot of third-party dependencies and package exports. Out of the box versions of
             SCF, for instance, include a partial export of the fasterxml Jackson libraries residing on the private classpath of one of the SCF bundles.
             This is incompatible with Spring, which (rightfully) relies on libraries being fully, not just partially, available.
-            However, recent upgrades to the SCF fixed this issue by providing the jackson libraries as as OSGi bundles.
+            However, recent upgrades to the SCF fixed this issue by providing the jackson libraries as OSGi bundles.
         </p>
         <p>
             This means NEBA needs to be able to run without these libraries, with a partial presence of these libraries and with the libraries being deployed as OSGi bundles.
