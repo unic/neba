@@ -1,9 +1,13 @@
-NEBA
+
+
+![NEBA logo](README/neba-logo.png "NEBA logo") NEBA  
 ====
 
-NEBA integrates the Spring Framework into Apache Sling. It makes available all of Spring's features to allow using mature, best-practice solutions for the majority of system-level concerns common to applications based on Apache SLing, such as Adobe AEM. NEBA does so in full compliance with the open core philosophy - using exclusively mature, standardized open source software - gemini blueprint - for the integration into OSGi.
+NEBA integrates the Spring Framework into Apache Sling. It makes available all of Spring's features to allow using mature, best-practice solutions for the majority of system-level concerns common to applications based on Apache Sling, such as Adobe AEM. NEBA does so in full compliance with the open core philosophy - using exclusively mature, standardized open source software - [gemini blueprint](http://www.eclipse.org/gemini/blueprint/) - for the integration into OSGi. 
 
-All Spring and Sling features are accessible to developers using a lightweight, well documented API that does not couple the domain -specific implementation code to any implementation details of Sling, Spring or NEBA.
+All Spring and Sling features are accessible to developers using a lightweight, [well documented API](http://neba.io/documentation.html) that does not couple the domain -specific implementation code to any implementation details of Sling, Spring or NEBA.
+
+<a href='https://coveralls.io/github/unic/neba?branch=master'><img src='https://coveralls.io/repos/unic/neba/badge.svg?branch=master&service=github' alt='Coverage Status' style="vertical-align: bottom"/></a>  <a href="https://travis-ci.org/unic/neba"><img src="https://travis-ci.org/unic/neba.svg?branch=develop" title="Travis CI build status" style="vertical-align: bottom" /></a>
 
 Downloading artifacts
 ----------------------
@@ -48,7 +52,6 @@ To release NEBA, credentials for the sonatype [OSS repository](https://oss.sonat
    <password>...</password>
  </server>
 ````
-
 
 In addition, a GPG installation executable from the [maven-gpg-plugin](https://maven.apache.org/plugins/maven-gpg-plugin/) must be installed on the local system, e.g. [GPG4Win](https://www.gpg4win.org/) on windows. As the delivery artifacts are signed, you require a valid key pair, and the public key must have been [distributed to a public key server](https://www.gnupg.org/gph/en/manual/x457.html).
  
