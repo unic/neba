@@ -42,14 +42,23 @@ public class ResourceModelCaches {
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
-     * Looks up the {@link #store(Resource, Object, Key) cached model}
+     * Looks up the {@link #store(Resource, Class, Object)} cached model}
      * of the given type for the given resource.
      * Returns the first model found in the caches.
      *
-     * @param key must not be <code>null</code>.
+     * @param resource must not be <code>null</code>.
+     * @param modelType must not be <code>null</code>.
      * @return can be <code>null</code>.
      */
-    public <T> T lookup(Key key) {
+    public <T> T lookup(Resource resource, Class<T> modelType) {
+        if (resource == null) {
+            throw new IllegalArgumentException("Method argument resource must not be null");
+        }
+        if (modelType == null) {
+            throw new IllegalArgumentException("Method argument modelType must not be null");
+        }
+
+        final Key key = key(resource, modelType);
         for (ResourceModelCache cache : this.caches) {
             T model = cache.get(key);
             if (model != null) {
@@ -66,10 +75,21 @@ public class ResourceModelCaches {
      * to the given target type.
      *
      * @param resource must not be <code>null</code>.
+     * @param modelType must not be <code>null</code>.
      * @param model can be <code>null</code>.
-     * @param key must not be <code>null</code>.
      */
-    public <T> void store(Resource resource, T model, Key key) {
+    public <T> void store(Resource resource, Class<T> modelType, T model) {
+        if (resource == null) {
+            throw new IllegalArgumentException("Method argument resource must not be null");
+        }
+        if (modelType == null) {
+            throw new IllegalArgumentException("Method argument modelType must not be null");
+        }
+        if (model == null) {
+            throw new IllegalArgumentException("Method argument model must not be null");
+        }
+
+        final Key key = key(resource, modelType);
         for (ResourceModelCache cache : this.caches) {
             cache.put(resource, model, key);
         }
@@ -84,5 +104,9 @@ public class ResourceModelCaches {
             return;
         }
         this.caches.remove(cache);
+    }
+
+    private <T> Key key(Resource resource, Class<T> modelType) {
+        return new Key(resource.getPath(), modelType, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p/>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p/>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p/>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p/>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.tagsupport;
 
@@ -23,11 +23,13 @@ import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
@@ -53,6 +55,8 @@ public class ResourceModelProviderImplTest {
     @Mock
     private Resource resource;
     @Mock
+    private ResourceResolver resourceResolver;
+    @Mock
     private ResourceToModelMapper mapper;
     @Mock
     private LookupResult lookupResult;
@@ -71,16 +75,15 @@ public class ResourceModelProviderImplTest {
     @SuppressWarnings("unchecked")
     public void prepareContainerAdapter() {
         Answer storeInCache = invocation -> {
-            testCache.put((Key) invocation.getArguments()[2], invocation.getArguments()[1]);
+            testCache.put(buildCacheInvocationKey(invocation), invocation.getArguments()[2]);
             return null;
         },
-        lookupFromCache = invocation -> {
-            Key key = (Key) invocation.getArguments()[0];
-            return testCache.get(key);
-        };
 
-        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), any(), isA(Key.class));
-        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Key.class));
+        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+
+        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(Class.class), any());
+        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(Class.class));
+        doReturn(this.resourceResolver).when(this.resource).getResourceResolver();
 
         when(this.mapper.map(isA(Resource.class), isA(OsgiBeanSource.class))).thenAnswer(invocation -> {
             OsgiBeanSource<Object> source = (OsgiBeanSource<Object>) invocation.getArguments()[1];
@@ -97,6 +100,7 @@ public class ResourceModelProviderImplTest {
         lookupResults.add(this.lookupResult);
         doReturn(this.osgiBeanSource).when(this.lookupResult).getSource();
         when(this.osgiBeanSource.getBean()).thenReturn(this.model);
+        doReturn(this.model.getClass()).when(this.osgiBeanSource).getBeanType();
         when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(lookupResults);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), anyString())).thenReturn(lookupResults);
     }
@@ -186,6 +190,7 @@ public class ResourceModelProviderImplTest {
     @Test
     public void testSubsequentResolutionOfSameResourceWithSameResourceTypeIsServedFromCache() throws Exception {
         withResourcePath("/resource/path");
+
         withResourceType("resource/type/one");
 
         provideMostSpecificModel();
@@ -238,5 +243,14 @@ public class ResourceModelProviderImplTest {
 
     private void assertResolvedModelIsReturned() {
         assertThat(this.resolutionResult).isSameAs(this.model);
+    }
+
+    /**
+     * Simulates the key calculation used by the ResourceModelCaches implementation.
+     */
+    private Key buildCacheInvocationKey(InvocationOnMock invocation) {
+        Resource resource = (Resource) invocation.getArguments()[0];
+        Class<?> modelType = (Class<?>) invocation.getArguments()[1];
+        return new Key(resource.getPath(), modelType, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
@@ -85,16 +86,15 @@ public class ResourceToModelAdapterTest {
     @Before
     public void setUp() throws Exception {
         Answer storeInCache = invocation -> {
-            testCache.put((Key) invocation.getArguments()[2], invocation.getArguments()[1]);
+            Object model = invocation.getArguments()[2];
+            testCache.put(buildCacheInvocationKey(invocation), model);
             return null;
         },
-        lookupFromCache = invocation -> {
-            Key key = (Key) invocation.getArguments()[0];
-            return testCache.get(key);
-        };
 
-        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), any(), isA(Key.class));
-        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Key.class));
+        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+
+        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(Class.class), any());
+        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(Class.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
     }
@@ -171,34 +171,6 @@ public class ResourceToModelAdapterTest {
         assertResourceWasAdaptedToModel();
     }
 
-    @Test
-    public void testAdapterUsesResourceResolverIdentityForCacheKey() throws Exception {
-        withResourceType("resource/type/one");
-        withResourcePath("/resource/path");
-        withTargetType(TestModel.class);
-        withAvailableModels(new TestModel());
-
-        adapt();
-        verifyModelIsMappedOnlyOnce();
-
-        withDifferentResourceResolverForSameResource();
-
-        adapt();
-        verifyModelIsMappedAgain();
-    }
-
-    private void verifyModelIsMappedAgain() {
-        verify(this.mapper, times(2)).map(eq(this.resource), isA(OsgiBeanSource.class));
-    }
-
-    private void withDifferentResourceResolverForSameResource() {
-        doReturn(mock(ResourceResolver.class)).when(this.resource).getResourceResolver();
-    }
-
-    private void verifyModelIsMappedOnlyOnce() {
-        verify(this.mapper, times(1)).map(eq(this.resource), isA(OsgiBeanSource.class));
-    }
-
     @SuppressWarnings("unchecked")
     private void verifyAdapterDoesNotMapResourceToModel() {
         verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiBeanSource.class));
@@ -265,5 +237,14 @@ public class ResourceToModelAdapterTest {
 
     private void withResourceType(String type) {
         doReturn(type).when(this.resource).getResourceType();
+    }
+
+    /**
+     * Simulates the key calculation used by the ResourceModelCaches implementation.
+     */
+    private Key buildCacheInvocationKey(InvocationOnMock invocation) {
+        Resource resource = (Resource) invocation.getArguments()[0];
+        Class<?> modelType = (Class<?>) invocation.getArguments()[1];
+        return new Key(resource.getPath(), modelType, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }
