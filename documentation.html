@@ -113,7 +113,7 @@ description: A comprehensive guide to using the NEBA features
                                             $list.append('<li>' +
                                                     '<p class="posted">'
                                                     + new Date(parseInt(item.creation_date) * 1000).toLocaleDateString() +
-                                                    ' | ' + item.answer_count + (parseInt(item.answer_count) == 1 ? 'Answer' : 'Answers') +
+                                                    ' | ' + item.answer_count + (parseInt(item.answer_count) == 1 ? ' Answer' : ' Answers') +
                                                     '</p>' +
                                                     '<p>' +
                                                     '<a href="' + item.link + '">' + item.title + '</a>' +
