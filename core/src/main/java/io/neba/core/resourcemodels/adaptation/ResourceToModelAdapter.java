@@ -20,7 +20,6 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.Key;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -58,12 +57,11 @@ public class ResourceToModelAdapter implements AdapterFactory {
         T model = null;
         if (adaptable instanceof Resource) {
             Resource resource = (Resource) adaptable;
-            Key key = new Key(resource.getPath(), target, resource.getResourceType(), resource.getResourceResolver().hashCode());
-            model = this.caches.lookup(key);
+            model = this.caches.lookup(resource, target);
             if (model == null) {
                 model = getAdapterInternal(target, resource);
                 if (model != null) {
-                    this.caches.store(resource, model, key);
+                    this.caches.store(resource, target, model);
                 }
             }
         }

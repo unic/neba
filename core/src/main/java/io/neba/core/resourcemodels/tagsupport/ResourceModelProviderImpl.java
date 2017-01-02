@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p/>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p/>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p/>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p/>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.tagsupport;
 
@@ -21,7 +21,6 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.Key;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
-import static io.neba.core.util.Key.toKey;
 
 /**
  * Resolves a {@link Resource} to a {@link io.neba.api.annotations.ResourceModel}
@@ -80,19 +78,29 @@ public class ResourceModelProviderImpl implements ResourceModelProvider {
         return resolveMostSpecificModelForResource(resource, true, null);
     }
 
-    private Object resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String beanName) {
-        final Key key = toKey(resource.getPath(), includeBaseTypes, beanName, resource.getResourceType());
-        Object model = this.caches.lookup(key);
-        if (model == null) {
-            Collection<LookupResult> models = (beanName == null) ? this.registry.lookupMostSpecificModels(resource) :
-                    this.registry.lookupMostSpecificModels(resource, beanName);
-            if (models != null && models.size() == 1) {
-                LookupResult lookupResult = models.iterator().next();
-                if (includeBaseTypes || !isMappedFromGenericBaseType(lookupResult)) {
-                    OsgiBeanSource<?> source = lookupResult.getSource();
-                    model = this.mapper.map(resource, source);
-                    this.caches.store(resource, model, key);
+    private <T> T resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String beanName) {
+        T model = null;
+        Collection<LookupResult> models = (beanName == null) ?
+                this.registry.lookupMostSpecificModels(resource) :
+                this.registry.lookupMostSpecificModels(resource, beanName);
+
+        if (models != null && models.size() == 1) {
+            LookupResult lookupResult = models.iterator().next();
+            if (includeBaseTypes || !isMappedFromGenericBaseType(lookupResult)) {
+
+                @SuppressWarnings("unchecked")
+                OsgiBeanSource<T> source = (OsgiBeanSource<T>) lookupResult.getSource();
+
+                @SuppressWarnings("unchecked")
+                Class<T> modelType = (Class<T>) source.getBeanType();
+
+                model = this.caches.lookup(resource, modelType);
+                if (model != null) {
+                    return model;
                 }
+
+                model = this.mapper.map(resource, source);
+                this.caches.store(resource, modelType, model);
             }
         }
 
