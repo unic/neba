@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.registration;
 
@@ -32,7 +32,13 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PreDestroy;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -161,10 +167,6 @@ public class ModelRegistry {
             throw new IllegalArgumentException("Method argument beanName must not be null.");
         }
 
-        if (isUnmapped(resource)) {
-            return null;
-        }
-
         Key key = key(resource, beanName);
 
         if (isUnmapped(key)) {
@@ -234,10 +236,6 @@ public class ModelRegistry {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
 
-        if (isUnmapped(resource)) {
-            return null;
-        }
-
         final Key key = key(resource, "allModels");
 
         if (isUnmapped(key)) {
@@ -274,10 +272,6 @@ public class ModelRegistry {
         }
         if (targetType == null) {
             throw new IllegalArgumentException("Method argument targetType must not be null.");
-        }
-
-        if (isUnmapped(resource)) {
-            return null;
         }
 
         final Key key = key(resource, targetType);
@@ -394,10 +388,6 @@ public class ModelRegistry {
         this.lookupCache.clear();
         this.unmappedTypesCache.clear();
         this.logger.debug("Cache cleared.");
-    }
-
-    private boolean isUnmapped(Resource resource) {
-        return this.unmappedTypesCache.containsKey(key(resource));
     }
 
     private boolean isUnmapped(Key key) {
