@@ -31,7 +31,7 @@
                 <executions>
                     <execution>
                         <id>unpack-aem-delivery-package</id>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
