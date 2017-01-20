@@ -42,7 +42,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -93,10 +99,15 @@ public class ResourceToModelAdapterTest {
 
         lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
-        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(Class.class), any());
-        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(Class.class));
+        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(OsgiBeanSource.class), any());
+        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(OsgiBeanSource.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
+    }
+
+    @Test
+    public void testAdaptablesOtherThanResourceYieldNull() throws Exception {
+        assertThat(this.testee.getAdapter(new Object(), Object.class)).isNull();
     }
 
     @Test
@@ -217,7 +228,7 @@ public class ResourceToModelAdapterTest {
             LookupResult result = mock(LookupResult.class);
             when(result.getSource()).thenReturn(source);
             this.sources.add(result);
-            when(source.getBeanType()).thenReturn((Class) model.getClass());
+            when(source.getBeanType()).thenReturn(model.getClass());
             when(source.getBean()).thenReturn(model);
             when(this.mapper.map(eq(this.resource), eq(source))).thenReturn(model);
         }
@@ -244,7 +255,7 @@ public class ResourceToModelAdapterTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        Class<?> modelType = (Class<?>) invocation.getArguments()[1];
-        return new Key(resource.getPath(), modelType, resource.getResourceType(), resource.getResourceResolver().hashCode());
+        OsgiBeanSource<?> modelSource = (OsgiBeanSource<?>) invocation.getArguments()[1];
+        return new Key(resource.getPath(), modelSource.getBeanType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

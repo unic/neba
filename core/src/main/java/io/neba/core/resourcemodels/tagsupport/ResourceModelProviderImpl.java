@@ -91,16 +91,13 @@ public class ResourceModelProviderImpl implements ResourceModelProvider {
                 @SuppressWarnings("unchecked")
                 OsgiBeanSource<T> source = (OsgiBeanSource<T>) lookupResult.getSource();
 
-                @SuppressWarnings("unchecked")
-                Class<T> modelType = (Class<T>) source.getBeanType();
-
-                model = this.caches.lookup(resource, modelType);
+                model = this.caches.lookup(resource, source);
                 if (model != null) {
                     return model;
                 }
 
                 model = this.mapper.map(resource, source);
-                this.caches.store(resource, modelType, model);
+                this.caches.store(resource, source, model);
             }
         }
 

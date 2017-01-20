@@ -49,38 +49,40 @@ public class ResourceToModelAdapter implements AdapterFactory {
     /**
      * @return the resource model provided by the
      * {@link io.neba.core.resourcemodels.registration.ModelRegistrar}
-     *  or <code>null</code> if no model for the given resource exists or
-     *  the resource model's type does not match the target type.
+     * or <code>null</code> if no model for the given resource exists or
+     * the resource model's type does not match the target type.
      */
     @Override
-    public <T> T getAdapter(Object adaptable, Class<T> target) {
-        T model = null;
-        if (adaptable instanceof Resource) {
-            Resource resource = (Resource) adaptable;
-            model = this.caches.lookup(resource, target);
-            if (model == null) {
-                model = getAdapterInternal(target, resource);
-                if (model != null) {
-                    this.caches.store(resource, target, model);
-                }
-            }
-        }
-        return model;
-    }
-
     @SuppressWarnings("unchecked")
-    private <T> T getAdapterInternal(Class<T> target, Resource resource) {
-        T model = null;
-        Collection<LookupResult> models = this.registry.lookupMostSpecificModels(resource, target);
-        if (models != null && !models.isEmpty()) {
-            if (models.size() == 1) {
-                OsgiBeanSource<?> source = models.iterator().next().getSource();
-                model = (T) this.mapper.map(resource, source);
-            } else {
-                throw new AmbiguousModelAssociationException("There is more than one model that maps " +
-                        resource.getPath() + " to " + target.getName() + ": " + join(models, ", ") + ".");
-            }
+    public <T> T getAdapter(Object adaptable, Class<T> target) {
+        if (!(adaptable instanceof Resource)) {
+            return null;
         }
+
+        Resource resource = (Resource) adaptable;
+
+        Collection<LookupResult> models = this.registry.lookupMostSpecificModels(resource, target);
+
+        if (models == null || models.isEmpty()) {
+            return null;
+        }
+
+        if (models.size() != 1) {
+            throw new AmbiguousModelAssociationException("There is more than one model that maps " +
+                    resource.getPath() + " to " + target.getName() + ": " + join(models, ", ") + ".");
+        }
+
+        OsgiBeanSource<?> source = models.iterator().next().getSource();
+
+        T model = this.caches.lookup(resource, source);
+        if (model != null) {
+            return model;
+        }
+
+        model = (T) this.mapper.map(resource, source);
+
+        this.caches.store(resource, source, model);
+
         return model;
     }
 }

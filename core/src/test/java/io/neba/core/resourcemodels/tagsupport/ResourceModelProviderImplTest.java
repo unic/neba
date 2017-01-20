@@ -43,7 +43,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -81,8 +86,8 @@ public class ResourceModelProviderImplTest {
 
         lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
-        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(Class.class), any());
-        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(Class.class));
+        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(OsgiBeanSource.class), any());
+        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(OsgiBeanSource.class));
         doReturn(this.resourceResolver).when(this.resource).getResourceResolver();
 
         when(this.mapper.map(isA(Resource.class), isA(OsgiBeanSource.class))).thenAnswer(invocation -> {
@@ -103,6 +108,26 @@ public class ResourceModelProviderImplTest {
         doReturn(this.model.getClass()).when(this.osgiBeanSource).getBeanType();
         when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(lookupResults);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), anyString())).thenReturn(lookupResults);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testResolveMostSpecificModelWithBeanNameRequiresResource() throws Exception {
+        this.testee.resolveMostSpecificModelWithBeanName(null, "beanName");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testResolveMostSpecificModelWithBeanNameRequiresBeanName() throws Exception {
+        this.testee.resolveMostSpecificModelWithBeanName(mock(Resource.class), null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testResolveMostSpecificModelRequiresResource() throws Exception {
+        this.testee.resolveMostSpecificModel(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testResolveMostSpecificModelsIncludingBaseTypesRequiresResource() throws Exception {
+        this.testee.resolveMostSpecificModelIncludingModelsForBaseTypes(null);
     }
 
     @Test
@@ -250,7 +275,7 @@ public class ResourceModelProviderImplTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        Class<?> modelType = (Class<?>) invocation.getArguments()[1];
-        return new Key(resource.getPath(), modelType, resource.getResourceType(), resource.getResourceResolver().hashCode());
+        OsgiBeanSource<?> modelSource = (OsgiBeanSource<?>) invocation.getArguments()[1];
+        return new Key(resource.getPath(), modelSource.getBeanType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

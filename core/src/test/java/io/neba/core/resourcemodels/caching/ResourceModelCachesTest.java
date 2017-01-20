@@ -21,6 +21,7 @@ import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.Key;
+import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -37,7 +38,15 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -54,6 +63,8 @@ public class ResourceModelCachesTest {
 	private ResourceModelMetaData resourceModelMetaData;
 	@Mock
 	private ResourceModelStatistics resourceModelStatistics;
+	@Mock
+	private OsgiBeanSource modelSource;
 	
 	private List<ResourceModelCache> mockedCaches = new LinkedList<>();
 	private Class<Object> targetType = Object.class;
@@ -69,11 +80,12 @@ public class ResourceModelCachesTest {
 		doReturn(this.resourceModelMetaData).when(this.resourceModelMetaDataRegistrar).get(any());
 		doReturn(this.resourceModelStatistics).when(this.resourceModelMetaData).getStatistics();
 		doReturn(this.resourceResolver).when(this.resource).getResourceResolver();
+		doReturn(this.targetType).when(this.modelSource).getBeanType();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullResourceIsNotAllowedForCacheLookup() throws Exception {
-		this.testee.lookup(null, Object.class);
+		this.testee.lookup(null, this.modelSource);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -83,7 +95,7 @@ public class ResourceModelCachesTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullResourceIsNotAllowedForCacheWrite() throws Exception {
-		this.testee.store(null, Object.class, new Object());
+		this.testee.store(null, this.modelSource, new Object());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -93,7 +105,7 @@ public class ResourceModelCachesTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullModelIsNotAllowedForCacheWrite() throws Exception {
-		this.testee.store(mock(Resource.class), Object.class, null);
+		this.testee.store(mock(Resource.class), this.modelSource, null);
 	}
 
 	@Test
@@ -171,7 +183,7 @@ public class ResourceModelCachesTest {
     }
 
     private void storeModel() {
-        this.testee.store(this.resource, this.targetType, this.model);
+        this.testee.store(this.resource, this.modelSource, this.model);
     }
 
     private void verifyNoCacheIsUsed() {
@@ -215,7 +227,7 @@ public class ResourceModelCachesTest {
 	}
 
 	private void lookup() {
-		this.lookupResult = this.testee.lookup(this.resource, this.targetType);
+		this.lookupResult = this.testee.lookup(this.resource, this.modelSource);
 	}
 
 	private void assertModelWasFoundInCache() {
