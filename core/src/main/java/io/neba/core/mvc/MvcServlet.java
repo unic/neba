@@ -73,6 +73,13 @@ public class MvcServlet extends SlingAllMethodsServlet {
      * @param context must not be <code>null</code>.
      */
     public void enableMvc(ConfigurableListableBeanFactory factory, BundleContext context) {
+        if (factory == null) {
+            throw new IllegalArgumentException("Method argument factory must not be null.");
+        }
+        if (context == null) {
+            throw new IllegalArgumentException("Method argument context must not be null.");
+        }
+
         final BundleSpecificDispatcherServlet dispatcherServlet = createBundleSpecificDispatcherServlet(factory, context);
         factory.registerSingleton(generateNameFor(BundleSpecificDispatcherServlet.class), dispatcherServlet);
         this.mvcCapableBundles.put(context.getBundle(), dispatcherServlet);
@@ -84,6 +91,10 @@ public class MvcServlet extends SlingAllMethodsServlet {
      * @param bundle must not be <code>null</code>.
      */
     public void disableMvc(Bundle bundle) {
+        if (bundle == null) {
+            throw new IllegalArgumentException("Method argument bundle must not be null.");
+        }
+
         this.mvcCapableBundles.remove(bundle);
     }
 

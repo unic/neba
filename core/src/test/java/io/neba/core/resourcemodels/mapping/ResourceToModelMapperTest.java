@@ -88,6 +88,7 @@ public class ResourceToModelMapperTest {
     @SuppressWarnings("unchecked")
     public void prepareMapper() {
         when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(this.valueMap);
+        when(this.resource.getPath()).thenReturn("/resource/path");
         when(this.resourceModelMetaDataRegistrar.get(isA(Class.class))).thenReturn(this.resourceMetaData);
         when(this.nestedMappingSupport.begin(isA(Mapping.class))).thenReturn(null);
         when(this.resourceMetaData.getMappableFields()).thenReturn(new MappedFieldMetaData[]{});

@@ -51,6 +51,9 @@ public class ResourceModelProviderImpl implements ResourceModelProvider {
     @Autowired
     private ResourceModelCaches caches;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object resolveMostSpecificModelWithBeanName(Resource resource, String beanName) {
         if (resource == null) {
@@ -62,6 +65,9 @@ public class ResourceModelProviderImpl implements ResourceModelProvider {
         return resolveMostSpecificModelForResource(resource, true, beanName);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object resolveMostSpecificModel(Resource resource) {
         if (resource == null) {

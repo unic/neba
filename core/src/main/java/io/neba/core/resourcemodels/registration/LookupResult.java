@@ -32,7 +32,18 @@ public class LookupResult {
     private final String resourceType;
     private final int hashCode;
 
+    /**
+     * @param source must not be <code>null</code>
+     * @param resourceType must not be <code>null</code>
+     */
     public LookupResult(OsgiBeanSource<?> source, String resourceType) {
+        if (source == null) {
+            throw new IllegalArgumentException("Method argument source must not be null.");
+        }
+        if (resourceType == null) {
+            throw new IllegalArgumentException("Method argument resourceType must not be null.");
+        }
+
         this.source = source;
         this.resourceType = resourceType;
         this.hashCode = new HashCodeBuilder().append(source).append(resourceType).toHashCode();

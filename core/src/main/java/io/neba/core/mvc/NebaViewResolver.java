@@ -41,7 +41,13 @@ import static org.springframework.web.servlet.view.UrlBasedViewResolver.REDIRECT
 public class NebaViewResolver implements ViewResolver, Ordered {
     private final ServletResolver servletResolver;
 
+    /**
+     * @param servletResolver must not be <code>null</code>.
+     */
     public NebaViewResolver(ServletResolver servletResolver) {
+        if (servletResolver == null) {
+            throw new IllegalArgumentException("Method argument servletResolver must not be null.");
+        }
         this.servletResolver = servletResolver;
     }
 

@@ -40,6 +40,7 @@ public class OsgiBeanSource<T> {
     /**
      * @param beanName must not be <code>null</code>.
      * @param factory must not be <code>null</code>.
+	 * @param bundle must not be <code>null</code>.
      */
     public OsgiBeanSource(String beanName, BeanFactory factory, Bundle bundle) {
         if (beanName == null) {

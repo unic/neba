@@ -38,7 +38,11 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -79,6 +83,21 @@ public class MvcServletTest {
         doReturn("symbolic-name").when(this.bundle).getSymbolicName();
         doReturn(new Version(1, 2, 3)).when(this.bundle).getVersion();
         doReturn(this.dispatcherServlet).when(this.testee).createBundleSpecificDispatcherServlet(factory, context);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEnableMvcRequiresNonNullFactory() throws Exception {
+        this.testee.enableMvc(null, this.context);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEnableMvcRequiresNonNullContext() throws Exception {
+        this.testee.enableMvc(this.factory, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDisableMvcRequiresNonNullBundle() throws Exception {
+        this.testee.disableMvc(null);
     }
 
     @Test
