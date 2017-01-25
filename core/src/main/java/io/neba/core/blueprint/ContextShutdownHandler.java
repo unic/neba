@@ -43,8 +43,14 @@ public abstract class ContextShutdownHandler {
      * encounter further locks which may be blocked by threads waiting for the
      * {@link io.neba.core.blueprint.EventhandlingBarrier}, thus resulting in a deadlock. <br />
      * To prevent this, the handling is performed {@link org.springframework.scheduling.annotation.Async asynchronously}.
+     *
+     * @param bundle must not be <code>null</code>.
      */
     public void handleStop(Bundle bundle) {
+        if (bundle == null) {
+            throw new IllegalArgumentException("Method argument bundle must not be null.");
+        }
+
         this.logger.info("Removing infrastructure for bundle: " + bundle + "...");
         EventhandlingBarrier.begin();
         try {

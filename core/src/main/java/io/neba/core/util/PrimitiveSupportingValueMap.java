@@ -25,8 +25,9 @@ import java.util.Set;
 import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
 
 /**
- * This {@link ValueMap} converts primitive types
- * to their boxed equivalents prior to conversion.
+ * This {@link ValueMap} decorator converts primitive types passed to {@link #get(String, Class)} or
+ * {@link #get(String, Object)} to their boxed equivalents prior to their retrieval from the
+ * wrapped value map, as the standard value map does not support primitive type retrieval.
  * 
  * @author Olaf Otto
  */

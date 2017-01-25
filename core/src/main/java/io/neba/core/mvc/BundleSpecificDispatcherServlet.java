@@ -87,7 +87,7 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
     /**
      * Configures the context's bean factory with MVC infrastructure beans.
      *
-     * @param event must not be <code>null</code>.
+     * @param event can be <code>null</code>, in which case the event is ignored.
      */
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
@@ -228,7 +228,14 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
         return this.servletConfig;
     }
 
+    /**
+     * @param request must not be <code>null</code>.
+     */
     public boolean hasHandlerFor(HttpServletRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Method argument request must not be null.");
+        }
+
         if (!this.initialized) {
             return false;
         }

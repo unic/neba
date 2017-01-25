@@ -31,7 +31,7 @@ import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
  * Consequently, cached type hierarchy state must be cleared when these attributes change. This is what this event handler is responsible for.
  * <p>
  * <p>
- * Only valid cases handled herein. For instance, if a resource points to a sling:resourceType or sling:resourceSuperType, and
+ * Only valid cases are handled here. For instance, if a resource points to a sling:resourceType or sling:resourceSuperType, and
  * that type or super type resource is removed at runtime, this handler does not invalidate the cache as this represents an invalid
  * content state and is thus considered a programming error.
  * </p>
