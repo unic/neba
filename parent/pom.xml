@@ -128,14 +128,16 @@
     </pluginRepositories>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>unic-we-releases</id>
+            <name>unic-we-releases</name>
+            <url>https://nexus.unic.com/nexus/content/repositories/unic-we-releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>unic-we-snapshots</id>
+            <name>unic-we-snapshots</name>
+            <url>https://nexus.unic.com/nexus/content/repositories/unic-we-snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <profiles>
