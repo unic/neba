@@ -32,7 +32,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -40,23 +40,22 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
@@ -89,7 +88,7 @@ public class MvcContextTest {
     @Mock
     private SlingHttpServletResponse response;
 
-    private List<?> registeredArgumentResolvers = new ArrayList<Object>();
+    private WebArgumentResolver[] registeredArgumentResolvers = new WebArgumentResolver[]{};
     private HandlerMapping handlerMapping;
 
     private MvcContext testee;
@@ -113,6 +112,9 @@ public class MvcContextTest {
         doAnswer(createMock).when(this.factory).createBean(isA(Class.class));
 
         this.testee = new MvcContext(this.factory);
+
+        doReturn(mock(Enumeration.class)).when(this.request).getHeaderNames();
+        doReturn(mock(ServletOutputStream.class)).when(this.response).getOutputStream();
     }
 
     @Test
@@ -231,14 +233,6 @@ public class MvcContextTest {
         verifyNebaArgumentResolversAreRegistered();
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testHandlingOfUninitializedArgumentsResolvers() throws Exception {
-        RequestMappingHandlerAdapter adapter = mock(RequestMappingHandlerAdapter.class);
-        withRequestMappingHandlerCreatedOnDemand(adapter);
-
-        signalContextRefreshed();
-    }
-
     @Test
     public void testHandlingOfUnsupportedApplicationEvent() throws Exception {
         sendEvent(mock(ContextClosedEvent.class));
@@ -301,43 +295,41 @@ public class MvcContextTest {
     }
 
     private void withRequestMappingHandlerAlreadyExistingInContext() {
-        doReturn(mockRequestMappingHandler()).when(this.factory).getBean(eq(RequestMappingHandlerAdapter.class));
+        doReturn(mockRequestMappingHandler()).when(this.factory).getBean(eq(AnnotationMethodHandlerAdapter.class));
     }
 
-    private void withRequestMappingHandlerCreatedOnDemand(final RequestMappingHandlerAdapter handler) {
-        Answer<RequestMappingHandlerAdapter> mockBeanCreation = new Answer<RequestMappingHandlerAdapter>() {
+    private void withRequestMappingHandlerCreatedOnDemand(final AnnotationMethodHandlerAdapter handler) {
+        Answer<AnnotationMethodHandlerAdapter> mockBeanCreation = new Answer<AnnotationMethodHandlerAdapter>() {
             @Override
-            public RequestMappingHandlerAdapter answer(InvocationOnMock invocation) throws Throwable {
-                doReturn(handler).when(factory).getBean(eq(RequestMappingHandlerAdapter.class));
+            public AnnotationMethodHandlerAdapter answer(InvocationOnMock invocation) throws Throwable {
+                doReturn(handler).when(factory).getBean(eq(AnnotationMethodHandlerAdapter.class));
                 return handler;
             }
         };
-        doAnswer(mockBeanCreation).when(this.factory).createBean(eq(RequestMappingHandlerAdapter.class));
+        doAnswer(mockBeanCreation).when(this.factory).createBean(eq(AnnotationMethodHandlerAdapter.class));
     }
 
     @SuppressWarnings("unchecked")
-    private RequestMappingHandlerAdapter mockRequestMappingHandler() {
-        RequestMappingHandlerAdapter requestMappingHandlerAdapter = mock(RequestMappingHandlerAdapter.class);
-        HandlerMethodArgumentResolverComposite composite = mock(HandlerMethodArgumentResolverComposite.class);
-        doReturn(composite).when(requestMappingHandlerAdapter).getArgumentResolvers();
-        Answer<Object> verifyList = new Answer<Object>() {
+    private AnnotationMethodHandlerAdapter mockRequestMappingHandler() {
+        AnnotationMethodHandlerAdapter requestMappingHandlerAdapter = mock(AnnotationMethodHandlerAdapter.class);
+        Answer<Object> retainCustomResolvers = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                registeredArgumentResolvers = (List<?>) invocation.getArguments()[0];
+                registeredArgumentResolvers = (WebArgumentResolver[]) invocation.getArguments()[0];
                 return null;
             }
         };
 
-        doAnswer(verifyList).when(requestMappingHandlerAdapter).setArgumentResolvers(anyList());
+        doAnswer(retainCustomResolvers).when(requestMappingHandlerAdapter).setCustomArgumentResolvers(Mockito.isA(WebArgumentResolver[].class));
 
         return requestMappingHandlerAdapter;
     }
 
     private void verifyNebaArgumentResolversAreRegistered() {
         assertThat(this.registeredArgumentResolvers).describedAs("The list of registered NEBA argument resolvers").hasSize(3);
-        assertThat(this.registeredArgumentResolvers.get(0)).isInstanceOf(RequestPathInfoArgumentResolver.class);
-        assertThat(this.registeredArgumentResolvers.get(1)).isInstanceOf(ResourceResolverArgumentResolver.class);
-        assertThat(this.registeredArgumentResolvers.get(2)).isInstanceOf(ResourceParamArgumentResolver.class);
+        assertThat(this.registeredArgumentResolvers[0]).isInstanceOf(RequestPathInfoArgumentResolver.class);
+        assertThat(this.registeredArgumentResolvers[1]).isInstanceOf(ResourceResolverArgumentResolver.class);
+        assertThat(this.registeredArgumentResolvers[2]).isInstanceOf(ResourceParamArgumentResolver.class);
     }
 
     private void verifyNebaArgumentResolversAreNotRegistered() {
@@ -363,32 +355,32 @@ public class MvcContextTest {
 
     private void verifyHandlerMappingsAreRegistered() {
         verifyContextDefinesBean(BeanNameUrlHandlerMapping.class);
-        verifyContextDefinesBean(RequestMappingHandlerMapping.class);
+        verifyContextDefinesBean(DefaultAnnotationHandlerMapping.class);
     }
 
     private void verifyHandlerMappingsAreNotRegistered() {
         verifyBeanIsNeverCreatedInFactory(BeanNameUrlHandlerMapping.class);
-        verifyBeanIsNeverCreatedInFactory(RequestMappingHandlerMapping.class);
+        verifyBeanIsNeverCreatedInFactory(DefaultAnnotationHandlerMapping.class);
     }
 
     private void verifyHandlerAdaptersAreRegistered() {
         verifyContextDefinesBean(HttpRequestHandlerAdapter.class);
-        verifyContextDefinesBean(RequestMappingHandlerAdapter.class);
+        verifyContextDefinesBean(AnnotationMethodHandlerAdapter.class);
     }
 
     private void verifyHandlerAdaptersAreNotRegistered() {
         verifyBeanIsNeverCreatedInFactory(HttpRequestHandlerAdapter.class);
-        verifyBeanIsNeverCreatedInFactory(RequestMappingHandlerAdapter.class);
+        verifyBeanIsNeverCreatedInFactory(AnnotationMethodHandlerAdapter.class);
     }
 
     private void verifyExceptionResolversAreRegistered() {
-        verifyContextDefinesBean(ExceptionHandlerExceptionResolver.class);
+        verifyContextDefinesBean(AnnotationMethodHandlerExceptionResolver.class);
         verifyContextDefinesBean(ResponseStatusExceptionResolver.class);
         verifyContextDefinesBean(DefaultHandlerExceptionResolver.class);
     }
 
     private void verifyExceptionResolversAreNotRegistered() {
-        Class<?> type = ExceptionHandlerExceptionResolver.class;
+        Class<?> type = AnnotationMethodHandlerExceptionResolver.class;
         verifyBeanIsNeverCreatedInFactory(type);
         verifyBeanIsNeverCreatedInFactory(ResponseStatusExceptionResolver.class);
         verifyBeanIsNeverCreatedInFactory(DefaultHandlerExceptionResolver.class);

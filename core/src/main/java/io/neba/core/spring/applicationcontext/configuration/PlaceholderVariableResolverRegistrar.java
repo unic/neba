@@ -43,8 +43,19 @@ public class PlaceholderVariableResolverRegistrar {
     public void registerResolvers(BundleContext bundleContext, ConfigurableListableBeanFactory beanFactory) {
         this.logger.info("Detecting " + PlaceholderVariableResolver.class + " instances in " +  
         		displayNameOf(bundleContext.getBundle()) + "...");
-        String[] valueResolvers = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, 
-        		PlaceholderVariableResolver.class);
+        String[] valueResolvers = new String[]{};
+
+        // CHECKSTYLE:OFF
+
+        try {
+            valueResolvers = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory,
+                    PlaceholderVariableResolver.class);
+        } catch (Throwable t) {
+            logger.error("Unable to scan for placeholder variable resolvers in " + displayNameOf(bundleContext.getBundle()) + ". " +
+                         "This may be caused by bean definitions pointing to nonexistent classes.", t);
+        }
+
+        // CHECKSTYLE:ON
 
         for (String resolverName : valueResolvers) {
             StringValueResolver embeddableResolver = new PlaceholderVariableResolverWrapper(beanFactory, resolverName);

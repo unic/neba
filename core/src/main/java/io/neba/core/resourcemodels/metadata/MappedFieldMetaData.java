@@ -23,10 +23,10 @@ import io.neba.api.annotations.This;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.util.Annotations;
 import io.neba.core.util.ReflectionUtil;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.LazyLoader;
 import org.apache.commons.lang.ClassUtils;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -148,10 +148,10 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * Prepares a proxy instance of a collection type for use as a {@link org.springframework.cglib.proxy.Factory}.
-     * Proxy instances are always {@link org.springframework.cglib.proxy.Factory factories}.
-     * Using {@link org.springframework.cglib.proxy.Factory#newInstance(org.springframework.cglib.proxy.Callback)}
-     * is significantly more efficient than using {@link org.springframework.cglib.proxy.Enhancer#create(Class, org.springframework.cglib.proxy.Callback)}.
+     * Prepares a proxy instance of a collection type for use as a {@link Factory}.
+     * Proxy instances are always {@link Factory factories}.
+     * Using {@link Factory#newInstance(net.sf.cglib.proxy.Callback)}
+     * is significantly more efficient than using {@link Enhancer#create(Class, net.sf.cglib.proxy.Callback)}.
      */
     private Factory prepareProxyFactoryForCollectionTypes() {
         if (this.isInstantiableCollectionType) {

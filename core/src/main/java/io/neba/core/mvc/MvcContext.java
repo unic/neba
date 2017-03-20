@@ -17,13 +17,14 @@
 package io.neba.core.mvc;
 
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerAdapter;
@@ -32,18 +33,16 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import static org.springframework.beans.factory.BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
@@ -68,6 +67,7 @@ import static org.springframework.web.servlet.DispatcherServlet.MULTIPART_RESOLV
  * @author Olaf Otto
  */
 public class MvcContext implements ApplicationListener<ApplicationEvent> {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private volatile boolean dispatcherServletInitialized = false;
     private volatile boolean mvcInfrastructureInitialized = false;
     private ApplicationContext context;
@@ -107,7 +107,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
 
         protected boolean hasHandlerFor(HttpServletRequest request) {
             try {
-                return super.getHandler(request) != null;
+                return super.getHandler(request, false) != null;
             } catch (Exception e) {
                 throw new RuntimeException("Unable to lookup a handler for " + request + ".", e);
             }
@@ -139,6 +139,16 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
         if (event instanceof ContextRefreshedEvent) {
             synchronized (this) {
                 this.context = ((ContextRefreshedEvent) event).getApplicationContext();
+
+                // CHECKSTYLE:OFF
+                try {
+                    this.context.getBeansOfType(Object.class);
+                } catch (Throwable t) {
+                    this.logger.error("Unable to initialize MVC infrastructure for context " + context + ".", t);
+                    return;
+                }
+                // CHECKSTYLE:ON
+
                 configureMultipartResolver();
                 configureExceptionResolvers();
                 configureHandlerAdapters();
@@ -156,7 +166,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
      * @return <code>true</code> if this context has been
      *        {@link #onApplicationEvent(ApplicationEvent) initialized}
      *        and the {@link DispatcherServlet} contains a
-     *        {@link DispatcherServlet#getHandler(javax.servlet.http.HttpServletRequest) handler for the request}.
+     *        {@link DispatcherServlet#getHandler(javax.servlet.http.HttpServletRequest, boolean) handler for the request}.
      */
     public boolean isResponsibleFor(HttpServletRequest request) {
         return this.mvcInfrastructureInitialized && this.dispatcherServletInitialized && this.dispatcherServlet.hasHandlerFor(request);
@@ -174,30 +184,18 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
     }
 
     /**
-     * Registers the custom argument resolvers if a {@link RequestMappingHandlerAdapter}
+     * Registers the custom argument resolvers if a {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
      * is present in the factory.
      */
     private void registerCustomArgumentResolvers() {
-        RequestMappingHandlerAdapter requestMappingHandlerAdapter = this.factory.getBean(RequestMappingHandlerAdapter.class);
+        AnnotationMethodHandlerAdapter requestMappingHandlerAdapter = this.factory.getBean(AnnotationMethodHandlerAdapter.class);
 
         if (requestMappingHandlerAdapter != null) {
-            HandlerMethodArgumentResolverComposite argumentResolvers = requestMappingHandlerAdapter.getArgumentResolvers();
-
-            if (argumentResolvers == null) {
-                throw new IllegalStateException("No argument resolvers found in " + requestMappingHandlerAdapter +
-                        ". It appears the handler was not initialized by the application context.");
-            }
-
-            // Add Sling-specific argument resolvers first
-            List<HandlerMethodArgumentResolver> resolvers = new LinkedList<HandlerMethodArgumentResolver>();
-            resolvers.add(new RequestPathInfoArgumentResolver());
-            resolvers.add(new ResourceResolverArgumentResolver());
-            resolvers.add(new ResourceParamArgumentResolver());
-
-            // Subsequently add all existing argument resolvers (they are order-sensitive, ending with a catch-all resolver,
-            // thus the custom resolvers have to go first)
-            resolvers.addAll(argumentResolvers.getResolvers());
-            requestMappingHandlerAdapter.setArgumentResolvers(resolvers);
+            requestMappingHandlerAdapter.setCustomArgumentResolvers(new WebArgumentResolver[] {
+                    new RequestPathInfoArgumentResolver(),
+                    new ResourceResolverArgumentResolver(),
+                    new ResourceParamArgumentResolver()
+            });
         }
     }
 
@@ -210,7 +208,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
         Map<String, HandlerAdapter> handlerAdapters = this.factory.getBeansOfType(HandlerAdapter.class);
         if (handlerAdapters.isEmpty()) {
             defineBean(HttpRequestHandlerAdapter.class);
-            defineBean(RequestMappingHandlerAdapter.class);
+            defineBean(AnnotationMethodHandlerAdapter.class);
         }
     }
 
@@ -222,7 +220,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
     private void configureExceptionResolvers() {
         Map<String, HandlerExceptionResolver> resolvers = this.factory.getBeansOfType(HandlerExceptionResolver.class);
         if (resolvers.isEmpty()) {
-            defineBean(ExceptionHandlerExceptionResolver.class);
+            defineBean(AnnotationMethodHandlerExceptionResolver.class);
             defineBean(ResponseStatusExceptionResolver.class);
             DefaultHandlerExceptionResolver defaultResolver = defineBean(DefaultHandlerExceptionResolver.class);
             defaultResolver.setWarnLogCategory("mvc");
@@ -238,7 +236,7 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
         Map<String, HandlerMapping> handlerMappings = this.factory.getBeansOfType(HandlerMapping.class);
         if (handlerMappings.isEmpty()) {
             defineBean(BeanNameUrlHandlerMapping.class);
-            defineBean(RequestMappingHandlerMapping.class);
+            defineBean(DefaultAnnotationHandlerMapping.class);
         }
     }
 

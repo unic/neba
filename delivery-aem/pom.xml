@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>3.12.0-SNAPSHOT</version>
+        <version>3.12.0.AEM61-FORMS-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -37,48 +37,12 @@
             <artifactId>velocity</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.gemini.blueprint</groupId>
-            <artifactId>gemini-blueprint-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.gemini.blueprint</groupId>
-            <artifactId>gemini-blueprint-io</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
         </dependency>
 
         <!-- Test dependencies -->
@@ -127,48 +91,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Manifest customization: unpack all dependencies that require manifest transformation into a suitable directory -->
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-spring-dependencies</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
-                            <excludeArtifactIds>org.apache.servicemix.bundles.aopalliance</excludeArtifactIds>
-                            <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
-                            <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Customize the manifests of the unpacked dependencies and re-package them -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>transform-javax-import-versions</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <phase>prepare-package</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>io.neba.delivery.JavaxInjectManifestTransformer</mainClass>
-                    <arguments>
-                        <argument>${spring.artifacts.workdir}</argument>
-                        <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}</argument>
-                    </arguments>
-                </configuration>
-            </plugin>
-
             <!-- Build the content package including bundles with customized manifests (those are already copied to the target/vault-work directory) -->
             <plugin>
                 <groupId>com.day.jcr.vault</groupId>
@@ -183,18 +105,13 @@
                             <target>${neba.installation.path}</target>
                         </embedded>
                         <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+                            <groupId>org.springframework</groupId>
+                            <artifactId>spring-aop</artifactId>
                             <target>${neba.installation.path}</target>
                         </embedded>
                         <embedded>
-                            <groupId>org.eclipse.gemini.blueprint</groupId>
-                            <artifactId>gemini-blueprint-core</artifactId>
-                            <target>${neba.installation.path}</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.eclipse.gemini.blueprint</groupId>
-                            <artifactId>gemini-blueprint-io</artifactId>
+                            <groupId>org.springframework</groupId>
+                            <artifactId>spring-webmvc</artifactId>
                             <target>${neba.installation.path}</target>
                         </embedded>
                         <embedded>

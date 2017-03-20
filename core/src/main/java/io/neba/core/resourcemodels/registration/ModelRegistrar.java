@@ -24,13 +24,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static org.apache.commons.lang.StringUtils.join;
-import static org.springframework.beans.factory.BeanFactoryUtils.beanNamesForTypeIncludingAncestors;
 
 /**
  * Whenever a {@link org.springframework.beans.factory.BeanFactory} is initialized, this registrar
@@ -57,7 +57,21 @@ public class ModelRegistrar {
 
     private void discoverResourceModels(ConfigurableListableBeanFactory factory, Bundle bundle) {
         logger.info("Discovering resource models in bundle: " + displayNameOf(bundle) + " ...");
-        String[] beanNames = beanNamesForTypeIncludingAncestors(factory, Object.class);
+
+
+        String[] beanNames = new String[]{};
+
+        // CHECKSTYLE:OFF
+
+        try {
+            beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(factory, Object.class);
+        } catch (Throwable t) {
+            logger.error("Unable to scan for resource models in " + displayNameOf(bundle) + ". " +
+                    "This may be caused by bean definitions pointing to nonexistent classes.", t);
+        }
+
+        // CHECKSTYLE:ON
+
         int numberOfDiscoveredModels = 0;
         for (String beanName : beanNames) {
             ResourceModel resourceModel = factory.findAnnotationOnBean(beanName, ResourceModel.class);

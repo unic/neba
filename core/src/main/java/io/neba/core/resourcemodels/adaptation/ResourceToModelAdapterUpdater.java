@@ -26,12 +26,20 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.apache.commons.lang.ClassUtils.getAllInterfaces;
 import static org.apache.commons.lang.ClassUtils.getAllSuperclasses;
 import static org.apache.sling.api.adapter.AdapterFactory.ADAPTABLE_CLASSES;
@@ -67,11 +75,17 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
     private BundleContext context = null;
     private ServiceRegistration resourceToModelAdapterRegistration = null;
 
-    @Async("singlethreaded")
+    private final ExecutorService executorService = newSingleThreadExecutor();
+
     public void refresh() {
-        if (isModelAdapterUpdatable()) {
-            updateModeAdapter();
-        }
+        this.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (isModelAdapterUpdatable()) {
+                    updateModeAdapter();
+                }
+            }
+        });
     }
 
     /**
@@ -105,6 +119,11 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
         Dictionary<String, Object> properties = createResourceToModelAdapterProperties();
         String serviceClassName = AdapterFactory.class.getName();
         this.resourceToModelAdapterRegistration = this.context.registerService(serviceClassName, this.adapter, properties);
+    }
+
+    @PreDestroy
+    public void destroy() {
+        this.executorService.shutdownNow();
     }
 
     private void unregisterModelAdapter() {

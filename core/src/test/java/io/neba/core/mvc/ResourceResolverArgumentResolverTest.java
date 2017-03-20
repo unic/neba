@@ -48,9 +48,9 @@ public class ResourceResolverArgumentResolverTest extends AbstractArgumentResolv
         assertResolvedArgumentIsResourceResolver();
     }
 
-    @Test
-    public void testResourceResolverIsSupported() throws Exception {
-        assertResolverSupports(ResourceResolver.class);
+    @Override
+    Class<?> getParameterType() {
+        return ResourceResolver.class;
     }
 
     @Override

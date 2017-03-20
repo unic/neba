@@ -32,7 +32,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
 
@@ -46,6 +45,7 @@ import java.util.Set;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static org.springframework.beans.factory.BeanFactoryUtils.isFactoryDereference;
+import static org.springframework.util.ClassUtils.CGLIB_CLASS_SEPARATOR;
 
 /**
  * Detects beans that have methods annotated with {@link SelfTest}. <br />
@@ -62,7 +62,17 @@ public class SelftestRegistrar {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public void registerSelftests(ConfigurableListableBeanFactory factory, Bundle bundle) {
-        String[] beanNames = BeanFactoryUtils.beanNamesIncludingAncestors(factory);
+        String[] beanNames = new String[]{};
+
+        // CHECKSTYLE:OFF
+        try {
+            beanNames = BeanFactoryUtils.beanNamesIncludingAncestors(factory);
+        } catch (Throwable t) {
+            logger.error("Unable to scan for self tests in " + displayNameOf(bundle) + ". " +
+                    "This may be caused by bean definitions pointing to nonexistent classes.", t);
+        }
+        // CHECKSTYLE:ON
+
         for (String beanName : beanNames) {
             if (factory.containsBeanDefinition(beanName) && !isInternal(beanName)) {
                 findSelftests(factory, beanName, bundle);
@@ -139,16 +149,25 @@ public class SelftestRegistrar {
         Class<?> beanType = factory.getType(beanName);
         if (beanType != null) {
             beanType = unproxy(beanType);
-            ReflectionUtils.doWithMethods(beanType, new MethodCallback() {
-                @Override
-                public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-                    SelfTest selfTest = AnnotationUtils.findAnnotation(method, SelfTest.class);
-                    if (selfTest != null) {
-                        String methodName = method.getName();
-                        selftestReferences.add(new SelftestReference(factory, beanName, selfTest, methodName, bundle));
+
+            // CHECKSTYLE:OFF
+            try {
+                ReflectionUtils.doWithMethods(beanType, new MethodCallback() {
+                    @Override
+                    public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+                        SelfTest selfTest = AnnotationUtils.findAnnotation(method, SelfTest.class);
+                        if (selfTest != null) {
+                            String methodName = method.getName();
+                            selftestReferences.add(new SelftestReference(factory, beanName, selfTest, methodName, bundle));
+                        }
                     }
-                }
-            });
+                });
+            } catch (Throwable t) {
+                logger.debug("Unable to check for @" + SelfTest.class.getSimpleName() + " annotations on type " + beanType +
+                              ", got class not found exception. This may stem from unresolved optional imports and can be ignored.", t);
+            }
+
+            // CHECKSTYLE:ON
         }
     }
 
@@ -167,11 +186,15 @@ public class SelftestRegistrar {
      */
     private Class<?> unproxy(Class<?> beanType) {
         Class<?> unproxiedType = beanType;
-        if (ClassUtils.isCglibProxyClass(beanType)) {
+        if (isCglibProxyClass(beanType)) {
             // It is a dynamic subclass re-implementing the same methods.
             unproxiedType = beanType.getSuperclass();
         }
         return unproxiedType;
+    }
+
+    private boolean isCglibProxyClass(Class<?> beanType) {
+        return beanType.getName().contains(CGLIB_CLASS_SEPARATOR);
     }
 
     private Set<MethodMetadata> getSelfTestMethods(AnnotationMetadata metadata) {

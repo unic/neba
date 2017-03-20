@@ -20,22 +20,17 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import static java.util.Collections.list;
 
 /**
  * Translates sling's build-in support of multipart file posts
@@ -126,44 +121,5 @@ public class MultipartSlingHttpServletRequest extends SlingHttpServletRequestWra
 			}
 		}
 		return fileMap;
-	}
-
-	@Override
-	public String getMultipartContentType(String name) {
-		final RequestParameter requestParameter = getRequestParameter(name);
-		String contentType = null;
-		if (requestParameter != null && !requestParameter.isFormField()) {
-			contentType = requestParameter.getContentType();
-		}
-		return contentType;
-	}
-
-	@Override
-	public HttpHeaders getMultipartHeaders(String name) {
-		String contentType = getMultipartContentType(name);
-		if (contentType != null) {
-			HttpHeaders headers = new HttpHeaders();
-			headers.add(CONTENT_TYPE, contentType);
-			return headers;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public HttpHeaders getRequestHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		Enumeration<String> headerNames = getHeaderNames();
-		while (headerNames.hasMoreElements()) {
-			String headerName = headerNames.nextElement();
-			headers.put(headerName, list(getHeaders(headerName)));
-		}
-		return headers;
-	}
-
-	@Override
-	public HttpMethod getRequestMethod() {
-		return HttpMethod.valueOf(getSlingRequest().getMethod());
 	}
 }

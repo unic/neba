@@ -21,6 +21,8 @@ import org.eclipse.gemini.blueprint.context.event.OsgiBundleApplicationContextLi
 import org.eclipse.gemini.blueprint.context.event.OsgiBundleContextFailedEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,8 @@ import static org.osgi.framework.Bundle.STARTING;
 @Service("osgiApplicationContextListener")
 public class ContextFailedHandler extends ContextShutdownHandler
                                   implements OsgiBundleApplicationContextListener<OsgiBundleApplicationContextEvent> {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     /**
      * This method is executed asynchronously since the original extender thread may try to obtain a lock to the OSGi
      * framework's registry state during the stop while holding the event handling lock, which may result in a transitive
@@ -51,6 +55,9 @@ public class ContextFailedHandler extends ContextShutdownHandler
         // for instanceof since gemini-blueprint does not correctly determine
         // the event type we are listening for.
         if (event instanceof OsgiBundleContextFailedEvent) {
+            logger.error("Stopping bundle " + displayNameOf(event.getBundle()) + ", " +
+                         "the bundle's application context failed to start. ", ((OsgiBundleContextFailedEvent) event).getFailureCause());
+
             final Bundle bundle = event.getBundle();
 
             handleStop(bundle);

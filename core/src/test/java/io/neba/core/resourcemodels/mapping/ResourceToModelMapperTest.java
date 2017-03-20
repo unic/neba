@@ -19,6 +19,8 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.api.resourcemodels.ResourceModelPostProcessor;
 import io.neba.core.resourcemodels.metadata.*;
 import io.neba.core.util.OsgiBeanSource;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.NoOp;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
@@ -31,8 +33,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.NoOp;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyObject;

@@ -19,10 +19,8 @@ package io.neba.core.mvc;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.springframework.core.MethodParameter;
-import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Supports {@link RequestPathInfo} arguments of a {@link org.springframework.web.bind.annotation.RequestMapping}.
@@ -40,19 +38,24 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author Olaf Otto
  */
-public class RequestPathInfoArgumentResolver implements HandlerMethodArgumentResolver {
-    @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+public class RequestPathInfoArgumentResolver implements WebArgumentResolver {
+    private boolean supportsParameter(MethodParameter parameter) {
         return RequestPathInfo.class.isAssignableFrom(parameter.getParameterType());
     }
 
-    @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    private Object resolveArgumentInternal(MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
         Object request = webRequest.getNativeRequest();
         if (request instanceof SlingHttpServletRequest) {
             return ((SlingHttpServletRequest) request).getRequestPathInfo();
         }
         return null;
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
+        if (!supportsParameter(methodParameter)) {
+            return UNRESOLVED;
+        }
+        return resolveArgumentInternal(methodParameter, webRequest);
     }
 }

@@ -22,10 +22,8 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
@@ -53,9 +51,8 @@ import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
  *
  * @author Olaf Otto
  */
-public class ResourceParamArgumentResolver implements HandlerMethodArgumentResolver {
-    @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+public class ResourceParamArgumentResolver implements WebArgumentResolver {
+    private boolean supportsParameter(MethodParameter parameter) {
         return getParameterAnnotation(parameter) != null;
     }
 
@@ -63,11 +60,8 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         return parameter.getParameterAnnotation(ResourceParam.class);
     }
 
-    @Override
-    public Object resolveArgument(MethodParameter parameter,
-                                 ModelAndViewContainer container,
-                                 NativeWebRequest webRequest,
-                                 WebDataBinderFactory binderFactory) throws Exception {
+    private Object resolveArgumentInternal(MethodParameter parameter,
+                                 NativeWebRequest webRequest) throws Exception {
 
         final Object nativeRequest = webRequest.getNativeRequest();
 
@@ -129,5 +123,14 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
             parameterName = parameter.getParameterName();
         }
         return parameterName;
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
+        if (!supportsParameter(methodParameter)) {
+            return UNRESOLVED;
+        }
+
+        return resolveArgumentInternal(methodParameter, webRequest);
     }
 }

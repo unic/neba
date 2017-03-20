@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
@@ -42,7 +41,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.springframework.web.servlet.DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE;
 
 /**
  * @author Olaf Otto
@@ -55,8 +53,6 @@ public class NebaViewResolverTest {
     private RequestDispatcher dispatcher;
     @Mock
     private HttpServletResponse response;
-    @Mock
-    private FlashMapManager flashMapManager;
 
     private View resolvedView;
 
@@ -67,7 +63,6 @@ public class NebaViewResolverTest {
     public void setUp() throws Exception {
         doReturn("").when(this.request).getContextPath();
         doReturn(this.dispatcher).when(this.request).getRequestDispatcher(anyString());
-        doReturn(this.flashMapManager).when(this.request).getAttribute(FLASH_MAP_MANAGER_ATTRIBUTE);
         Answer<Object> original = new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {

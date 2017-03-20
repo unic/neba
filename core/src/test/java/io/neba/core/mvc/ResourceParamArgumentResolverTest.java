@@ -29,9 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -60,11 +58,7 @@ public class ResourceParamArgumentResolverTest {
     @Mock
     private MethodParameter methodParameter;
     @Mock
-    private ModelAndViewContainer container;
-    @Mock
     private NativeWebRequest webRequest;
-    @Mock
-    private WebDataBinderFactory factory;
     @Mock
     private ResourceParam resourceParam;
 
@@ -317,7 +311,7 @@ public class ResourceParamArgumentResolverTest {
     }
 
     private void resolveArgument() throws Exception {
-        this.resolvedArgument = testee.resolveArgument(this.methodParameter, this.container, this.webRequest, this.factory);
+        this.resolvedArgument = testee.resolveArgument(this.methodParameter, this.webRequest);
     }
 
     private void withNonSlingRequest() {

@@ -19,20 +19,20 @@ package io.neba.core.resourcemodels.metadata;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.util.OsgiBeanSource;
+import net.sf.cglib.proxy.NoOp;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
-import org.springframework.cglib.proxy.NoOp;
 
 import java.util.Collection;
 
+import static net.sf.cglib.proxy.Enhancer.create;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.cglib.proxy.Enhancer.create;
 
 /**
  * @author Olaf Otto

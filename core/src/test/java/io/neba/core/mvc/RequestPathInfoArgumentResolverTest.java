@@ -48,9 +48,9 @@ public class RequestPathInfoArgumentResolverTest extends AbstractArgumentResolve
         assertResolvedArgumentIsResourceResolver();
     }
 
-    @Test
-    public void testResourceResolverIsSupported() throws Exception {
-        assertResolverSupports(RequestPathInfo.class);
+    @Override
+    Class<?> getParameterType() {
+        return RequestPathInfo.class;
     }
 
     @Override

@@ -16,19 +16,6 @@
 
 package io.neba.core.mvc;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.request.RequestParameterMap;
@@ -38,9 +25,21 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -99,53 +98,6 @@ public class MultipartSlingHttpServletRequestTest {
 		mockFileField("test2", 1);
 		mockFileField("test3", 1);
 		assertMultiFileMapHasEntries("test1", "test2", "test3");
-	}
-
-	@Test
-	public void testGetMultipartContentType() {
-		String fileName = "test1";
-		String contentType = "image/png";
-
-		mockFileFieldWithContentType(fileName, contentType);
-
-		String actual = this.testee.getMultipartContentType(fileName);
-		assertThat(actual).isEqualTo(contentType);
-	}
-
-	@Test
-	public void testGetMultipartHeaders() {
-		String fileName = "test1";
-		String contentType = "image/png";
-
-		mockFileFieldWithContentType(fileName, contentType);
-
-		HttpHeaders headers = this.testee.getMultipartHeaders(fileName);
-		assertThat(headers.size()).isEqualTo(1);
-		assertThat(headers.containsKey(MultipartSlingHttpServletRequest.CONTENT_TYPE)).isTrue();
-		assertThat(headers.getFirst(MultipartSlingHttpServletRequest.CONTENT_TYPE)).isEqualTo(contentType);
-	}
-
-	@Test
-	public void testGetRequestHeaders() {
-		HttpHeaders expected = new HttpHeaders();
-		expected.add("MyHeaderA", "value1a");
-		expected.add("MyHeaderA", "value1b");
-		expected.add("MyHeaderB", "value2");
-		expected.add("MyHeaderC", "value3");
-
-		mockHeaders(expected);
-		HttpHeaders actual = this.testee.getRequestHeaders();
-
-		assertThat(actual).isEqualTo(expected);
-	}
-
-	@Test
-	public void testGetRequestMethod() {
-		String expected = "GET";
-		when(this.wrappedRequest.getMethod()).thenReturn(expected);
-
-		HttpMethod actual = this.testee.getRequestMethod();
-		assertThat(actual.name()).isEqualTo(expected);
 	}
 
 	private void assertMultiFileMapHasEntries(Object... fileNames) {

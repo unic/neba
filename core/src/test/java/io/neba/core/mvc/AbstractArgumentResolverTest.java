@@ -19,11 +19,10 @@ package io.neba.core.mvc;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.doReturn;
 /**
  * @author Olaf Otto
  */
-public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgumentResolver> {
+public abstract class AbstractArgumentResolverTest<T extends WebArgumentResolver> {
     @Mock
     private MethodParameter parameter;
     @Mock
@@ -43,14 +42,8 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
 
     @Before
     public void setUp() throws Exception {
-        doReturn(ResourceResolver.class).when(this.parameter).getParameterType();
+        doReturn(getParameterType()).when(this.parameter).getParameterType();
         doReturn(this.request).when(this.nativeWebRequest).getNativeRequest();
-    }
-
-    @Test
-    public void testUnsupportedArgumentType() throws Exception {
-        withUnsupportedParameterType();
-        assertParameterIsUnsupported();
     }
 
     public void withParameterType(Class<?> type) {
@@ -58,35 +51,18 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
     }
 
     public void resolveArguments() throws Exception {
-        this.argument = getTestee().resolveArgument(this.parameter, null, this.nativeWebRequest, null);
+        this.argument = getTestee().resolveArgument(this.parameter, this.nativeWebRequest);
     }
 
     public void assertResolvedArgumentIs(Object value) {
         assertThat(this.argument).isSameAs(value);
     }
 
+    abstract Class<?> getParameterType();
+
     public SlingHttpServletRequest getRequest() {
         return request;
     }
 
     public abstract T getTestee();
-
-    public void assertResolverSupports(Class<?> parameterType) {
-        withParameterType(parameterType);
-        assertParameterIsSupported();
-    }
-
-    private void assertParameterIsUnsupported() {
-        assertThat(getTestee().supportsParameter(this.parameter)).isFalse();
-    }
-
-    private void assertParameterIsSupported() {
-        assertThat(getTestee().supportsParameter(this.parameter)).isTrue();
-    }
-
-    private void withUnsupportedParameterType() {
-        @SuppressWarnings("rawtypes")
-		Class<? extends AbstractArgumentResolverTest> type = getClass();
-        withParameterType(type);
-    }
 }
