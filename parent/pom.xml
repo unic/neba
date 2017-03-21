@@ -67,9 +67,9 @@
     </properties>
 
     <scm>
-        <url>https://github.com/unic/neba</url>
-        <connection>scm:git:git://github.com/unic/neba.git</connection>
-        <developerConnection>scm:git:git@github.com:unic/unic.git</developerConnection>
+        <connection>scm:git:https://git.unic.com/scm/ewzepac/ewz-neba.git</connection>
+        <developerConnection>scm:git:https://git.unic.com/scm/ewzepac/ewz-neba.git</developerConnection>
+        <url>https://git.unic.com/scm/ewzepac/ewz-neba.git</url>
     </scm>
 
     <repositories>
