@@ -35,7 +35,10 @@ import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -173,8 +176,8 @@ public class ResourceToModelAdapterUpdaterTest {
 		assertThat(adapters).containsOnly(elements);
 	}
 	
-	private void signalRegistryChange() {
-		this.testee.refresh();
+	private void signalRegistryChange() throws InterruptedException, ExecutionException, TimeoutException {
+		this.testee.refresh().get(5, SECONDS);
 	}
 
 	@SuppressWarnings({ "rawtypes" })

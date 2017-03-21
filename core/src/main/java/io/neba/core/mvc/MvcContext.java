@@ -141,20 +141,20 @@ public class MvcContext implements ApplicationListener<ApplicationEvent> {
                 this.context = ((ContextRefreshedEvent) event).getApplicationContext();
 
                 // CHECKSTYLE:OFF
+
                 try {
-                    this.context.getBeansOfType(Object.class);
+                    configureMultipartResolver();
+                    configureExceptionResolvers();
+                    configureHandlerAdapters();
+                    registerCustomArgumentResolvers();
+                    configureHandlerMappings();
+                    configureViewResolvers();
                 } catch (Throwable t) {
                     this.logger.error("Unable to initialize MVC infrastructure for context " + context + ".", t);
                     return;
                 }
                 // CHECKSTYLE:ON
 
-                configureMultipartResolver();
-                configureExceptionResolvers();
-                configureHandlerAdapters();
-                registerCustomArgumentResolvers();
-                configureHandlerMappings();
-                configureViewResolvers();
                 this.mvcInfrastructureInitialized = true;
             }
         }

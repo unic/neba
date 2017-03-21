@@ -53,6 +53,10 @@ public class ResourceResolverArgumentResolver implements WebArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
+        if (!supportsParameter(methodParameter)) {
+            return UNRESOLVED;
+        }
+
         return resolveArgumentInternal(methodParameter, webRequest);
     }
 }

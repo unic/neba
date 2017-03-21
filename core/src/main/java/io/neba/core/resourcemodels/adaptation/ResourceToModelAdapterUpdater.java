@@ -38,6 +38,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.apache.commons.lang.ClassUtils.getAllInterfaces;
@@ -77,8 +78,8 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
 
     private final ExecutorService executorService = newSingleThreadExecutor();
 
-    public void refresh() {
-        this.executorService.execute(new Runnable() {
+    public Future<?> refresh() {
+        return this.executorService.submit(new Runnable() {
             @Override
             public void run() {
                 if (isModelAdapterUpdatable()) {
