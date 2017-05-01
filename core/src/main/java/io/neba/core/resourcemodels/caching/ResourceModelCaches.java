@@ -59,6 +59,10 @@ public class ResourceModelCaches {
             throw new IllegalArgumentException("Method argument modelSource must not be null");
         }
 
+        if (this.caches.isEmpty()) {
+            return null;
+        }
+
         final Key key = key(resource, modelSource.getBeanType());
         for (ResourceModelCache cache : this.caches) {
             T model = cache.get(key);
@@ -88,6 +92,10 @@ public class ResourceModelCaches {
         }
         if (model == null) {
             throw new IllegalArgumentException("Method argument model must not be null");
+        }
+
+        if (this.caches.isEmpty()) {
+            return;
         }
 
         final Key key = key(resource, modelSource.getBeanType());
