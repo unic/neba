@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.api.tags;
 
@@ -41,6 +41,7 @@ public final class DefineObjectsTag extends TagSupport {
 
     private boolean includeGenericBaseTypes = false;
     private String modelBeanName;
+    private String var;
 
     @Override
     public int doEndTag() throws JspException {
@@ -52,7 +53,7 @@ public final class DefineObjectsTag extends TagSupport {
             "generic base types such as \"nt:unstructured\" or " +
             "\"nt:base\". Defaults to false. Has no effect if a " +
             "modelName is provided.",
-            required = false, runtimeValueAllowed = true)
+            runtimeValueAllowed = true)
     public void setIncludeGenericBaseTypes(boolean includeGenericBaseTypes) {
         this.includeGenericBaseTypes = includeGenericBaseTypes;
     }
@@ -62,9 +63,16 @@ public final class DefineObjectsTag extends TagSupport {
             "declared for a resource type compatible with the resource's type. The searched " +
             "models will always include generic base models, regardless of whether " +
             "includeGenericBaseTypes is false.",
-            required = false, runtimeValueAllowed = true)
+            runtimeValueAllowed = true)
     public void setUseModelNamed(String name) {
         this.modelBeanName = name;
+    }
+
+    @TagAttribute(description = "The variable name to publish the model under. " +
+            "Defaults to the default model name 'm' if not defined, null or empty."  ,
+            runtimeValueAllowed = true)
+    public void setVar(String var) {
+        this.var = var;
     }
 
     private void provideMostSpecificResourceModel() {
@@ -89,7 +97,8 @@ public final class DefineObjectsTag extends TagSupport {
         }
 
         if (model != null) {
-            this.pageContext.setAttribute(MODEL, model);
+            String variableName = isBlank(this.var) ? MODEL : this.var;
+            this.pageContext.setAttribute(variableName, model);
         }
     }
 
