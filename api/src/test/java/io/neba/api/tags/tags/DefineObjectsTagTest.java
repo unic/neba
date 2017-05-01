@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.api.tags.tags;
 
@@ -40,7 +40,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -98,14 +101,14 @@ public class DefineObjectsTagTest {
         enableBaseTypeSupport();
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModelIncludingBaseTypes();
-        verifyGenericModelIsAddedToPageContext();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test
     public void testResolutionOfGenericModelWithoutBaseTypes() throws Exception {
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModel();
-        verifyGenericModelIsAddedToPageContext();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test
@@ -113,7 +116,7 @@ public class DefineObjectsTagTest {
         withDesiredModelNamed("name");
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModelWithProvidedBeanName();
-        verifyGenericModelIsAddedToPageContext();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test
@@ -121,13 +124,38 @@ public class DefineObjectsTagTest {
         withDesiredModelNamed(" ");
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModel();
-        verifyGenericModelIsAddedToPageContext();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlingOfMissingProvider() throws Exception {
         withMissingProviderService();
         executeTag();
+    }
+
+    @Test
+    public void testUserDefinedVariableNameOverridesDefaultVariableName() throws Exception {
+        withUserDefinedVariableName("userDefined");
+        executeTag();
+        verifyGenericModelIsAddedToPageContextWithVariableName("userDefined");
+    }
+
+    @Test
+    public void testFallbackToDefaultVariableNameIfUserDefinedVariableNameIsNull() throws Exception {
+        withUserDefinedVariableName(null);
+        executeTag();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
+    }
+
+    @Test
+    public void testFallbackToDefaultVariableNameIfUserDefinedVariableNameIsEmpty() throws Exception {
+        withUserDefinedVariableName("");
+        executeTag();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
+    }
+
+    private void withUserDefinedVariableName(String variableName) {
+        this.testee.setVar(variableName);
     }
 
     private void withMissingProviderService() {
@@ -155,8 +183,12 @@ public class DefineObjectsTagTest {
         this.testee.setIncludeGenericBaseTypes(true);
     }
 
-    private void verifyGenericModelIsAddedToPageContext() {
+    private void verifyGenericModelIsAddedToPageContextWithDefaultVariableName() {
         verify(this.context).setAttribute(eq(Constants.MODEL), eq(this.model));
+    }
+
+    private void verifyGenericModelIsAddedToPageContextWithVariableName(String variableName) {
+        verify(this.context).setAttribute(eq(variableName), eq(this.model));
     }
 
     private void withBindings(SlingBindings bindings) {
