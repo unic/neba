@@ -14,7 +14,7 @@
 </p>
 
 <header>
-    <h3 id="customizing_mvc>Customizing the Spring MVC infrastructure</h3>
+    <h3 id="customizing_mvc">Customizing the Spring MVC infrastructure</h3>
 </header>
 <p>You may provide implementations of
     <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/HandlerAdapter.html">Handler adapters</a>,

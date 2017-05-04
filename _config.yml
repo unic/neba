@@ -2,6 +2,7 @@ github: [Repository metadata]
 markdown: kramdown
 url: http://www.neba.io
 nebaVersion: 4.1.0
+springNamespaceVersion: 4.2
 springDocumentationVersion: 4.2.x
 collections:
   - mainNavItems

@@ -34,7 +34,7 @@
        ...
        xsi:schemaLocation="
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+        http://www.springframework.org/schema/mvc/spring-mvc-{{site.springNamespaceVersion}}.xsd
         ...">
 
     <mvc:annotation-driven />
@@ -165,7 +165,7 @@ public class DemoController {
 }
 {% endhighlight %}
 
-<p>Here, "page" is implicitly considered option (since there is a default value)</p>
+<p>Here, "page" is implicitly considered optional (since there is a default value)</p>
 
 <p>
    Furthermore, the content paths resolved by the @ResourceParam annotations can be altered by appending an arbitrary sub-path:

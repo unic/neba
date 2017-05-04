@@ -188,7 +188,7 @@ by NEBA are treated as if the corresponding NEBA annotation was directly applied
 <h4 id="the_reference_annotation">Resolving references with the @Reference annotation</h4>
 
 <p><span id="the_unmapped_annotation">NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
-    annotated with @Unmapped</span>.  Notice that play speed and trans time are Strings in this example, whereas one would
+    annotated with @Unmapped</span>.  Notice that play speed and trans time are Strings in the above example, whereas one would
     expect them to be integers. This is simply because these values are defined to be Strings in the component's CQ
     dialog. Had they been defined as integers, we could also retrieve them as integers. You will also notice that &quot;pages&quot;
     is null. And no wonder - the &quot;pages&quot; property is actually of type &quot;String[]&quot;, so the field

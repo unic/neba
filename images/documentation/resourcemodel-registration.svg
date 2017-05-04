@@ -256,15 +256,15 @@
                y="9"
                id="tspan102">:ResourceToModelAdapter</tspan></text>
 <path
-             d="m 555,532 0,71 146,0 0,-59 -12,-12 -134,0"
+             d="m 555,532 0,71 220,0 0,-59 -12,-12 -134,0"
              id="path104"
              inkscape:connector-curvature="0"
              style="fill:#dfdfdf;stroke:none" /><path
-             d="m 552,529 0,71 146,0 0,-59 -12,-12 -134,0"
+             d="m 552,529 0,71 220,0 0,-59 -12,-12 -208,0"
              id="path106"
              inkscape:connector-curvature="0"
              style="fill:#ffffff" /><path
-             d="m 686,529 0,12 12,0 -12,-12"
+             d="m 760,529 0,12 12,0 -12,-12"
              id="path108"
              inkscape:connector-curvature="0"
              style="fill:#dcdcdc" /></g><g
@@ -278,7 +278,7 @@
                dx="0"
                x="557"
                y="553"
-               id="tspan114">This Sling AdapterFactory OSGi </tspan></text>
+               id="tspan114">This Sling AdapterFactory OSGi Service</tspan></text>
 <text
              transform="scale(1,-1)"
              id="text116"
@@ -286,23 +286,7 @@
                dx="0"
                x="557"
                y="565"
-               id="tspan118">Service enables </tspan></text>
-<text
-             transform="scale(1,-1)"
-             id="text120"
-             style="fill:#000000;stroke:none"><tspan
-               dx="0"
-               x="557"
-               y="577"
-               id="tspan122">Resource.adaptTo</tspan></text>
-<text
-             transform="scale(1,-1)"
-             id="text124"
-             style="fill:#000000;stroke:none"><tspan
-               dx="0"
-               x="557"
-               y="589"
-               id="tspan126">(ModelType.class)</tspan></text>
+               id="tspan118">enables Resource.adaptTo (ModelType.class)</tspan></text>
 </g><g
            transform="scale(0.959748,-0.959436)"
            id="g128"><path
