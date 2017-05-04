@@ -3,7 +3,7 @@
 <section class="info">
     <h4>Background: How Spring MVC is integrated into Sling</h4>
     <p>
-        By default, Sling supports three kinds of scripts: JSPs, Sightly templates and plain <a href="http://sling.apache.org/site/servlets.html">Servlets</a>.
+        By default, Sling supports three kinds of scripts: JSPs, HTL (Sightly) templates and plain <a href="http://sling.apache.org/site/servlets.html">Servlets</a>.
         While the former two are decent to render dynamic resources, i.e. content pages and components that have no fixed
         URL, servlets are often used to provide RESTful services with a fixed URL. However, Servlets are quite
         primitive. They do not provide separation of model, view and controller or common yet complex features such as
@@ -27,7 +27,7 @@
     such as automated conversion of controller responses to JSON
 </p>
 
-{% highlight xml %}
+<div class="listing" id="listing:mvc-schema">{% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
 <beans
        xmlns:mvc="http://www.springframework.org/schema/mvc"
@@ -39,23 +39,23 @@
 
     <mvc:annotation-driven />
 </beans>
-{% endhighlight %}
+{% endhighlight %}<div class="legend">MVC schema snippet for blueprint XML declaration</div></div>
 
 <p>Let's create a simple Controller called &quot;DemoController&quot;.
     We will use Spring's @Controller annotation; other styles (such as mapping by bean names etc.) are also
     supported.  The purpose of this controller is to echo a parameter that we provide in a RESTful way, i.e. as a
     path element (this allows caching!).</p>
 
-{% highlight java %}
+<div class="listing" id="listing:controller-annotation">{% highlight java %}
 @Controller
 public class DemoController {
 }
-{% endhighlight %}
+{% endhighlight %}<div class="legend">@Controller annotation usage</div></div>
 
 <p>A @Controller is automatically detected and registered (as a singleton) by Spring's classpath scanning.
     Let's use Spring's REST support to both define the URL the controller listens to and the parameter we expect:</p>
 
-{% highlight java %}
+<div class="listing" id="listing:controller-annotation-requestmapping">{% highlight java %}
 @Controller
 public class DemoController {
     @RequestMapping("/echo/{param}")
@@ -64,14 +64,14 @@ public class DemoController {
        return paramToEcho;
     }
 }
-{% endhighlight %}
+{% endhighlight %}<div class="legend">An echo @Controller example</div></div>
 
 <p>That's it. You may now call your controller e.g. with /bin/mvc.do/echo/HelloWorld.txt.</p>
 
 <p>Furthermore, NEBA automatically provides <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/method/support/HandlerMethodArgumentResolver.html">handler method argument resolvers</a>
     for Sling-specific request elements, SlingHttpServletRequest and -Response, RequestPathInfo and ResourceResolver, like so:</p>
 
-{% highlight java %}
+<div class="listing" id="listing:controller-neba-argument-resolvers">{% highlight java %}
 @Controller
 public class DemoController {
     @RequestMapping("/echoTitle")
@@ -86,7 +86,7 @@ public class DemoController {
         ...
     }
 }
-{% endhighlight %}
+{% endhighlight %}<div class="legend">NEBA argument resolvers for controller methods</div></div>
 
 <p>It is thus not necessary to obtain these elements from the request.</p>
 
@@ -110,7 +110,7 @@ and thus discouraged.</p>
     that resolves resource type names to the corresponding sling scripts and uses these to render views. Consider the following controller method:
 </p>
 
-{% highlight java %}
+<div class="listing" id="listing:controller-sling-view-support">{% highlight java %}
 @Controller
 public class DemoController {
     @RequestMapping("/myMethod")
@@ -119,10 +119,10 @@ public class DemoController {
        return "app/controllerViews/myView"
     }
 }
-{% endhighlight %}
+{% endhighlight %}<div class="legend">Calling Sling Views from Spring @Controllers</div></div>
 <p>
     Here, NEBA's view resolver will resolve "app/controllerViews/myView" to the corresponding resource, e.g. "/apps/app/controllerViews/myView". It will then
-    look for a suitable default script for the type, e.g. "myView.html" for a Sightly template or "myView.jsp" for a JSP view. If no such script is found,
+    look for a suitable default script for the type, e.g. "myView.html" for a HTL (Sightly) template or "myView.jsp" for a JSP view. If no such script is found,
     the view resolver will re-attempt to resolve the default view for the <em>super type</em> of the view resource. This enables inheritance and
     overriding - just like for regular Sling resource views.
 </p>
@@ -137,7 +137,7 @@ public class DemoController {
 
 <p>NEBA supports the common use case of handling resource paths in controllers with a convenience annotation:</p>
 
-{% highlight java %}
+<div class="listing" id="listing:controller-resourceparam-annotation">{% highlight java %}
 @Controller
 public class DemoController {
     @RequestMapping("/echoTitle")
@@ -146,7 +146,7 @@ public class DemoController {
        return page.getTitle();
     }
 }
-{% endhighlight %}
+{% endhighlight %}<div class="legend">Using the resource param annotations in Spring @Controllers</div></div>
 
 <p>Here, a request parameter &quot;page&quot; is expected to contain a path to a resource. This resource is
     resolved and adapted to the parameter type in case the parameter type is not &quot;Resource&quot;.
@@ -154,7 +154,7 @@ public class DemoController {
     be used in case the parameter is not present or empty:
 </p>
 
-{% highlight java %}
+<div class="listing" id="listing:controller-resourceparam-defaultvalue">{% highlight java %}
 @Controller
 public class DemoController {
     @RequestMapping("/echoTitle")
@@ -163,7 +163,7 @@ public class DemoController {
        return page.getTitle();
     }
 }
-{% endhighlight %}
+{% endhighlight %}<div class="legend">Using a default value for the @ResourceParam annotation</div></div>
 
 <p>Here, "page" is implicitly considered optional (since there is a default value)</p>
 
@@ -171,7 +171,7 @@ public class DemoController {
    Furthermore, the content paths resolved by the @ResourceParam annotations can be altered by appending an arbitrary sub-path:
 </p>
 
-{% highlight java %}
+<div class="listing" id="listing:controller-resourceparam-append">{% highlight java %}
 @Controller
 public class DemoController {
     @RequestMapping("/echoTitle")
@@ -180,7 +180,7 @@ public class DemoController {
        return pageContent.getTitle();
     }
 }
-{% endhighlight %}
+{% endhighlight %}<div class="legend">Altering the path resolved by the @ResourceParam annotation</div></div>
 
 <p>
     The path specified in "append" is appended to the provided path or the specified default path prior to resolution.

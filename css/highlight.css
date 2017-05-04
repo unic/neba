@@ -1,7 +1,7 @@
 .highlight pre {
     white-space: pre-wrap;
 }
-.highlight  { background: #f6f6f6; padding: 3px; margin-bottom: 14px; margin-left: 0; text-align: left}
+.highlight  { background: #f6f6f6; padding: 3px; margin-left: 0; text-align: left}
 .highlight pre { padding-left: 5px;}
 .highlight .c { color: #999988; font-style: italic } /* Comment */
 .highlight .err { color: #378c47  } /* Error, but assume string. */
@@ -63,3 +63,14 @@
 .highlight .vg { color: #008080 } /* Name.Variable.Global */
 .highlight .vi { color: #008080 } /* Name.Variable.Instance */
 .highlight .il { color: #009999 } /* Literal.Number.Integer.Long */
+
+.listing {
+    margin-bottom: 15px;
+}
+
+.listing .legend {
+    border-top: 1px dashed #e0e0e0;
+    background-color: #f9fafa;
+    padding: 3px 10px;
+    font-size: 80%;
+ }

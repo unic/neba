@@ -9,7 +9,7 @@
 
 <h3 id="add_osgi_blueprint_context">Step 2: Add an OSGi blueprint context to your bundle(s)</h3>
 <p>Place one or more blueprint XML file into OSGI-INF/blueprint, like so:</p>
-{% highlight xml %}
+<div class="listing" id="listing:blueprintxml">{% highlight xml %}
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -24,7 +24,7 @@
 
     <context:component-scan base-package="bundle.package.impl" />
 </beans>
-{% endhighlight %}
+{% endhighlight %}<div class="legend">Sample Blueprint Context XML declaration</div></div>
 
 <p>That's it - you may now proceed to <a href="#writing_resourcemodels">Write resource models</a> or
     <a href="#spring_mvc">Spring controllers</a> - for instance, use the sample project below as a starting point.</p>
