@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
+import io.neba.core.blueprint.EventhandlingBarrier;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -56,6 +57,8 @@ public class ModelRegistryTest {
 	private Bundle bundle;
     @Mock
     private ResourceResolver resolver;
+    @Mock
+    EventhandlingBarrier barrier;
 
     private Set<ResourceModel> resourceModelAnnotations;
     private long bundleId;
@@ -67,6 +70,7 @@ public class ModelRegistryTest {
     @Before
     public void setUp() throws LoginException {
         this.resourceModelAnnotations = new HashSet<>();
+        doReturn(true).when(this.barrier).tryBegin();
     	withBundleId(12345L);
     }
     

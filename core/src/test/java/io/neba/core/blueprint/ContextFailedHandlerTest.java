@@ -45,6 +45,8 @@ public class ContextFailedHandlerTest {
     private MvcServlet dispatcherServlet;
     @Mock
     private Bundle bundle;
+    @Mock
+    private EventhandlingBarrier barrier;
 
     private OsgiBundleApplicationContextEvent event;
 

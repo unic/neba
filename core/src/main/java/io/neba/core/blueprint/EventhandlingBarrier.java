@@ -16,6 +16,8 @@
 
 package io.neba.core.blueprint;
 
+import org.springframework.stereotype.Service;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -30,28 +32,29 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * be included in a finally block like so:<br />
  * 
  * <pre>
- * EventHandling.begin();
+ * barrier.begin();
  * try {
  *    // do something
  * } finally {
- *    EventHandling.end();
+ *    barrier.end();
  * }
  * </pre>
  * 
  * @author Olaf Otto
  */
+@Service
 public class EventhandlingBarrier {
-    private static final Lock LOCK = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
     /**
      * Tries to obtain a lock. Waits up to ten minutes for the locking to succeed, or fails
      * with an {@link IllegalStateException}. Rationale: Waiting indefinitely for a lock is bad practice,
      * since it enables deadlocks.
      */
-    public static void begin() {
+    public void begin() {
         boolean locked;
         try {
-            locked = LOCK.tryLock(10, MINUTES);
+            locked = lock.tryLock(10, MINUTES);
         } catch (InterruptedException e) {
             throw new IllegalStateException("Interrupted while attempting to obtain the event handling lock.", e);
         }
@@ -70,9 +73,9 @@ public class EventhandlingBarrier {
      * 
      * @see Lock#tryLock(long, java.util.concurrent.TimeUnit)
      */
-    public static boolean tryBegin() {
+    public boolean tryBegin() {
         try {
-            return LOCK.tryLock(10, SECONDS);
+            return lock.tryLock(10, SECONDS);
         } catch (InterruptedException e) {
             return false;
         }
@@ -81,9 +84,7 @@ public class EventhandlingBarrier {
     /**
      * @see #begin()
      */
-    public static void end() {
-        LOCK.unlock();
+    public void end() {
+        lock.unlock();
     }
-
-    private EventhandlingBarrier() {}
 }

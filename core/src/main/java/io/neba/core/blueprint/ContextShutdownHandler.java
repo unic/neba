@@ -39,6 +39,8 @@ public abstract class ContextShutdownHandler {
     private ModelRegistrar modelRegistrar;
     @Autowired
     private MvcServlet dispatcherServlet;
+    @Autowired
+    private EventhandlingBarrier barrier;
 
     /**
      * We must guarantee the order in which the event is consumed by the
@@ -53,12 +55,12 @@ public abstract class ContextShutdownHandler {
         }
 
         this.logger.info("Removing infrastructure for bundle: " + bundle + "...");
-        EventhandlingBarrier.begin();
+        this.barrier.begin();
         try {
             this.modelRegistrar.unregister(bundle);
             this.dispatcherServlet.disableMvc(bundle);
         } finally {
-            EventhandlingBarrier.end();
+            this.barrier.end();
         }
         this.logger.info("Infrastructure for " + bundle + " removed.");
     }

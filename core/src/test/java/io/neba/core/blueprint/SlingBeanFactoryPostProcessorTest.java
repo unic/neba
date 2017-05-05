@@ -57,6 +57,8 @@ public class SlingBeanFactoryPostProcessorTest {
     private Bundle bundle;
     @Mock
     private MvcServlet dispatcherServlet;
+    @Mock
+    private EventhandlingBarrier barrier;
     
     @InjectMocks
     private SlingBeanFactoryPostProcessor testee;

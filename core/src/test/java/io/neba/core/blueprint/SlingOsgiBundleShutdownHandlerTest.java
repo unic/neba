@@ -47,7 +47,9 @@ public class SlingOsgiBundleShutdownHandlerTest {
     private Bundle bundle;
     @Mock
     private BundleContext context;
-    
+    @Mock
+    private EventhandlingBarrier barrier;
+
     @InjectMocks
     private SlingOsgiBundleShutdownHandler testee;
 
