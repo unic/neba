@@ -38,13 +38,6 @@
             <organizationUrl>http://www.unic.com</organizationUrl>
         </developer>
         <developer>
-            <id>huberchrigu</id>
-            <name>Christoph Huber</name>
-            <email>christoph.huber@unic.com</email>
-            <organization>Unic AG</organization>
-            <organizationUrl>http://www.unic.com</organizationUrl>
-        </developer>
-        <developer>
             <id>DaniRey</id>
             <name>Daniel Rey</name>
             <email>daniel.rey@unic.com</email>
@@ -52,8 +45,9 @@
             <organizationUrl>http://www.unic.com</organizationUrl>
         </developer>
         <developer>
-            <name>mistertakai</name>
-            <email>daniel.takai@unic.com</email>
+            <id>olimination</id>
+            <name>Oliver Burkhalter</name>
+            <email>oliver.burkhalter@unic.com</email>
             <organization>Unic AG</organization>
             <organizationUrl>http://www.unic.com</organizationUrl>
         </developer>
@@ -63,7 +57,7 @@
         <!-- Properties for artifact versions are only used if the artifact versions is
              referenced outside the POM, such as in the delivery module's package definition. -->
         <spring.version>4.3.7.RELEASE_1</spring.version>
-        <gemini.version>2.1.0.M2</gemini.version>
+        <gemini.version>2.1.0.RELEASE</gemini.version>
         <aopalliance.version>1.0_6</aopalliance.version>
         <language.level>1.8</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
@@ -75,42 +69,6 @@
         <connection>scm:git:git://github.com/unic/neba.git</connection>
         <developerConnection>scm:git:git@github.com:unic/unic.git</developerConnection>
     </scm>
-
-    <repositories>
-        <repository>
-            <id>repo.eclipse.org.blueprint.releases</id>
-            <name>Project Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-releases/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>repo.eclipse.org.blueprint.snapshots</id>
-            <name>Project Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/repositories/gemini-blueprint-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>eclipse-gemini</id>
-            <name>Eclipse Gemini Maven repository</name>
-            <url>http://download.eclipse.org/gemini/mvn/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <pluginRepositories>
         <pluginRepository>
