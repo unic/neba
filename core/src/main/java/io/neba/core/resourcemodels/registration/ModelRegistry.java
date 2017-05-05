@@ -26,6 +26,7 @@ import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -151,6 +152,9 @@ public class ModelRegistry {
     private final Map<Key, Object> unmappedTypesCache = new ConcurrentHashMap<>();
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicInteger state = new AtomicInteger(0);
+
+    @Autowired
+    private EventhandlingBarrier barrier;
 
     /**
      * Finds the most specific models for the given {@link Resource}. The model's bean
@@ -359,7 +363,7 @@ public class ModelRegistry {
      */
     @Scheduled(fixedRate = EVERY_30_SECONDS)
     public void removeInvalidReferences() {
-        if (EventhandlingBarrier.tryBegin()) {
+        if (this.barrier.tryBegin()) {
             this.logger.debug("Checking for references to beans from inactive bundles...");
             try {
                 for (Collection<OsgiBeanSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
@@ -373,7 +377,7 @@ public class ModelRegistry {
                     }
                 }
             } finally {
-                EventhandlingBarrier.end();
+                this.barrier.end();
             }
             this.logger.debug("Completed checking for references to beans from inactive bundles.");
         }
