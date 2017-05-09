@@ -25,6 +25,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -58,7 +59,7 @@ public class ModelRegistryTest {
     @Mock
     private ResourceResolver resolver;
     @Mock
-    EventhandlingBarrier barrier;
+    private EventhandlingBarrier barrier;
 
     private Set<ResourceModel> resourceModelAnnotations;
     private long bundleId;
@@ -401,6 +402,7 @@ public class ModelRegistryTest {
 
         removeInvalidReferences();
 
+        verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier();
         assertRegistryHasModels(0);
     }
 
@@ -412,6 +414,7 @@ public class ModelRegistryTest {
 
         removeInvalidReferences();
 
+        verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier();
         verifySourcesWhereTestedForValidity();
         assertRegistryHasModels(1);
     }
@@ -664,5 +667,11 @@ public class ModelRegistryTest {
     
     private void removeBundle() {
         this.testee.removeResourceModels(this.bundle);
+    }
+
+    private void verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier() {
+        InOrder inOrder = inOrder(this.barrier);
+        inOrder.verify(this.barrier).tryBegin();
+        inOrder.verify(this.barrier).end();
     }
 }
