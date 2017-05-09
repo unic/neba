@@ -73,17 +73,20 @@ public class SlingBeanFactoryPostProcessorTest {
         postProcessBeanFactory();
         
         InOrder inOrder = inOrder(
+            this.barrier,
     		this.requestScopeConfigurator,
             this.servletInfrastructureAwareConfigurer,
     		this.variableResolver, 
     		this.modelRegistrar, 
         	this.dispatcherServlet);
-        
+
+        inOrder.verify(this.barrier).begin();
         inOrder.verify(this.requestScopeConfigurator).registerRequestScope(eq(this.beanFactory));
         inOrder.verify(this.servletInfrastructureAwareConfigurer).enableServletContextAwareness(eq(this.beanFactory));
         inOrder.verify(this.variableResolver).registerResolvers(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.modelRegistrar).registerModels(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.dispatcherServlet).enableMvc(eq(this.beanFactory), eq(this.context));
+        inOrder.verify(this.barrier).end();
     }
 
     private void postProcessBeanFactory() {

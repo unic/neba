@@ -55,11 +55,10 @@ public class ContextShutdownHandlerTest {
     }
 
     @Test
-    public void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
-        InOrder inOrder = inOrder(this.barrier, this.modelRegistrar, this.dispatcherServlet);
-
+    public void testBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
         handleStop();
 
+        InOrder inOrder = inOrder(this.barrier, this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.barrier).begin();
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);
         inOrder.verify(this.dispatcherServlet).disableMvc(this.bundle);
