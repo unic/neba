@@ -38,7 +38,10 @@
                         <configuration>
                             <includeArtifactIds>io.neba.neba-delivery-aem</includeArtifactIds>
                             <includeTypes>zip</includeTypes>
-                            <includes>**/*.jar</includes>
+                            <includes>
+                                **/*.jar,
+                                **/*.js
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>
@@ -51,10 +54,10 @@
                     <instructions>
                         <Sling-Initial-Content>
                             <!-- Provide the bundles to the JCR OSGi installer. Uninstall the bundles if the delivery bundle is uninstalled -->
-                            SLING-INF/content/install;overwrite:=true;ignoreImportProviders:=jar;uninstall:=true;path:=/apps/neba/install
+                            SLING-INF/content;overwrite:=true;ignoreImportProviders:=jar;uninstall:=true;path:=/apps/neba
                         </Sling-Initial-Content>
                         <Include-Resource>
-                            SLING-INF/content/install=${project.build.directory}/dependency/jcr_root/apps/neba/install
+                            SLING-INF/content=${project.build.directory}/dependency/jcr_root/apps/neba
                         </Include-Resource>
                     </instructions>
                 </configuration>
