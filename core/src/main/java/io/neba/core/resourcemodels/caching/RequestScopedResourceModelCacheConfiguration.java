@@ -61,13 +61,4 @@ public class RequestScopedResourceModelCacheConfiguration {
                           "safemode in favor of safe-to-cache @ResourceModels.",
             boolValue = false)
     public static final String SAFEMODE = "safeMode";
-
-    @Property(label = "Enable statistics logging",
-            description = "Whether to log statistical information",
-            boolValue = false)
-    private static final String PROPERTY_ENABLED = "enableStatistics";
-
-    @Property(label = "Restrict logging to requests containing",
-              description = "Restrict logging to requests containing the following string (e.g. a path or path fragment)")
-    private static final String PROPERTY_RESTRICT_TO_URL_CONTAINING = "restrictStatisticsTo";
 }

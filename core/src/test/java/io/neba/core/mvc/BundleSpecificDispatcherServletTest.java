@@ -107,6 +107,11 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testHasHandlerForRequiresNonNullRequest() throws Exception {
+        this.testee.hasHandlerFor(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInConstructor() throws Exception {
         new BundleSpecificDispatcherServlet(mock(ServletConfig.class), this.servletResolver, null);
     }

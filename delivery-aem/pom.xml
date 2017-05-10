@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.2.0</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -79,6 +79,10 @@
         <dependency>
             <groupId>org.eclipse.gemini.blueprint</groupId>
             <artifactId>gemini-blueprint-extender</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-extensions</artifactId>
         </dependency>
 
         <!-- build dependencies -->
@@ -211,6 +215,11 @@
                         <embedded>
                             <groupId>org.eclipse.gemini.blueprint</groupId>
                             <artifactId>gemini-blueprint-io</artifactId>
+                            <target>${neba.installation.path}/18</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>org.eclipse.gemini.blueprint</groupId>
+                            <artifactId>gemini-blueprint-extensions</artifactId>
                             <target>${neba.installation.path}/18</target>
                         </embedded>
                         <embedded>

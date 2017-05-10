@@ -1,22 +1,23 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
+import io.neba.core.blueprint.EventhandlingBarrier;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -24,6 +25,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -56,6 +58,8 @@ public class ModelRegistryTest {
 	private Bundle bundle;
     @Mock
     private ResourceResolver resolver;
+    @Mock
+    private EventhandlingBarrier barrier;
 
     private Set<ResourceModel> resourceModelAnnotations;
     private long bundleId;
@@ -67,6 +71,7 @@ public class ModelRegistryTest {
     @Before
     public void setUp() throws LoginException {
         this.resourceModelAnnotations = new HashSet<>();
+        doReturn(true).when(this.barrier).tryBegin();
     	withBundleId(12345L);
     }
     
@@ -397,6 +402,7 @@ public class ModelRegistryTest {
 
         removeInvalidReferences();
 
+        verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier();
         assertRegistryHasModels(0);
     }
 
@@ -408,6 +414,7 @@ public class ModelRegistryTest {
 
         removeInvalidReferences();
 
+        verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier();
         verifySourcesWhereTestedForValidity();
         assertRegistryHasModels(1);
     }
@@ -660,5 +667,11 @@ public class ModelRegistryTest {
     
     private void removeBundle() {
         this.testee.removeResourceModels(this.bundle);
+    }
+
+    private void verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier() {
+        InOrder inOrder = inOrder(this.barrier);
+        inOrder.verify(this.barrier).tryBegin();
+        inOrder.verify(this.barrier).end();
     }
 }

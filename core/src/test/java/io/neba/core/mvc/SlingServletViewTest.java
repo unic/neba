@@ -34,7 +34,9 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -66,6 +68,16 @@ public class SlingServletViewTest {
                 .service(isA(SlingServletView.MvcResourceRequest.class), eq(this.response));
 
         this.testee = new SlingServletView("some/resource/type", this.script);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testContstructorRequireNonNullResourceType() throws Exception {
+        new SlingServletView(null, this.script);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testContstructorRequireNonNullServlet() throws Exception {
+        new SlingServletView("some/resource/type", null);
     }
 
     @Test

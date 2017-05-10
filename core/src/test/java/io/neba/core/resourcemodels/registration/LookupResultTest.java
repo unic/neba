@@ -43,6 +43,16 @@ public class LookupResultTest {
         doReturn(Object.class).when(this.beanSource).getBeanType();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorArgumentSourceMustNotBeNull() throws Exception {
+        new LookupResult(null, "some/resource/type");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorArgumentResourceTypeMustNotBeNull() throws Exception {
+        new LookupResult(this.beanSource, null);
+    }
+
     @Test
     public void testEqualsNull() throws Exception {
         assertLookupResultIsNotEqualTo(null);

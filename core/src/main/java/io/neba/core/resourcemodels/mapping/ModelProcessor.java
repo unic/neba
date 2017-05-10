@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.mapping;
 
@@ -38,7 +38,18 @@ import java.lang.reflect.Method;
 public class ModelProcessor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * @param metaData must not be <code>null</code>.
+     * @param model must not be <code>null</code>.
+     */
     public <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
+        if (metaData == null) {
+            throw new IllegalArgumentException("Method argument metaData must not be null.");
+        }
+        if (model == null) {
+            throw new IllegalArgumentException("Method argument model must not be null.");
+        }
+
         for (MethodMetaData methodMetaData : metaData.getPostMappingMethods()) {
             Method method = methodMetaData.getMethod();
             method.setAccessible(true);
@@ -52,7 +63,17 @@ public class ModelProcessor {
         }
     }
 
+    /**
+     * @param metaData must not be <code>null</code>.
+     * @param model must not be <code>null</code>.
+     */
     public <T> void processBeforeMapping(ResourceModelMetaData metaData, T model) {
+        if (metaData == null) {
+            throw new IllegalArgumentException("Method argument metaData must not be null.");
+        }
+        if (model == null) {
+            throw new IllegalArgumentException("Method argument model must not be null.");
+        }
         for (MethodMetaData methodMetaData : metaData.getPreMappingMethods()) {
             Method method = methodMetaData.getMethod();
             method.setAccessible(true);

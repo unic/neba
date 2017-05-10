@@ -27,6 +27,11 @@ public class ZipFileUtil {
     private static final Pattern WINDOWS_FILE_SEPARATOR = compile("[\\\\]+");
     private static final Pattern DUPLICATE_SEPARATORS = compile("[/]{2,}");
 
+    /**
+     * @param file  must not be <code>null</code>.
+     * @return a file name that can safely used for constructing {@link java.util.zip.ZipEntry#ZipEntry(String) zip entries},
+     *         never <code>null</code>.
+     */
     public static String toZipFileEntryName(File file) {
         if (file == null) {
             throw new IllegalArgumentException("method parameter file must not be null");

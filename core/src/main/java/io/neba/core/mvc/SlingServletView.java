@@ -37,7 +37,17 @@ public class SlingServletView implements View {
     private final String resourceType;
     private final Servlet servlet;
 
+    /**
+     * @param resourceType must not be <code>null</code>.
+     * @param servlet must not be <code>null</code>.
+     */
     public SlingServletView(String resourceType, Servlet servlet) {
+        if (resourceType == null) {
+            throw new IllegalArgumentException("Method argument resourceType must not be null.");
+        }
+        if (servlet == null) {
+            throw new IllegalArgumentException("Method argument servlet must not be null.");
+        }
         this.resourceType = resourceType;
         this.servlet = servlet;
     }
@@ -71,7 +81,7 @@ public class SlingServletView implements View {
     }
 
     /**
-     * Wraps the original controller request to provide a {@link java.util.ResourceBundle.Control} as the
+     * Wraps the original controller request to override the
      * {@link #getResource() request's resource}.
      *
      * @author Olaf Otto

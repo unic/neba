@@ -1,20 +1,22 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.blueprint;
+
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,34 +26,35 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Contains a global {@link Lock} on which the event handlers changing the
- * framework state (e.g. registered {@link io.neba.api.annotations.ResourceModel models} or self tests)
+ * framework state (e.g. registering {@link io.neba.api.annotations.ResourceModel models})
  * may synchronize to prevent undefined state due to concurrent modifications.<br />
  * {@link #begin()} must always be followed by {@link #end()}, i.e. {@link #end()} should
  * be included in a finally block like so:<br />
  * 
  * <pre>
- * EventHandling.begin();
+ * barrier.begin();
  * try {
  *    // do something
  * } finally {
- *    EventHandling.end();
+ *    barrier.end();
  * }
  * </pre>
  * 
  * @author Olaf Otto
  */
+@Service
 public class EventhandlingBarrier {
-    private static final Lock LOCK = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
     /**
      * Tries to obtain a lock. Waits up to ten minutes for the locking to succeed, or fails
      * with an {@link IllegalStateException}. Rationale: Waiting indefinitely for a lock is bad practice,
      * since it enables deadlocks.
      */
-    public static void begin() {
+    public void begin() {
         boolean locked;
         try {
-            locked = LOCK.tryLock(10, MINUTES);
+            locked = lock.tryLock(10, MINUTES);
         } catch (InterruptedException e) {
             throw new IllegalStateException("Interrupted while attempting to obtain the event handling lock.", e);
         }
@@ -70,9 +73,9 @@ public class EventhandlingBarrier {
      * 
      * @see Lock#tryLock(long, java.util.concurrent.TimeUnit)
      */
-    public static boolean tryBegin() {
+    public boolean tryBegin() {
         try {
-            return LOCK.tryLock(10, SECONDS);
+            return lock.tryLock(10, SECONDS);
         } catch (InterruptedException e) {
             return false;
         }
@@ -81,9 +84,7 @@ public class EventhandlingBarrier {
     /**
      * @see #begin()
      */
-    public static void end() {
-        LOCK.unlock();
+    public void end() {
+        lock.unlock();
     }
-
-    private EventhandlingBarrier() {}
 }

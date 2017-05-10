@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.registration;
 
@@ -26,13 +26,20 @@ import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -146,6 +153,9 @@ public class ModelRegistry {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicInteger state = new AtomicInteger(0);
 
+    @Autowired
+    private EventhandlingBarrier barrier;
+
     /**
      * Finds the most specific models for the given {@link Resource}. The model's bean
      * name must match the provided bean name.
@@ -159,10 +169,6 @@ public class ModelRegistry {
         }
         if (beanName == null) {
             throw new IllegalArgumentException("Method argument beanName must not be null.");
-        }
-
-        if (isUnmapped(resource)) {
-            return null;
         }
 
         Key key = key(resource, beanName);
@@ -234,10 +240,6 @@ public class ModelRegistry {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
 
-        if (isUnmapped(resource)) {
-            return null;
-        }
-
         final Key key = key(resource, "allModels");
 
         if (isUnmapped(key)) {
@@ -274,10 +276,6 @@ public class ModelRegistry {
         }
         if (targetType == null) {
             throw new IllegalArgumentException("Method argument targetType must not be null.");
-        }
-
-        if (isUnmapped(resource)) {
-            return null;
         }
 
         final Key key = key(resource, targetType);
@@ -365,7 +363,7 @@ public class ModelRegistry {
      */
     @Scheduled(fixedRate = EVERY_30_SECONDS)
     public void removeInvalidReferences() {
-        if (EventhandlingBarrier.tryBegin()) {
+        if (this.barrier.tryBegin()) {
             this.logger.debug("Checking for references to beans from inactive bundles...");
             try {
                 for (Collection<OsgiBeanSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
@@ -379,7 +377,7 @@ public class ModelRegistry {
                     }
                 }
             } finally {
-                EventhandlingBarrier.end();
+                this.barrier.end();
             }
             this.logger.debug("Completed checking for references to beans from inactive bundles.");
         }
@@ -394,10 +392,6 @@ public class ModelRegistry {
         this.lookupCache.clear();
         this.unmappedTypesCache.clear();
         this.logger.debug("Cache cleared.");
-    }
-
-    private boolean isUnmapped(Resource resource) {
-        return this.unmappedTypesCache.containsKey(key(resource));
     }
 
     private boolean isUnmapped(Key key) {
