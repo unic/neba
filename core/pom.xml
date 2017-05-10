@@ -224,6 +224,9 @@
                             org.eclipse.jetty.websocket.server,
                             *
                         </Import-Package>
+                        <Sling-Initial-Content>
+                            SLING-INF/configuration;overwrite:=true;path:=/apps/neba/install
+                        </Sling-Initial-Content>
                     </instructions>
                 </configuration>
             </plugin>
