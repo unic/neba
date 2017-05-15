@@ -53,18 +53,21 @@ description: Download and integrate NEBA in a maven build
 {% endhighlight %}
 </p>
 
-<p>If you'd also like to browse or debug the core, add it to your project's dependencies like so:</p>
+<p>
+    In order to use Gemini Blueprint's <a href="https://www.eclipse.org/gemini/blueprint/documentation/reference/2.1.0.RELEASE/html/service-registry.html#service-registry:annotations-vs-xml-declarations">annotation-based service injection</a>
+    available since NEBA 4.2.0, add the gemini-blueprint-extensions bundle to your dependencies:
+</p>
 <p>
 {% highlight xml %}
 <dependency>
-    <groupId>io.neba</groupId>
-    <artifactId>io.neba.neba-core</artifactId>
-    <version>{{site.nebaVersion}}</version>
+    <groupId>org.eclipse.gemini.blueprint</groupId>
+    <artifactId>gemini-blueprint-extensions</artifactId>
+    <version>2.1.0.RELEASE</version>
 </dependency>
 {% endhighlight %}
 </p>
 
-<p>The convenience CRX deployment package for AEM can be referenced like so:</p>
+<p>The CRX deployment package for Adobe AEM&trade; can be referenced like so:</p>
 
 <p>
 {% highlight xml %}
