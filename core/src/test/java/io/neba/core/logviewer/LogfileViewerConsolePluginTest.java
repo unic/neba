@@ -94,21 +94,38 @@ public class LogfileViewerConsolePluginTest {
         this.testLogfileDirectory = new File(testLogfileUrl.getFile());
         this.availableLogFiles = listFiles(this.testLogfileDirectory, null, true);
 
-        when(this.context.getContextHandler()).thenReturn(contextHandler);
-        when(this.contextHandler.getServer()).thenReturn(this.server);
-        when(this.server.getThreadPool()).thenReturn(mock(ThreadPool.class));
+        when(this.context.getContextHandler())
+                .thenReturn(contextHandler);
 
-        when(this.request.getServletPath()).thenReturn("/system/console");
-        when(this.request.getServerName()).thenReturn("servername");
-        when(this.request.getMethod()).thenReturn("GET");
-        when(this.request.getProtocol()).thenReturn("HTTP");
-        when(this.response.getWriter()).thenReturn(writer);
-        when(this.response.getOutputStream()).thenReturn(this.outputStream);
+        when(this.contextHandler.getServer())
+                .thenReturn(this.server);
+
+        when(this.server.getThreadPool())
+                .thenReturn(mock(ThreadPool.class));
+
+        when(this.request.getServletPath())
+                .thenReturn("/system/console");
+
+        when(this.request.getServerName())
+                .thenReturn("servername");
+
+        when(this.request.getMethod())
+                .thenReturn("GET");
+
+        when(this.request.getProtocol())
+                .thenReturn("HTTP");
+
+        when(this.response.getWriter())
+                .thenReturn(writer);
+
+        when(this.response.getOutputStream())
+                .thenReturn(this.outputStream);
 
         Answer<Object> writeIntToByteArrayOutputStream = invocation -> {
             internalOutputStream.write((Integer) invocation.getArguments()[0]);
             return null;
         };
+
         Answer<Object> writeBytesToByteArrayOutputStream = invocation -> {
             byte[] b = (byte[]) invocation.getArguments()[0];
             int off = (Integer) invocation.getArguments()[1];
@@ -116,8 +133,14 @@ public class LogfileViewerConsolePluginTest {
             internalOutputStream.write(b, off, len);
             return null;
         };
-        doAnswer(writeIntToByteArrayOutputStream).when(this.outputStream).write(anyInt());
-        doAnswer(writeBytesToByteArrayOutputStream).when(this.outputStream).write(isA(byte[].class), anyInt(), anyInt());
+
+        doAnswer(writeIntToByteArrayOutputStream)
+                .when(this.outputStream)
+                .write(anyInt());
+
+        doAnswer(writeBytesToByteArrayOutputStream)
+                .when(this.outputStream)
+                .write(isA(byte[].class), anyInt(), anyInt());
 
         when(this.config.getServletContext()).thenReturn(this.context);
 

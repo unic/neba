@@ -73,10 +73,21 @@ public class ResourceParamArgumentResolverTest {
 
     @Before
     public void setUp() throws Exception {
-        doReturn(this.resourceParam).when(this.methodParameter).getParameterAnnotation(eq(ResourceParam.class));
-        doReturn(this.slingRequest).when(this.webRequest).getNativeRequest();
-        doReturn(this.resolver).when(this.slingRequest).getResourceResolver();
-        doReturn(getClass()).when(this.methodParameter).getParameterType();
+        doReturn(this.resourceParam)
+                .when(this.methodParameter)
+                .getParameterAnnotation(eq(ResourceParam.class));
+
+        doReturn(this.slingRequest)
+                .when(this.webRequest)
+                .getNativeRequest();
+
+        doReturn(this.resolver)
+                .when(this.slingRequest)
+                .getResourceResolver();
+
+        doReturn(getClass())
+                .when(this.methodParameter)
+                .getParameterType();
     }
 
     @Test(expected = IllegalStateException.class)

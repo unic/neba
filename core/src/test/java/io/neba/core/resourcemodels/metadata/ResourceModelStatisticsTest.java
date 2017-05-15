@@ -108,15 +108,15 @@ public class ResourceModelStatisticsTest {
     @Test
     public void testMaximumMappingDurationCalculation() throws Exception {
         withDurations(0, 2, 250, 0, 5, 6, 7, 199);
-        calculatMaximumMappingDuration();
+        calculateMaximumMappingDuration();
         // The maximum is the average of the maximum interval ([128, 256))
-        asserMaximumMappingDurationIs(192);
+        assertMaximumMappingDurationIs(192);
     }
 
     @Test
     public void testMaximumMappingDurationCalculationWithoutAnyElements() throws Exception {
-        calculatMaximumMappingDuration();
-        asserMaximumMappingDurationIs(0);
+        calculateMaximumMappingDuration();
+        assertMaximumMappingDurationIs(0);
     }
 
     @Test
@@ -142,9 +142,9 @@ public class ResourceModelStatisticsTest {
     @Test
     public void testFallbackWhenMappingDurationExceedsFrequencyTableBoundaries() throws Exception {
         withDurations(1, 1, MAX_VALUE);
-        calculatMaximumMappingDuration();
+        calculateMaximumMappingDuration();
         // The average of [2^14, 2^15), the right-most interval.
-        asserMaximumMappingDurationIs(24576);
+        assertMaximumMappingDurationIs(24576);
     }
 
     @Test
@@ -229,11 +229,11 @@ public class ResourceModelStatisticsTest {
         this.minimumDuration = this.testee.getMinimumMappingDuration();
     }
 
-    private void asserMaximumMappingDurationIs(double duration) {
+    private void assertMaximumMappingDurationIs(double duration) {
         assertThat(this.maximumDuration).isEqualTo(duration);
     }
 
-    private void calculatMaximumMappingDuration() {
+    private void calculateMaximumMappingDuration() {
         this.maximumDuration = this.testee.getMaximumMappingDuration();
     }
 

@@ -64,8 +64,13 @@ public class RequestScopedResourceModelCacheTest {
 
     @Before
     public void setUp() throws Exception {
-        doReturn("GET").when(this.request).getMethod();
-        doReturn(this.requestPathInfo).when(this.request).getRequestPathInfo();
+        doReturn("GET")
+                .when(this.request)
+                .getMethod();
+
+        doReturn(this.requestPathInfo)
+                .when(this.request)
+                .getRequestPathInfo();
     }
 
     @Test

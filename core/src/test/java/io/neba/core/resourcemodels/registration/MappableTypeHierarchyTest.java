@@ -47,10 +47,21 @@ public class MappableTypeHierarchyTest {
 
     @Before
     public void prepareNodeTypeHierarchy() throws RepositoryException {
-        doReturn(this.nodeType).when(this.node).getPrimaryNodeType();
-        doReturn(this.node).when(this.resource).adaptTo(eq(Node.class));
-        doReturn("myResourceType").when(this.resource).getResourceType();
-        doReturn("myNodeTypeName").when(this.nodeType).getName();
+        doReturn(this.nodeType)
+                .when(this.node)
+                .getPrimaryNodeType();
+
+        doReturn(this.node)
+                .when(this.resource)
+                .adaptTo(eq(Node.class));
+
+        doReturn("myResourceType")
+                .when(this.resource)
+                .getResourceType();
+
+        doReturn("myNodeTypeName")
+                .when(this.nodeType)
+                .getName();
     }
 
     @Test

@@ -49,7 +49,10 @@ public class TailSocketTest extends TailTests {
     @Before
     public void prepareRegisteredLogFile() throws Exception {
         this.availableLogFiles = listFiles(getTestLogfileDirectory(), null, true);
-        doReturn(availableLogFiles).when(this.logFiles).resolveLogFiles();
+
+        doReturn(availableLogFiles)
+                .when(this.logFiles)
+                .resolveLogFiles();
     }
 
     @Before

@@ -43,15 +43,18 @@ public class NodeTypeHierarchyIteratorTest {
        NodeType[] mixins = new NodeType[2];
        mixins[0] = mockNodeType("mixin1");
        mixins[1] = mockNodeType("mixin2");
-       when(this.node.getMixinNodeTypes()).thenReturn(mixins);
+       when(this.node.getMixinNodeTypes())
+               .thenReturn(mixins);
 
        NodeType primaryType = mockNodeType("primaryType");
-       when(this.node.getPrimaryNodeType()).thenReturn(primaryType);
+       when(this.node.getPrimaryNodeType())
+               .thenReturn(primaryType);
        
        NodeType[] superTypes = new NodeType[2];
        superTypes[0] = mockNodeType("superType1");
        superTypes[1] = mockNodeType("superType2");
-       when(primaryType.getDeclaredSupertypes()).thenReturn(superTypes);
+       when(primaryType.getDeclaredSupertypes())
+               .thenReturn(superTypes);
     }
 
     @Test

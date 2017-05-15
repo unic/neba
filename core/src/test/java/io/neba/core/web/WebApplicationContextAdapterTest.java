@@ -47,12 +47,9 @@ public class WebApplicationContextAdapterTest {
 
     @Before
     public void setUp() throws Exception {
-        ApplicationContext applicationContext = mock(ApplicationContext.class, new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                lastInvocationOnWrappedContext = invocation;
-                return null;
-            }
+        ApplicationContext applicationContext = mock(ApplicationContext.class, (Answer) inv -> {
+            lastInvocationOnWrappedContext = inv;
+            return null;
         });
 
         this.testee = new WebApplicationContextAdapter(applicationContext, this.servletContext);

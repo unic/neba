@@ -61,10 +61,19 @@ public class LogFilesTest {
     public void setUp() throws Exception {
         URL slingHomeUrl = getClass().getResource("/io/neba/core/logviewer/testlogfiles");
         this.slingHomeDirectory = new File(slingHomeUrl.getFile());
-        when(this.bundleContext.getProperty(eq("sling.home"))).thenReturn(this.slingHomeDirectory.getAbsolutePath());
-        when(this.configurationAdmin.getConfiguration(eq("org.apache.sling.commons.log.LogManager"))).thenReturn(this.logConfiguration);
-        when(this.logConfiguration.getProperties()).thenReturn(this.logConfigurationProperties);
-        when(this.logConfigurationProperties.get(eq(ORG_APACHE_SLING_COMMONS_LOG_FILE))).thenReturn("logs/error.log");
+
+        when(this.bundleContext.getProperty(eq("sling.home")))
+                .thenReturn(this.slingHomeDirectory.getAbsolutePath());
+
+        when(this.configurationAdmin.getConfiguration(eq("org.apache.sling.commons.log.LogManager")))
+                .thenReturn(this.logConfiguration);
+
+        when(this.logConfiguration.getProperties())
+                .thenReturn(this.logConfigurationProperties);
+
+        when(this.logConfigurationProperties.get(eq(ORG_APACHE_SLING_COMMONS_LOG_FILE)))
+                .thenReturn("logs/error.log");
+
         this.testee.determineSlingHomeDirectory();
     }
 

@@ -45,8 +45,14 @@ public class BackgroundServletRequestWrapperTest {
     @Before
     public void setUp() throws Exception {
         testee = new BackgroundServletRequestWrapper(request);
-        doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION")).when(request).getSession();
-        doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION")).when(request).getSession(anyBoolean());
+
+        doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(request)
+                .getSession();
+
+        doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(request)
+                .getSession(anyBoolean());
     }
 
     @Test

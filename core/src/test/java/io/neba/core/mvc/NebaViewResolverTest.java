@@ -80,13 +80,27 @@ public class NebaViewResolverTest {
 
     @Before
     public void setUp() throws Exception {
-        doReturn("").when(this.request).getContextPath();
-        doReturn(this.dispatcher).when(this.request).getRequestDispatcher(anyString());
-        doReturn(this.flashMapManager).when(this.request).getAttribute(FLASH_MAP_MANAGER_ATTRIBUTE);
-        doReturn(this.resourceResolver).when(this.request).getResourceResolver();
+        doReturn("")
+                .when(this.request)
+                .getContextPath();
+
+        doReturn(this.dispatcher)
+                .when(this.request)
+                .getRequestDispatcher(anyString());
+
+        doReturn(this.flashMapManager)
+                .when(this.request)
+                .getAttribute(FLASH_MAP_MANAGER_ATTRIBUTE);
+
+        doReturn(this.resourceResolver)
+                .when(this.request)
+                .getResourceResolver();
 
         Answer<Object> original = invocation -> invocation.getArguments()[0];
-        doAnswer(original).when(this.response).encodeRedirectURL(anyString());
+        doAnswer(original)
+                .when(this.response)
+                .encodeRedirectURL(anyString());
+
         setRequestAttributes(new ServletRequestAttributes(this.request));
     }
 

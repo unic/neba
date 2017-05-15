@@ -86,28 +86,47 @@ public class ResourceModelProviderImplTest {
 
         lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
-        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(OsgiBeanSource.class), any());
-        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(OsgiBeanSource.class));
-        doReturn(this.resourceResolver).when(this.resource).getResourceResolver();
+        doAnswer(storeInCache)
+                .when(this.caches)
+                .store(isA(Resource.class), isA(OsgiBeanSource.class), any());
 
-        when(this.mapper.map(isA(Resource.class), isA(OsgiBeanSource.class))).thenAnswer(invocation -> {
-            OsgiBeanSource<Object> source = (OsgiBeanSource<Object>) invocation.getArguments()[1];
-            return source.getBean();
-        });
+        doAnswer(lookupFromCache)
+                .when(this.caches)
+                .lookup(isA(Resource.class), isA(OsgiBeanSource.class));
+
+        doReturn(this.resourceResolver)
+                .when(this.resource)
+                .getResourceResolver();
+
+        when(this.mapper.map(isA(Resource.class), isA(OsgiBeanSource.class)))
+                .thenAnswer(inv -> {
+                    OsgiBeanSource<Object> source = (OsgiBeanSource<Object>) inv.getArguments()[1];
+                    return source.getBean();
+                });
     }
 
     @Before
     public void provideMockResourceModel() {
         LinkedList<LookupResult> lookupResults = new LinkedList<>();
-        @SuppressWarnings("unchecked")
-        OsgiBeanSource<Object> osgiBeanSource = mock(OsgiBeanSource.class);
-        this.osgiBeanSource = osgiBeanSource;
         lookupResults.add(this.lookupResult);
-        doReturn(this.osgiBeanSource).when(this.lookupResult).getSource();
-        when(this.osgiBeanSource.getBean()).thenReturn(this.model);
-        doReturn(this.model.getClass()).when(this.osgiBeanSource).getBeanType();
-        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(lookupResults);
-        when(this.registry.lookupMostSpecificModels(eq(this.resource), anyString())).thenReturn(lookupResults);
+
+        this.osgiBeanSource = mock(OsgiBeanSource.class);
+        doReturn(this.osgiBeanSource)
+                .when(this.lookupResult)
+                .getSource();
+
+        when(this.osgiBeanSource.getBean())
+                .thenReturn(this.model);
+
+        doReturn(this.model.getClass())
+                .when(this.osgiBeanSource)
+                .getBeanType();
+
+        when(this.registry.lookupMostSpecificModels(eq(this.resource)))
+                .thenReturn(lookupResults);
+
+        when(this.registry.lookupMostSpecificModels(eq(this.resource), anyString()))
+                .thenReturn(lookupResults);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -76,7 +76,10 @@ public class ModelRegistrarTest {
             }
             return null;
         };
-        doAnswer(registerModel).when(this.registry).add(isA(String[].class), isA(OsgiBeanSource.class));
+
+        doAnswer(registerModel)
+                .when(this.registry)
+                .add(isA(String[].class), isA(OsgiBeanSource.class));
     }
 
     @Before

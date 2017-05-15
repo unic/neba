@@ -99,8 +99,13 @@ public class ResourceToModelAdapterTest {
 
         lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
-        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), isA(OsgiBeanSource.class), any());
-        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Resource.class), isA(OsgiBeanSource.class));
+        doAnswer(storeInCache)
+                .when(this.caches)
+                .store(isA(Resource.class), isA(OsgiBeanSource.class), any());
+
+        doAnswer(lookupFromCache)
+                .when(this.caches)
+                .lookup(isA(Resource.class), isA(OsgiBeanSource.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
     }
