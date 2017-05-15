@@ -95,23 +95,57 @@ public class ModelRegistryConsolePluginTest {
         this.typeMappings = new HashMap<>();
         this.beanSources = new ArrayList<>();
 
-        doReturn(writer).when(this.response).getWriter();
-        doReturn(this.typeMappings).when(this.modelRegistry).getTypeMappings();
-        doReturn(this.beanSources).when(this.modelRegistry).getBeanSources();
-        doReturn(this.resolver).when(this.factory).getAdministrativeResourceResolver(any());
-        doReturn(new String[]{""}).when(this.resolver).getSearchPath();
-        doReturn("").when(this.request).getContextPath();
-        doReturn("/system/console").when(this.request).getServletPath();
-        doReturn(this.outputStream).when(this.response).getOutputStream();
-        doReturn("JUnit test bundle").when(this.bundle).getSymbolicName();
-        doReturn(this.version).when(this.bundle).getVersion();
-        doReturn("1.0.0").when(this.version).toString();
+        doReturn(writer)
+                .when(this.response)
+                .getWriter();
+
+        doReturn(this.typeMappings)
+                .when(this.modelRegistry)
+                .getTypeMappings();
+
+        doReturn(this.beanSources)
+                .when(this.modelRegistry)
+                .getBeanSources();
+
+        doReturn(this.resolver)
+                .when(this.factory)
+                .getAdministrativeResourceResolver(any());
+
+        doReturn(new String[]{""})
+                .when(this.resolver)
+                .getSearchPath();
+
+        doReturn("")
+                .when(this.request)
+                .getContextPath();
+
+        doReturn("/system/console")
+                .when(this.request)
+                .getServletPath();
+
+        doReturn(this.outputStream)
+                .when(this.response)
+                .getOutputStream();
+
+        doReturn("JUnit test bundle")
+                .when(this.bundle)
+                .getSymbolicName();
+
+        doReturn(this.version)
+                .when(this.bundle)
+                .getVersion();
+
+        doReturn("1.0.0")
+                .when(this.version)
+                .toString();
     }
 
     @Test
     public void testRenderingOfRegisteredModelsTable() throws Exception {
         withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+
         renderContent();
+
         assertResponseContainsTableHead();
         assertResponseContainsNumberOfModelsText(1);
         assertResponseContains("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "beanName");
@@ -121,7 +155,9 @@ public class ModelRegistryConsolePluginTest {
     public void testRenderingOfLinkToCrxDe() throws Exception {
         withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
         withResolution("cq/Page", "/libs/foundation/components/primary/cq/Page");
+
         renderContent();
+
         assertResponseContains("<a href=\"/crx/de/#" +
                 "/libs/foundation/components/primary/cq/Page\" class=\"crxdelink\">" +
                 "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "beanName");
@@ -136,7 +172,9 @@ public class ModelRegistryConsolePluginTest {
     @Test
     public void testRenderingOfExistingComponentIcon() throws Exception {
         withIconResource("/apps/project/components/myComponent/icon.png");
+
         get("/system/console/modelregistry/api/componenticon/apps/project/components/myComponent");
+
         verifyPluginResolvesResource("/apps/project/components/myComponent/icon.png");
         verifyResponseHasContentType("image/png");
         verifyIconResourceIsAdaptedToInputStream();
@@ -145,6 +183,7 @@ public class ModelRegistryConsolePluginTest {
     @Test
     public void testRenderingOfDefaultComponentIcon() throws Exception {
         get("/system/console/modelregistry/api/componenticon");
+
         verifyResponseHasContentType("image/png");
         verifyNoIconResourceIsResolved();
         verifyDefaultComponentIconIsWritten();
@@ -153,7 +192,9 @@ public class ModelRegistryConsolePluginTest {
     @Test
     public void testModelTypesApi() throws Exception {
         withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+
         get("/system/console/modelregistry/api/modeltypes");
+
         verifyResponseHasContentType("application/json;charset=UTF-8");
         assertResponseIs("[\"io.neba.core.resourcemodels.registration.ModelRegistryConsolePluginTest$Model\"]");
     }

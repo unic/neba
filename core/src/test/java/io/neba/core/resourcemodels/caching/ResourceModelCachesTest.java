@@ -77,10 +77,22 @@ public class ResourceModelCachesTest {
 	@Before
 	public void prepareTest() {
 		this.mockedCaches.clear();
-		doReturn(this.resourceModelMetaData).when(this.resourceModelMetaDataRegistrar).get(any());
-		doReturn(this.resourceModelStatistics).when(this.resourceModelMetaData).getStatistics();
-		doReturn(this.resourceResolver).when(this.resource).getResourceResolver();
-		doReturn(this.targetType).when(this.modelSource).getBeanType();
+
+		doReturn(this.resourceModelMetaData)
+				.when(this.resourceModelMetaDataRegistrar)
+				.get(any());
+
+		doReturn(this.resourceModelStatistics)
+				.when(this.resourceModelMetaData)
+				.getStatistics();
+
+		doReturn(this.resourceResolver)
+				.when(this.resource)
+				.getResourceResolver();
+
+		doReturn(this.targetType)
+				.when(this.modelSource)
+				.getBeanType();
 	}
 
 	@Test(expected = IllegalArgumentException.class)

@@ -75,14 +75,17 @@ public class ResourceToModelAdapterUpdaterTest {
 	public void prepareTest() {
 		this.beanSources = new LinkedList<>();
 		
-		when(this.registry.getBeanSources()).thenReturn(this.beanSources);
+		when(this.registry.getBeanSources())
+				.thenReturn(this.beanSources);
 
 		when(this.context.registerService(eq(AdapterFactory.class.getName()), eq(this.adapter), isA(Dictionary.class)))
-		.thenAnswer(invocation -> {
-            updatedProperties = (Dictionary<String, Object>) invocation.getArguments()[2];
-            return registration;
-        });
-		when(this.context.getBundle()).thenReturn(this.bundle);
+				.thenAnswer(inv -> {
+					updatedProperties = (Dictionary<String, Object>) inv.getArguments()[2];
+					return registration;
+				});
+
+		when(this.context.getBundle())
+				.thenReturn(this.bundle);
 		
 		this.testee.registerModelAdapter();
 	}

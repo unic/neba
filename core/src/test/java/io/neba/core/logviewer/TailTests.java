@@ -65,7 +65,9 @@ public abstract class TailTests {
             return null;
         };
 
-        doAnswer(recordText).when(remote).sendBytes(any());
+        doAnswer(recordText)
+                .when(remote)
+                .sendBytes(any());
     }
 
     public File getTestLogfileDirectory() {

@@ -65,7 +65,6 @@ public class ResourceModelMetaDataTest {
 		assertMappableFieldsDoesNotContain("unmappedStringFieldWithUnmappedMetaAnnotation");
 	}
 
-
     @Test
     public void testFieldsAnnotatedWithAtInjectAreNotMappable() throws Exception {
     	assertMappableFieldsDoesNotContain("injectedField");

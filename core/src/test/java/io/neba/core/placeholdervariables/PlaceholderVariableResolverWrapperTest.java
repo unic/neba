@@ -46,7 +46,7 @@ public class PlaceholderVariableResolverWrapperTest {
     @Before
     public void prepareWrapper() {
         when(this.factory.getBean(eq(this.resolverName), eq(PlaceholderVariableResolver.class)))
-        .thenReturn(this.resolver);
+                .thenReturn(this.resolver);
         
         this.testee = new PlaceholderVariableResolverWrapper(this.factory, this.resolverName);
     }

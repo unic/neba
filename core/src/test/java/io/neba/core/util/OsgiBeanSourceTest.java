@@ -49,10 +49,22 @@ public class OsgiBeanSourceTest {
 
     @Before
     public void prepareBeanSource() {
-        doReturn(ACTIVE).when(this.bundleOne).getState();
-        doReturn(ACTIVE).when(this.bundleTwo).getState();
-        doReturn(123L).when(this.bundleOne).getBundleId();
-        doReturn(1234L).when(this.bundleTwo).getBundleId();
+        doReturn(ACTIVE)
+                .when(this.bundleOne)
+                .getState();
+
+        doReturn(ACTIVE)
+                .when(this.bundleTwo)
+                .getState();
+
+        doReturn(123L)
+                .when(this.bundleOne)
+                .getBundleId();
+
+        doReturn(1234L)
+                .when(this.bundleTwo)
+                .getBundleId();
+
         this.testee = new OsgiBeanSource<>(this.beanName, this.factory, this.bundleOne);
     }
     

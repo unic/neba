@@ -51,7 +51,8 @@ public class PlaceholderVariableResolverRegistrarTest {
 
     @Before
     public void prepareOsgiContext() {
-        when(this.context.getBundle()).thenReturn(this.bundle);
+        when(this.context.getBundle())
+                .thenReturn(this.bundle);
     }
 
     @Test

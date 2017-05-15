@@ -80,7 +80,7 @@ public class NebaRequestContextFilterTest {
 
     @Before
     public void setUp() throws IOException, ServletException {
-        doAnswer(invocationOnMock -> {
+        doAnswer(inv -> {
             requestAttributes = getRequestAttributes();
 
             if (requestAttributes != null) {
@@ -95,9 +95,12 @@ public class NebaRequestContextFilterTest {
             }).get();
 
             return null;
-        }).when(chain).doFilter(isA(HttpServletRequest.class), isA(HttpServletResponse.class));
+        }).when(chain)
+          .doFilter(isA(HttpServletRequest.class), isA(HttpServletResponse.class));
 
-        doReturn(locale).when(request).getLocale();
+        doReturn(locale)
+                .when(request)
+                .getLocale();
     }
 
     @After
