@@ -1,0 +1,90 @@
+---
+title: NEBA 4.2.0 released
+layout: post
+twitterAuthor: deploynix
+description: NEBA 4.2.0 Release notes
+abstract: NEBA 4.2.0 ships with Gemini Blueprint 2.1.0, Spring 4.3.8 and increases performance of model lookups and caching
+---
+
+<section>
+    <header><h2>Hightlights of this release</h2></header>
+
+    <section>
+        <header><h3>NEBA 4.2.0 ships with Gemini Blueprint 2.1.0</h3></header>
+        <p>
+           NEBA 4.2.0 updates to Gemini 2.1.0, which is compatible to Spring 4.3.x and features
+           <a href="https://www.eclipse.org/gemini/blueprint/documentation/reference/2.1.0.RELEASE/html/service-registry.html#service-registry:annotations-vs-xml-declarations">Annotation-based service injection</a>, like so:
+{% highlight java %}
+import org.eclipse.gemini.blueprint.extensions.annotation.ServiceReference;
+import io.neba.api.annotations.ResourceModel;
+
+@ResourceModel
+public class MyModel {
+    // This injects the OSGi service with type "ServiceReference" into this bean.
+    @ServiceReference
+    private SomeService service;
+}
+{% endhighlight %}
+        </p>
+
+    <p>Here, the type <em>ServiceReference</em> stems from the gemini-blueprint-extensions bundle:</p>
+
+{% highlight xml %}
+<dependency>
+    <groupId>org.eclipse.gemini.blueprint</groupId>
+    <artifactId>gemini-blueprint-extensions</artifactId>
+    <version>2.1.0.RELEASE</version>
+</dependency>
+{% endhighlight %}
+
+    </section>
+
+    <section>
+        <header><h3>Improved support for HTL (Sightly) views for Spring Controllers</h3></header>
+        <p>
+            Up to HTL Engine 1.0.20, request attributes could only be accessed indirectly,
+            e.g. via <a href="https://sling.apache.org/documentation/bundles/scripting/scripting-htl.html#the-use-api">the HTL use API</a> (see for instance
+            <a href="https://issues.apache.org/jira/browse/SLING-5812">SLING-5812</a>. However, Spring controller invocations provide their model
+            attributes as request attributes. Consequently, HTL (Sightly) users would have to write additional code to obtain the Spring Controller invocation model data.
+            As of NEBA 4.2.0, the Spring Controller Model is provided by the <a href="https://sling.apache.org/apidocs/sling8/org/apache/sling/api/resource/ValueMap.html">ValueMap</a>
+            representation (aka properties) of the <a href="https://sling.apache.org/apidocs/sling8/org/apache/sling/api/resource/Resource.html">Resource</a> provided to the view script.
+            Thus, model attributes can be accessed like so:
+        </p>
+        <p>
+{% highlight jsp %}
+${properties.modelAttribute}
+{% endhighlight %}
+        </p>
+    </section>
+
+    <section>
+        <header><h3>Update to Spring 4.3.8</h3></header>
+        <p>
+            NEBA updates from Spring 4.2.8 to 4.3.8, the current GA (generally available) Spring 4 version (<a href="https://jira.spring.io/secure/ReleaseNote.jspa?version=15892&styleName=&projectId=10000">release notes</a>).
+        </p>
+    </section>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="15" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="15" data-labels="bug"></ul>
+    </section>
+
+    <section>
+        <header><h3 id="upgrading">Upgrading from 4.1.0</h3></header>
+        <p>
+            Users of NEBA 4.1.0 can upgrade to 4.2.0 without code changes.
+        </p>
+        <p>Neba 4.2.0 ships with Spring 4.3.8. Project dependencies must be updated to the
+            <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.apache.servicemix.bundles%22%20AND%20a%3Aorg.apache.servicemix.bundles.spring-*%20AND%20v%3A%224.3.8.RELEASE_1%22">respective Spring bundle versions</a>.
+        </p>
+    </section>
+</section>
