@@ -131,6 +131,31 @@ public class DemoController {
    selectors or extensions. These aspects are used to address the Spring Controller and cannot be leveraged for view resolution without
    conflicting the Spring controller mapping.
 </p>
+<p>
+    Each request to a Spring @Controller is associated with a generic <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/htmlsingle/#mvc-coc-modelmap">Model</a>.
+    The attributes of this model are available as request attributes to Sling Scripts used as controller views. In a JSP view, for instance, a model attribute "page" can be accessed via:
+</p>
+<div class="listing" id="listing:controller-resourceparam-annotation">
+{% highlight jsp %}
+${page}
+{% endhighlight %}
+<div class="legend">Accessing Spring model attributes in JSP</div></div>
+
+<p>
+    In HTL (Sightly) however, request attributes could only be accessed indirectly up to HTL Engine 1.0.20,
+    e.g. via <a href="https://sling.apache.org/documentation/bundles/scripting/scripting-htl.html#the-use-api">the HTL use API</a> (see for instance
+    <a href="https://issues.apache.org/jira/browse/SLING-5812">SLING-5812</a>). Consequently, HTL (Sightly) users had to write additional code
+    to obtain the Spring Controller invocation model data. Since NEBA 4.2.0, the Spring Controller Model is provided by the <a href="https://sling.apache.org/apidocs/sling8/org/apache/sling/api/resource/ValueMap.html">ValueMap</a>
+    representation (aka properties) of the <a href="https://sling.apache.org/apidocs/sling8/org/apache/sling/api/resource/Resource.html">Resource</a> provided to the view script.
+    Thus, a model attribute "page" could be accessed in HTL (Sightly) - and thus also in JSP - like so:
+</p>
+<p>
+<div class="listing" id="listing:controller-resourceparam-annotation">
+{% highlight jsp %}
+${properties.page}
+{% endhighlight %}
+<div class="legend">Accessing Spring model attributes in HTL (Sightly)</div></div>
+</p>
 </section>
 <section>
 <header><h3 id="mvc_resourceparam_annotation">Resolving resource path parameters with the @ResourceParam annotation</h3></header>

@@ -4,7 +4,7 @@
     Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
 -->
 <head>
-    <title>{{ page.pageTitle }}</title>
+    <title>{% if page.pageTitle %}{{page.pageTitle}}{% else %}{{page.title}}{% endif %}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
     <meta name="viewport" content="width=device-width" />

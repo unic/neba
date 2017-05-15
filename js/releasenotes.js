@@ -12,6 +12,10 @@
                 "milestone" : milestone
             },
             success: function(issues) {
+                if (!issues.length) {
+                    $placeholder.append("<li>None</li>")
+                    return;
+                }
                 issues.forEach(function (issue) {
                     $placeholder.append($('<li><a href="' + issue.html_url + '">#' + issue.number + ': ' + issue.title + '</a></li>'));
                 });
