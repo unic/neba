@@ -8,15 +8,15 @@
 	   xmlns:compendium="http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium"
 
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+           http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
            http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util-4.2.xsd
+           http://www.springframework.org/schema/util/spring-util-4.3.xsd
            http://www.springframework.org/schema/task
-           http://www.springframework.org/schema/task/spring-task-4.2.xsd
+           http://www.springframework.org/schema/task/spring-task-4.3.xsd
            http://www.osgi.org/xmlns/blueprint/v1.0.0
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-4.2.xsd
+           http://www.springframework.org/schema/context/spring-context-4.3.xsd
            http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium
            http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd">
 

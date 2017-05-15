@@ -19,12 +19,15 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.springframework.web.servlet.View;
 
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -68,7 +71,7 @@ public class SlingServletView implements View {
         final ResourceResolver resourceResolver = slingRequest.getResourceResolver();
         final String resourcePath = request.getPathInfo();
 
-        final Resource resource = new SyntheticResource(resourceResolver, resourcePath, this.resourceType);
+        final Resource resource = new SpringControllerModelResource(resourceResolver, resourcePath, this.resourceType, model);
         final SlingHttpServletRequest wrapped = new MvcResourceRequest(slingRequest, resource);
 
         if (model != null) {
@@ -97,6 +100,40 @@ public class SlingServletView implements View {
         @Override
         public Resource getResource() {
             return resource;
+        }
+    }
+
+    /**
+     * Represents the result of a spring controller invocation as a {@link Resource}. The underlying
+     * {@link org.springframework.ui.Model model} is provided via the {@link Resource {@link #getValueMap()} value map representation}
+     * of this resource.
+     *
+     * @author Olaf Otto
+     */
+    private static class SpringControllerModelResource extends SyntheticResource {
+        private final Map<String, ?> model;
+
+        SpringControllerModelResource(ResourceResolver resourceResolver, String resourcePath, String resourceType, Map<String, ?> model) {
+            super(resourceResolver, resourcePath, resourceType);
+            this.model = model;
+        }
+
+        @Override
+        public ValueMap getValueMap() {
+            ValueMap properties = new ValueMapDecorator(new HashMap<>());
+            if (this.model != null) {
+                properties.putAll(this.model);
+            }
+            return properties;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+            if (type.isAssignableFrom(ValueMap.class)) {
+                return (AdapterType) getValueMap();
+            }
+            return super.adaptTo(type);
         }
     }
 }
