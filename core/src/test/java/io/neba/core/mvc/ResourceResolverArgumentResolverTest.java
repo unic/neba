@@ -39,7 +39,9 @@ public class ResourceResolverArgumentResolverTest extends AbstractArgumentResolv
 
     @Before
     public void mockResourceResolver() throws Exception {
-        doReturn(this.resourceResolver).when(getRequest()).getResourceResolver();
+        doReturn(this.resourceResolver)
+                .when(getRequest())
+                .getResourceResolver();
     }
 
     @Test

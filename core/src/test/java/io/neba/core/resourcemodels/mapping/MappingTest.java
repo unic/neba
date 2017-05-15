@@ -45,7 +45,10 @@ public class MappingTest {
     public void prepareMapping() {
         this.source = "/src/path";
         this.testee = new Mapping<>(this.source, this.metaData);
-        doReturn("junit.test.Type").when(this.metaData).getTypeName();
+
+        doReturn("junit.test.Type")
+                .when(this.metaData)
+                .getTypeName();
     }
 
     @Test(expected = IllegalArgumentException.class)

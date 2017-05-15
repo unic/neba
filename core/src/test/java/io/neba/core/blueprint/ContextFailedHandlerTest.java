@@ -120,7 +120,7 @@ public class ContextFailedHandlerTest {
         verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier();
     }
 
-    public void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
+    private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
         InOrder inOrder = inOrder(this.barrier, this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.barrier).begin();
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);

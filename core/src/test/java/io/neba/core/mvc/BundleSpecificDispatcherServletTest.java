@@ -61,7 +61,14 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.web.servlet.DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME;
 
 /**
@@ -93,9 +100,16 @@ public class BundleSpecificDispatcherServletTest {
     @Before
     public void setUp() throws Exception {
         doThrow(new NoSuchBeanDefinitionException("THIS IS AN EXPECTED TEST EXCEPTION"))
-                .when(this.applicationContext).getBean(anyString(), isA(Class.class));
-        doReturn(this.applicationContext).when(this.event).getApplicationContext();
-        doReturn(this.factory).when(this.applicationContext).getAutowireCapableBeanFactory();
+                .when(this.applicationContext)
+                .getBean(anyString(), isA(Class.class));
+
+        doReturn(this.applicationContext)
+                .when(this.event)
+                .getApplicationContext();
+
+        doReturn(this.factory)
+                .when(this.applicationContext)
+                .getAutowireCapableBeanFactory();
 
         Answer<Object> createMock = invocation -> {
             final Class<?> beanType = (Class<?>) invocation.getArguments()[0];
@@ -137,14 +151,6 @@ public class BundleSpecificDispatcherServletTest {
         signalContextRefreshed();
         getBeanFromWebApplicationContext("anyBean");
         verifyBeanIsFetchedFromApplicationContext("anyBean");
-    }
-
-    private void verifyBeanIsFetchedFromApplicationContext(String beanName) {
-        verify(this.applicationContext).getBean(beanName);
-    }
-
-    private void getBeanFromWebApplicationContext(String beanName) {
-        this.testee.getWebApplicationContext().getBean(beanName);
     }
 
     @Test
@@ -334,6 +340,14 @@ public class BundleSpecificDispatcherServletTest {
         assertServletHasHandlerForRequest();
 
         verifyHandlerMappingIsUsedForRequest();
+    }
+
+    private void verifyBeanIsFetchedFromApplicationContext(String beanName) {
+        verify(this.applicationContext).getBean(beanName);
+    }
+
+    private void getBeanFromWebApplicationContext(String beanName) {
+        this.testee.getWebApplicationContext().getBean(beanName);
     }
 
     private void assertServletHasHandlerForRequest() {

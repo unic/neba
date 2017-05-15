@@ -71,7 +71,11 @@ public class ModelRegistryTest {
     @Before
     public void setUp() throws LoginException {
         this.resourceModelAnnotations = new HashSet<>();
-        doReturn(true).when(this.barrier).tryBegin();
+
+        doReturn(true)
+                .when(this.barrier)
+                .tryBegin();
+
     	withBundleId(12345L);
     }
     

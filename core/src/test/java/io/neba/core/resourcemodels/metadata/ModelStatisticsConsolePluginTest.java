@@ -64,8 +64,14 @@ public class ModelStatisticsConsolePluginTest {
         this.metadata = new ArrayList<>();
         this.internalWriter = new StringWriter();
         Writer writer = new PrintWriter(this.internalWriter);
-        doReturn(writer).when(this.response).getWriter();
-        doReturn(this.metadata).when(this.registrar).get();
+
+        doReturn(writer)
+                .when(this.response)
+                .getWriter();
+
+        doReturn(this.metadata)
+                .when(this.registrar)
+                .get();
     }
 
     @Test

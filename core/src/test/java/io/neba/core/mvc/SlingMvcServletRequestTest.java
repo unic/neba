@@ -44,10 +44,21 @@ public class SlingMvcServletRequestTest {
 
     @Before
     public void setUp() throws Exception {
-        doReturn(this.requestPathInfo).when(this.request).getRequestPathInfo();
-        doReturn("/bin/mvc").when(this.requestPathInfo).getResourcePath();
-        doReturn("do").when(this.requestPathInfo).getExtension();
-        doReturn("/controllerPath").when(this.requestPathInfo).getSuffix();
+        doReturn(this.requestPathInfo)
+                .when(this.request)
+                .getRequestPathInfo();
+
+        doReturn("/bin/mvc")
+                .when(this.requestPathInfo)
+                .getResourcePath();
+
+        doReturn("do")
+                .when(this.requestPathInfo)
+                .getExtension();
+
+        doReturn("/controllerPath")
+                .when(this.requestPathInfo)
+                .getSuffix();
 
         this.testee = new SlingMvcServletRequest(this.request);
     }

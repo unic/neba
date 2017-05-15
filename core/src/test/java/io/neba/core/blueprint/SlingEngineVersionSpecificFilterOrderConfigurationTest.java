@@ -52,9 +52,13 @@ public class SlingEngineVersionSpecificFilterOrderConfigurationTest {
 
     @Before
     public void setUp() throws Exception {
-        doAnswer(invocationOnMock -> slingEngineVersion).when(this.slingEngineBundle).getVersion();
+        doAnswer(invocationOnMock -> slingEngineVersion)
+                .when(this.slingEngineBundle)
+                .getVersion();
 
-        doReturn(new Bundle[]{this.slingEngineBundle, this.otherBundle}).when(this.context).getBundles();
+        doReturn(new Bundle[]{this.slingEngineBundle, this.otherBundle})
+                .when(this.context)
+                .getBundles();
 
         Dictionary<String, String> otherManifest = new Hashtable<>();
         Dictionary<String, String> slingEngineManifest = new Hashtable<>();
@@ -62,14 +66,29 @@ public class SlingEngineVersionSpecificFilterOrderConfigurationTest {
         otherManifest.put(BUNDLE_SYMBOLICNAME, "some.other.bundle");
         slingEngineManifest.put(BUNDLE_SYMBOLICNAME, "org.apache.sling.engine");
 
-        doReturn(otherManifest).when(this.otherBundle).getHeaders();
-        doReturn(slingEngineManifest).when(this.slingEngineBundle).getHeaders();
+        doReturn(otherManifest)
+                .when(this.otherBundle)
+                .getHeaders();
 
-        doReturn(this.requestContextFilterService).when(this.factory).getBeanDefinition(eq("requestContextFilterService"));
-        doReturn(this.requestScopedCacheService).when(this.factory).getBeanDefinition(eq("requestScopedResourceModelCacheService"));
+        doReturn(slingEngineManifest)
+                .when(this.slingEngineBundle)
+                .getHeaders();
 
-        doReturn(this.requestContextFilterServiceProperties).when(this.requestContextFilterService).getPropertyValues();
-        doReturn(this.requestScopedCacheServiceProperties).when(this.requestScopedCacheService).getPropertyValues();
+        doReturn(this.requestContextFilterService)
+                .when(this.factory)
+                .getBeanDefinition(eq("requestContextFilterService"));
+
+        doReturn(this.requestScopedCacheService)
+                .when(this.factory)
+                .getBeanDefinition(eq("requestScopedResourceModelCacheService"));
+
+        doReturn(this.requestContextFilterServiceProperties)
+                .when(this.requestContextFilterService)
+                .getPropertyValues();
+
+        doReturn(this.requestScopedCacheServiceProperties)
+                .when(this.requestScopedCacheService)
+                .getPropertyValues();
     }
 
     @Test

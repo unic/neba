@@ -47,7 +47,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceToModelMapperTest {
     /**
-     * @author Christoph Huber
      * @author Olaf Otto
      */
     public static class TestModel {
@@ -87,14 +86,30 @@ public class ResourceToModelMapperTest {
     @Before
     @SuppressWarnings("unchecked")
     public void prepareMapper() {
-        when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(this.valueMap);
-        when(this.resource.getPath()).thenReturn("/resource/path");
-        when(this.resourceModelMetaDataRegistrar.get(isA(Class.class))).thenReturn(this.resourceMetaData);
-        when(this.nestedMappingSupport.begin(isA(Mapping.class))).thenReturn(null);
-        when(this.resourceMetaData.getMappableFields()).thenReturn(new MappedFieldMetaData[]{});
-        when(this.resourceMetaData.getPostMappingMethods()).thenReturn(new MethodMetaData[]{});
-        when(this.resourceMetaData.getPreMappingMethods()).thenReturn(new MethodMetaData[]{});
-        when(this.resourceMetaData.getStatistics()).thenReturn(this.resourceModelStatistics);
+        when(this.resource.adaptTo(eq(ValueMap.class)))
+                .thenReturn(this.valueMap);
+
+        when(this.resource.getPath())
+                .thenReturn("/resource/path");
+
+        when(this.resourceModelMetaDataRegistrar.get(isA(Class.class)))
+                .thenReturn(this.resourceMetaData);
+
+        when(this.nestedMappingSupport.begin(isA(Mapping.class)))
+                .thenReturn(null);
+
+        when(this.resourceMetaData.getMappableFields())
+                .thenReturn(new MappedFieldMetaData[]{});
+
+        when(this.resourceMetaData.getPostMappingMethods())
+                .thenReturn(new MethodMetaData[]{});
+
+        when(this.resourceMetaData.getPreMappingMethods())
+                .thenReturn(new MethodMetaData[]{});
+
+        when(this.resourceMetaData.getStatistics())
+                .thenReturn(this.resourceModelStatistics);
+
         this.model = new TestModel();
         this.beanType = TestModel.class;
     }

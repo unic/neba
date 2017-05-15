@@ -39,7 +39,9 @@ public class RequestPathInfoArgumentResolverTest extends AbstractArgumentResolve
 
     @Before
     public void mockRequestPathInfo() throws Exception {
-        doReturn(this.requestPathInfo).when(getRequest()).getRequestPathInfo();
+        doReturn(this.requestPathInfo)
+                .when(getRequest())
+                .getRequestPathInfo();
     }
 
     @Test

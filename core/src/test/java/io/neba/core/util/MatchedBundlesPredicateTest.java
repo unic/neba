@@ -42,7 +42,9 @@ public class MatchedBundlesPredicateTest {
 
 	@Before
 	public void preparePredicate() {
-		when(this.bundle.getBundleId()).thenReturn(this.bundleId);
+		when(this.bundle.getBundleId())
+				.thenReturn(this.bundleId);
+
 		this.testee = new MatchedBundlesPredicate(this.bundle);
 	}
 

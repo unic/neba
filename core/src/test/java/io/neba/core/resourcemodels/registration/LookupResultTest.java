@@ -39,8 +39,14 @@ public class LookupResultTest {
     @Before
     public void setUp() throws Exception {
         this.testee = new LookupResult(this.beanSource, "junit/test/type");
-        doReturn(123L).when(this.beanSource).getBundleId();
-        doReturn(Object.class).when(this.beanSource).getBeanType();
+
+        doReturn(123L)
+                .when(this.beanSource)
+                .getBundleId();
+
+        doReturn(Object.class)
+                .when(this.beanSource)
+                .getBeanType();
     }
 
     @Test(expected = IllegalArgumentException.class)

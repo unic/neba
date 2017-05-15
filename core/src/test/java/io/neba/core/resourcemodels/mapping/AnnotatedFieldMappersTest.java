@@ -79,31 +79,71 @@ public class AnnotatedFieldMappersTest {
 
     @Before
     public void setUp() throws Exception {
-        doReturn(CustomAnnotation1.class).when(this.mapper1).getAnnotationType();
-        doReturn(Collection.class).when(this.mapper1).getFieldType();
+        doReturn(CustomAnnotation1.class)
+                .when(this.mapper1)
+                .getAnnotationType();
 
-        doReturn(CustomAnnotation2.class).when(this.mapper2).getAnnotationType();
-        doReturn(Resource.class).when(this.mapper2).getFieldType();
+        doReturn(Collection.class)
+                .when(this.mapper1)
+                .getFieldType();
 
-        doReturn(CustomAnnotation2.class).when(this.mapper3).getAnnotationType();
-        doReturn(Resource.class).when(this.mapper3).getFieldType();
 
-        doReturn(this.field1).when(this.metadata1).getField();
-        doReturn(this.field1.getType()).when(this.metadata1).getType();
-        doReturn(this.field2).when(this.metadata2).getField();
-        doReturn(this.field2.getType()).when(this.metadata2).getType();
+        doReturn(CustomAnnotation2.class)
+                .when(this.mapper2)
+                .getAnnotationType();
 
-        doReturn(this.annotations1).when(this.metadata1).getAnnotations();
-        doReturn(this.annotations2).when(this.metadata2).getAnnotations();
+        doReturn(Resource.class)
+                .when(this.mapper2)
+                .getFieldType();
+
+
+        doReturn(CustomAnnotation2.class)
+                .when(this.mapper3)
+                .getAnnotationType();
+
+        doReturn(Resource.class)
+                .when(this.mapper3)
+                .getFieldType();
+
+
+        doReturn(this.field1)
+                .when(this.metadata1)
+                .getField();
+
+        doReturn(this.field1.getType())
+                .when(this.metadata1)
+                .getType();
+
+
+        doReturn(this.field2)
+                .when(this.metadata2)
+                .getField();
+
+        doReturn(this.field2.getType())
+                .when(this.metadata2)
+                .getType();
+
+
+        doReturn(this.annotations1)
+                .when(this.metadata1)
+                .getAnnotations();
+
+        doReturn(this.annotations2)
+                .when(this.metadata2)
+                .getAnnotations();
 
         final List<Annotation> ann1 = new ArrayList<>();
         ann1.add(annotation1);
-        doAnswer(invocationOnMock -> ann1.iterator()).when(this.annotations1).iterator();
+        doAnswer(invocationOnMock -> ann1.iterator())
+                .when(this.annotations1)
+                .iterator();
 
         final List<Annotation> ann2 = new ArrayList<>();
         ann2.add(annotation2);
         ann2.add(metaAnnotation1);
-        doAnswer(invocationOnMock -> ann2.iterator()).when(this.annotations2).iterator();
+        doAnswer(invocationOnMock -> ann2.iterator())
+                .when(this.annotations2)
+                .iterator();
     }
 
     @Test(expected = IllegalArgumentException.class)

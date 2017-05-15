@@ -79,10 +79,21 @@ public class MvcServletTest {
             return null;
         }).when(this.factory).registerSingleton(anyString(), isA(BundleSpecificDispatcherServlet.class));
 
-        doReturn(this.bundle).when(this.context).getBundle();
-        doReturn("symbolic-name").when(this.bundle).getSymbolicName();
-        doReturn(new Version(1, 2, 3)).when(this.bundle).getVersion();
-        doReturn(this.dispatcherServlet).when(this.testee).createBundleSpecificDispatcherServlet(factory, context);
+        doReturn(this.bundle)
+                .when(this.context)
+                .getBundle();
+
+        doReturn("symbolic-name")
+                .when(this.bundle)
+                .getSymbolicName();
+
+        doReturn(new Version(1, 2, 3))
+                .when(this.bundle)
+                .getVersion();
+
+        doReturn(this.dispatcherServlet)
+                .when(this.testee)
+                .createBundleSpecificDispatcherServlet(factory, context);
     }
 
     @Test(expected = IllegalArgumentException.class)

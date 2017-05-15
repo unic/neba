@@ -106,8 +106,13 @@ public class FieldValueMappingCallbackTest {
             lazyLoadingCollectionCallback = (LazyLoader) invocationOnMock.getArguments()[0];
             return lazyLoadingCollectionCallback.loadObject();
         };
-        doAnswer(loadImmediately).when(lazyLoadingCollectionFactory).newInstance(isA(LazyLoader.class));
-        doReturn(lazyLoadingCollectionFactory).when(this.mappedFieldMetadata).getCollectionProxyFactory();
+        doAnswer(loadImmediately)
+                .when(lazyLoadingCollectionFactory)
+                .newInstance(isA(LazyLoader.class));
+
+        doReturn(lazyLoadingCollectionFactory)
+                .when(this.mappedFieldMetadata)
+                .getCollectionProxyFactory();
     }
 
     @Before

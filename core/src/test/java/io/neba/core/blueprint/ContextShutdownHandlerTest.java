@@ -72,5 +72,4 @@ public class ContextShutdownHandlerTest {
     private void withNullBundle() {
         this.bundle = null;
     }
-
 }
