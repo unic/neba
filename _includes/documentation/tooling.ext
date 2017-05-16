@@ -78,7 +78,7 @@
         log files of a Sling instance for authenticated uses ot the Felix console.
     </p>
     <p>
-        The log viewer console allows filtering log files with regard to the log level, tailing and following logfile changes and instantly downloading
+        The log viewer automatically detects errors in the current log file excerpt of an error.log and allows tailing logfiles in real-time. It also allows downloading
         logfiles as ZIP compressed packages for offline analysis.
     </p>
 
