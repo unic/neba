@@ -7,7 +7,7 @@ NEBA integrates the Spring Framework into Apache Sling. It makes available all o
 
 All Spring and Sling features are accessible to developers using a lightweight, [well documented API](http://neba.io/documentation.html) that does not couple the domain -specific implementation code to any implementation details of Sling, Spring or NEBA.
 
-[![Coverage Status](https://coveralls.io/repos/github/unic/neba/badge.svg?branch=master)](https://coveralls.io/github/unic/neba?branch=master) 
+[![codecov](https://codecov.io/gh/unic/neba/branch/develop/graph/badge.svg)](https://codecov.io/gh/unic/neba) 
 [![Travis](https://api.travis-ci.org/unic/neba.svg?branch=develop)](https://travis-ci.org/unic/neba/) 
 [![Maven Central](https://img.shields.io/maven-central/v/io.neba/io.neba.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aio.neba)
 
