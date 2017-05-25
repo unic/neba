@@ -8,21 +8,21 @@
 	<description>
 	Contains all annotations, tag libraries and lifecycle callback interfaces of NEBA.
 	All packages of this API bundle are exported. Change to the API that are not byte code compatible
-	must only occur in major revisions.
+	only occur in major revisions.
 	</description>
 
 	<parent>
 		<groupId>io.neba</groupId>
 		<artifactId>io.neba.neba-parent</artifactId>
-		<version>4.2.0</version>
+		<version>4.2.1</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<properties>
 		<bundle.symbolicName>io.neba-api</bundle.symbolicName>
 		<bundle.namespace>io.neba</bundle.namespace>
+		<api.version>4.2.0</api.version>
 	</properties>
-
 
 	<build>
 		<plugins>
@@ -36,7 +36,7 @@
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Category>neba</Bundle-Category>
 						<Export-Package>
-							io.neba.api.*;version=${project.version}
+							io.neba.api.*;version=${api.version}
 						</Export-Package>
 					</instructions>
 				</configuration>

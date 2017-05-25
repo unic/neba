@@ -1,18 +1,18 @@
 /**
  * Copyright 2013 the original author or authors.
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 package io.neba.core.resourcemodels.mapping;
 
@@ -29,7 +29,11 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
@@ -95,16 +99,19 @@ public class FieldValueMappingCallback {
 
         // Prepare the dynamic contextual data of this mapping
         final FieldData fieldData = new FieldData(metaData, evaluateFieldPath(metaData));
+        // Determine whether the mapping can result in a non-null value
+        final boolean isMappable = isMappable(fieldData);
+
+        if (metaData.isOptional()) {
+            // Optional fields are never null, regardless of whether a value is mappable.
+            Optional<Object> optional = isMappable ? new OptionalFieldValue(fieldData, this) : new EmptyOptional(fieldData);
+            setField(metaData.getField(), this.model, optional);
+            return;
+        }
 
         Object value = null;
 
-        if (isMappable(fieldData)) {
-            // Explicit lazy loading: provide the lazy loading implementation, not not map anything.
-            if (metaData.isOptional()) {
-                setField(metaData.getField(), this.model, new OptionalFieldValue(fieldData, this));
-                return;
-            }
-
+        if (isMappable) {
             value = resolve(fieldData);
         }
 
@@ -139,9 +146,9 @@ public class FieldValueMappingCallback {
         // an empty collection, in case no non-<code>null</code> default value was provided and field is not Optional.
         boolean preventNullCollection =
                 value == null &&
-                !fieldData.metaData.isOptional() &&
-                fieldData.metaData.isInstantiableCollectionType() &&
-                getField(fieldData.metaData.getField(), this.model) == null;
+                        !fieldData.metaData.isOptional() &&
+                        fieldData.metaData.isInstantiableCollectionType() &&
+                        getField(fieldData.metaData.getField(), this.model) == null;
 
         @SuppressWarnings("unchecked")
         Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) fieldData.metaData.getType()) : null;
@@ -320,8 +327,8 @@ public class FieldValueMappingCallback {
         }
         // Create a lazy loading proxy for the collection
         @SuppressWarnings("unchecked")
-		Collection<Object> result = (Collection<Object>) field.metaData.getCollectionProxyFactory().newInstance(new LazyReferencesLoader(field, paths, this));
-		return result;
+        Collection<Object> result = (Collection<Object>) field.metaData.getCollectionProxyFactory().newInstance(new LazyReferencesLoader(field, paths, this));
+        return result;
     }
 
     /**
@@ -365,7 +372,7 @@ public class FieldValueMappingCallback {
         } else {
             value = resolvePropertyTypedValue(field, field.metaData.getType());
         }
-        return  value;
+        return value;
     }
 
     /**
@@ -386,7 +393,7 @@ public class FieldValueMappingCallback {
         }
         if (this.properties == null) {
             throw new IllegalStateException("Tried to map the property " + field +
-                                            " even though the resource has no properties.");
+                    " even though the resource has no properties.");
         }
         return this.properties.get(field.path, propertyType);
     }
@@ -431,7 +438,7 @@ public class FieldValueMappingCallback {
 
         ValueMap properties = parent.adaptTo(ValueMap.class);
         if (properties == null) {
-            return  null;
+            return null;
         }
 
         return new PrimitiveSupportingValueMap(properties).get(property.getName(), propertyType);
@@ -445,15 +452,15 @@ public class FieldValueMappingCallback {
      *
      * @return a collection of the resolved values, or <code>null</code> if no value could be resolved.
      */
-	private Collection<?> getArrayPropertyAsCollection(FieldData field) {
+    private Collection<?> getArrayPropertyAsCollection(FieldData field) {
         Class<?> arrayType = field.metaData.getArrayTypeOfTypeParameter();
         Object[] elements = (Object[]) resolvePropertyTypedValue(field, arrayType);
 
         if (elements != null) {
-			@SuppressWarnings("unchecked")
-			Collection<Object> collection = ReflectionUtil.instantiateCollectionType((Class<Collection<Object>>) field.metaData.getType());
+            @SuppressWarnings("unchecked")
+            Collection<Object> collection = ReflectionUtil.instantiateCollectionType((Class<Collection<Object>>) field.metaData.getType());
             Collections.addAll(collection, elements);
-			return collection;
+            return collection;
         }
 
         return null;
@@ -634,6 +641,35 @@ public class FieldValueMappingCallback {
     }
 
     /**
+     * An {@link Optional} that is empty. Represents cases where it is already clear
+     * at mapping time that the value will be null.
+     *
+     * @author Olaf Otto
+     */
+    private static class EmptyOptional implements Optional<Object> {
+        private final FieldData fieldData;
+
+        private EmptyOptional(FieldData fieldData) {
+            this.fieldData = fieldData;
+        }
+
+        @Override
+        public Object get() throws NoSuchElementException {
+            throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
+        }
+
+        @Override
+        public Object orElse(Object defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+    }
+
+    /**
      * Lazy-loads collections of children.
      *
      * @see #createCollectionOfChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)
@@ -692,11 +728,11 @@ public class FieldValueMappingCallback {
         private final MappedFieldMetaData metaData;
 
         OngoingFieldMapping(Object model,
-                                   Object resolvedValue,
-                                   AnnotationMapping mapping,
-                                   FieldData fieldData,
-                                   Resource resource,
-                                   ValueMap properties) {
+                            Object resolvedValue,
+                            AnnotationMapping mapping,
+                            FieldData fieldData,
+                            Resource resource,
+                            ValueMap properties) {
 
             this.model = model;
             this.resolvedValue = resolvedValue;

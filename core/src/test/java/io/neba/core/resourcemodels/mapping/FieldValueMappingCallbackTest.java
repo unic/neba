@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.mapping;
 
@@ -25,6 +25,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
 import org.apache.sling.api.resource.ValueMap;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +38,12 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.Vector;
 
 import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
@@ -50,11 +56,17 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(MockitoJUnitRunner.class)
 public class FieldValueMappingCallbackTest {
     @Mock
@@ -435,6 +447,36 @@ public class FieldValueMappingCallbackTest {
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
         assertOptionalFieldHasValue(this.resourceTargetedByMapping);
         assertOptionalValueIsPresent();
+    }
+
+    /**
+     * In case a field value will always resolve to null, e.g. if a resource has no properties and the field is based
+     * on the resource properties, the filed mapper must still provide a non-null {@link Optional} as, by design, {@link Optional} fields
+     * must not be null. For instance, a resource without properties will never have a resource path stored in the property
+     * "link", thus the following example would always yield <code>null</code> but must still provide a non-null {@link Optional}:
+     *
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}
+     *         private Optional&lt;Resource&gt; link;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testOptionalFieldIsNotNullEvenIfFieldIsNotMappable() throws Exception {
+        withNullValueMap();
+        withField(Resource.class);
+        withOptionalField();
+        withReferenceAnnotationPresent();
+
+        mapField();
+
+        assertMappedFieldValueIsOptional();
+        assertOptionalValueIsNotPresent();
+        assertOptionalFieldYieldsDefaultValue();
+        assertOptionalFieldHasNoElement();
     }
 
     /**
@@ -1652,6 +1694,21 @@ public class FieldValueMappingCallbackTest {
         assertThat(((Optional<?>) this.mappedFieldOfTypeObject).isPresent()).describedAs("the optional field is present").isFalse();
     }
 
+    private void assertOptionalFieldHasNoElement() {
+        try {
+            ((Optional<?>) this.mappedFieldOfTypeObject).get();
+            Assertions.fail("Expected invocation of 'get()' on the optional " +
+                    "to yield a " + NoSuchElementException.class.getSimpleName() + ".");
+        } catch (NoSuchElementException e) {
+            // Expected behavior
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertOptionalFieldYieldsDefaultValue() {
+        assertThat(((Optional<Object>) this.mappedFieldOfTypeObject).orElse("defaultValue")).describedAs("the optional field should yield the default value provided to 'orElse'").isEqualTo("defaultValue");
+    }
+
     private void getOptionalValue() {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
         ((Optional<?>) this.mappedFieldOfTypeObject).get();
@@ -1716,9 +1773,10 @@ public class FieldValueMappingCallbackTest {
         verify(this.factory).resolveEmbeddedValue(eq(placeholder));
     }
 
+    @SuppressWarnings("unchecked")
     private void assertMappedFieldValueIsCollectionContainingTargetValue() {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
-        assertThat((Collection<?>) this.mappedFieldOfTypeObject).containsOnly(this.targetValue);
+        assertThat((Collection<Object>) this.mappedFieldOfTypeObject).containsOnly(this.targetValue);
     }
 
     private void assertMappedFieldValueIsEmptyCollection() {
@@ -1726,9 +1784,10 @@ public class FieldValueMappingCallbackTest {
         assertThat((Collection<?>) this.mappedFieldOfTypeObject).isEmpty();
     }
 
+    @SuppressWarnings("unchecked")
     private void assertMappedFieldValueIsCollectionWithEntries(Object... entries) {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
-        assertThat((Collection<?>) this.mappedFieldOfTypeObject).containsOnly(entries);
+        assertThat((Collection<Object>) this.mappedFieldOfTypeObject).containsOnly(entries);
     }
 
     @SuppressWarnings("unchecked")
