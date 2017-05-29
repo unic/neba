@@ -22,9 +22,14 @@
 
 	<context:component-scan base-package="io.neba.core" />
 
-	<task:annotation-driven  proxy-target-class="true"/>
+	<task:annotation-driven  proxy-target-class="true" executor="defaultExecutor" />
 
-    <task:executor id="singlethreaded" pool-size="1" queue-capacity="1" rejection-policy="DISCARD_OLDEST" />
+	<!-- Explicitly define a default executor for all non-qualified @Async methods. This is necessary as
+	     the FelixTaskExecutor, which is synchronous, is published with the default executor name "taskExecutor" and
+	     would thus be used for all such method invocations. -->
+	<task:executor id="defaultExecutor" />
+
+    <task:executor id="singlethreadedExecutor" pool-size="1" queue-capacity="1" rejection-policy="DISCARD_OLDEST" />
 	
 	<util:constant
 		static-field="io.neba.core.resourcemodels.registration.ModelRegistryConsolePlugin.LABEL"
