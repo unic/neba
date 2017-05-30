@@ -21,7 +21,7 @@
 	<properties>
 		<bundle.symbolicName>io.neba-api</bundle.symbolicName>
 		<bundle.namespace>io.neba</bundle.namespace>
-		<api.version>4.2.0</api.version>
+		<api.version>4.3.0</api.version>
 	</properties>
 
 	<build>
