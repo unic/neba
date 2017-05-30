@@ -420,7 +420,7 @@ public class FieldValueMappingCallbackTest {
         withResourceTargetedByMapping("/path/stored/in/property");
         withLazyField();
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
-        assertLazyFieldHasValue(this.resourceTargetedByMapping);
+        assertLazyFieldIsJavaUtilOptionalWithValue(this.resourceTargetedByMapping);
     }
 
     /**
@@ -1387,7 +1387,7 @@ public class FieldValueMappingCallbackTest {
 
     /**
      * NEBA guarantees that Collection-typed mappable fields are not null. This shall not hold true for
-     * {@link Lazy} collection-typed fields, as those may explicitly  yield {@link Lazy#get()} null}. For example.
+     * {@link Lazy} collection-typed fields, as those may explicitly  yield {@link Lazy#getValue()} null}. For example.
      * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
@@ -1844,7 +1844,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void loadLazyField() {
-        this.mappedFieldOfTypeObject = ((Lazy<?>) this.mappedFieldOfTypeObject).get();
+        this.mappedFieldOfTypeObject = ((Lazy<?>) this.mappedFieldOfTypeObject).getValue().orElse(null);
     }
 
     private void assertMappedFieldValueIsOptional() {
@@ -1868,9 +1868,10 @@ public class FieldValueMappingCallbackTest {
         assertThat(((Optional<?>) this.mappedFieldOfTypeObject).orElse(null)).isEqualTo(expected);
     }
 
-    private void assertLazyFieldHasValue(Object expected) {
+    @SuppressWarnings("unchecked")
+    private void assertLazyFieldIsJavaUtilOptionalWithValue(Object value) {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Lazy.class);
-        assertThat(((Lazy<?>) this.mappedFieldOfTypeObject).get()).isEqualTo(expected);
+        assertThat(((Lazy) this.mappedFieldOfTypeObject).getValue()).hasValue(value);
     }
 
     private void assertOptionalValueIsPresent() {
@@ -1891,8 +1892,10 @@ public class FieldValueMappingCallbackTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void assertLazyFieldHasNoValue() {
-        assertThat(((Lazy) this.mappedFieldOfTypeObject).get()).describedAs("The value returned when invoking get() of the lazy field").isNull();
+        assertThat(((Lazy<Object>) this.mappedFieldOfTypeObject).getValue())
+                .describedAs("The value returned when invoking getValue() of the lazy field").isEmpty();
     }
 
     @SuppressWarnings("unchecked")

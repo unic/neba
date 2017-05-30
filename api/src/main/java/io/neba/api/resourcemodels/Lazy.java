@@ -41,7 +41,7 @@ package io.neba.api.resourcemodels;
  */
 public interface Lazy<T> {
     /**
-     * @return the lazy-loaded value, or <code>null</code> if no value could be resolved.
+     * @return an {@link java.util.Optional} representation of the lazy-loaded value, never <code>null</code>.
      */
-    T get();
+    java.util.Optional<T> getValue();
 }
