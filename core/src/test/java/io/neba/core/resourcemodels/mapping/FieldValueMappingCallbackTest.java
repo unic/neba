@@ -22,6 +22,7 @@ import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
+import io.neba.core.util.Annotations;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -39,12 +40,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
@@ -57,12 +53,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -105,7 +96,7 @@ public class FieldValueMappingCallbackTest {
 
     @Before
     public void prepareMappedField() throws Exception {
-        withmappedField("mappedFieldOfTypeObject");
+        withMappedField("mappedFieldOfTypeObject");
     }
 
     @Before
@@ -442,7 +433,6 @@ public class FieldValueMappingCallbackTest {
     public void testHandlingOfNullWhenNullIsNotAllowedInOptionalReference() throws Exception {
         withOptionalField();
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
-        assertOptionalFieldHasValue(null);
         getOptionalValue();
     }
 
@@ -1541,7 +1531,7 @@ public class FieldValueMappingCallbackTest {
     @Test
     public void testHandlingOfIncompatibleReturnValueFromCustomFieldMapper() throws Exception {
         withCustomFieldMapperMappingTo(new ArrayList<String>());
-        withmappedField("mappedFieldOfTypeString");
+        withMappedField("mappedFieldOfTypeString");
 
         Exception e = null;
         try {
@@ -1574,6 +1564,7 @@ public class FieldValueMappingCallbackTest {
         assertThat(this.ongoingMapping.getResolvedValue()).isEqualTo(this.targetValue);
         assertThat(this.ongoingMapping.getResource()).isSameAs(this.resource);
         assertThat(this.ongoingMapping.getFieldTypeParameter()).isSameAs(this.mappedFieldMetadata.getTypeParameter());
+        assertThat(this.ongoingMapping.getAnnotationsOfField()).isSameAs(this.mappedFieldMetadata.getAnnotations().getAnnotations());
     }
 
     @SuppressWarnings("unchecked")
@@ -1593,7 +1584,7 @@ public class FieldValueMappingCallbackTest {
         doAnswer(retainMappingContext).when(this.annotatedFieldMapper).map(isA(OngoingMapping.class));
     }
 
-    private void withmappedField(String fieldName) throws NoSuchFieldException {
+    private void withMappedField(String fieldName) throws NoSuchFieldException {
         this.mappedField = getClass().getDeclaredField(fieldName);
     }
 
@@ -1833,6 +1824,10 @@ public class FieldValueMappingCallbackTest {
         doReturn(mappedField).when(this.mappedFieldMetadata).getField();
         doReturn("field").when(this.mappedFieldMetadata).getPath();
         doReturn(fieldType).when(this.mappedFieldMetadata).getType();
+
+        Annotations annotations = mock(Annotations.class);
+        doReturn(new HashMap<>()).when(annotations).getAnnotations();
+        doReturn(annotations).when(this.mappedFieldMetadata).getAnnotations();
     }
 
     private void mapField() {
