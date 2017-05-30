@@ -235,15 +235,29 @@ public class MappedFieldMetaDataTest {
 
     @Test
     public void testDetectionOfOptionalFieldWithReferenceAnnotation() throws Exception {
-        createMetadataForTestModelFieldWithName("lazyReferenceToOtherModel");
+        createMetadataForTestModelFieldWithName("optionalReferenceToOtherModel");
         assertOptionalFieldIsDetected();
         assertFieldTypeIs(OtherTestResourceModel.class);
     }
 
     @Test
+    public void testDetectionOfLazyFieldWithReferenceAnnotation() throws Exception {
+        createMetadataForTestModelFieldWithName("lazyReferenceToOtherModel");
+        assertLazyFieldIsDetected();
+        assertFieldTypeIs(OtherTestResourceModel.class);
+    }
+
+    @Test
     public void testDetectionOfOptionalFieldWithPointingToChildResource() throws Exception {
-        createMetadataForTestModelFieldWithName("lazyReferenceToChildAsOtherModel");
+        createMetadataForTestModelFieldWithName("optionalReferenceToChildAsOtherModel");
         assertOptionalFieldIsDetected();
+        assertFieldTypeIs(OtherTestResourceModel.class);
+    }
+
+    @Test
+    public void testDetectionOfLazyFieldWithPointingToChildResource() throws Exception {
+        createMetadataForTestModelFieldWithName("lazyReferenceToChildAsOtherModel");
+        assertLazyFieldIsDetected();
         assertFieldTypeIs(OtherTestResourceModel.class);
     }
 
@@ -274,6 +288,14 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
+    public void testLazyFieldsAreTransparentlyTreatedLikeTheirTargetType() throws Exception {
+        createMetadataForTestModelFieldWithName("lazyChildContentResourcesAsResources");
+        assertFieldIsInstantiableCollectionType();
+        assertFieldTypeIs(List.class);
+        assertTypeParameterIs(Resource.class);
+    }
+
+    @Test
     public void testMetadataMakesFieldAccessible() throws Exception {
         TestResourceModel testResourceModel = new TestResourceModel();
         createMetadataForTestModelFieldWithName("stringField");
@@ -291,6 +313,10 @@ public class MappedFieldMetaDataTest {
 
     private void assertOptionalFieldIsDetected() {
         assertThat(this.testee.isOptional()).isTrue();
+    }
+
+    private void assertLazyFieldIsDetected() {
+        assertThat(this.testee.isLazy()).isTrue();
     }
 
     private void assertChildrenHasResolveBelowEveryChildPath() {

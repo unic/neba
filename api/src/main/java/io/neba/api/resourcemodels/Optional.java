@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.api.resourcemodels;
 
 import java.util.NoSuchElementException;
@@ -55,9 +55,11 @@ import java.util.NoSuchElementException;
  *     reason to make them {@link io.neba.api.resourcemodels.Optional}.
  * </p>
  *
+ * @deprecated Use {@link Lazy} instead.
  * @param <T> the type of the lazy-loaded object.
  * @author Olaf Otto
  */
+@Deprecated
 public interface Optional<T> {
     /**
      * @return the non-<code>null</code> value, or throws a {@link java.util.NoSuchElementException} if no value exists.

@@ -17,10 +17,12 @@
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.api.resourcemodels.AnnotatedFieldMapper;
+import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
+import io.neba.core.util.Annotations;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -38,12 +40,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
@@ -56,12 +53,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -104,7 +96,7 @@ public class FieldValueMappingCallbackTest {
 
     @Before
     public void prepareMappedField() throws Exception {
-        withmappedField("mappedFieldOfTypeObject");
+        withMappedField("mappedFieldOfTypeObject");
     }
 
     @Before
@@ -402,11 +394,33 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testLazyLoadingReferenceResolution() throws Exception {
+    public void testOptionalLoadingReferenceResolution() throws Exception {
         withResourceTargetedByMapping("/path/stored/in/property");
         withOptionalField();
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
         assertOptionalFieldHasValue(this.resourceTargetedByMapping);
+    }
+
+    /**
+     * A model may declare lazy 1:1 relationships to other models using the
+     * {@link io.neba.api.resourcemodels.Lazy} interface. An implementation
+     * of this interface must be provided automatically and must load the
+     * target value when requested. Example:
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}
+     *         private {@link io.neba.api.resourcemodels.Lazy}&lt;Resource&gt; link;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testLazyLoadingReferenceResolution() throws Exception {
+        withResourceTargetedByMapping("/path/stored/in/property");
+        withLazyField();
+        mapSingleReferenceField(Resource.class, "/path/stored/in/property");
+        assertLazyFieldHasValue(this.resourceTargetedByMapping);
     }
 
     /**
@@ -419,7 +433,6 @@ public class FieldValueMappingCallbackTest {
     public void testHandlingOfNullWhenNullIsNotAllowedInOptionalReference() throws Exception {
         withOptionalField();
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
-        assertOptionalFieldHasValue(null);
         getOptionalValue();
     }
 
@@ -480,8 +493,37 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
+     * In case a field value will always resolve to null, e.g. if a resource has no properties and the field is based
+     * on the resource properties, the filed mapper must still provide a non-null {@link io.neba.api.resourcemodels.Lazy}
+     * as, by design, {@link io.neba.api.resourcemodels.Lazy} fields
+     * must not be null. For instance, a resource without properties will never have a resource path stored in the property
+     * "link", thus the following example would always yield <code>null</code> but must still provide a non-null {@link io.neba.api.resourcemodels.Lazy}:
+     *
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}
+     *         private Lazy&lt;Resource&gt; link;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testLazyFieldIsNotNullEvenIfFieldIsNotMappable() throws Exception {
+        withNullValueMap();
+        withField(Resource.class);
+        withLazyField();
+        withReferenceAnnotationPresent();
+
+        mapField();
+
+        assertMappedFieldValueIsLazy();
+        assertLazyFieldHasNoValue();
+    }
+
+    /**
      * A reference may be a property of a resource containing an array of paths to other resources.
-     * Such a references are automatically resolved and adapted in the presence of a
+     * Such references are automatically resolved and adapted in the presence of a
      * {@link io.neba.api.annotations.Reference} annotation.
      * For example, the current resource may have a String[] property called "links", containing the values
      * "/first/path/stored/in/property", "/second/path/stored/in/property".
@@ -495,6 +537,9 @@ public class FieldValueMappingCallbackTest {
      *         private {@link io.neba.api.resourcemodels.Optional}&lt;Collection&lt;Resource&gt;&gt; links;
      *     }
      * </pre>
+     *
+     * In this case, lazy-loading mus exclusively occur via the provided {@link Optional} implementation, i.e.
+     * the collection lazy-loaded via {@link Optional} should not be a lazy-loading collection.
      */
     @Test
     public void testOptionalCollectionOfReferencesIsExclusivelyLazyLoadedViaOptional() throws Exception {
@@ -504,6 +549,38 @@ public class FieldValueMappingCallbackTest {
         mapReferenceCollectionField(Collection.class, Resource.class, referencedResources);
         assertMappedFieldValueIsOptional();
         loadOptionalField();
+        assertMappedFieldValueIsCollectionWithResourcesWithPaths(referencedResources);
+        assertNoLazyLoadingProxyIsCreated();
+    }
+
+    /**
+     * A reference may be a property of a resource containing an array of paths to other resources.
+     * Such references are automatically resolved and adapted in the presence of a
+     * {@link io.neba.api.annotations.Reference} annotation.
+     * For example, the current resource may have a String[] property called "links", containing the values
+     * "/first/path/stored/in/property", "/second/path/stored/in/property".
+     * The corresponding resources are then resolved and injected.
+     * Here, the reference is also declared {@link io.neba.api.resourcemodels.Lazy}.
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}
+     *         private {@link io.neba.api.resourcemodels.Lazy}&lt;Collection&lt;Resource&gt;&gt; links;
+     *     }
+     * </pre>
+     *
+     * In this case, lazy-loading mus exclusively occur via the provided {@link Lazy} implementation, i.e.
+     * the collection lazy-loaded via {@link Lazy} should not be a lazy-loading collection.
+     */
+    @Test
+    public void testLazyCollectionOfReferencesIsExclusivelyLazyLoadedViaLazy() throws Exception {
+        String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
+        withMockResources(referencedResources);
+        withLazyField();
+        mapReferenceCollectionField(Collection.class, Resource.class, referencedResources);
+        assertMappedFieldValueIsLazy();
+        loadLazyField();
         assertMappedFieldValueIsCollectionWithResourcesWithPaths(referencedResources);
         assertNoLazyLoadingProxyIsCreated();
     }
@@ -560,8 +637,38 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
+     * Test the explicitly lazy retrieval of the children of the current resources with adaptation to
+     * the desired target type (component type of the collection).
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Children}
+     *         private {@link io.neba.api.resourcemodels.Lazy}&lt;List&lt;ModelForChild&gt;&gt; children;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testLazyCollectionOfChildrenIsExclusivelyLazyLoadedViaLazy() throws Exception {
+        withField(Collection.class);
+        withLazyField();
+        withCollectionTypedField();
+        withInstantiableCollectionTypedField();
+        withTypeParameter(TestResourceModel.class);
+        withChildrenAnnotationPresent();
+        withResourceTargetedByMapping(child("field"));
+        withResourceTargetedByMappingAdaptingTo(TestResourceModel.class, new TestResourceModel());
+
+        mapField();
+
+        assertMappedFieldValueIsLazy();
+        loadLazyField();
+        assertMappedFieldValueIsCollectionContainingTargetValue();
+    }
+
+    /**
      * Tests that {@link AnnotatedFieldMapper annotated field mappers} are supported on
-     * {@link Optional lazy-oding} resource model fields, i.e. that these mappers are invoked when the
+     * {@link Optional lazy-loading} resource model fields, i.e. that these mappers are invoked when the
      * lazy loading callback is triggered in a case such as this:
      * <p />
      * <pre>
@@ -588,6 +695,40 @@ public class FieldValueMappingCallbackTest {
         assertCustomFieldMapperIsNotUsedToMapField();
 
         loadOptionalField();
+
+        assertCustomFieldMapperIsObtained();
+        assertCustomFieldMapperIsUsedToMapField();
+    }
+
+    /**
+     * Tests that {@link AnnotatedFieldMapper annotated field mappers} are supported on
+     * {@link Lazy lazy-loading} resource model fields, i.e. that these mappers are invoked when the
+     * lazy loading callback is triggered in a case such as this:
+     * <p />
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;MyCustomAnnotation
+     *         private {@link io.neba.api.resourcemodels.Optional}&lt;AnyType&gt; anyField;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testCustomMappersAreAppliedWhenLazyFieldsAreLoaded() throws Exception {
+        withField(Collection.class);
+        withLazyField();
+        withCollectionTypedField();
+        withInstantiableCollectionTypedField();
+        withCustomFieldMapperMappingTo(new ArrayList<>());
+
+        mapField();
+
+        assertMappedFieldValueIsLazy();
+
+        assertCustomFieldMapperIsNotObtained();
+        assertCustomFieldMapperIsNotUsedToMapField();
+
+        loadLazyField();
 
         assertCustomFieldMapperIsObtained();
         assertCustomFieldMapperIsUsedToMapField();
@@ -1245,6 +1386,30 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
+     * NEBA guarantees that Collection-typed mappable fields are not null. This shall not hold true for
+     * {@link Lazy} collection-typed fields, as those may explicitly  yield {@link Lazy#get()} null}. For example.
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;some.Annotation
+     *         private Lazy&lt;List&lt;SomeModel&lt;&lt; lazyList;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testNullValuesAreNotPreventedInLazyCollectionTypedFields() throws Exception {
+        withField(Collection.class);
+        withLazyField();
+        withInstantiableCollectionTypedField();
+
+        mapField();
+
+        assertMappedFieldValueIsLazy();
+        assertLazyFieldHasNoValue();
+    }
+
+    /**
      * NEBA guarantees that Collection-typed mappable fields are not null. This
      * shall hold true regardless of the field semantics.
      */
@@ -1366,7 +1531,7 @@ public class FieldValueMappingCallbackTest {
     @Test
     public void testHandlingOfIncompatibleReturnValueFromCustomFieldMapper() throws Exception {
         withCustomFieldMapperMappingTo(new ArrayList<String>());
-        withmappedField("mappedFieldOfTypeString");
+        withMappedField("mappedFieldOfTypeString");
 
         Exception e = null;
         try {
@@ -1399,6 +1564,7 @@ public class FieldValueMappingCallbackTest {
         assertThat(this.ongoingMapping.getResolvedValue()).isEqualTo(this.targetValue);
         assertThat(this.ongoingMapping.getResource()).isSameAs(this.resource);
         assertThat(this.ongoingMapping.getFieldTypeParameter()).isSameAs(this.mappedFieldMetadata.getTypeParameter());
+        assertThat(this.ongoingMapping.getAnnotationsOfField()).isSameAs(this.mappedFieldMetadata.getAnnotations().getAnnotations());
     }
 
     @SuppressWarnings("unchecked")
@@ -1418,7 +1584,7 @@ public class FieldValueMappingCallbackTest {
         doAnswer(retainMappingContext).when(this.annotatedFieldMapper).map(isA(OngoingMapping.class));
     }
 
-    private void withmappedField(String fieldName) throws NoSuchFieldException {
+    private void withMappedField(String fieldName) throws NoSuchFieldException {
         this.mappedField = getClass().getDeclaredField(fieldName);
     }
 
@@ -1576,6 +1742,10 @@ public class FieldValueMappingCallbackTest {
         doReturn(true).when(this.mappedFieldMetadata).isOptional();
     }
 
+    private void withLazyField() {
+        doReturn(true).when(this.mappedFieldMetadata).isLazy();
+    }
+
     /**
      * Creates a resource mock <code>resourceTargetedByMapping</code> that can be resolved with
      * <code>path</code> and returns the path.
@@ -1654,6 +1824,10 @@ public class FieldValueMappingCallbackTest {
         doReturn(mappedField).when(this.mappedFieldMetadata).getField();
         doReturn("field").when(this.mappedFieldMetadata).getPath();
         doReturn(fieldType).when(this.mappedFieldMetadata).getType();
+
+        Annotations annotations = mock(Annotations.class);
+        doReturn(new HashMap<>()).when(annotations).getAnnotations();
+        doReturn(annotations).when(this.mappedFieldMetadata).getAnnotations();
     }
 
     private void mapField() {
@@ -1669,8 +1843,16 @@ public class FieldValueMappingCallbackTest {
         this.mappedFieldOfTypeObject = ((Optional<?>) this.mappedFieldOfTypeObject).orElse(null);
     }
 
+    private void loadLazyField() {
+        this.mappedFieldOfTypeObject = ((Lazy<?>) this.mappedFieldOfTypeObject).get();
+    }
+
     private void assertMappedFieldValueIsOptional() {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
+    }
+
+    private void assertMappedFieldValueIsLazy() {
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Lazy.class);
     }
 
     private void assertNoLazyLoadingProxyIsCreated() {
@@ -1684,6 +1866,11 @@ public class FieldValueMappingCallbackTest {
     private void assertOptionalFieldHasValue(Object expected) {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
         assertThat(((Optional<?>) this.mappedFieldOfTypeObject).orElse(null)).isEqualTo(expected);
+    }
+
+    private void assertLazyFieldHasValue(Object expected) {
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Lazy.class);
+        assertThat(((Lazy<?>) this.mappedFieldOfTypeObject).get()).isEqualTo(expected);
     }
 
     private void assertOptionalValueIsPresent() {
@@ -1702,6 +1889,10 @@ public class FieldValueMappingCallbackTest {
         } catch (NoSuchElementException e) {
             // Expected behavior
         }
+    }
+
+    private void assertLazyFieldHasNoValue() {
+        assertThat(((Lazy) this.mappedFieldOfTypeObject).get()).describedAs("The value returned when invoking get() of the lazy field").isNull();
     }
 
     @SuppressWarnings("unchecked")

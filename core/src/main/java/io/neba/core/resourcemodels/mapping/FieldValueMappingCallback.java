@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.api.resourcemodels.AnnotatedFieldMapper;
+import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
@@ -29,11 +30,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
@@ -102,6 +99,13 @@ public class FieldValueMappingCallback {
         // Determine whether the mapping can result in a non-null value
         final boolean isMappable = isMappable(fieldData);
 
+        if (metaData.isLazy()) {
+            // Lazy fields are never null, regardless of whether a value is mappable.
+            Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : LazyFieldValue.EMPTY;
+            setField(metaData.getField(), this.model, lazy);
+            return;
+        }
+
         if (metaData.isOptional()) {
             // Optional fields are never null, regardless of whether a value is mappable.
             Optional<Object> optional = isMappable ? new OptionalFieldValue(fieldData, this) : new EmptyOptional(fieldData);
@@ -146,6 +150,7 @@ public class FieldValueMappingCallback {
         // an empty collection, in case no non-<code>null</code> default value was provided and field is not Optional.
         boolean preventNullCollection =
                 value == null &&
+                        !fieldData.metaData.isLazy() &&
                         !fieldData.metaData.isOptional() &&
                         fieldData.metaData.isInstantiableCollectionType() &&
                         getField(fieldData.metaData.getField(), this.model) == null;
@@ -321,7 +326,7 @@ public class FieldValueMappingCallback {
      * @return never <code>null</code> but rather an empty collection.
      */
     private Collection<Object> createCollectionOfReferences(final FieldData field, final String[] paths) {
-        if (field.metaData.isOptional()) {
+        if (field.metaData.isLazy() || field.metaData.isOptional()) {
             // The field was already lazy-loaded - no not lazy-load again.
             return loadReferences(field, paths);
         }
@@ -603,11 +608,13 @@ public class FieldValueMappingCallback {
          */
         @Override
         public Object get() {
-            Object o = load();
-            if (o == null) {
+            if (this.value == NULL) {
+                load();
+            }
+            if (this.value == null) {
                 throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
             }
-            return o;
+            return this.value;
         }
 
         /**
@@ -615,8 +622,10 @@ public class FieldValueMappingCallback {
          */
         @Override
         public Object orElse(Object defaultValue) {
-            Object o = load();
-            return o == null ? defaultValue : o;
+            if (this.value == NULL) {
+                load();
+            }
+            return this.value == null ? defaultValue : this.value;
         }
 
         /**
@@ -632,11 +641,10 @@ public class FieldValueMappingCallback {
          * The value is loaded exactly once, subsequent or concurrent access to the field value means accessing the
          * same value. Thus, the value is retained and this method is thread-safe.
          */
-        private synchronized Object load() {
+        private synchronized void load() {
             if (this.value == NULL) {
                 this.value = this.callback.resumeMapping(this.fieldData);
             }
-            return this.value;
         }
     }
 
@@ -666,6 +674,55 @@ public class FieldValueMappingCallback {
         @Override
         public boolean isPresent() {
             return false;
+        }
+    }
+
+
+    /**
+     * Implements explicit lazy-loading via {@link io.neba.api.resourcemodels.Lazy}.
+     *
+     * @author Olaf Otto
+     */
+    private static class LazyFieldValue implements Lazy<Object> {
+        private static final Lazy<Object> EMPTY = new Lazy<Object>() {
+            @Override
+            public Object get() {
+                return null;
+            }
+        };
+
+        private static final Object NULL = new Object();
+
+        private final FieldData fieldData;
+        private final FieldValueMappingCallback callback;
+
+        private Object value = NULL;
+
+        LazyFieldValue(FieldData fieldData, FieldValueMappingCallback callback) {
+            this.fieldData = fieldData;
+            this.callback = callback;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Object get() {
+            if (this.value == NULL) {
+                load();
+            }
+            return this.value;
+        }
+
+        /**
+         * The semantics of the value holder must adhere to the semantics of a non-lazy-loaded field value:
+         * The value is loaded exactly once, subsequent or concurrent access to the field value means accessing the
+         * same value. Thus, the value is retained and this method is thread-safe.
+         */
+        private synchronized void load() {
+            if (this.value == NULL) {
+                this.value = this.callback.resumeMapping(this.fieldData);
+            }
         }
     }
 
