@@ -684,7 +684,6 @@ public class FieldValueMappingCallback {
      */
     private static class LazyFieldValue implements Lazy<Object> {
         private static final Lazy<Object> EMPTY = java.util.Optional::empty;
-
         private static final Object NULL = new Object();
 
         private final FieldData fieldData;
@@ -701,7 +700,7 @@ public class FieldValueMappingCallback {
          * {@inheritDoc}
          */
         @Override
-        public java.util.Optional<Object> getValue() {
+        public java.util.Optional<Object> asOptional() {
             if (this.value == NULL) {
                 load();
             }

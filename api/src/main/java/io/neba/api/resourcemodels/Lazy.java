@@ -1,8 +1,32 @@
+/*
+  Copyright 2013 the original author or authors.
+
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.api.resourcemodels;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * <p>
- * Declares lazy-loading 1:1 relationships in resource models.
+ * Declares lazy-loading 1:1 relationships in resource models. In addition, as Lazy-loading always has to deal with nonexistent values, this
+ * interface both provides an {@link java.util.Optional} representation via {@link #asOptional()} implements the "interface" of
+ * {@link java.util.Optional} for convenience.
  * </p>
  * <p>
  * NEBA will automatically detect <em>{@link Lazy}</em> fields and provide a suitable lazy-loading implementation.
@@ -21,8 +45,8 @@ package io.neba.api.resourcemodels;
  * }
  * </pre>
  * <p>
- *     This interface <em>may</em> also be used to explicitly lazy-load collection-typed resource model relationships, such as
- *     {@link io.neba.api.annotations.Children} or {@link io.neba.api.annotations.Reference} collections:
+ * This interface <em>may</em> also be used to explicitly lazy-load collection-typed resource model relationships, such as
+ * {@link io.neba.api.annotations.Children} or {@link io.neba.api.annotations.Reference} collections:
  * </p>
  * <pre>
  * &#64;{@link io.neba.api.annotations.ResourceModel}(types = "...")
@@ -32,8 +56,8 @@ package io.neba.api.resourcemodels;
  * }
  * </pre>
  * <p>
- *     However, collection-typed relationships are automatically provided as lazy-loading proxies, thus there usually is no
- *     reason to make them {@link Lazy}.
+ * However, collection-typed relationships are automatically provided as lazy-loading proxies, thus there usually is no
+ * reason to make them {@link Lazy}.
  * </p>
  *
  * @param <T> the type of the lazy-loaded object.
@@ -43,5 +67,70 @@ public interface Lazy<T> {
     /**
      * @return an {@link java.util.Optional} representation of the lazy-loaded value, never <code>null</code>.
      */
-    java.util.Optional<T> getValue();
+    java.util.Optional<T> asOptional();
+
+    default T get() {
+        return asOptional().get();
+    }
+
+    /**
+     * {@see java.util.Optional#isPresent}
+     */
+    default boolean isPresent() {
+        return asOptional().isPresent();
+    }
+
+    /**
+     * {@see java.util.Optional#ifPresent}
+     */
+    default void ifPresent(Consumer<? super T> c) {
+        asOptional().ifPresent(c);
+    }
+
+    /**
+     * {@see java.util.Optional#filter}
+     */
+    default Lazy<T> filter(Predicate<? super T> predicate) {
+        return () -> asOptional().filter(predicate);
+    }
+
+    /**
+     * {@see java.util.Optional#map}
+     */
+    default <U> Lazy<U> map(Function<? super T, ? extends U> f) {
+        return () -> asOptional().map(f);
+    }
+
+    /**
+     * {@see java.util.Optional#flatMap}
+     */
+    default <U> Lazy<U> flatMap(Function<? super T, Lazy<U>> f) {
+        requireNonNull(f);
+        if (!isPresent())
+            return java.util.Optional::empty;
+        else {
+            return requireNonNull(f.apply(get()));
+        }
+    }
+
+    /**
+     * {@see java.util.Optional#orElse}
+     */
+    default T orElse(T other) {
+        return asOptional().orElse(other);
+    }
+
+    /**
+     * {@see java.util.Optional#orElseGet}
+     */
+    default T orElseGet(Supplier<? extends T> other) {
+        return asOptional().orElseGet(other);
+    }
+
+    /**
+     * {@see java.util.Optional#orElseThrow}
+     */
+    default <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        return asOptional().<X>orElseThrow(exceptionSupplier);
+    }
 }

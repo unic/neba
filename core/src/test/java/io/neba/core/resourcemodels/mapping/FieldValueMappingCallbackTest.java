@@ -1387,7 +1387,7 @@ public class FieldValueMappingCallbackTest {
 
     /**
      * NEBA guarantees that Collection-typed mappable fields are not null. This shall not hold true for
-     * {@link Lazy} collection-typed fields, as those may explicitly  yield {@link Lazy#getValue()} null}. For example.
+     * {@link Lazy} collection-typed fields, as those may explicitly  yield {@link Lazy#asOptional()} null}. For example.
      * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
@@ -1844,7 +1844,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void loadLazyField() {
-        this.mappedFieldOfTypeObject = ((Lazy<?>) this.mappedFieldOfTypeObject).getValue().orElse(null);
+        this.mappedFieldOfTypeObject = ((Lazy<?>) this.mappedFieldOfTypeObject).asOptional().orElse(null);
     }
 
     private void assertMappedFieldValueIsOptional() {
@@ -1871,7 +1871,7 @@ public class FieldValueMappingCallbackTest {
     @SuppressWarnings("unchecked")
     private void assertLazyFieldIsJavaUtilOptionalWithValue(Object value) {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Lazy.class);
-        assertThat(((Lazy) this.mappedFieldOfTypeObject).getValue()).hasValue(value);
+        assertThat(((Lazy) this.mappedFieldOfTypeObject).asOptional()).hasValue(value);
     }
 
     private void assertOptionalValueIsPresent() {
@@ -1894,8 +1894,8 @@ public class FieldValueMappingCallbackTest {
 
     @SuppressWarnings("unchecked")
     private void assertLazyFieldHasNoValue() {
-        assertThat(((Lazy<Object>) this.mappedFieldOfTypeObject).getValue())
-                .describedAs("The value returned when invoking getValue() of the lazy field").isEmpty();
+        assertThat(((Lazy<Object>) this.mappedFieldOfTypeObject).asOptional())
+                .describedAs("The value returned when invoking asOptional() of the lazy field").isEmpty();
     }
 
     @SuppressWarnings("unchecked")
