@@ -107,11 +107,11 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":100," +
-                                    "\"averageMappingDuration\":10," +
-                                    "\"totalMappingDuration\":1000," +
-                                    "\"maximumMappingDuration\":20," +
-                                    "\"minimumMappingDuration\":0," +
-                                    "\"mappingDurationMedian\":5," +
+                                    "\"averageMappingDuration\":10.0," +
+                                    "\"totalMappingDuration\":1000.0," +
+                                    "\"maximumMappingDuration\":20.0," +
+                                    "\"minimumMappingDuration\":0.0," +
+                                    "\"mappingDurationMedian\":5.0," +
                                     "\"cacheHits\":0" +
                                     "}," +
 
@@ -123,11 +123,11 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":200," +
-                                    "\"averageMappingDuration\":20," +
-                                    "\"totalMappingDuration\":1000," +
-                                    "\"maximumMappingDuration\":40," +
-                                    "\"minimumMappingDuration\":1," +
-                                    "\"mappingDurationMedian\":10," +
+                                    "\"averageMappingDuration\":20.0," +
+                                    "\"totalMappingDuration\":1000.0," +
+                                    "\"maximumMappingDuration\":40.0," +
+                                    "\"minimumMappingDuration\":1.0," +
+                                    "\"mappingDurationMedian\":10.0," +
                                     "\"cacheHits\":0" +
                                     "}" +
                                 "]");
@@ -146,11 +146,11 @@ public class ModelStatisticsConsolePluginTest {
                         "\"greedyFields\":0," +
                         "\"instantiations\":0," +
                         "\"mappings\":100," +
-                        "\"averageMappingDuration\":10," +
-                        "\"totalMappingDuration\":1000," +
-                        "\"maximumMappingDuration\":20," +
-                        "\"minimumMappingDuration\":0," +
-                        "\"mappingDurationMedian\":5," +
+                        "\"averageMappingDuration\":10.0," +
+                        "\"totalMappingDuration\":1000.0," +
+                        "\"maximumMappingDuration\":20.0," +
+                        "\"minimumMappingDuration\":0.0," +
+                        "\"mappingDurationMedian\":5.0," +
                         "\"cacheHits\":0," +
                         "\"mappingDurationFrequencies\":{" +
                             "\"[0, 1)\":10," +
