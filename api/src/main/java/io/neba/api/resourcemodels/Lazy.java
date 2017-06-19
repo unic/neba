@@ -24,12 +24,12 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * <p>
- * Declares lazy-loading 1:1 relationships in resource models. In addition, as Lazy-loading always has to deal with nonexistent values, this
- * interface both provides an {@link java.util.Optional} representation via {@link #asOptional()} implements the "interface" of
- * {@link java.util.Optional} for convenience.
+ * Declares lazy-loading 1:1 relationships in resource models. In addition, as lazy-loading always has to deal with nonexistent values, this
+ * interface both features a {@link java.util.Optional} representation via {@link #asOptional()} and provides the same API semantics
+ * as {@link java.util.Optional} for convenience.
  * </p>
  * <p>
- * NEBA will automatically detect <em>{@link Lazy}</em> fields and provide a suitable lazy-loading implementation.
+ * NEBA automatically detects <em>{@link Lazy}</em> fields and provides a suitable lazy-loading implementation.
  * Note that this interface is <em>not</em> required to lazy-load collections, as NEBA automatically
  * provides collection-typed members, such as {@link io.neba.api.annotations.Reference}
  * or {@link io.neba.api.annotations.Children} collections, as lazy-loading proxies.
@@ -65,10 +65,13 @@ import static java.util.Objects.requireNonNull;
  */
 public interface Lazy<T> {
     /**
-     * @return an {@link java.util.Optional} representation of the lazy-loaded value, never <code>null</code>.
+     * @return a {@link java.util.Optional} representation of the lazy-loaded value, never <code>null</code>.
      */
     java.util.Optional<T> asOptional();
 
+    /**
+     * {@see java.util.Optional#get}
+     */
     default T get() {
         return asOptional().get();
     }
