@@ -40,7 +40,8 @@
                             <includeTypes>zip</includeTypes>
                             <includes>
                                 **/*.jar,
-                                **/*.js
+                                **/*.js,
+                                **/*.config
                             </includes>
                         </configuration>
                     </execution>
