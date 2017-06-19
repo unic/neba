@@ -16,26 +16,35 @@
 
 package io.neba.core.logviewer;
 
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
+import static java.lang.Class.forName;
 import static java.lang.Thread.currentThread;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.springframework.util.ClassUtils.isPresent;
 
 /**
  * A web console plugin for tailing and downloading the CQ log files placed within the sling log directory as configured in the
@@ -47,12 +56,37 @@ import static org.apache.commons.lang.StringUtils.*;
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     private static final String LABEL = "logviewer";
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
+    private static final String DECORATED_OBJECT_FACTORY = "org.eclipse.jetty.util.DecoratedObjectFactory";
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private boolean isManagingDecoratedObjectFactory = false;
 
     @Autowired
     private TailServlet tailServlet;
 
     @Autowired
     private LogFiles logFiles;
+
+    @Autowired
+    private ServletContext servletContext;
+
+    @PostConstruct
+    protected void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        if (this.servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isPresent(DECORATED_OBJECT_FACTORY, getClass().getClassLoader())) {
+            return;
+        }
+
+        this.servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
+        this.isManagingDecoratedObjectFactory = true;
+    }
+
+    @PreDestroy
+    protected void removeDecoratorObjectFactoryFromServletContext() {
+        if (this.isManagingDecoratedObjectFactory) {
+            this.servletContext.removeAttribute(DECORATED_OBJECT_FACTORY);
+        }
+    }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -61,8 +95,10 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         try {
             currentThread().setContextClassLoader(getClass().getClassLoader());
             this.tailServlet.init(config);
-        } catch (RuntimeException e) {
-            throw new ServletException("Unable to initialize the tail servlet - the log viewer will not be available", e);
+        } catch (Throwable t) {
+            this.logger.error("Unable to initialize the tail servlet - the log viewer will not be available", t);
+            // We have to catch an re-throw here, as Sling tends not to log exceptions thrown in servlet's init() methods.
+            throw new ServletException("Unable to initialize the tail servlet - the log viewer will not be available", t);
         } finally {
             currentThread().setContextClassLoader(ccl);
         }

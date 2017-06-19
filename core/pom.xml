@@ -217,7 +217,9 @@
                             org.springframework.web.filter,
                             org.aopalliance.aop,
                             org.apache.sling.bgservlets;version=0.0.0;resolution:=optional,
-                            org.eclipse.jetty.websocket.server,
+                            org.eclipse.jetty.*;version="[9.2, 10)",
+                            org.eclipse.jetty.util;version="[9.2, 10)",
+                            org.eclipse.jetty.websocket.server;version="[9.2, 10)",
                             *
                         </Import-Package>
                     </instructions>
