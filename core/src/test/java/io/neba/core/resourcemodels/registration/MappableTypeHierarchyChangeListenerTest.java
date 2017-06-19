@@ -1,5 +1,25 @@
+/*
+  Copyright 2013 the original author or authors.
+
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.core.resourcemodels.registration;
 
+import java.lang.reflect.Field;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,16 +29,20 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.event.Event;
 import org.slf4j.Logger;
 
-import java.lang.reflect.Field;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang3.reflect.FieldUtils.getField;
 import static org.apache.commons.lang3.reflect.FieldUtils.writeField;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -64,21 +88,19 @@ public class MappableTypeHierarchyChangeListenerTest {
     /**
      * When multiple successive events are handled, only the first one shall cause the cache to be cleared, i.e.
      * events do not queue up while the cache is cleared, as it is sufficient to clear the cache once.
-     *
      */
     @Test
-    public void testMultipleEventsAreSummarized() throws Exception {
+    public void testOnlyOneEventIsAccepted() throws Exception {
+        withChangeOn("/apps/testapp/components/test");
+        withChangeOn("/apps/testapp/components/test");
+        withChangeOn("/apps/testapp/components/test");
+        withChangeOn("/apps/testapp/components/test");
+        withChangeOn("/apps/testapp/components/test");
+
         activate();
-
-        withChangeOn("/apps/testapp/components/test");
-        withChangeOn("/apps/testapp/components/test");
-        withChangeOn("/apps/testapp/components/test");
-        withChangeOn("/apps/testapp/components/test");
-        withChangeOn("/apps/testapp/components/test");
-
         sleep();
 
-        verifyModelRegistryCacheIsClearedAtMost(2);
+        verifyModelRegistryCacheIsCleared();
     }
 
     @Test
