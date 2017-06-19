@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,9 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Math.round;
 import static org.apache.commons.collections.CollectionUtils.find;
-import static org.apache.commons.lang.ClassUtils.wrapperToPrimitive;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.apache.commons.lang.StringUtils.substringAfter;
@@ -137,33 +135,6 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
             prepareJsonResponse(res);
             res.getWriter().write(toJson(data));
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private String toJson(Object value) {
-        if (value.getClass().isPrimitive() || wrapperToPrimitive(value.getClass()) != null) {
-            return Objects.toString(value);
-        }
-        if (value instanceof String) {
-            return '"' + ((String) value).replaceAll("\"", "\\\"") + '"';
-        }
-        if (value instanceof Collection) {
-            return ((Collection<Object>) value).stream()
-                    .map(this::toJson)
-                    .reduce((l, r) -> l + "," + r)
-                    .map(s -> '[' + s + ']')
-                    .orElse("[]");
-        }
-        if (value instanceof Map) {
-            Set<Map.Entry> entries = ((Map) value).entrySet();
-            return entries
-                    .stream()
-                    .map(e -> toJson(e.getKey()) + ':' + toJson(e.getValue()))
-                    .reduce((l, r) -> l + ',' + r)
-                    .map(s -> '{' + s + '}')
-                    .orElse("{}");
-        }
-        throw new IllegalArgumentException("Cannot convert value " + value + " to JSON.");
     }
 
     private void prepareJsonResponse(HttpServletResponse res) {

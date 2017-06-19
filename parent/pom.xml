@@ -275,6 +275,12 @@
                 <artifactId>org.apache.sling.bgservlets</artifactId>
                 <version>1.0.0</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>org.apache.sling.commons.json</artifactId>
+                        <groupId>org.apache.sling</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>

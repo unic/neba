@@ -1,10 +1,10 @@
-/**
+/*
  * Copyright 2013 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
 
  * Unless required by applicable law or agreed to in writing, software
@@ -12,43 +12,53 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+*/
 
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.util.OsgiBeanSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static io.neba.core.util.ClassHierarchyIterator.hierarchyOf;
+import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Character.isUpperCase;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang.StringUtils.*;
-import static org.apache.sling.api.resource.ResourceUtil.*;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
+import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
+import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
 
 /**
  * Shows a table with all detected type -&gt; model mappings in the felix console.
- * 
+ *
  * @author Olaf Otto
  */
 @Service
@@ -97,39 +107,35 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
 
     private void handleApiCall(String apiIdentifier, HttpServletRequest req, HttpServletResponse res) throws IOException {
-        try {
-            if (apiIdentifier.startsWith(API_COMPONENTICON)) {
-                spoolComponentIcon(res, apiIdentifier);
-                return;
-            }
+        if (apiIdentifier.startsWith(API_COMPONENTICON)) {
+            spoolComponentIcon(res, apiIdentifier);
+            return;
+        }
 
-            res.setContentType("application/json;charset=UTF-8");
+        res.setContentType("application/json;charset=UTF-8");
 
-            if (apiIdentifier.startsWith(API_FILTER)) {
-                provideFilteredModelRegistryView(req, res);
-                return;
-            }
+        if (apiIdentifier.startsWith(API_FILTER)) {
+            provideFilteredModelRegistryView(req, res);
+            return;
+        }
 
-            if (apiIdentifier.startsWith(API_RESOURCES)) {
-                provideMatchingResourcePaths(req, res);
-                return;
-            }
+        if (apiIdentifier.startsWith(API_RESOURCES)) {
+            provideMatchingResourcePaths(req, res);
+            return;
+        }
 
-            if (apiIdentifier.startsWith(API_MODELTYPES)) {
-                provideAllModelTypes(res);
-            }
-        } catch (JSONException e) {
-            throw new IllegalStateException("Unable to render JSON response.", e);
+        if (apiIdentifier.startsWith(API_MODELTYPES)) {
+            provideAllModelTypes(res);
         }
     }
 
     @Override
     protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         writeHeadnavigation(res);
-        
+
         PrintWriter writer = res.getWriter();
         writeScriptIncludes(res);
-        
+
         writer.write("<table id=\"plugin_table\" class=\"nicetable tablesorter noauto\">");
         writer.write("<thead><tr><th>Type</th><th>Model type</th><th>Bean name</th><th>Source bundle</th></tr></thead>");
         writer.write("<tbody>");
@@ -143,7 +149,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 writer.write("<td>" + source.getBeanType().getName() + "</td>");
                 writer.write("<td>" + source.getBeanName() + "</td>");
                 writer.write("<td><a href=\"bundles/" + source.getBundleId() + "\" " +
-                                    "title=\"" + sourceBundleName + "\">" + source.getBundleId() + "</a></td>");
+                        "title=\"" + sourceBundleName + "\">" + source.getBundleId() + "</a></td>");
                 writer.write("</tr>");
             }
         }
@@ -165,21 +171,21 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 }
             }
             return resource != null ? "<a href=\"" + request.getContextPath() +
-                                                 "/crx/de/#" + resource.getPath() + "\" " +
-                                          "class=\"crxdelink\">"
-                                      + "<img class=\"componentIcon\" src=\""
-                                      + getLabel() + API_PATH + API_COMPONENTICON + (iconResource == null ? "" : resource.getPath())
-                                      + "\"/>"
-                                      + type + "</a>" :
-                                      "<span class=\"unresolved\">" + type + "</span>";
+                    "/crx/de/#" + resource.getPath() + "\" " +
+                    "class=\"crxdelink\">"
+                    + "<img class=\"componentIcon\" src=\""
+                    + getLabel() + API_PATH + API_COMPONENTICON + (iconResource == null ? "" : resource.getPath())
+                    + "\"/>"
+                    + type + "</a>" :
+                    "<span class=\"unresolved\">" + type + "</span>";
         } finally {
             resolver.close();
         }
     }
 
-    private void provideAllModelTypes(HttpServletResponse res) throws IOException, JSONException {
+    private void provideAllModelTypes(HttpServletResponse res) throws IOException {
         Set<String> typeNames = new HashSet<>();
-        for (OsgiBeanSource<?> source: this.registry.getBeanSources()) {
+        for (OsgiBeanSource<?> source : this.registry.getBeanSources()) {
             for (Class<?> type : hierarchyOf(source.getBeanType())) {
                 if (type == Object.class) {
                     continue;
@@ -187,10 +193,11 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 typeNames.add(type.getName());
             }
         }
-        new JSONArray(typeNames).write(res.getWriter());
+
+        res.getWriter().write(toJson(typeNames));
     }
 
-    private void provideMatchingResourcePaths(HttpServletRequest req, HttpServletResponse res) throws IOException, JSONException {
+    private void provideMatchingResourcePaths(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String path = req.getParameter(PARAM_PATH);
         if (isEmpty(path) || path.charAt(0) != '/') {
             return;
@@ -215,16 +222,15 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 return;
             }
 
-            JSONArray array = new JSONArray();
+            Collection<String> resourcePaths = new LinkedList<>();
             Iterator<Resource> children = parent.listChildren();
             while (children.hasNext()) {
                 Resource child = children.next();
                 if (prefix.isEmpty() || child.getName().startsWith(prefix)) {
-                    array.put(child.getPath());
+                    resourcePaths.add(child.getPath());
                 }
             }
-
-            array.write(res.getWriter());
+            res.getWriter().write(toJson(resourcePaths));
         } finally {
             resolver.close();
         }
@@ -238,7 +244,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    private void provideFilteredModelRegistryView(HttpServletRequest req, HttpServletResponse res) throws IOException, JSONException {
+    private void provideFilteredModelRegistryView(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String modelTypePrefix = req.getParameter(PARAM_TYPENAME);
         String resourcePath = req.getParameter(PARAM_PATH);
 
@@ -268,7 +274,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
             }
         }
 
-        new JSONArray(matchingModelTypeNames).write(res.getWriter());
+        res.getWriter().write(toJson(matchingModelTypeNames));
     }
 
     private Collection<OsgiBeanSource<?>> resolveModelTypesFor(String resourcePath) {
@@ -300,11 +306,11 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         }
         return null;
     }
-    
+
     private void writeScriptIncludes(HttpServletResponse response) throws IOException {
         response.getWriter().write("<script src=\"" + getLabel() + "/static/script.js\"></script>");
     }
-    
+
     private void writeHeadnavigation(HttpServletResponse response) throws IOException {
         String template = readTemplateFile("/META-INF/consoleplugin/modelregistry/templates/head.html");
         response.getWriter().printf(template, getNumberOfModels());
