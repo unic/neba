@@ -19,7 +19,7 @@
     // Tweets. Since there is no authentication-free tweet search API and we've got
     // no server-side component, we'll use a twitter widget as the data source.
     // this means we have to parse the widget HTML to retrieve data.
-    var TweetsForWidget = function (widgetId) {
+    var TweetsOfUser = function (screenName) {
         var result = [];
         var knownTweets = [];
 
@@ -55,7 +55,7 @@
         });
 
         var provider = new Provider({
-            source: "https://cdn.syndication.twimg.com/widgets/timelines/" + widgetId + "?lang=en&t=1560138&callback=__twttr_loadTweets[" + (__twttr_loadTweets.length - 1) + "]&suppress_response_codes=true"
+            source: "https://cdn.syndication.twimg.com/timeline/profile?callback=__twttr_loadTweets[" + (__twttr_loadTweets.length - 1) + "]&dnt=false&lang=en&screen_name=" + screenName + "&suppress_response_codes=true&t=1664724&with_replies=false",
         });
 
         provider.load = function (callback) {
@@ -73,7 +73,7 @@
         return  provider;
     };
 
-    TweetsForWidget("535389938054094848").load(function(tweets) {
+    TweetsOfUser("nebaframework").load(function(tweets) {
         if (!tweets.length) return;
         var tweet = tweets[0];
         $("#tweet").find("blockquote").html('<a href="' + tweet.url + '"><img src="/images/tweet.png" />' + new Date(tweet.time).toDateString() + '</a>: &ldquo;' + tweet.message + '&rdquo;')
