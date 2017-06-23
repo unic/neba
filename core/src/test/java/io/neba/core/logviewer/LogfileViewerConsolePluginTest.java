@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -229,6 +230,7 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testLogViewerToleratesMissingDecoratedObjectFactoryFactory() throws Exception {
         ClassLoader classLoaderWithoutDecoratedObjectFactory = new ClassLoader(getClass().getClassLoader()) {
             @Override
@@ -252,35 +254,43 @@ public class LogfileViewerConsolePluginTest {
             }
         };
 
-        Class<?> logViewerClass = classLoaderWithoutDecoratedObjectFactory.loadClass(LogfileViewerConsolePlugin.class.getName());
-        Object logViewerInstance = logViewerClass.newInstance();
+        Class<? extends Servlet> type = (Class<? extends Servlet>) classLoaderWithoutDecoratedObjectFactory.loadClass(LogfileViewerConsolePlugin.class.getName());
+        Servlet logViewerInstance = type.newInstance();
 
         ServletConfig config = mock(ServletConfig.class);
         ServletContext context = mock(ServletContext.class);
         doReturn(context).when(config).getServletContext();
-
-        inject(logViewerInstance, "servletContext", context);
-        invoke(logViewerInstance, "injectDecoratorObjectFactoryIntoServletContext");
-        invoke(logViewerInstance, "removeDecoratorObjectFactoryFromServletContext");
+        injectTailServlet(logViewerInstance);
+        invokeInit(logViewerInstance, config);
+        invokeDestroy(logViewerInstance);
 
         verify(context, never()).setAttribute(any(), any());
         verify(context, never()).removeAttribute(any());
     }
 
-    private void invoke(Object o, String methodName) throws InvocationTargetException, IllegalAccessException {
+    private void invokeInit(Servlet servlet, ServletConfig config) throws InvocationTargetException, IllegalAccessException {
         Method method = findMethod(
-                o.getClass(),
-                methodName);
+                servlet.getClass(),
+                "init",
+                ServletConfig.class);
         method.setAccessible(true);
-        method.invoke(o);
+        method.invoke(servlet, config);
     }
 
-    private void inject(Object o, String fieldName, Object fieldValue) throws InvocationTargetException, IllegalAccessException {
+    private void invokeDestroy(Servlet servlet) throws InvocationTargetException, IllegalAccessException {
+        Method method = findMethod(
+                servlet.getClass(),
+                "destroy");
+        method.setAccessible(true);
+        method.invoke(servlet);
+    }
+
+    private void injectTailServlet(Object o) throws InvocationTargetException, IllegalAccessException {
         Field field = findField(
                 o.getClass(),
-                fieldName);
+                "tailServlet");
         field.setAccessible(true);
-        field.set(o, fieldValue);
+        field.set(o, this.tailServlet);
     }
 
     private void verifyDecoratorObjectFactoryIsNotRemovedFromServletContext() {
