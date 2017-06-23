@@ -1,0 +1,215 @@
+<section><header><h2 id="spring_mvc">Using Spring MVC in Sling</h2></header>
+
+<section class="info">
+    <h4>Background: How Spring MVC is integrated into Sling</h4>
+    <p>
+        By default, Sling supports three kinds of scripts: JSPs, HTL (Sightly) templates and plain <a href="http://sling.apache.org/site/servlets.html">Servlets</a>.
+        While the former two are decent to render dynamic resources, i.e. content pages and components that have no fixed
+        URL, servlets are often used to provide RESTful services with a fixed URL. However, Servlets are quite
+        primitive. They do not provide separation of model, view and controller or common yet complex features such as
+        form data binding. With NEBA, one can alternatively use all of Spring's MVC features to enable clean, simple and RESTful MVC with fixed URLs.
+    </p>
+
+    <p>To avoid conflict with resource resolution and servlet mappings, <a
+            href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC</a>
+        is integrated into Sling using a Servlet with the fixed URL &quot;/bin/mvc&quot; (you may use servlet resolver
+        mapping to change this path). Since each distinct path in sling maps to a different resource (servlets are
+        resources, too), the path /bin/mvc/url would not point to the /bin/mvc/ servlet. Thus, to have a request handled by
+        the MVC servlet, the pseudo-extension&quot;.do&quot; is used. A spring controller with the URL /my/controller/path
+        is thus always addressed using /bin/mvc.do/my/controller/path. One may also use an extension and selectors (e.g.
+        /bin/mvc.do/my/controller/path.selector1.selector2.xml).
+    </p>
+</section>
+
+<p>
+    While NEBA provides a default MVC infrastructure similar to the defaults provided by Spring's DispatcherServlet,
+    it is recommended to explicitly configure MVC support in the blueprint context using <code>&lt;mvc:annotation-driven /&gt;</code>. This also enables advanced features,
+    such as automated conversion of controller responses to JSON
+</p>
+
+<div class="listing" id="listing:mvc-schema">{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       ...
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-{{site.springNamespaceVersion}}.xsd
+        ...">
+
+    <mvc:annotation-driven />
+</beans>
+{% endhighlight %}<div class="legend">MVC schema snippet for blueprint XML declaration</div></div>
+
+<p>Let's create a simple Controller called &quot;DemoController&quot;.
+    We will use Spring's @Controller annotation; other styles (such as mapping by bean names etc.) are also
+    supported.  The purpose of this controller is to echo a parameter that we provide in a RESTful way, i.e. as a
+    path element (this allows caching!).</p>
+
+<div class="listing" id="listing:controller-annotation">{% highlight java %}
+@Controller
+public class DemoController {
+}
+{% endhighlight %}<div class="legend">@Controller annotation usage</div></div>
+
+<p>A @Controller is automatically detected and registered (as a singleton) by Spring's classpath scanning.
+    Let's use Spring's REST support to both define the URL the controller listens to and the parameter we expect:</p>
+
+<div class="listing" id="listing:controller-annotation-requestmapping">{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/echo/{param}")
+    @ResponseBody
+    public String echo(@PathVariable("param") String paramToEcho) {
+       return paramToEcho;
+    }
+}
+{% endhighlight %}<div class="legend">An echo @Controller example</div></div>
+
+<p>That's it. You may now call your controller e.g. with /bin/mvc.do/echo/HelloWorld.txt.</p>
+
+<p>Furthermore, NEBA automatically provides <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/method/support/HandlerMethodArgumentResolver.html">handler method argument resolvers</a>
+    for Sling-specific request elements, SlingHttpServletRequest and -Response, RequestPathInfo and ResourceResolver, like so:</p>
+
+<div class="listing" id="listing:controller-neba-argument-resolvers">{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/echoTitle")
+    @ResponseBody
+    public String echo(ResourceResolver resolver, RequestPathInfo info) {
+       ...
+    }
+
+    @RequestMapping("/echoTitle")
+    @ResponseBody
+    public String echo(SlingHttpServletRequest request) {
+        ...
+    }
+}
+{% endhighlight %}<div class="legend">NEBA argument resolvers for controller methods</div></div>
+
+<p>It is thus not necessary to obtain these elements from the request.</p>
+
+<p>Note that the annotation-driven controllers have a lot more very powerful options. See the
+    <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC
+    documentation</a> for more examples. NEBA also supports Spring&apos;s special view names for redirecting and
+    forwarding views: returning &quot;redirect:/some/path&quot; from a controller method will cause a redirect to
+    /some/path, returning forward:/some/path will forward the request to /some/path, see also
+    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-redirecting">MVC redirecting</a>.</p>
+    <p>You may also directly work with the response. For this, provide your own
+org.springframework.web.servlet.View in the org.springframework.web.servlet.ModelAndView provided by the controller;
+this way, your View's render method is used to render the response. Alternatively, you may also simply write to the
+response and either let the controller method return &quot;null&quot; or make it void. This is however bad practice
+and thus discouraged.</p>
+<section>
+<section>
+<header><h3 id="mvc_sling_views">Using Sling Scripts as controller views</h3></header>
+<p>
+    Since Version 4, NEBA supports using sling scripts to render controller views.
+    NEBA provides a <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-viewresolver">view resolver</a>
+    that resolves resource type names to the corresponding sling scripts and uses these to render views. Consider the following controller method:
+</p>
+
+<div class="listing" id="listing:controller-sling-view-support">{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/myMethod")
+    public String echo(@ResourceParam Page page) {
+       // do something
+       return "app/controllerViews/myView"
+    }
+}
+{% endhighlight %}<div class="legend">Calling Sling Views from Spring @Controllers</div></div>
+<p>
+    Here, NEBA's view resolver will resolve "app/controllerViews/myView" to the corresponding resource, e.g. "/apps/app/controllerViews/myView". It will then
+    look for a suitable default script for the type, e.g. "myView.html" for a HTL (Sightly) template or "myView.jsp" for a JSP view. If no such script is found,
+    the view resolver will re-attempt to resolve the default view for the <em>super type</em> of the view resource. This enables inheritance and
+    overriding - just like for regular Sling resource views.
+</p>
+<p>
+   Note that, contrary to the standard view resolution for Sling resources, controller view resolution does not take into account request methods,
+   selectors or extensions. These aspects are used to address the Spring Controller and cannot be leveraged for view resolution without
+   conflicting the Spring controller mapping.
+</p>
+<p>
+    Each request to a Spring @Controller is associated with a generic <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/htmlsingle/#mvc-coc-modelmap">Model</a>.
+    The attributes of this model are available as request attributes to Sling Scripts used as controller views. In a JSP view, for instance, a model attribute "page" can be accessed via:
+</p>
+<div class="listing" id="listing:controller-resourceparam-annotation">
+{% highlight jsp %}
+${page}
+{% endhighlight %}
+<div class="legend">Accessing Spring model attributes in JSP</div></div>
+
+<p>
+    In HTL (Sightly) however, request attributes could only be accessed indirectly up to HTL Engine 1.0.20,
+    e.g. via <a href="https://sling.apache.org/documentation/bundles/scripting/scripting-htl.html#the-use-api">the HTL use API</a> (see for instance
+    <a href="https://issues.apache.org/jira/browse/SLING-5812">SLING-5812</a>). Consequently, HTL (Sightly) users had to write additional code
+    to obtain the Spring Controller invocation model data. Since NEBA 4.2.0, the Spring Controller Model is provided by the <a href="https://sling.apache.org/apidocs/sling8/org/apache/sling/api/resource/ValueMap.html">ValueMap</a>
+    representation (aka properties) of the <a href="https://sling.apache.org/apidocs/sling8/org/apache/sling/api/resource/Resource.html">Resource</a> provided to the view script.
+    Thus, a model attribute "page" could be accessed in HTL (Sightly) - and thus also in JSP - like so:
+</p>
+<p>
+<div class="listing" id="listing:controller-resourceparam-annotation">
+{% highlight jsp %}
+${properties.page}
+{% endhighlight %}
+<div class="legend">Accessing Spring model attributes in HTL (Sightly)</div></div>
+</p>
+</section>
+<section>
+<header><h3 id="mvc_resourceparam_annotation">Resolving resource path parameters with the @ResourceParam annotation</h3></header>
+
+<p>NEBA supports the common use case of handling resource paths in controllers with a convenience annotation:</p>
+
+<div class="listing" id="listing:controller-resourceparam-annotation">{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/echoTitle")
+    @ResponseBody
+    public String echo(@ResourceParam Page page) {
+       return page.getTitle();
+    }
+}
+{% endhighlight %}<div class="legend">Using the resource param annotations in Spring @Controllers</div></div>
+
+<p>Here, a request parameter &quot;page&quot; is expected to contain a path to a resource. This resource is
+    resolved and adapted to the parameter type in case the parameter type is not &quot;Resource&quot;.
+    @ResourceParameters can be optional or required. In addition, they can have a default value (a default resource path) that will
+    be used in case the parameter is not present or empty:
+</p>
+
+<div class="listing" id="listing:controller-resourceparam-defaultvalue">{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/echoTitle")
+    @ResponseBody
+    public String echo(@ResourceParam(defaultValue = "/default/resource/path") Page page) {
+       return page.getTitle();
+    }
+}
+{% endhighlight %}<div class="legend">Using a default value for the @ResourceParam annotation</div></div>
+
+<p>Here, "page" is implicitly considered optional (since there is a default value)</p>
+
+<p>
+   Furthermore, the content paths resolved by the @ResourceParam annotations can be altered by appending an arbitrary sub-path:
+</p>
+
+<div class="listing" id="listing:controller-resourceparam-append">{% highlight java %}
+@Controller
+public class DemoController {
+    @RequestMapping("/echoTitle")
+    @ResponseBody
+    public String echo(@ResourceParam(append = "/jcr:content") PageContent pageContent) {
+       return pageContent.getTitle();
+    }
+}
+{% endhighlight %}<div class="legend">Altering the path resolved by the @ResourceParam annotation</div></div>
+
+<p>
+    The path specified in "append" is appended to the provided path or the specified default path prior to resolution.
+</p>
+</section>
+
+</section>

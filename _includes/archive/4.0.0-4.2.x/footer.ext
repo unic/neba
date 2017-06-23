@@ -1,0 +1,40 @@
+<!-- Tweet -->
+<div id="tweet">
+    <div class="container">
+        <section>
+            <blockquote></blockquote>
+        </section>
+    </div>
+</div>
+
+<!-- Footer -->
+<div id="footer">
+    <div class="container">
+        <section>
+            <header>
+                <h2>Get in touch</h2>
+            </header>
+            <p>
+                E-Mail: <script>document.write('<a href="mailto:neba' + '@unic.com">neba' + "@unic.com</a>");</script>
+            </p>
+            <p>
+                Unic AG<br>
+                Belpstrasse 48, 3007 Bern, Switzerland<br>
+                Telephone: +41 31 560 12 12<br>
+                Fax: +41 31 560 12 13
+            </p>
+
+            <ul class="contact">
+                <li><a href="https://twitter.com/nebaframework" class="fa fa-twitter"><span>Twitter</span></a></li>
+                <li><a href="https://github.com/unic/neba" class="fa fa-github"><span>Github</span></a></li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+<!-- Copyright -->
+<div id="copyright">
+    <div class="container">
+        Design: <a href="http://templated.co">TEMPLATED</a>
+    </div>
+</div>

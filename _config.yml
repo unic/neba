@@ -1,7 +1,7 @@
 github: [Repository metadata]
 markdown: kramdown
 url: http://www.neba.io
-nebaVersion: 4.2.1
+nebaVersion: 4.3.0
 springNamespaceVersion: 4.3
 springDocumentationVersion: 4.3.x
 collections:

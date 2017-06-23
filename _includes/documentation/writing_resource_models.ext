@@ -430,24 +430,24 @@ The contents of these collection are loaded as soon as a collection method - suc
 The lazy-loading behavior for collections is thus completely transparent.
 </p>
 
-<h4 id="the_optional_interface">Declaring lazy-loading relationships using the Optional&lt;T&gt; interface</h4>
+<h4 id="the_optional_interface">Declaring lazy-loading relationships using the Lazy&lt;T&gt; interface</h4>
 
 <p>
 1:1 relationships are not automatically lazy. In order to make them lazy-loading,
-NEBA provides the <a href="apidocs/neba-api/io/neba/api/resourcemodels/Optional.html">Optional</a> interface:
+NEBA provides the <a href="apidocs/neba-api/io/neba/api/resourcemodels/Lazy.html">Lazy</a> interface:
 </p>
 
 <div class="listing" id="listing:explicit-lazy-loading-with-optional">{% highlight java %}
 @ResourceModel(types = "...")
 public class MyModel {
   @Reference
-  private Optional<Page> page;
+  private Lazy<Page> page;
   @Path("/content/path")
-  private Optional<Resource> otherResource;
+  private Lazy<Resource> otherResource;
 }
-{% endhighlight %}<div class="legend">Explicit lazy-loading using the Optional interface</div></div>
+{% endhighlight %}<div class="legend">Explicit lazy-loading using the Lazy interface</div></div>
 
-With Optional, the relationships is loaded when one of Optional's methods for model retrieval is invoked.
+With Lazy, the relationships is loaded when one of Lazy's methods for model retrieval is invoked, such as "orElse".
 
 <section class="info">
     <h4>Background: Why 1:1 relationships cannot be lazy by default</h4>
@@ -487,7 +487,7 @@ With Optional, the relationships is loaded when one of Optional's methods for mo
 </section>
 
 <p>
-The Optional&lt;T&gt; interface is an extract of the <a href="http://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">JAVA 8 "Optional" interface</a>. NEBA
+The Lazy&lt;T&gt; interface provides all features of the <a href="http://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">JAVA 8 "Optional" type</a>. NEBA
 automatically provides an implementation that will load the reference upon request. Of course, you may also use the interface for collection-typed references:
 </p>
 
@@ -495,15 +495,15 @@ automatically provides an implementation that will load the reference upon reque
 @ResourceModel(types = "...")
 public class MyModel {
   @Children
-  private Optional<Collection<Page>> children;
+  private Lazy<Collection<Page>> children;
   @Reference
-  private Optional<Collection<Page>> pages;
+  private Lazy<Collection<Page>> pages;
 }
 {% endhighlight %}<div class="legend">Explicit lazy loading of collection instances</div></div>
 
 <p>
     In this case, NEBA will not provide the collection as a lazy-loading proxy, but simply load it when requested via
-    the Optional interface implementation.
+    the Lazy interface implementation.
 </p>
 
 <h3 id="the_premapping_and_postmapping_annotations">Performing additional initializations</h3>

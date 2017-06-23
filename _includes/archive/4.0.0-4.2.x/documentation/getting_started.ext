@@ -1,0 +1,34 @@
+<section><header><h2 id="getting_started">Getting started</h2></header>
+
+<p>Getting started with NEBA only requires two simple steps:</p>
+
+<h3 id="download_and_integrate">Step 1: Download and integrate NEBA</h3>
+<p>
+    <a href="/download.html">install the delivery package and integrate the NEBA API into your project.</a>
+</p>
+
+<h3 id="add_osgi_blueprint_context">Step 2: Add an OSGi blueprint context to your bundle(s)</h3>
+<p>Place one or more blueprint XML file into OSGI-INF/blueprint, like so:</p>
+<div class="listing" id="listing:blueprintxml">{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-{{site.springNamespaceVersion}}.xsd
+   http://www.osgi.org/xmlns/blueprint/v1.0.0
+   http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context-{{site.springNamespaceVersion}}.xsd">
+
+    <context:component-scan base-package="bundle.package.impl" />
+</beans>
+{% endhighlight %}<div class="legend">Sample Blueprint Context XML declaration</div></div>
+
+<p>That's it - you may now proceed to <a href="#writing_resourcemodels">Write resource models</a> or
+    <a href="#spring_mvc">Spring controllers</a> - for instance, use the sample project below as a starting point.</p>
+
+<h3 id="sample_project">NEBA directive: A sample project for NEBA</h3>
+<a href="https://github.com/unic/neba-sample-project"><span class="pennant"><span class="fa fa-github"></span></span> Checkout the continuously updated NEBA sample project on Github</a>
+</section>
