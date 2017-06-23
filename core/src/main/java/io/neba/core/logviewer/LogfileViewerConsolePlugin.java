@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -66,17 +65,14 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     @Autowired
     private LogFiles logFiles;
 
-    @Autowired
-    private ServletContext servletContext;
-
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public void init() throws ServletException {
+        super.init();
         final ClassLoader ccl = currentThread().getContextClassLoader();
         try {
             injectDecoratorObjectFactoryIntoServletContext();
             currentThread().setContextClassLoader(getClass().getClassLoader());
-            this.tailServlet.init(config);
+            this.tailServlet.init(getServletConfig());
         } catch (Throwable t) {
             this.logger.error("Unable to initialize the tail servlet - the log viewer will not be available", t);
             // We have to catch an re-throw here, as Sling tends not to log exceptions thrown in servlet's init() methods.
@@ -138,17 +134,18 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        if (this.servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isPresent(DECORATED_OBJECT_FACTORY, getClass().getClassLoader())) {
+        ServletContext servletContext = getServletContext();
+        if (servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isPresent(DECORATED_OBJECT_FACTORY, getClass().getClassLoader())) {
             return;
         }
 
-        this.servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
+        servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
         this.isManagingDecoratedObjectFactory = true;
     }
 
     private void removeDecoratorObjectFactoryFromServletContext() {
         if (this.isManagingDecoratedObjectFactory) {
-            this.servletContext.removeAttribute(DECORATED_OBJECT_FACTORY);
+            getServletContext().removeAttribute(DECORATED_OBJECT_FACTORY);
         }
     }
 
