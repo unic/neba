@@ -1,6 +1,6 @@
 (function() {
     // Global for JSONP tweet callback
-    window.loadTweets = window.loadTweets || [];
+    window.__twttr_loadTweets = window.__twttr_loadTweets || [];
 
     var PATTERN_TWITTER_TIMESTAMP = /([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]+)\+[0-9]+/;
 
@@ -23,7 +23,7 @@
         var result = [];
         var knownTweets = [];
 
-        loadTweets.push(function (data) {
+        __twttr_loadTweets.push(function (data) {
             $(data.body).find("li.timeline-TweetList-tweet").each(function (_, elem) {
                 var tweet = {
                     type: "tweet"
@@ -55,7 +55,7 @@
         });
 
         var provider = new Provider({
-            source: "https://cdn.syndication.twimg.com/widgets/timelines/" + widgetId + "?lang=en&t=1560138&callback=loadTweets[" + (loadTweets.length - 1) + "]&suppress_response_codes=true"
+            source: "https://cdn.syndication.twimg.com/widgets/timelines/" + widgetId + "?lang=en&t=1560138&callback=__twttr_loadTweets[" + (__twttr_loadTweets.length - 1) + "]&suppress_response_codes=true"
         });
 
         provider.load = function (callback) {
