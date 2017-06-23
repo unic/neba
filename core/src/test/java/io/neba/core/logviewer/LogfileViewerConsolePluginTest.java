@@ -161,8 +161,6 @@ public class LogfileViewerConsolePluginTest {
         when(this.config.getServletContext()).thenReturn(this.context);
 
         when(this.logFiles.resolveLogFiles()).thenReturn(availableLogFiles);
-
-        this.testee.init(config);
     }
 
     @Test
@@ -200,7 +198,7 @@ public class LogfileViewerConsolePluginTest {
     @Test(expected = ServletException.class)
     public void testRuntimeExceptionsDuringTailServletInitializationAreConvertedToServletException() throws Exception {
         doThrow(new RuntimeException("THIS IS AN EXPECTED TEST EXCEPTION")).when(this.tailServlet).init(any());
-        this.testee.init(this.config);
+        init();
     }
 
     @Test
@@ -212,10 +210,10 @@ public class LogfileViewerConsolePluginTest {
 
     @Test
     public void testLogViewerProvidesDecoratedObjectFactoryAsServletContextAttribute() throws Exception {
-        injectDecoratorObjectFactoryIntoServletContext();
+        init();
         verifyDecoratedObjectInstanceIsInjectedIntoServletContext();
 
-        removeDecoratorObjectFactoryFromServletContext();
+        destroy();
         verifyDecoratorObjectFactoryIsRemovedFromServletContext();
     }
 
@@ -223,10 +221,10 @@ public class LogfileViewerConsolePluginTest {
     public void testLogViewerDoesNotOverrideExistingDecoratorObjectFactory() throws Exception {
         withExistingDecoratorObjectFactory();
 
-        injectDecoratorObjectFactoryIntoServletContext();
+        init();
         verifyDecoratorObjectFactoryIsNotInjectedIntoServletContext();
 
-        removeDecoratorObjectFactoryFromServletContext();
+        destroy();
         verifyDecoratorObjectFactoryIsNotRemovedFromServletContext();
     }
 
@@ -301,16 +299,8 @@ public class LogfileViewerConsolePluginTest {
         verify(this.context).removeAttribute(DecoratedObjectFactory.class.getName());
     }
 
-    private void removeDecoratorObjectFactoryFromServletContext() {
-        this.testee.removeDecoratorObjectFactoryFromServletContext();
-    }
-
     private void verifyDecoratedObjectInstanceIsInjectedIntoServletContext() {
         verify(this.context).setAttribute(eq(DecoratedObjectFactory.class.getName()), isA(DecoratedObjectFactory.class));
-    }
-
-    private void injectDecoratorObjectFactoryIntoServletContext() throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        this.testee.injectDecoratorObjectFactoryIntoServletContext();
     }
 
     private void verifyRequestIsDelegatedToTailServlet() throws ServletException, IOException {
@@ -319,6 +309,10 @@ public class LogfileViewerConsolePluginTest {
 
     private void verifyTailServletIsDestroyed() {
         verify(this.tailServlet).destroy();
+    }
+
+    private void init() throws ServletException {
+        this.testee.init(this.config);
     }
 
     private void destroy() {
