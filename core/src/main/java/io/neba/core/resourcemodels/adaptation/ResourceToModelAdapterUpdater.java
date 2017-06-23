@@ -68,7 +68,7 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
     private BundleContext context = null;
     private ServiceRegistration resourceToModelAdapterRegistration = null;
 
-    @Async("singlethreaded")
+    @Async("singlethreadedExecutor")
     public void refresh() {
         if (isModelAdapterUpdatable()) {
             updateModeAdapter();

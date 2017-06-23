@@ -14,14 +14,14 @@
 	<parent>
 		<groupId>io.neba</groupId>
 		<artifactId>io.neba.neba-parent</artifactId>
-		<version>4.2.1</version>
+		<version>4.3.0</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
 	<properties>
 		<bundle.symbolicName>io.neba-api</bundle.symbolicName>
 		<bundle.namespace>io.neba</bundle.namespace>
-		<api.version>4.2.0</api.version>
+		<api.version>4.3.0</api.version>
 	</properties>
 
 	<build>

@@ -20,6 +20,7 @@ import io.neba.api.annotations.Children;
 import io.neba.api.annotations.Path;
 import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.This;
+import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.util.Annotations;
 import io.neba.core.util.ReflectionUtil;
@@ -49,6 +50,8 @@ import static org.springframework.util.ReflectionUtils.makeAccessible;
  * @author Olaf Otto
  */
 public class MappedFieldMetaData {
+    private boolean isLazy;
+
     /**
      * Whether a property cannot be represented by a resource but must stem
      * from a value map representing the properties of a resource.
@@ -103,12 +106,13 @@ public class MappedFieldMetaData {
         this.modelType = modelType;
         this.field = field;
         this.isOptional = field.getType() == Optional.class;
+        this.isLazy = field.getType() == Lazy.class;
         this.annotations = annotations(field);
 
         // Treat Optional<X> fields transparently like X fields: This way, anyone operating on the metadata is not
         // forced to be aware of the lazy-loading value holder indirection but can operate on the target type directly.
-        this.genericFieldType = this.isOptional ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
-        this.fieldType = this.isOptional ? getRawType(this.genericFieldType, this.modelType) : field.getType();
+        this.genericFieldType = this.isLazy || this.isOptional ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
+        this.fieldType = this.isLazy || this.isOptional ? getRawType(this.genericFieldType, this.modelType) : field.getType();
         this.isCollectionType = Collection.class.isAssignableFrom(this.fieldType);
         this.isPathAnnotationPresent = this.annotations.contains(Path.class);
         this.isReference = this.annotations.contains(Reference.class);
@@ -312,7 +316,7 @@ public class MappedFieldMetaData {
 
     /**
      * @return the type the resolved value for the field shall have, which is either the {@link java.lang.reflect.Field#getType() field type},
-     * or the generic parameter type in case of {@link #isOptional() optional} fields.
+     * or the generic parameter type in case of {@link #isLazy() lazy} or {@link #isOptional() optional} fields.
      */
     public Class<?> getType() {
         return this.fieldType;
@@ -407,6 +411,13 @@ public class MappedFieldMetaData {
      */
     public boolean isOptional() {
         return isOptional;
+    }
+
+    /**
+     * @return whether the field is of type {@link io.neba.api.resourcemodels.Lazy}.
+     */
+    public boolean isLazy() {
+        return isLazy;
     }
 
     @Override

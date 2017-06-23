@@ -1,38 +1,41 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.metadata;
 
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.sling.commons.json.JSONArray;
-import org.apache.sling.commons.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URL;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+
+import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Math.round;
 import static org.apache.commons.collections.CollectionUtils.find;
-import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.apache.commons.lang.StringUtils.substringAfter;
 
 /**
  * Provides a RESTFul JSON API for {@link io.neba.api.annotations.ResourceModel} metadata,
@@ -89,19 +92,15 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         res.setHeader("Pragma", "no-cache");
     }
 
-    private void resetStatistics(HttpServletResponse res) {
+    private void resetStatistics(HttpServletResponse res) throws IOException {
         for (ResourceModelMetaData metaData : this.modelMetaDataRegistrar.get()) {
             metaData.getStatistics().reset();
         }
         prepareJsonResponse(res);
-        try {
-            res.getWriter().write("{\"success\": true}");
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to write success message after statistics cleared.", e);
-        }
+        res.getWriter().write("{\"success\": true}");
     }
 
-    private void getModelMetadata(String typePath, HttpServletResponse res) {
+    private void getModelMetadata(String typePath, HttpServletResponse res) throws IOException {
         if (typePath.isEmpty()) {
             provideStatisticsOfAllModels(res);
         } else {
@@ -110,36 +109,31 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    private void provideStatisticsOfModel(final String typeName, HttpServletResponse res) {
+    private void provideStatisticsOfModel(final String typeName, HttpServletResponse res) throws IOException {
         ResourceModelMetaData metaData = (ResourceModelMetaData) find(
                 this.modelMetaDataRegistrar.get(), object -> ((ResourceModelMetaData) object).getTypeName().equals(typeName)
         );
 
         if (metaData != null) {
 
-            Map<String, Object> data = data(metaData);
+            Map<String, Object> data = toMap(metaData);
 
             ResourceModelStatistics statistics = metaData.getStatistics();
             int[] mappingDurationFrequencies = statistics.getMappingDurationFrequencies();
             int[] intervalBoundaries = statistics.getMappingDurationIntervalBoundaries();
 
-            try {
-                JSONObject json = new JSONObject(data);
-                JSONObject durationFrequencies = new JSONObject();
+            Map<String, Object> durationFrequencies = new LinkedHashMap<>();
 
-                int leftBoundary = 0;
-                for (int i = 0; i < mappingDurationFrequencies.length; ++i) {
-                    durationFrequencies.put("[" + leftBoundary + ", " + intervalBoundaries[i] + ")", mappingDurationFrequencies[i]);
-                    leftBoundary = intervalBoundaries[i];
-                }
-
-                json.put("mappingDurationFrequencies", durationFrequencies);
-
-                prepareJsonResponse(res);
-                json.write(res.getWriter());
-            } catch (Exception e) {
-                throw new RuntimeException("Unable to write the resource model JSON data.", e);
+            int leftBoundary = 0;
+            for (int i = 0; i < mappingDurationFrequencies.length; ++i) {
+                durationFrequencies.put("[" + leftBoundary + ", " + intervalBoundaries[i] + ")", mappingDurationFrequencies[i]);
+                leftBoundary = intervalBoundaries[i];
             }
+
+            data.put("mappingDurationFrequencies", durationFrequencies);
+
+            prepareJsonResponse(res);
+            res.getWriter().write(toJson(data));
         }
     }
 
@@ -148,25 +142,17 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         res.setContentType("application/json; charset=UTF-8");
     }
 
-    private void provideStatisticsOfAllModels(HttpServletResponse res) {
-        JSONArray array = new JSONArray();
+    private void provideStatisticsOfAllModels(HttpServletResponse res) throws IOException {
+        Collection<Object> data = new LinkedList<>();
         for (ResourceModelMetaData metaData : this.modelMetaDataRegistrar.get()) {
-            Map<String, Object> data = data(metaData);
-
-            array.put(data);
+            data.add(toMap(metaData));
         }
-        try {
-            prepareJsonResponse(res);
-            array.write(res.getWriter());
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to write the resource model JSON data.", e);
-        }
+        prepareJsonResponse(res);
+        res.getWriter().write(toJson(data));
     }
 
-    private Map<String, Object> data(ResourceModelMetaData metaData) {
+    private Map<String, Object> toMap(ResourceModelMetaData metaData) {
         ResourceModelStatistics statistics = metaData.getStatistics();
-
-        //
         Map<String, Object> data = new LinkedHashMap<>();
 
         int lazyFields = 0, greedyFields = 0;
