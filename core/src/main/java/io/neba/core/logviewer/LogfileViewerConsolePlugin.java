@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -71,28 +69,12 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     @Autowired
     private ServletContext servletContext;
 
-    @PostConstruct
-    protected void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        if (this.servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isPresent(DECORATED_OBJECT_FACTORY, getClass().getClassLoader())) {
-            return;
-        }
-
-        this.servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
-        this.isManagingDecoratedObjectFactory = true;
-    }
-
-    @PreDestroy
-    protected void removeDecoratorObjectFactoryFromServletContext() {
-        if (this.isManagingDecoratedObjectFactory) {
-            this.servletContext.removeAttribute(DECORATED_OBJECT_FACTORY);
-        }
-    }
-
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         final ClassLoader ccl = currentThread().getContextClassLoader();
         try {
+            injectDecoratorObjectFactoryIntoServletContext();
             currentThread().setContextClassLoader(getClass().getClassLoader());
             this.tailServlet.init(config);
         } catch (Throwable t) {
@@ -107,6 +89,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     @Override
     public void destroy() {
         super.destroy();
+        removeDecoratorObjectFactoryFromServletContext();
         this.tailServlet.destroy();
     }
 
@@ -137,17 +120,6 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         writeHead(res);
     }
 
-    private void writeHead(HttpServletResponse res) throws IOException {
-        StringBuilder options = new StringBuilder(1024);
-        this.logFiles.resolveLogFiles().forEach(file ->
-                 options.append("<option value=\"").append(file.getAbsolutePath()).append("\" ")
-                .append("title=\"").append(file.getAbsolutePath()).append("\">")
-                .append(file.getParentFile().getName()).append('/').append(file.getName())
-                .append("</option>"));
-        writeFromTemplate(res, "head.html", options.toString());
-        writeFromTemplate(res, "body.html");
-    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String suffix = substringAfter(req.getRequestURI(), req.getServletPath() + "/" + getLabel());
@@ -163,6 +135,32 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         }
 
         super.doGet(req, res);
+    }
+
+    private void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        if (this.servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isPresent(DECORATED_OBJECT_FACTORY, getClass().getClassLoader())) {
+            return;
+        }
+
+        this.servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
+        this.isManagingDecoratedObjectFactory = true;
+    }
+
+    private void removeDecoratorObjectFactoryFromServletContext() {
+        if (this.isManagingDecoratedObjectFactory) {
+            this.servletContext.removeAttribute(DECORATED_OBJECT_FACTORY);
+        }
+    }
+
+    private void writeHead(HttpServletResponse res) throws IOException {
+        StringBuilder options = new StringBuilder(1024);
+        this.logFiles.resolveLogFiles().forEach(file ->
+                options.append("<option value=\"").append(file.getAbsolutePath()).append("\" ")
+                        .append("title=\"").append(file.getAbsolutePath()).append("\">")
+                        .append(file.getParentFile().getName()).append('/').append(file.getName())
+                        .append("</option>"));
+        writeFromTemplate(res, "head.html", options.toString());
+        writeFromTemplate(res, "body.html");
     }
 
     /**
