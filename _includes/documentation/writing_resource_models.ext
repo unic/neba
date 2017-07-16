@@ -402,7 +402,7 @@ public class AccessRestricted {
 <h3 id="lazy_loading">Lazy loading</h3>
 
 <p>
-    Reading data into an object graph - such as NEBA models referencing each other - bears the risk of loading
+    Reading data into an object graph - such as NEBA models - bears the risk of loading
     more data than required for rendering. Especially when there is a significant amount of repository content, being able to load
     models <em>on demand</em> rather then up front is <em>crucial</em> for building high-performance implementations. To achieve this,
     NEBA enables lazy-loading model relationships.
@@ -447,12 +447,12 @@ public class MyModel {
 }
 {% endhighlight %}<div class="legend">Explicit lazy-loading using the Lazy interface</div></div>
 
-With Lazy, the relationships is loaded when one of Lazy's methods for model retrieval is invoked, such as "orElse".
+With Lazy, the relationship is loaded when one of Lazy's methods for model retrieval is invoked, such as "orElse".
 
 <section class="info">
     <h4>Background: Why 1:1 relationships cannot be lazy by default</h4>
     <p>
-        Let us assume there is a resource model that references resource "r":
+        Let us assume there is a resource model that references a resource "r":
     </p>
 
     <div class="listing">
@@ -472,7 +472,7 @@ With Lazy, the relationships is loaded when one of Lazy's methods for model retr
     </div>
 
     <p>
-       Of course, any client working with "r" must know it exists. However, there is no natural "empty" representation for Resource -
+       Of course, any client working with "r" must know whether it exists. However, there is no natural "empty" representation for Resource -
        it is either null or not. Now, if r was provided as a lazy-loading proxy that proxy instance would never be null (since determining whether the resource represented by "r" exists
        would mean having to load it, which defeats the purpose of lazy-loading).
     </p>
@@ -482,7 +482,7 @@ With Lazy, the relationships is loaded when one of Lazy's methods for model retr
     </p>
     <p>
         Consequently, lazy 1:1 relationships <em>must</em> be explicit to allow clients to determine whether the relationship exists.
-        Collections, on the other hand, do have a natural representation of emptiness (isEmpty) and are thus automatically provided as lazy-loading proxies by NEBA.
+        Collections, however, do have a natural representation of emptiness (isEmpty) and are thus automatically provided as lazy-loading proxies by NEBA.
     </p>
 </section>
 
