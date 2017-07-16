@@ -30,35 +30,25 @@
     and customizing the bean <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-factory-lifecycle">lifecycle</a>).
 </p>
 
-<p>However, there is an additional lifecycle phase of @ResourceModels in beans: after creation, dependency injection
+<p>However, there is an additional lifecycle for @ResourceModels beans: after creation, dependency injection
     and initialization, a resource model is injected with the properties of the resource which is adapted to the model.
     For programmatic extensibility, the NEBA API contains the lifecycle callback interface <em>ResourceModelPostProcessor</em>.
     <br/>
     Providing an OSGi service with this interface allows customization and even overriding of a ResourceModel before and
-    / or after the resource properties are mapped on it.  The demo project's com.unic.cq.foundation.demo.i18n
-    package and context.xml contain an example of how this lifecycle callback can be used to support an additional
-    annotation on a resource model.
+    / or after the resource properties are mapped on it.
 </p>
 
 <h3 id="cache_extension">Caching and cache extension</h3>
 <p>
-NEBA's central and most performance critical feature is the adaptation of Resources to their corresponding resource models.
+NEBA's central and most performance critical feature is the adaptation of Resources resource models.
 There, resource and model resolution, content-to-object mapping and datatype conversion occurs.
 This core functionality features an extensible caching
 interface. Any OSGi service implementing the NEBA API interface <a href="apidocs/neba-api/io/neba/api/resourcemodels/ResourceModelCache.html">ResourceModelCache</a> will automatically be
 registered and used to cache the result of the resource to model adaptation.</p><p>NEBA ships with a safe and
 sensible default implementation of this interface contained in the core, the <em>request-scoped resource model
 cache.</em>
-This cache can be enabled or disabled via the Felix console (configuration tab). If you would like
+This cache can be disabled via the Felix console (configuration tab). If you would like
 to provide your own caching implementation, consult the Javadoc of the <a href="apidocs/neba-api/io/neba/api/resourcemodels/ResourceModelCache.html">ResourceModelCache</a> <em>for further
 information.</em></p>
-
-<header><h3>Extending the tag library</h3></header>
-
-<p>
-    While NEBA's <em>DefineObjectsTag</em> is part of the NEBA API, writing a standalone tag
-    library is the recommended approach to avoid tight coupling to implementation details of the
-    NEBA tag library.
-</p>
 
 </section>
