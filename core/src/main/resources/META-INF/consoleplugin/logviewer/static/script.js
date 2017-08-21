@@ -16,6 +16,7 @@
 $(function () {
     var KEY_ENTER = 13,
         KEY_A = 65,
+        NEWLINE = /\r?\n/,
         textDecoder = new TextDecoder("UTF-8"),
         tailSocket,
         tailDomNode = document.getElementById("tail"),
@@ -121,9 +122,12 @@ $(function () {
          * when log file rotation occurs.
          */
         info: function (text) {
+            tailDomNode.appendChild(document.createElement("br"));
             tailDomNode.appendChild(
-                document.createTextNode('\r\n ----------------- ' + text + ' ----------------- \r\n\r\n')
+                document.createTextNode(' ----------------- ' + text + ' ----------------- ')
             );
+            tailDomNode.appendChild(document.createElement("br"));
+            tailDomNode.appendChild(document.createElement("br"));
             this.follow();
         },
 
@@ -137,7 +141,8 @@ $(function () {
                 link.textContent = '[' + match[2] + ']';
                 tailDomNode.appendChild(document.createTextNode(match[1]));
                 tailDomNode.appendChild(link);
-                tailDomNode.appendChild(document.createTextNode(match[3] + '\r\n'));
+                tailDomNode.appendChild(document.createTextNode(match[3]));
+                tailDomNode.appendChild(document.createElement("br"));
                 return link;
             }
 
@@ -149,7 +154,7 @@ $(function () {
                 return /(.* )\[([0-9]+)]( <\- [0-9]+ .*)/g;
             }
 
-            var lines = (this.buffer + text).split('\n');
+            var lines = (this.buffer + text).split(NEWLINE);
 
 
             for (var i = 0; i < lines.length - 1; ++i) {
@@ -161,8 +166,7 @@ $(function () {
                  *
                  * @type {Text}
                  */
-                var textNode = document.createTextNode(lines[i] + '\n');
-
+                var textNode = document.createTextNode(lines[i]);
 
                 if (this.logType === Tail.LogType.ERROR || this.logType == undefined) {
 
@@ -173,6 +177,7 @@ $(function () {
                         if (firstChar === '\t' || (firstChar * 0) !== 0) {
                             // Add the node to the existing error section
                             this.errorSection.appendChild(textNode);
+                            this.errorSection.appendChild(document.createElement("br"));
                             this.updateErrorFocusedView();
                             this.notifyErrorUpdateListeners();
                             continue;
@@ -193,6 +198,7 @@ $(function () {
                         tailDomNode.appendChild(this.errorSection);
                         // Add the current text to the newly created error section
                         this.errorSection.appendChild(textNode);
+                        this.errorSection.appendChild(document.createElement("br"));
                         this.addErrorToErrorFocusedView();
                         this.notifyNewErrorListeners();
                         continue;
@@ -218,6 +224,7 @@ $(function () {
 
                 // Simply append the line
                 tailDomNode.appendChild(textNode);
+                tailDomNode.appendChild(document.createElement("br"));
             }
 
             if (lines[lines.length - 1]) {
@@ -544,11 +551,13 @@ $(function () {
      */
     function restrictCopyAllToLogView() {
         $(document).keydown(function (e) {
-            if (e.keyCode == KEY_A && e.ctrlKey) {
+            if (e.keyCode === KEY_A && e.ctrlKey) {
                 e.preventDefault();
                 var range = document.createRange();
                 range.selectNode(Tail.view());
-                window.getSelection().addRange(range);
+                var selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
             }
         });
     }
