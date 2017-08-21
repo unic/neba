@@ -384,7 +384,7 @@ $(function () {
      * @returns {WebSocket}
      */
     function createSocket() {
-        var socket = new WebSocket((window.location.protocol === "https" ? "wss" : "ws") + "://" + window.location.host + "/system/console/logviewer/tail");
+        var socket = new WebSocket((window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + "/system/console/logviewer/tail");
 
         socket.onclose = function () {
             Tail.info("Connection to server lost. Trying to reconnect ...");
