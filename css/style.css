@@ -1094,6 +1094,10 @@ section .info {
 	padding: 0.2em;
 }
 
+#tweet img.Emoji {
+	width: .8em;
+}
+
 /***
  additions for old documentation
 ***/
