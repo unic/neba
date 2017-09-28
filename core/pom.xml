@@ -42,48 +42,8 @@
             <artifactId>org.apache.sling.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.bgservlets</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -140,14 +100,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.gemini.blueprint</groupId>
-            <artifactId>gemini-blueprint-extender</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.gemini.blueprint</groupId>
-            <artifactId>gemini-blueprint-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole</artifactId>
         </dependency>
@@ -168,10 +120,6 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
@@ -206,17 +154,6 @@
                         </Private-Package>
                         <Export-Package />
                         <Import-Package>
-                            org.springframework.cglib.core,
-                            org.springframework.cglib.proxy,
-                            org.springframework.cglib.reflect,
-                            org.springframework.context,
-                            org.springframework.aop,
-                            org.springframework.aop.framework,
-                            org.springframework.scheduling.concurrent,
-                            org.springframework.scheduling.config,
-                            org.springframework.web.filter,
-                            org.aopalliance.aop,
-                            org.apache.sling.bgservlets;version=0.0.0;resolution:=optional,
                             org.eclipse.jetty.*;version="[9.2, 10)",
                             org.eclipse.jetty.util;version="[9.2, 10)",
                             org.eclipse.jetty.websocket.server;version="[9.2, 10)",
@@ -224,27 +161,6 @@
                         </Import-Package>
                     </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <executions>
-                    <execution>
-                        <!-- This is a workaround for FELIX-5173 -->
-                        <id>inline-scr-configuration-descriptions</id>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                        <phase>prepare-package</phase>
-                        <configuration>
-                            <delimiters>
-                                <delimiter>%*</delimiter>
-                            </delimiters>
-                            <file>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.xml</file>
-                            <tokenValueMap>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.properties</tokenValueMap>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

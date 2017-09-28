@@ -43,7 +43,7 @@ import static org.springframework.beans.factory.BeanFactoryUtils.beanNamesForTyp
  *
  * @author Olaf Otto
  * @see io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater
- * @see io.neba.core.blueprint.SlingBeanFactoryPostProcessor
+ * @see io.neba.spring.blueprint.SlingBeanFactoryPostProcessor
  */
 @Service
 public class ModelRegistrar {

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>io.neba.neba-spring</artifactId>
+    <packaging>bundle</packaging>
+    <name>NEBA spring integration</name>
+
+    <description>
+    </description>
+
+    <parent>
+        <groupId>io.neba</groupId>
+        <artifactId>io.neba.neba-parent</artifactId>
+        <version>4.3.3-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
+    <properties>
+        <bundle.symbolicName>io.neba-spring</bundle.symbolicName>
+        <bundle.namespace>io.neba</bundle.namespace>
+    </properties>
+
+    <dependencies>
+        <!-- NEBA internal dependencies -->
+        <dependency>
+            <groupId>io.neba</groupId>
+            <artifactId>io.neba.neba-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>io.neba.neba-core</artifactId>
+        </dependency>
+
+        <!-- External dependencies -->
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-extender</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.gemini.blueprint</groupId>
+            <artifactId>gemini-blueprint-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.bgservlets</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>NEBA spring integration</Bundle-Name>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Category>neba</Bundle-Category>
+                        <Fragment-Host>org.eclipse.gemini.blueprint.extender</Fragment-Host>
+                        <Private-Package>
+                            io.neba.spring.*
+                        </Private-Package>
+                        <Export-Package />
+                        <Import-Package>
+                            org.apache.sling.bgservlets;version=0.0.0;resolution:=optional,
+                            org.springframework.cglib.core,
+                            org.springframework.cglib.proxy,
+                            org.springframework.cglib.reflect,
+                            org.springframework.context,
+                            org.springframework.aop,
+                            org.springframework.aop.framework,
+                            org.springframework.scheduling.concurrent,
+                            org.springframework.scheduling.config,
+                            org.springframework.web.filter,
+                            org.aopalliance.aop,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <executions>
+                    <execution>
+                        <!-- This is a workaround for FELIX-5173 -->
+                        <id>inline-scr-configuration-descriptions</id>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <delimiters>
+                                <delimiter>%*</delimiter>
+                            </delimiters>
+                            <file>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.xml</file>
+                            <tokenValueMap>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.properties</tokenValueMap>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

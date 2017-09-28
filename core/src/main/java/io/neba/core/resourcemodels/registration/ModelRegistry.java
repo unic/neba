@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.blueprint.EventhandlingBarrier;
+import io.neba.spring.blueprint.EventhandlingBarrier;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
 import io.neba.core.util.MatchedBundlesPredicate;

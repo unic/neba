@@ -35,6 +35,10 @@
                         <Bundle-Name>NEBA API</Bundle-Name>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Category>neba</Bundle-Category>
+						<Import-Package>
+							org.springframework.*;resolution:=optional,
+							*
+						</Import-Package>
 						<Export-Package>
 							io.neba.api.*;version=${api.version}
 						</Export-Package>
