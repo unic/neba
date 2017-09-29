@@ -18,21 +18,30 @@ package io.neba.core.resourcemodels.adaptation;
 
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiBeanSource;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
-import org.eclipse.gemini.blueprint.context.BundleContextAware;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.stream.Collectors;
 
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.apache.commons.lang.ClassUtils.getAllInterfaces;
 import static org.apache.commons.lang.ClassUtils.getAllSuperclasses;
 import static org.apache.sling.api.adapter.AdapterFactory.ADAPTABLE_CLASSES;
@@ -56,23 +65,37 @@ import static org.osgi.framework.Bundle.STARTING;
  * 
  * @author Olaf Otto
  */
-@Service
-public class ResourceToModelAdapterUpdater implements BundleContextAware {
+@Service(ResourceToModelAdapter.class)
+@Component
+public class ResourceToModelAdapterUpdater {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Autowired
+    @Reference
     private ModelRegistry registry;
-    @Autowired
+    @Reference
     private ResourceToModelAdapter adapter;
     
     private BundleContext context = null;
     private ServiceRegistration resourceToModelAdapterRegistration = null;
+    private ExecutorService executorService;
 
-    @Async("singlethreadedExecutor")
+    @Activate
+    protected void activate(BundleContext context) {
+        this.context = context;
+        this.executorService = newSingleThreadExecutor();
+    }
+
+    @Deactivate
+    protected void deActivate() {
+        this.executorService.shutdownNow();
+    }
+
     public void refresh() {
-        if (isModelAdapterUpdatable()) {
-            updateModeAdapter();
-        }
+        this.executorService.execute(() -> {
+            if (isModelAdapterUpdatable()) {
+                updateModeAdapter();
+            }
+        });
     }
 
     /**
@@ -157,10 +180,5 @@ public class ResourceToModelAdapterUpdater implements BundleContextAware {
         List<String> classNames = new ArrayList<>(l.size());
         classNames.addAll(l.stream().map(Class::getName).collect(Collectors.toList()));
         return classNames;
-    }
-
-    @Override
-    public void setBundleContext(BundleContext bundleContext) {
-        this.context = bundleContext;
     }
 }

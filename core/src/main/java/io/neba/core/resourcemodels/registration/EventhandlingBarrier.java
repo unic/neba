@@ -14,17 +14,20 @@
   limitations under the License.
 */
 
-package io.neba.spring.blueprint;
-
-import org.springframework.stereotype.Service;
+package io.neba.core.resourcemodels.registration;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
+ * TODO: remove.
+ *
  * Contains a global {@link Lock} on which the event handlers changing the
  * framework state (e.g. registering {@link io.neba.api.annotations.ResourceModel models})
  * may synchronize to prevent undefined state due to concurrent modifications.<br />
@@ -42,7 +45,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * 
  * @author Olaf Otto
  */
-@Service
+@Service(EventhandlingBarrier.class)
+@Component
 public class EventhandlingBarrier {
     private final Lock lock = new ReentrantLock();
 

@@ -21,12 +21,13 @@ import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiBeanSource;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,16 +44,17 @@ import static org.springframework.util.Assert.notNull;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(ResourceToModelMapper.class)
+@Component
 public class ResourceToModelMapper {
     private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
-    @Autowired
+    @Reference
     private ModelProcessor modelProcessor;
-    @Autowired
+    @Reference
     private NestedMappingSupport nestedMappingSupport;
-    @Autowired
+    @Reference
     private AnnotatedFieldMappers annotatedFieldMappers;
-    @Autowired
+    @Reference
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     /**
@@ -145,6 +147,7 @@ public class ResourceToModelMapper {
         T model = preprocessedModel;
         // Unwrap proxied beans prior to mapping. The mapping must access the target
         // bean's fields in order to perform value injection there.
+        // FIXME make this optional, check if spring on classpath
         if (preprocessedModel instanceof Advised) {
             model = getTargetObjectOfAdvisedBean((Advised) bean);
         }

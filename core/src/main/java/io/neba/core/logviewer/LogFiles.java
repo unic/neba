@@ -15,23 +15,23 @@
  **/
 package io.neba.core.logviewer;
 
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.eclipse.gemini.blueprint.context.BundleContextAware;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.TreeSet;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+
 
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -42,8 +42,9 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  *
  * @author Olaf Otto
  */
-@Service
-public class LogFiles implements BundleContextAware {
+@Component
+@Service(LogFiles.class)
+public class LogFiles {
     // Obtained from the felix console configuration for the log manager.
     private static final String LOG_FILE_PROPERTY = "org.apache.sling.commons.log.file";
     private static final String LOG_MANAGER_PID = "org.apache.sling.commons.log.LogManager";
@@ -65,14 +66,15 @@ public class LogFiles implements BundleContextAware {
         }
     };
 
-    @Autowired
+    @Reference
     private ConfigurationAdmin configurationAdmin;
 
     private BundleContext context;
     private File slingHomeDirectory;
 
-    @PostConstruct
-    public void determineSlingHomeDirectory() {
+    @Activate
+    protected void activate(BundleContext context) {
+        this.context = context;
         this.slingHomeDirectory = new File(this.context.getProperty("sling.home"));
     }
 
@@ -151,10 +153,5 @@ public class LogFiles implements BundleContextAware {
 
     private Configuration getCommonsLogConfiguration() throws IOException {
         return this.configurationAdmin.getConfiguration(LOG_MANAGER_PID);
-    }
-
-    @Override
-    public void setBundleContext(BundleContext bundleContext) {
-        this.context = bundleContext;
     }
 }

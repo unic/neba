@@ -20,12 +20,12 @@ import io.neba.api.annotations.PostMapping;
 import io.neba.api.annotations.PreMapping;
 import io.neba.core.resourcemodels.metadata.MethodMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Invokes {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isPreMappingCallback pre-mapping methods}
@@ -34,7 +34,8 @@ import java.lang.reflect.Method;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(ModelProcessor.class)
+@Component
 public class ModelProcessor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

@@ -16,23 +16,11 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.spring.blueprint.EventhandlingBarrier;
+import io.neba.api.annotations.Reference;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
 import io.neba.core.util.MatchedBundlesPredicate;
 import io.neba.core.util.OsgiBeanSource;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.sling.api.resource.Resource;
-import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PreDestroy;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,12 +29,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.annotation.PreDestroy;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.Resource;
+import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static java.util.Collections.unmodifiableCollection;
+import static java.util.concurrent.Executors.newScheduledThreadPool;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Contains {@link OsgiBeanSource model sources} associated to
@@ -55,10 +59,12 @@ import static java.util.Collections.unmodifiableCollection;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(ModelRegistry.class)
+@Component
 public class ModelRegistry {
     private static final Object NULL_VALUE = new Object();
     private static final long EVERY_30_SECONDS = 30 * 1000;
+    private ScheduledExecutorService executorService;
 
     /**
      * Generate a {@link Key} representing both the
@@ -153,8 +159,19 @@ public class ModelRegistry {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final AtomicInteger state = new AtomicInteger(0);
 
-    @Autowired
+    @Reference
     private EventhandlingBarrier barrier;
+
+    @Activate
+    protected void activate() {
+        this.executorService = newScheduledThreadPool(1);
+        this.executorService.scheduleAtFixedRate(this::removeInvalidReferences, 30, 30, SECONDS);
+    }
+
+    @Deactivate
+    protected void deActivate() {
+        this.executorService.shutdownNow();
+    }
 
     /**
      * Finds the most specific models for the given {@link Resource}. The model's bean
@@ -361,7 +378,6 @@ public class ModelRegistry {
      * are still {@link io.neba.core.util.OsgiBeanSource#isValid() valid}. If not,
      * the corresponding model(s) are removed from the registry.
      */
-    @Scheduled(fixedRate = EVERY_30_SECONDS)
     public void removeInvalidReferences() {
         if (this.barrier.tryBegin()) {
             this.logger.debug("Checking for references to beans from inactive bundles...");

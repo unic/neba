@@ -151,7 +151,7 @@ public class ResourceModelMetaDataRegistrarTest {
     }
 
     private void tearDown() {
-        this.testee.tearDown();
+        this.testee.deactivate();
     }
 
     private void assertMetadataIsNotNull() {

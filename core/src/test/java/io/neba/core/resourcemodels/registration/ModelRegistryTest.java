@@ -17,7 +17,6 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.spring.blueprint.EventhandlingBarrier;
 import io.neba.core.util.OsgiBeanSource;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;

@@ -14,7 +14,7 @@
  * limitations under the License.
 **/
 
-package io.neba.core.resourcemodels.registration;
+package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater;
@@ -56,7 +56,7 @@ public class ModelRegistrar {
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     private void discoverResourceModels(ConfigurableListableBeanFactory factory, Bundle bundle) {
-        logger.info("Discovering resource models in bundle: " + displayNameOf(bundle) + " ...");
+        logger.info("Discovering resource models in bundle: " + BundleUtil.displayNameOf(bundle) + " ...");
         String[] beanNames = beanNamesForTypeIncludingAncestors(factory, Object.class);
         int numberOfDiscoveredModels = 0;
         for (String beanName : beanNames) {
@@ -67,11 +67,11 @@ public class ModelRegistrar {
                 this.resourceModelMetaDataRegistrar.register(source);
                 this.registry.add(resourceModel.types(), source);
                 logger.debug("Registered bean " + beanName + " as a model for the resource types "
-                            + join(resourceModel.types(), ", ") + ".");
+                            + StringUtils.join(resourceModel.types(), ", ") + ".");
             }
         }
         logger.info("Discovered " + numberOfDiscoveredModels + " resource model(s) in bundle: "
-                + displayNameOf(bundle) + ".");
+                + BundleUtil.displayNameOf(bundle) + ".");
     }
 
     public void registerModels(BundleContext bundleContext, ConfigurableListableBeanFactory beanFactory) {

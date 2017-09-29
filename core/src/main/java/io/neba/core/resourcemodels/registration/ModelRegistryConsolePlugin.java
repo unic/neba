@@ -29,16 +29,18 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
@@ -61,7 +63,8 @@ import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(Servlet.class)
+@Component
 public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     public static final String LABEL = "modelregistry";
     public static final String PREFIX_STATIC = "/static";
@@ -75,9 +78,9 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     private static final String PARAM_TYPENAME = "modelTypeName";
     private static final String PARAM_PATH = "path";
 
-    @Autowired
+    @Reference
     private ResourceResolverFactory resourceResolverFactory;
-    @Autowired
+    @Reference
     private ModelRegistry registry;
 
     @SuppressWarnings("unused")

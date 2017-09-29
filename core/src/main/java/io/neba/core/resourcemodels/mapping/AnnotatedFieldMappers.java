@@ -18,14 +18,15 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
-import org.springframework.stereotype.Service;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.felix.scr.annotations.Service;
+import org.springframework.stereotype.Component;
+
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
@@ -36,7 +37,8 @@ import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(AnnotatedFieldMappers.class)
+@Component
 public class AnnotatedFieldMappers {
     /**
      * Represents the relation of an {@link java.lang.annotation.Annotation} and and a

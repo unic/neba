@@ -26,11 +26,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
@@ -49,7 +50,8 @@ import static org.springframework.util.ClassUtils.isPresent;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(LogfileViewerConsolePlugin.class)
+@Component
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     private static final String LABEL = "logviewer";
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
@@ -59,10 +61,10 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
 
     private boolean isManagingDecoratedObjectFactory = false;
 
-    @Autowired
+    @Reference
     private TailServlet tailServlet;
 
-    @Autowired
+    @Reference
     private LogFiles logFiles;
 
     @Override

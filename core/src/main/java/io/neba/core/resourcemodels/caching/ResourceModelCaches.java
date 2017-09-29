@@ -20,12 +20,12 @@ import io.neba.api.resourcemodels.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiBeanSource;
-import org.apache.sling.api.resource.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.Resource;
 
 /**
  * Represents all currently registered {@link ResourceModelCache resource model cache services}.
@@ -35,9 +35,10 @@ import java.util.List;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(ResourceModelCaches.class)
+@Component
 public class ResourceModelCaches {
-    @Autowired
+    @Reference
     private ResourceModelMetaDataRegistrar metaDataRegistrar;
 
     private final List<ResourceModelCache> caches = new ArrayList<>();

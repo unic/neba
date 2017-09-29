@@ -17,14 +17,14 @@
 package io.neba.core.resourcemodels.metadata;
 
 import io.neba.core.util.OsgiBeanSource;
-import org.osgi.framework.Bundle;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.Bundle;
+
 
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.ClassUtils.getUserClass;
@@ -139,8 +139,8 @@ public class ResourceModelMetaDataRegistrar {
         return new HashMap<>(this.cache);
     }
 
-    @PreDestroy
-    public void tearDown() {
+    @Deactivate
+    protected void deactivate() {
         this.cache.clear();
     }
 }

@@ -16,6 +16,7 @@
 
 /**
  * Contains the infrastructure for
- * {@link io.neba.api.configuration.io.neba.api.configuration.PlaceholderVariableResolver placeholder variable resolvers}. .
+ * {@link io.neba.api.configuration.io.neba.api.configuration.PlaceholderVariableResolver placeholder variable resolvers}.
+ * TODO: re-implement
  */
 package io.neba.core.placeholdervariables;

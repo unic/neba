@@ -17,12 +17,13 @@
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
-import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+
 
 import static org.springframework.util.Assert.notNull;
 
@@ -33,7 +34,8 @@ import static org.springframework.util.Assert.notNull;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(NestedMappingSupport.class)
+@Component
 @SuppressWarnings("rawtypes")
 public class NestedMappingSupport {
     /**

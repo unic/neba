@@ -22,11 +22,12 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiBeanSource;
-import org.apache.sling.api.resource.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.Collection;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.api.resource.Resource;
+
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 
@@ -42,13 +43,14 @@ import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(ResourceModelProvider.class)
+@Component
 public class ResourceModelProviderImpl implements ResourceModelProvider {
-    @Autowired
+    @Reference
     private ModelRegistry registry;
-    @Autowired
+    @Reference
     private ResourceToModelMapper mapper;
-    @Autowired
+    @Reference
     private ResourceModelCaches caches;
 
     /**

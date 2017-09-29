@@ -1,17 +1,19 @@
 package io.neba.core.resourcemodels.registration;
 
+import java.util.EventListener;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -38,17 +40,18 @@ import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(EventListener.class)
+@Component
 public class MappableTypeHierarchyChangeListener implements EventHandler {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final ExecutorService executorService = newSingleThreadExecutor();
     private final BlockingQueue<Object> invalidationRequests = new ArrayBlockingQueue<>(1);
     private boolean isShutDown = false;
 
-    @Autowired
+    @Reference
     private ModelRegistry modelRegistry;
 
-    @PostConstruct
+    @Activate
     protected void activate() {
         executorService.execute(() -> {
             while (!isShutDown) {
@@ -69,7 +72,7 @@ public class MappableTypeHierarchyChangeListener implements EventHandler {
         });
     }
 
-    @PreDestroy
+    @Deactivate
     protected void deactivate() {
         this.isShutDown = true;
         this.executorService.shutdownNow();

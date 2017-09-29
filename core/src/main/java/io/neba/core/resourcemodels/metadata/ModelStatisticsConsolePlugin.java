@@ -22,12 +22,14 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 
 import static io.neba.core.util.JsonUtil.toJson;
@@ -44,14 +46,15 @@ import static org.apache.commons.lang.StringUtils.substringAfter;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(Servlet.class)
+@Component
 public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
     public static final String LABEL = "modelstatistics";
     private static final long serialVersionUID = -8676958166611686979L;
     private static final String STATISTICS_API_PATH = "/api/statistics";
     private static final String RESET_API_PATH = "/api/reset";
 
-    @Autowired
+    @Reference
     private ResourceModelMetaDataRegistrar modelMetaDataRegistrar;
 
     @SuppressWarnings("unused")
