@@ -16,19 +16,19 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Represents the result of a lookup of a {@link io.neba.api.annotations.ResourceModel} for
- * a {@link org.apache.sling.api.resource.Resource}. Provides the found model as an {@link io.neba.core.util.OsgiBeanSource}
+ * a {@link org.apache.sling.api.resource.Resource}. Provides the found model as an {@link OsgiModelSourceSource}
  * and the resource type the model was found for. The resource type may be any type within the resource's
  * resource type or node type hierarchy.
  *
  * @author Olaf Otto
  */
 public class LookupResult {
-    private final OsgiBeanSource<?> source;
+    private final OsgiModelSourceSource<?> source;
     private final String resourceType;
     private final int hashCode;
 
@@ -36,7 +36,7 @@ public class LookupResult {
      * @param source must not be <code>null</code>
      * @param resourceType must not be <code>null</code>
      */
-    public LookupResult(OsgiBeanSource<?> source, String resourceType) {
+    public LookupResult(OsgiModelSourceSource<?> source, String resourceType) {
         if (source == null) {
             throw new IllegalArgumentException("Method argument source must not be null.");
         }
@@ -49,7 +49,7 @@ public class LookupResult {
         this.hashCode = new HashCodeBuilder().append(source).append(resourceType).toHashCode();
     }
 
-    public OsgiBeanSource<?> getSource() {
+    public OsgiModelSourceSource<?> getSource() {
         return source;
     }
 

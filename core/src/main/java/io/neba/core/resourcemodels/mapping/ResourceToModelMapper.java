@@ -1,36 +1,36 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p/>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p/>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p/>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p/>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.mapping;
 
+import io.neba.api.resourcemodels.ResourceModelFactory;
 import io.neba.api.resourcemodels.ResourceModelPostProcessor;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
-import org.springframework.beans.factory.BeanFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang.StringUtils.join;
@@ -63,13 +63,13 @@ public class ResourceToModelMapper {
      * @param <T>      the bean type.
      * @return never <code>null</code>.
      */
-    public <T> T map(final Resource resource, final OsgiBeanSource<T> modelSource) {
+    public <T> T map(final Resource resource, final OsgiModelSourceSource<T> modelSource) {
         notNull(resource, "Method argument resource must not be null.");
         notNull(modelSource, "Method argument modelSource must not be null.");
 
         T model = null;
 
-        final Class<?> beanType = modelSource.getBeanType();
+        final Class<?> beanType = modelSource.getModelType();
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(beanType);
         final Mapping<T> mapping = new Mapping<>(resource.getPath(), metaData);
         // Do not track mapping time for nested resource models of the same type: this would yield
@@ -82,7 +82,7 @@ public class ResourceToModelMapper {
             try {
                 // Phase 1: Obtain bean instance. All standard bean lifecycle phases (such as @PostConstruct)
                 // and processors are executed during this invocation.
-                final T bean = modelSource.getBean();
+                final T bean = modelSource.getModel();
 
                 metaData.getStatistics().countInstantiation();
 
@@ -141,7 +141,7 @@ public class ResourceToModelMapper {
         return (T) target;
     }
 
-    private <T> T map(final Resource resource, final T bean, final ResourceModelMetaData metaData, final BeanFactory factory) {
+    private <T> T map(final Resource resource, final T bean, final ResourceModelMetaData metaData, final ResourceModelFactory factory) {
         T preprocessedModel = preProcess(resource, bean, factory);
 
         T model = preprocessedModel;
@@ -162,7 +162,7 @@ public class ResourceToModelMapper {
         return postProcess(resource, preprocessedModel, factory);
     }
 
-    private <T> T preProcess(final Resource resource, final T model, final BeanFactory factory) {
+    private <T> T preProcess(final Resource resource, final T model, final ResourceModelFactory factory) {
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(model.getClass());
         this.modelProcessor.processBeforeMapping(metaData, model);
 
@@ -176,7 +176,7 @@ public class ResourceToModelMapper {
         return currentModel;
     }
 
-    private <T> T postProcess(final Resource resource, final T model, final BeanFactory factory) {
+    private <T> T postProcess(final Resource resource, final T model, final ResourceModelFactory factory) {
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(model.getClass());
         this.modelProcessor.processAfterMapping(metaData, model);
 

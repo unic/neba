@@ -1,23 +1,23 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.adaptation;
 
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -65,7 +65,7 @@ import static org.osgi.framework.Bundle.STARTING;
  * 
  * @author Olaf Otto
  */
-@Service(ResourceToModelAdapter.class)
+@Service(ResourceToModelAdapterUpdater.class)
 @Component
 public class ResourceToModelAdapterUpdater {
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -96,6 +96,10 @@ public class ResourceToModelAdapterUpdater {
                 updateModeAdapter();
             }
         });
+    }
+
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     /**
@@ -150,8 +154,8 @@ public class ResourceToModelAdapterUpdater {
     }
 
     /**
-     * Obtains all {@link OsgiBeanSource bean sources} from the
-     * {@link io.neba.core.resourcemodels.registration.ModelRegistrar} and adds the {@link OsgiBeanSource#getBeanType()
+     * Obtains all {@link OsgiModelSourceSource bean sources} from the
+     * {@link io.neba.core.resourcemodels.registration.ModelRegistrar} and adds the {@link OsgiModelSourceSource#getModelType()
      * model type name} as well as the type name of all of its superclasses and
      * interfaces to the set.
      * 
@@ -162,10 +166,10 @@ public class ResourceToModelAdapterUpdater {
      */
     @SuppressWarnings("unchecked")
     private Set<String> getAdapterTypeNames() {
-        List<OsgiBeanSource<?>> beanSources = this.registry.getBeanSources();
+        List<OsgiModelSourceSource<?>> beanSources = this.registry.getBeanSources();
         Set<String> modelNames = new HashSet<>();
-        for (OsgiBeanSource<?> source : beanSources) {
-            Class<?> c = source.getBeanType();
+        for (OsgiModelSourceSource<?> source : beanSources) {
+            Class<?> c = source.getModelType();
             modelNames.add(c.getName());
             modelNames.addAll(toClassnameList(getAllInterfaces(c)));
             List<Class<?>> allSuperclasses = getAllSuperclasses(c);

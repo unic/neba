@@ -19,7 +19,7 @@ package io.neba.core.resourcemodels.caching;
 import io.neba.api.resourcemodels.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.felix.scr.annotations.Component;
@@ -44,7 +44,7 @@ public class ResourceModelCaches {
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
-     * Looks up the {@link #store(Resource, OsgiBeanSource, Object)} cached model}
+     * Looks up the {@link #store(Resource, OsgiModelSourceSource, Object)} cached model}
      * of the given type for the given resource.
      * Returns the first model found in the caches.
      *
@@ -52,7 +52,7 @@ public class ResourceModelCaches {
      * @param modelSource must not be <code>null</code>.
      * @return can be <code>null</code>.
      */
-    public <T> T lookup(Resource resource, OsgiBeanSource<?> modelSource) {
+    public <T> T lookup(Resource resource, OsgiModelSourceSource<?> modelSource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
@@ -64,7 +64,7 @@ public class ResourceModelCaches {
             return null;
         }
 
-        final Key key = key(resource, modelSource.getBeanType());
+        final Key key = key(resource, modelSource.getModelType());
         for (ResourceModelCache cache : this.caches) {
             T model = cache.get(key);
             if (model != null) {
@@ -84,7 +84,7 @@ public class ResourceModelCaches {
      * @param modelSource must not be <code>null</code>.
      * @param model can be <code>null</code>.
      */
-    public <T> void store(Resource resource, OsgiBeanSource<?> modelSource, T model) {
+    public <T> void store(Resource resource, OsgiModelSourceSource<?> modelSource, T model) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
@@ -99,7 +99,7 @@ public class ResourceModelCaches {
             return;
         }
 
-        final Key key = key(resource, modelSource.getBeanType());
+        final Key key = key(resource, modelSource.getModelType());
         for (ResourceModelCache cache : this.caches) {
             cache.put(resource, model, key);
         }

@@ -19,10 +19,20 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
+import io.neba.api.resourcemodels.ResourceModelFactory;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.Annotations;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.Vector;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -34,13 +44,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.LazyLoader;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.*;
 
 import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
@@ -50,10 +56,14 @@ import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -66,7 +76,7 @@ public class FieldValueMappingCallbackTest {
     @Mock
     private ResourceResolver resourceResolver;
     @Mock
-    private ConfigurableBeanFactory factory;
+    private ResourceModelFactory factory;
     @Mock
     private MappedFieldMetaData mappedFieldMetadata;
     @Mock
@@ -847,7 +857,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test
     public void testPlaceholderResolutionInPath() throws Exception {
-        withConfigurableBeanFactory();
+        withResourceModelFactory();
         withPlaceholderResolution("text-${language}", "text-de");
         withPropertyFieldWithPath(String.class, "text-${language}");
         withPathExpressionDetected();
@@ -864,7 +874,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test
     public void testPlaceholderResolutionWithoutSubstitution() throws Exception {
-        withConfigurableBeanFactory();
+        withResourceModelFactory();
         withPropertyFieldWithPath(String.class, "text-${language}");
         withPathExpressionDetected();
         mapField();
@@ -881,7 +891,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test
     public void testPlaceholdersAreOnlyResolvedForPathAnnotationValues() throws Exception {
-        withConfigurableBeanFactory();
+        withResourceModelFactory();
         mapPropertyField(String.class, "someValue");
         assertFieldMapperDoesNotAttemptToResolvePlaceholders();
     }
@@ -1700,11 +1710,11 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void withPlaceholderResolution(String key, String value) {
-        when(this.factory.resolveEmbeddedValue(key)).thenReturn(value);
+        throw new RuntimeException("TODO: do not use the bean factory");
     }
 
-    private void withConfigurableBeanFactory() {
-        this.factory = mock(ConfigurableBeanFactory.class);
+    private void withResourceModelFactory() {
+        this.factory = mock(ResourceModelFactory.class);
     }
 
     private <T> void withResourceTargetedByMappingAdaptingTo(Class<T> type, T value) {
@@ -1925,7 +1935,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertFieldMapperDoesNotAttemptToResolvePlaceholders() {
-        verify(this.factory, never()).resolveEmbeddedValue(anyString());
+        throw new RuntimeException("TODO: do not use the bean factory");
     }
 
     private void assertChildResourceIsNotLoadedForField() {
@@ -1964,7 +1974,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertFieldMapperAttemptsToResolvePlaceholdersIn(String placeholder) {
-        verify(this.factory).resolveEmbeddedValue(eq(placeholder));
+        throw new RuntimeException("TODO: do not use the bean factory.");
     }
 
     @SuppressWarnings("unchecked")

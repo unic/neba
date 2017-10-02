@@ -14,9 +14,8 @@
  * limitations under the License.
 **/
 
-package io.neba.core.web;
+package io.neba.spring.web;
 
-import io.neba.core.web.RequestScopeConfigurator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,6 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestScope;
+
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;

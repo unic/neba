@@ -1,6 +1,5 @@
 package io.neba.core.resourcemodels.registration;
 
-import java.util.EventListener;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +39,7 @@ import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
  *
  * @author Olaf Otto
  */
-@Service(EventListener.class)
+@Service(EventHandler.class)
 @Component
 public class MappableTypeHierarchyChangeListener implements EventHandler {
     private final Logger logger = LoggerFactory.getLogger(getClass());

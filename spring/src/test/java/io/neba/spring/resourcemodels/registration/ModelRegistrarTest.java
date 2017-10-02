@@ -14,12 +14,12 @@
  * limitations under the License.
 **/
 
-package io.neba.core.resourcemodels.registration;
+package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +52,7 @@ public class ModelRegistrarTest {
     private ConfigurableListableBeanFactory factory;
     private Bundle bundle;
     private BundleContext context;
-    private Map<String, OsgiBeanSource<Object>> addedBeanSources;
+    private Map<String, OsgiModelSourceSource<Object>> addedBeanSources;
     private Set<Object> beans = new HashSet<>();
 
     @Mock
@@ -70,16 +70,16 @@ public class ModelRegistrarTest {
         this.addedBeanSources = new HashMap<>();
         Answer registerModel = invocation -> {
             String[] resourceTypes = (String[]) invocation.getArguments()[0];
-            OsgiBeanSource<Object> osgiBeanSource = (OsgiBeanSource<Object>) invocation.getArguments()[1];
+            OsgiModelSourceSource<Object> osgiModelSourceSource = (OsgiModelSourceSource<Object>) invocation.getArguments()[1];
             for (String type : resourceTypes) {
-                addedBeanSources.put(type, osgiBeanSource);
+                addedBeanSources.put(type, osgiModelSourceSource);
             }
             return null;
         };
 
         doAnswer(registerModel)
                 .when(this.registry)
-                .add(isA(String[].class), isA(OsgiBeanSource.class));
+                .add(isA(String[].class), isA(OsgiModelSourceSource.class));
     }
 
     @Before
@@ -115,7 +115,7 @@ public class ModelRegistrarTest {
     private void assertBeanSourcesForAllBeansAddedToRegistry() {
         assertThat(this.addedBeanSources, notNullValue());
         assertThat(this.addedBeanSources.size(), is(this.beans.size()));
-        Set<Object> beansFromBeanSources = this.addedBeanSources.values().stream().map(OsgiBeanSource::getBean).collect(Collectors.toSet());
+        Set<Object> beansFromBeanSources = this.addedBeanSources.values().stream().map(OsgiModelSourceSource::getModel).collect(Collectors.toSet());
         assertThat(this.beans, is(beansFromBeanSources));
     }
 

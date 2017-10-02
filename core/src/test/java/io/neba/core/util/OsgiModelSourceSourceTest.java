@@ -1,28 +1,29 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.util;
 
+import io.neba.api.resourcemodels.ResourceModelFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
-import org.springframework.beans.factory.BeanFactory;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
@@ -34,18 +35,18 @@ import static org.osgi.framework.Bundle.UNINSTALLED;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class OsgiBeanSourceTest {
+public class OsgiModelSourceSourceTest {
     @Mock
-    private BeanFactory factory;
+    private ResourceModelFactory factory;
     @Mock
     private Bundle bundleOne;
     @Mock
     private Bundle bundleTwo;
 
-    private String beanName = "testBean";
-    private String beanSourceAsString;
+    private String modelName = "testBean";
+    private String modelSourceAsString;
 
-    private OsgiBeanSource<Object> testee;
+    private OsgiModelSourceSource<Object> testee;
 
     @Before
     public void prepareBeanSource() {
@@ -65,19 +66,19 @@ public class OsgiBeanSourceTest {
                 .when(this.bundleTwo)
                 .getBundleId();
 
-        this.testee = new OsgiBeanSource<>(this.beanName, this.factory, this.bundleOne);
+        this.testee = new OsgiModelSourceSource<>(this.modelName, this.factory, this.bundleOne);
     }
     
     @Test
     public void testToStringRepresentation() throws Exception {
         modelSourceToString();
-        assertBeanSourceAsStringIs("Bean \"testBean\" from bundle with id 123");
+        assertModelSourceAsStringIs("Bean \"testBean\" from bundle with id 123");
     }
     
     @Test
     public void testBeanRetrievalFromFactory() throws Exception {
         getModel();
-        verifyBeanSourceGetsModelFromBeanFactory();
+        verifyModelSourceGetsModelFromModelFactory();
     }
     
     @Test
@@ -99,22 +100,22 @@ public class OsgiBeanSourceTest {
 
     @Test
     public void testHashCodeAndEquals() throws Exception {
-        OsgiBeanSource<?> one = new OsgiBeanSource<>("one", mock(BeanFactory.class), this.bundleOne);
-        OsgiBeanSource<?> two = new OsgiBeanSource<>("one", mock(BeanFactory.class), this.bundleOne);
+        OsgiModelSourceSource<?> one = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
+        OsgiModelSourceSource<?> two = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
 
         assertThat(one.hashCode()).isEqualTo(two.hashCode());
         assertThat(one).isEqualTo(two);
         assertThat(two).isEqualTo(one);
 
-        one = new OsgiBeanSource<>("one", mock(BeanFactory.class), this.bundleOne);
-        two = new OsgiBeanSource<>("two", mock(BeanFactory.class), this.bundleOne);
+        one = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
+        two = new OsgiModelSourceSource<>("two", mock(ResourceModelFactory.class), this.bundleOne);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
         assertThat(one).isNotEqualTo(two);
         assertThat(two).isNotEqualTo(one);
 
-        one = new OsgiBeanSource<>("one", mock(BeanFactory.class), this.bundleOne);
-        two = new OsgiBeanSource<>("one", mock(BeanFactory.class), this.bundleTwo);
+        one = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
+        two = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleTwo);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
         assertThat(one).isNotEqualTo(two);
@@ -135,26 +136,26 @@ public class OsgiBeanSourceTest {
     }
 
     private void verifyBeanSourceGetsBeanTypeFromFactory() {
-        verify(this.factory).getType(eq(this.beanName));
+        verify(this.factory).getType(eq(this.modelName));
     }
 
     private void getModelType() {
-        this.testee.getBeanType();
+        this.testee.getModelType();
     }
 
-    private void verifyBeanSourceGetsModelFromBeanFactory() {
-        verify(this.factory).getBean(eq(this.beanName));
+    private void verifyModelSourceGetsModelFromModelFactory() {
+        verify(this.factory).getModel(eq(this.modelName));
     }
 
     private void getModel() {
-        this.testee.getBean();
+        this.testee.getModel();
     }
 
-    private void assertBeanSourceAsStringIs(String string) {
-        assertThat(this.beanSourceAsString).isEqualTo(string);
+    private void assertModelSourceAsStringIs(String string) {
+        assertThat(this.modelSourceAsString).isEqualTo(string);
     }
 
     private void modelSourceToString() {
-        this.beanSourceAsString = this.testee.toString();
+        this.modelSourceAsString = this.testee.toString();
     }
 }

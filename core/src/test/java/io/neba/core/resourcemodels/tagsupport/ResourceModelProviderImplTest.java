@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -69,7 +69,7 @@ public class ResourceModelProviderImplTest {
     private ResourceModelCaches caches;
     private Map<Key, Object> testCache = new HashMap<>();
 
-    private OsgiBeanSource<Object> osgiBeanSource;
+    private OsgiModelSourceSource<Object> osgiModelSourceSource;
     private Object resolutionResult;
     private final Object model = new Object();
 
@@ -88,20 +88,20 @@ public class ResourceModelProviderImplTest {
 
         doAnswer(storeInCache)
                 .when(this.caches)
-                .store(isA(Resource.class), isA(OsgiBeanSource.class), any());
+                .store(isA(Resource.class), isA(OsgiModelSourceSource.class), any());
 
         doAnswer(lookupFromCache)
                 .when(this.caches)
-                .lookup(isA(Resource.class), isA(OsgiBeanSource.class));
+                .lookup(isA(Resource.class), isA(OsgiModelSourceSource.class));
 
         doReturn(this.resourceResolver)
                 .when(this.resource)
                 .getResourceResolver();
 
-        when(this.mapper.map(isA(Resource.class), isA(OsgiBeanSource.class)))
+        when(this.mapper.map(isA(Resource.class), isA(OsgiModelSourceSource.class)))
                 .thenAnswer(inv -> {
-                    OsgiBeanSource<Object> source = (OsgiBeanSource<Object>) inv.getArguments()[1];
-                    return source.getBean();
+                    OsgiModelSourceSource<Object> source = (OsgiModelSourceSource<Object>) inv.getArguments()[1];
+                    return source.getModel();
                 });
     }
 
@@ -110,17 +110,17 @@ public class ResourceModelProviderImplTest {
         LinkedList<LookupResult> lookupResults = new LinkedList<>();
         lookupResults.add(this.lookupResult);
 
-        this.osgiBeanSource = mock(OsgiBeanSource.class);
-        doReturn(this.osgiBeanSource)
+        this.osgiModelSourceSource = mock(OsgiModelSourceSource.class);
+        doReturn(this.osgiModelSourceSource)
                 .when(this.lookupResult)
                 .getSource();
 
-        when(this.osgiBeanSource.getBean())
+        when(this.osgiModelSourceSource.getModel())
                 .thenReturn(this.model);
 
         doReturn(this.model.getClass())
-                .when(this.osgiBeanSource)
-                .getBeanType();
+                .when(this.osgiModelSourceSource)
+                .getModelType();
 
         when(this.registry.lookupMostSpecificModels(eq(this.resource)))
                 .thenReturn(lookupResults);
@@ -274,11 +274,11 @@ public class ResourceModelProviderImplTest {
     }
 
     private void verifyResourceIsMappedToModel() {
-        verify(this.mapper).map(eq(this.resource), eq(this.osgiBeanSource));
+        verify(this.mapper).map(eq(this.resource), eq(this.osgiModelSourceSource));
     }
 
     private void verifyResourceIsMappedToModelAgain() {
-        verify(this.mapper, times(2)).map(eq(this.resource), eq(this.osgiBeanSource));
+        verify(this.mapper, times(2)).map(eq(this.resource), eq(this.osgiModelSourceSource));
     }
 
     private void assertResolvedModelIsNull() {
@@ -294,7 +294,7 @@ public class ResourceModelProviderImplTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        OsgiBeanSource<?> modelSource = (OsgiBeanSource<?>) invocation.getArguments()[1];
-        return new Key(resource.getPath(), modelSource.getBeanType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
+        OsgiModelSourceSource<?> modelSource = (OsgiModelSourceSource<?>) invocation.getArguments()[1];
+        return new Key(resource.getPath(), modelSource.getModelType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

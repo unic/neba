@@ -13,8 +13,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */
-package io.neba.core.web;
+package io.neba.spring.web;
 
+import java.lang.reflect.Method;
+import javax.servlet.ServletContext;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,8 +27,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.ServletContext;
-import java.lang.reflect.Method;
 
 import static java.util.Arrays.stream;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -72,7 +73,7 @@ public class WebApplicationContextAdapterTest {
     }
 
     private String signatureOf(Method m) {
-        return  m.getName() + "(" + join(m.getParameterTypes(), ", ") + ")";
+        return  m.getName() + "(" + StringUtils.join(m.getParameterTypes(), ", ") + ")";
     }
 
     private Object[] mockArgs(Method method) {

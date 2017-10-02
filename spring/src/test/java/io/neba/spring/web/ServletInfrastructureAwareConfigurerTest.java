@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-package io.neba.core.web;
+package io.neba.spring.web;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,8 +27,6 @@ import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;

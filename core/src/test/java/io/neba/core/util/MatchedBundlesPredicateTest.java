@@ -34,7 +34,7 @@ public class MatchedBundlesPredicateTest {
 	@Mock
 	private Bundle bundle;
 	@Mock
-	private OsgiBeanSource<?> source;
+	private OsgiModelSourceSource<?> source;
 	
 	private long bundleId = 123L;
 

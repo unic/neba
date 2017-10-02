@@ -19,18 +19,21 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
+import io.neba.api.resourcemodels.ResourceModelFactory;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.cglib.proxy.LazyLoader;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+import org.springframework.cglib.proxy.LazyLoader;
+
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
@@ -52,7 +55,6 @@ public class FieldValueMappingCallback {
     private final Object model;
     private final ValueMap properties;
     private final Resource resource;
-    private final ConfigurableBeanFactory beanFactory;
     private final AnnotatedFieldMappers annotatedFieldMappers;
 
     /**
@@ -61,7 +63,7 @@ public class FieldValueMappingCallback {
      * @param factory  must not be null.
      * @param annotatedFieldMappers  must not be null.
      */
-    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory, AnnotatedFieldMappers annotatedFieldMappers) {
+    public FieldValueMappingCallback(Object model, Resource resource, ResourceModelFactory factory, AnnotatedFieldMappers annotatedFieldMappers) {
         if (model == null) {
             throw new IllegalArgumentException("Constructor parameter model must not be null.");
         }
@@ -78,14 +80,13 @@ public class FieldValueMappingCallback {
         this.model = model;
         this.properties = toValueMap(resource);
         this.resource = resource;
-        this.beanFactory = factory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) factory : null;
         this.annotatedFieldMappers = annotatedFieldMappers;
     }
 
     /**
      * Invoked for each {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData#getMappableFields() mappable field}
      * of a {@link io.neba.api.annotations.ResourceModel} to map the {@link MappedFieldMetaData#getField() corresponding field's}
-     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory, AnnotatedFieldMappers) constructor}.
+     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, ResourceModelFactory, AnnotatedFieldMappers) constructor}.
      *
      * @param metaData must not be <code>null</code>.
      */
@@ -473,7 +474,7 @@ public class FieldValueMappingCallback {
 
     /**
      * Evaluates the {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isPathExpressionPresent() path expression}
-     * of the field (if any) using the {@link #beanFactory bean factory} of the models source bundle.
+     * of the field (if any).
      */
     private String evaluateFieldPath(MappedFieldMetaData fieldMetaData) {
         String path = fieldMetaData.getPath();
@@ -484,19 +485,10 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Delegates the evaluation of expressions such as <code>/content/site/${language}/subpage</code>
-     * to the bean factory.
-     *
-     * @see ConfigurableBeanFactory#resolveEmbeddedValue(String)
+     * FIXME: re-implement not based on the bean factory
      */
     private String evaluatePathExpression(String pathWithExpression) {
         String path = pathWithExpression;
-        if (this.beanFactory != null) {
-            String evaluatedPath = this.beanFactory.resolveEmbeddedValue(pathWithExpression);
-            if (!isBlank(evaluatedPath)) {
-                path = evaluatedPath;
-            }
-        }
         return path;
     }
 

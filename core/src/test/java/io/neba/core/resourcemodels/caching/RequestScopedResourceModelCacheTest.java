@@ -17,6 +17,9 @@
 package io.neba.core.resourcemodels.caching;
 
 import io.neba.core.util.Key;
+import java.util.concurrent.Callable;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletResponse;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -26,11 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.web.context.request.RequestContextHolder;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletResponse;
-import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
@@ -272,13 +271,11 @@ public class RequestScopedResourceModelCacheTest {
 
     @Test
     public void testCacheGracefullyHandlesMissingRequestContextDuringCacheWrite() throws Exception {
-        withoutRequestAttributes();
         putModelInCache();
     }
 
     @Test
     public void testCacheGracefullyHandlesMissingRequestContextDuringCacheRead() throws Exception {
-        withoutRequestAttributes();
         lookupModelFromCache();
         assertModelIsNotInCache();
     }
@@ -343,9 +340,5 @@ public class RequestScopedResourceModelCacheTest {
     private void request(final Callable<Object> callable) throws Exception {
         doAnswer(invocationOnMock -> callable.call()).when(this.chain).doFilter(eq(this.request), eq(this.response));
         this.testee.doFilter(this.request, this.response, this.chain);
-    }
-
-    private void withoutRequestAttributes() {
-        RequestContextHolder.setRequestAttributes(null);
     }
 }

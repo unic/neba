@@ -23,12 +23,12 @@ import org.springframework.beans.factory.BeanFactory;
  * Lifecycle callback for
  * {@link io.neba.api.annotations.ResourceModel resource models}. <br />
  * 
- * {@link #processBeforeMapping(Object, Resource, BeanFactory)} is invoked after
+ * {@link #processBeforeMapping(Object, Resource, ResourceModelFactory)} is invoked after
  * the bean was created and initialized by the {@link BeanFactory} but before
  * all resource properties are mapped. All spring lifecycle callbacks where
  * already called at this point. <br />
  * 
- * {@link #processAfterMapping(Object, Resource, BeanFactory)} is invoked after
+ * {@link #processAfterMapping(Object, Resource, ResourceModelFactory)} is invoked after
  * the bean was created and initialized by the {@link BeanFactory} and all
  * resource properties are mapped. All spring lifecycle callbacks where already
  * called at this point. <br />
@@ -52,7 +52,7 @@ public interface ResourceModelPostProcessor {
      * @return a new resource model overriding the provided resourceModel, or
      *         <code>null</code> if the resource model is not to be changed.
      */
-    <T> T processBeforeMapping(T resourceModel, Resource resource, BeanFactory factory);
+    <T> T processBeforeMapping(T resourceModel, Resource resource, ResourceModelFactory factory);
 
     /**
      * Lifecycle callback invoked after the resource properties are mapped onto
@@ -64,5 +64,5 @@ public interface ResourceModelPostProcessor {
      * @return a new resource model overriding the provided resourceModel, or
      *         <code>null</code> if the resource model is not to be changed.
      */
-    <T> T processAfterMapping(T resourceModel, Resource resource, BeanFactory factory);
+    <T> T processAfterMapping(T resourceModel, Resource resource, ResourceModelFactory factory);
 }

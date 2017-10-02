@@ -17,7 +17,7 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -560,13 +560,13 @@ public class ModelRegistryTest {
     }
 
     private void verifySourcesWhereTestedForValidity() {
-        for (OsgiBeanSource<?> source : this.testee.getBeanSources()) {
+        for (OsgiModelSourceSource<?> source : this.testee.getBeanSources()) {
             verify(source).isValid();
         }
     }
 
     private void assertLookedUpModelTypesAre(Class<?>... types) {
-        assertThat(this.lookedUpModels).extracting("source.beanType").containsOnly((Object[]) types);
+        assertThat(this.lookedUpModels).extracting("source.modelType").containsOnly((Object[]) types);
     }
 
 	private void assertNumberOfLookedUpBeanSourcesIs(int i) {
@@ -652,17 +652,17 @@ public class ModelRegistryTest {
 
     @SuppressWarnings("unchecked")
     private void withModelForType(String resourceType, @SuppressWarnings("rawtypes") Class modelType, String modelBeanName, boolean isValid) {
-        OsgiBeanSource<?> source = mock(OsgiBeanSource.class);
-        when(source.getBeanType()).thenReturn(modelType);
+        OsgiModelSourceSource<?> source = mock(OsgiModelSourceSource.class);
+        when(source.getModelType()).thenReturn(modelType);
         when(source.getBundleId()).thenReturn(this.bundleId);
-        when(source.getBeanName()).thenReturn(modelBeanName);
+        when(source.getModelName()).thenReturn(modelBeanName);
         when(source.isValid()).thenReturn(isValid);
         this.testee.add(new String[] {resourceType}, source);
     }
 
     private void withBeanSourcesForAllResourceModels() {
         for (ResourceModel model : this.resourceModelAnnotations) {
-            OsgiBeanSource<?> source = mock(OsgiBeanSource.class);
+            OsgiModelSourceSource<?> source = mock(OsgiModelSourceSource.class);
             when(source.getBundleId()).thenReturn(this.bundleId);
             this.testee.add(model.types(), source);
         }

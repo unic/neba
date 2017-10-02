@@ -15,6 +15,10 @@
  */
 package io.neba.core.logviewer;
 
+import io.neba.core.Eventual;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
 import org.eclipse.jetty.websocket.api.Session;
 import org.junit.After;
 import org.junit.Before;
@@ -22,19 +26,19 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
 
 import static java.io.File.createTempFile;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.io.FileUtils.listFiles;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
  */
-public class TailSocketTest extends TailTests {
+public class TailSocketTest extends TailTests implements Eventual {
     private Collection<File> availableLogFiles;
 
     @Mock

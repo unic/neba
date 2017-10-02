@@ -20,7 +20,7 @@ import io.neba.api.annotations.Reference;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
 import io.neba.core.util.MatchedBundlesPredicate;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,13 +37,13 @@ import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
@@ -53,7 +53,7 @@ import static java.util.concurrent.Executors.newScheduledThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
- * Contains {@link OsgiBeanSource model sources} associated to
+ * Contains {@link OsgiModelSourceSource model sources} associated to
  * {@link MappableTypeHierarchy mappable types} and the corresponding logic to
  * lookup these relationships.
  *
@@ -116,12 +116,12 @@ public class ModelRegistry {
      *         <code>null</code>, or a collection representing the models
      *         compatible to the given type.
      */
-    private static Collection<OsgiBeanSource<?>> filter(Collection<OsgiBeanSource<?>> sources, Class<?> compatibleType) {
-        Collection<OsgiBeanSource<?>> compatibleSources = sources;
+    private static Collection<OsgiModelSourceSource<?>> filter(Collection<OsgiModelSourceSource<?>> sources, Class<?> compatibleType) {
+        Collection<OsgiModelSourceSource<?>> compatibleSources = sources;
         if (sources != null && compatibleType != null) {
             compatibleSources = new ArrayList<>(sources.size());
-            for (OsgiBeanSource<?> source : sources) {
-                if (compatibleType.isAssignableFrom(source.getBeanType())) {
+            for (OsgiModelSourceSource<?> source : sources) {
+                if (compatibleType.isAssignableFrom(source.getModelType())) {
                     compatibleSources.add(source);
                 }
             }
@@ -134,15 +134,15 @@ public class ModelRegistry {
      * @param beanName can be <code>null</code>.
      * @return the original collection if sources or beanName are
      *         <code>null</code>, or a collection representing the models
-     *         who's {@link io.neba.core.util.OsgiBeanSource#getBeanName()} bean name}
+     *         who's {@link OsgiModelSourceSource#getModelName()} bean name}
      *         is equal to the given bean name.
      */
-    private static Collection<OsgiBeanSource<?>> filter(Collection<OsgiBeanSource<?>> sources, String beanName) {
-        Collection<OsgiBeanSource<?>> sourcesWithBeanName = sources;
+    private static Collection<OsgiModelSourceSource<?>> filter(Collection<OsgiModelSourceSource<?>> sources, String beanName) {
+        Collection<OsgiModelSourceSource<?>> sourcesWithBeanName = sources;
         if (sources != null && beanName != null) {
             sourcesWithBeanName = new ArrayList<>(sources.size());
-            for (OsgiBeanSource<?> source : sources) {
-                if (beanName.equals(source.getBeanName())) {
+            for (OsgiModelSourceSource<?> source : sources) {
+                if (beanName.equals(source.getModelName())) {
                     sourcesWithBeanName.add(source);
                 }
             }
@@ -150,7 +150,7 @@ public class ModelRegistry {
         return sourcesWithBeanName;
     }
 
-    private final ConcurrentDistinctMultiValueMap<String, OsgiBeanSource<?>>
+    private final ConcurrentDistinctMultiValueMap<String, OsgiModelSourceSource<?>>
             typeNameToBeanSourcesMap = new ConcurrentDistinctMultiValueMap<>();
     private final ConcurrentDistinctMultiValueMap<Key, LookupResult>
             lookupCache = new ConcurrentDistinctMultiValueMap<>();
@@ -334,7 +334,7 @@ public class ModelRegistry {
     public void removeResourceModels(final Bundle bundle) {
         this.logger.info("Removing resource models of bundle " + displayNameOf(bundle) + "...");
         MatchedBundlesPredicate sourcesWithBundles = new MatchedBundlesPredicate(bundle);
-        for (Collection<OsgiBeanSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
+        for (Collection<OsgiModelSourceSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
             CollectionUtils.filter(values, sourcesWithBundles);
         }
         clearLookupCaches();
@@ -346,9 +346,9 @@ public class ModelRegistry {
      * @return a shallow copy of all registered sources for models, never
      *         <code>null</code> but rather an empty list.
      */
-    public List<OsgiBeanSource<?>> getBeanSources() {
-        Collection<Collection<OsgiBeanSource<?>>> sources = this.typeNameToBeanSourcesMap.values();
-        List<OsgiBeanSource<?>> linearizedSources = new LinkedList<>();
+    public List<OsgiModelSourceSource<?>> getBeanSources() {
+        Collection<Collection<OsgiModelSourceSource<?>>> sources = this.typeNameToBeanSourcesMap.values();
+        List<OsgiModelSourceSource<?>> linearizedSources = new LinkedList<>();
         sources.forEach(linearizedSources::addAll);
         return linearizedSources;
     }
@@ -359,7 +359,7 @@ public class ModelRegistry {
      * @param types  must not be <code>null</code>.
      * @param source must not be <code>null</code>.
      */
-    public void add(String[] types, OsgiBeanSource<?> source) {
+    public void add(String[] types, OsgiModelSourceSource<?> source) {
         for (String resourceType : types) {
             this.typeNameToBeanSourcesMap.put(resourceType, source);
         }
@@ -369,22 +369,22 @@ public class ModelRegistry {
     /**
      * @return all type -&gt; model mappings.
      */
-    public Map<String, Collection<OsgiBeanSource<?>>> getTypeMappings() {
+    public Map<String, Collection<OsgiModelSourceSource<?>>> getTypeMappings() {
         return this.typeNameToBeanSourcesMap.getContents();
     }
 
     /**
-     * Checks whether the {@link OsgiBeanSource sources} of all resource models
-     * are still {@link io.neba.core.util.OsgiBeanSource#isValid() valid}. If not,
+     * Checks whether the {@link OsgiModelSourceSource sources} of all resource models
+     * are still {@link OsgiModelSourceSource#isValid() valid}. If not,
      * the corresponding model(s) are removed from the registry.
      */
     public void removeInvalidReferences() {
         if (this.barrier.tryBegin()) {
             this.logger.debug("Checking for references to beans from inactive bundles...");
             try {
-                for (Collection<OsgiBeanSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
-                    for (Iterator<OsgiBeanSource<?>> it = values.iterator(); it.hasNext(); ) {
-                        final OsgiBeanSource<?> source = it.next();
+                for (Collection<OsgiModelSourceSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
+                    for (Iterator<OsgiModelSourceSource<?>> it = values.iterator(); it.hasNext(); ) {
+                        final OsgiModelSourceSource<?> source = it.next();
                         if (!source.isValid()) {
                             this.logger.info("Reference to " + source + " is invalid, removing.");
                             it.remove();
@@ -441,7 +441,7 @@ public class ModelRegistry {
     }
 
     /**
-     * Finds all {@link OsgiBeanSource bean sources} representing models for the given
+     * Finds all {@link OsgiModelSourceSource bean sources} representing models for the given
      * {@link Resource}.
      *
      * @param resource       must not be <code>null</code>.
@@ -454,8 +454,8 @@ public class ModelRegistry {
     private Collection<LookupResult> resolveBeanSources(Resource resource, Class<?> compatibleType, boolean resolveMostSpecific) {
         Collection<LookupResult> sources = new ArrayList<>(64);
         for (final String resourceType : mappableTypeHierarchyOf(resource)) {
-            Collection<OsgiBeanSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
-            Collection<OsgiBeanSource<?>> sourcesForCompatibleType = filter(allSourcesForType, compatibleType);
+            Collection<OsgiModelSourceSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
+            Collection<OsgiModelSourceSource<?>> sourcesForCompatibleType = filter(allSourcesForType, compatibleType);
             if (sourcesForCompatibleType != null && !sourcesForCompatibleType.isEmpty()) {
                 sources.addAll(sourcesForCompatibleType.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
                 if (resolveMostSpecific) {
@@ -467,8 +467,8 @@ public class ModelRegistry {
     }
 
     /**
-     * Finds all {@link OsgiBeanSource bean sources} representing models for the given
-     * {@link Resource} whos {@link io.neba.core.util.OsgiBeanSource#getBeanName() bean name}
+     * Finds all {@link OsgiModelSourceSource bean sources} representing models for the given
+     * {@link Resource} whos {@link OsgiModelSourceSource#getModelName() bean name}
      * matches the given bean name.
      *
      * @param resource must not be <code>null</code>.
@@ -478,8 +478,8 @@ public class ModelRegistry {
     private Collection<LookupResult> resolveMostSpecificBeanSources(Resource resource, String beanName) {
         Collection<LookupResult> sources = new ArrayList<>();
         for (final String resourceType : mappableTypeHierarchyOf(resource)) {
-            Collection<OsgiBeanSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
-            Collection<OsgiBeanSource<?>> sourcesWithMatchingBeanName = filter(allSourcesForType, beanName);
+            Collection<OsgiModelSourceSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
+            Collection<OsgiModelSourceSource<?>> sourcesWithMatchingBeanName = filter(allSourcesForType, beanName);
             if (sourcesWithMatchingBeanName != null && !sourcesWithMatchingBeanName.isEmpty()) {
                 sources.addAll(sourcesWithMatchingBeanName.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
                 break;

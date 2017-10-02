@@ -16,11 +16,12 @@
 
 package io.neba.core.resourcemodels.metadata;
 
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.Bundle;
@@ -37,16 +38,17 @@ import static org.springframework.util.ClassUtils.getUserClass;
  *
  * @author Olaf Otto
  */
-@Service
+@Service(ResourceModelMetaDataRegistrar.class)
+@Component
 public class ResourceModelMetaDataRegistrar {
     /**
      * @author Olaf Otto
      */
     private static class ResourceModelMetadataHolder {
-        private final OsgiBeanSource<?> source;
+        private final OsgiModelSourceSource<?> source;
         private final ResourceModelMetaData metaData;
 
-        private ResourceModelMetadataHolder(OsgiBeanSource<?> source, ResourceModelMetaData metaData) {
+        private ResourceModelMetadataHolder(OsgiModelSourceSource<?> source, ResourceModelMetaData metaData) {
             this.source = source;
             this.metaData = metaData;
         }
@@ -98,12 +100,12 @@ public class ResourceModelMetaDataRegistrar {
      * @param beanSource must not be <code>null</code>.
      * @return the newly created meta data. Never <code>null</code>.
      */
-    public ResourceModelMetaData register(OsgiBeanSource<?> beanSource) {
+    public ResourceModelMetaData register(OsgiModelSourceSource<?> beanSource) {
         if (beanSource == null) {
             throw new IllegalArgumentException("method parameter beanSource must not be null");
         }
 
-        Class<?> beanType = beanSource.getBeanType();
+        Class<?> beanType = beanSource.getModelType();
         ResourceModelMetaData modelMetaData = new ResourceModelMetaData(beanType);
         ResourceModelMetadataHolder holder = new ResourceModelMetadataHolder(beanSource, modelMetaData);
 
@@ -127,7 +129,7 @@ public class ResourceModelMetaDataRegistrar {
         Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
         Iterator<Map.Entry<Class<?>, ResourceModelMetadataHolder>> it = newCache.entrySet().iterator();
         while (it.hasNext()) {
-            OsgiBeanSource<?> source = it.next().getValue().source;
+            OsgiModelSourceSource<?> source = it.next().getValue().source;
             if (source.getBundleId() == bundle.getBundleId()) {
                 it.remove();
             }

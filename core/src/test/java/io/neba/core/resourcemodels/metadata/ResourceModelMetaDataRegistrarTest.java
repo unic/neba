@@ -18,7 +18,7 @@ package io.neba.core.resourcemodels.metadata;
 
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -160,8 +160,8 @@ public class ResourceModelMetaDataRegistrarTest {
 
     private void addModelType(Class<?> modelType) {
         @SuppressWarnings("unchecked")
-        OsgiBeanSource<Object> source = mock(OsgiBeanSource.class);
-        doReturn(modelType).when(source).getBeanType();
+        OsgiModelSourceSource<Object> source = mock(OsgiModelSourceSource.class);
+        doReturn(modelType).when(source).getModelType();
         doReturn(this.bundleId).when(source).getBundleId();
         this.testee.register(source);
     }

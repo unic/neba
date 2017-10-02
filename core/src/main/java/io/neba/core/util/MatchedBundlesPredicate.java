@@ -27,7 +27,7 @@ import static org.springframework.util.Assert.notNull;
  * {@link org.apache.commons.collections.CollectionUtils#filter(java.util.Collection, Predicate)}
  * to remove the element it.
  * 
- * Works only on collections of {@link OsgiBeanSource}.
+ * Works only on collections of {@link OsgiModelSourceSource}.
  * 
  * @author Olaf Otto
  */
@@ -42,7 +42,7 @@ public class MatchedBundlesPredicate implements Predicate {
 
     @Override
     public boolean evaluate(Object object) {
-        boolean keep = ((OsgiBeanSource<?>) object).getBundleId() != bundle.getBundleId();
+        boolean keep = ((OsgiModelSourceSource<?>) object).getBundleId() != bundle.getBundleId();
         if (!keep) {
             ++filteredElements;
         }

@@ -20,7 +20,7 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -74,7 +74,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
                     resource.getPath() + " to " + target.getName() + ": " + join(models, ", ") + ".");
         }
 
-        OsgiBeanSource<?> source = models.iterator().next().getSource();
+        OsgiModelSourceSource<?> source = models.iterator().next().getSource();
 
         T model = this.caches.lookup(resource, source);
         if (model != null) {

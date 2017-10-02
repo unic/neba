@@ -1,24 +1,29 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p/>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p/>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p/>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p/>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.mapping;
 
+import io.neba.api.resourcemodels.ResourceModelFactory;
 import io.neba.api.resourcemodels.ResourceModelPostProcessor;
-import io.neba.core.resourcemodels.metadata.*;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
+import io.neba.core.resourcemodels.metadata.MethodMetaData;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
+import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
+import io.neba.core.util.OsgiModelSourceSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
@@ -30,16 +35,23 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.NoOp;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -57,7 +69,7 @@ public class ResourceToModelMapperTest {
     @Mock
     private ValueMap valueMap;
     @Mock
-    private BeanFactory factory;
+    private ResourceModelFactory factory;
     @Mock
     private ModelProcessor modelProcessor;
     @Mock
@@ -321,10 +333,10 @@ public class ResourceToModelMapperTest {
 
     @SuppressWarnings("unchecked")
     private void mapResourceToModel() {
-        OsgiBeanSource<TestModel> source = mock(OsgiBeanSource.class);
-        when(source.getBean()).thenReturn(this.model);
+        OsgiModelSourceSource<TestModel> source = mock(OsgiModelSourceSource.class);
+        when(source.getModel()).thenReturn(this.model);
         when(source.getFactory()).thenReturn(this.factory);
-        doReturn(this.beanType).when(source).getBeanType();
+        doReturn(this.beanType).when(source).getModelType();
         this.mappedModel = this.testee.map(this.resource, source);
     }
 }

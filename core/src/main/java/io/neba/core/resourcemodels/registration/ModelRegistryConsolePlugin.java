@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -142,15 +142,15 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         writer.write("<table id=\"plugin_table\" class=\"nicetable tablesorter noauto\">");
         writer.write("<thead><tr><th>Type</th><th>Model type</th><th>Bean name</th><th>Source bundle</th></tr></thead>");
         writer.write("<tbody>");
-        for (Entry<String, Collection<OsgiBeanSource<?>>> entry : this.registry.getTypeMappings().entrySet()) {
-            for (OsgiBeanSource<?> source : entry.getValue()) {
+        for (Entry<String, Collection<OsgiModelSourceSource<?>>> entry : this.registry.getTypeMappings().entrySet()) {
+            for (OsgiModelSourceSource<?> source : entry.getValue()) {
                 String sourceBundleName = displayNameOf(source.getBundle());
 
-                writer.write("<tr data-modeltype=\"" + source.getBeanType().getName() + "\">");
+                writer.write("<tr data-modeltype=\"" + source.getModelType().getName() + "\">");
                 String resourceType = buildCrxDeLinkToResourceType(req, entry.getKey());
                 writer.write("<td>" + resourceType + "</td>");
-                writer.write("<td>" + source.getBeanType().getName() + "</td>");
-                writer.write("<td>" + source.getBeanName() + "</td>");
+                writer.write("<td>" + source.getModelType().getName() + "</td>");
+                writer.write("<td>" + source.getModelName() + "</td>");
                 writer.write("<td><a href=\"bundles/" + source.getBundleId() + "\" " +
                         "title=\"" + sourceBundleName + "\">" + source.getBundleId() + "</a></td>");
                 writer.write("</tr>");
@@ -188,8 +188,8 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
     private void provideAllModelTypes(HttpServletResponse res) throws IOException {
         Set<String> typeNames = new HashSet<>();
-        for (OsgiBeanSource<?> source : this.registry.getBeanSources()) {
-            for (Class<?> type : hierarchyOf(source.getBeanType())) {
+        for (OsgiModelSourceSource<?> source : this.registry.getBeanSources()) {
+            for (Class<?> type : hierarchyOf(source.getModelType())) {
                 if (type == Object.class) {
                     continue;
                 }
@@ -251,7 +251,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         String modelTypePrefix = req.getParameter(PARAM_TYPENAME);
         String resourcePath = req.getParameter(PARAM_PATH);
 
-        Collection<OsgiBeanSource<?>> types;
+        Collection<OsgiModelSourceSource<?>> types;
         if (isEmpty(resourcePath)) {
             types = this.registry.getBeanSources();
         } else {
@@ -263,14 +263,14 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
         boolean exactMatch = !isEmpty(typeNameCandidate) && isUpperCase(typeNameCandidate.charAt(0));
 
-        for (OsgiBeanSource<?> source : types) {
+        for (OsgiModelSourceSource<?> source : types) {
             if (modelTypePrefix == null) {
-                matchingModelTypeNames.add(source.getBeanType().getName());
+                matchingModelTypeNames.add(source.getModelType().getName());
             } else {
-                for (Class<?> type : hierarchyOf(source.getBeanType())) {
+                for (Class<?> type : hierarchyOf(source.getModelType())) {
                     String typeName = type.getName();
                     if ((exactMatch ? typeName.equals(modelTypePrefix) : typeName.startsWith(modelTypePrefix))) {
-                        matchingModelTypeNames.add(source.getBeanType().getName());
+                        matchingModelTypeNames.add(source.getModelType().getName());
                         break;
                     }
                 }
@@ -280,8 +280,8 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         res.getWriter().write(toJson(matchingModelTypeNames));
     }
 
-    private Collection<OsgiBeanSource<?>> resolveModelTypesFor(String resourcePath) {
-        Collection<OsgiBeanSource<?>> types = new ArrayList<>(64);
+    private Collection<OsgiModelSourceSource<?>> resolveModelTypesFor(String resourcePath) {
+        Collection<OsgiModelSourceSource<?>> types = new ArrayList<>(64);
 
         if (!isEmpty(resourcePath)) {
             ResourceResolver resolver = getResourceResolver();

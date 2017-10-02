@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.beans.factory.BeanFactory;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -82,9 +82,6 @@ public class ModelProcessorTest {
             preMappingWasCalled();
         }
     }
-
-    @Mock
-    private BeanFactory factory;
     @Mock
     private Resource resource;
 
@@ -113,7 +110,6 @@ public class ModelProcessorTest {
     public void testProcessBeforeMappingRequiresNonNullModel() throws Exception {
         this.testee.processBeforeMapping(this.metadata, null);
     }
-
 
     @Test(expected = IllegalArgumentException.class)
     public void testProcessAfterMappingRequiresNonNullMetaData() throws Exception {

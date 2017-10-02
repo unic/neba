@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSourceSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -81,8 +81,8 @@ public class ModelRegistryConsolePluginTest {
     private URL resourceUrl;
     private Writer internalWriter;
     private String renderedResponse;
-    private Map<String, Collection<OsgiBeanSource<?>>> typeMappings;
-    private Collection<OsgiBeanSource<?>> beanSources;
+    private Map<String, Collection<OsgiModelSourceSource<?>>> typeMappings;
+    private Collection<OsgiModelSourceSource<?>> beanSources;
 
     @InjectMocks
     private ModelRegistryConsolePlugin testee;
@@ -287,7 +287,7 @@ public class ModelRegistryConsolePluginTest {
 
     private void withPathResourceLookedUp() {
         Set<LookupResult> lookupResults = new HashSet<>();
-        for (OsgiBeanSource<?> source : this.beanSources) {
+        for (OsgiModelSourceSource<?> source : this.beanSources) {
             LookupResult result = mock(LookupResult.class);
             doReturn(source).when(result).getSource();
             doReturn(pathResource.getResourceType()).when(result).getResourceType();
@@ -382,11 +382,11 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withRegisteredModel(String typeName, Class<Model> modelType, long bundleId, String beanName) {
-        List<OsgiBeanSource<?>> sources = new ArrayList<>();
-        OsgiBeanSource<?> source = mock(OsgiBeanSource.class);
-        doReturn(modelType).when(source).getBeanType();
+        List<OsgiModelSourceSource<?>> sources = new ArrayList<>();
+        OsgiModelSourceSource<?> source = mock(OsgiModelSourceSource.class);
+        doReturn(modelType).when(source).getModelType();
         doReturn(bundleId).when(source).getBundleId();
-        doReturn(beanName).when(source).getBeanName();
+        doReturn(beanName).when(source).getModelName();
         doReturn(this.bundle).when(source).getBundle();
         sources.add(source);
         this.beanSources.add(source);

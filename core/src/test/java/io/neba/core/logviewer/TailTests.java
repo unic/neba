@@ -15,13 +15,6 @@
  */
 package io.neba.core.logviewer;
 
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,14 +22,23 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
-import static java.lang.System.currentTimeMillis;
-import static java.lang.Thread.*;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
+
+import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
+import static java.lang.Thread.yield;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -136,34 +138,4 @@ public abstract class TailTests {
         }).when(getRemote()).sendBytes(isA(ByteBuffer.class));
     }
 
-    /**
-     * Expects the execution of the provided runnable to stop failing within ten seconds, trying every 100 milliseconds.
-     *
-     * @param runnable not null. Expected to throw an exception should the embodied assertions fail.
-     */
-    public void eventually(Runnable runnable) {
-        long max = SECONDS.toMillis(10),
-                waited = 0,
-                interval = 100;
-
-        Throwable issue = null;
-
-        while (waited < max) {
-            try {
-                runnable.run();
-                return;
-            } catch (Throwable t) {
-                issue = t;
-                long timeBeforeSleep = currentTimeMillis();
-                try {
-                    sleep(interval);
-                } catch (InterruptedException e1) {
-                    // continue
-                }
-                waited += (currentTimeMillis() - timeBeforeSleep);
-            }
-        }
-
-        throw new AssertionError("Unable to satisfy within " + MILLISECONDS.toSeconds(max) + " seconds.", issue);
-    }
 }

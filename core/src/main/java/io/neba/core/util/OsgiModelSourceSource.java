@@ -1,24 +1,25 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.util;
 
+import io.neba.api.resourcemodels.ResourceModelFactory;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.osgi.framework.Bundle;
-import org.springframework.beans.factory.BeanFactory;
+
 
 import static org.osgi.framework.Bundle.ACTIVE;
 
@@ -29,22 +30,22 @@ import static org.osgi.framework.Bundle.ACTIVE;
  * 
  * @author Olaf Otto
  */
-public class OsgiBeanSource<T> {
-	private final String beanName;
-	private final BeanFactory factory;
+public class OsgiModelSourceSource<T> {
+	private final String modelName;
+	private final ResourceModelFactory factory;
 	private final long bundleId;
     private final int hashCode;
-    private final Class<?> beanType;
+    private final Class<?> modelType;
     private final Bundle bundle;
 
     /**
-     * @param beanName must not be <code>null</code>.
+     * @param modelName must not be <code>null</code>.
      * @param factory must not be <code>null</code>.
 	 * @param bundle must not be <code>null</code>.
      */
-    public OsgiBeanSource(String beanName, BeanFactory factory, Bundle bundle) {
-        if (beanName == null) {
-            throw new IllegalArgumentException("Method argument beanName must not be null.");
+    public OsgiModelSourceSource(String modelName, ResourceModelFactory factory, Bundle bundle) {
+        if (modelName == null) {
+            throw new IllegalArgumentException("Method argument modelName must not be null.");
         }
         if (factory == null) {
             throw new IllegalArgumentException("Method argument factory must not be null.");
@@ -53,36 +54,36 @@ public class OsgiBeanSource<T> {
             throw new IllegalArgumentException("Method argument bundle must not be null.");
         }
 
-        this.beanName = beanName;
+        this.modelName = modelName;
 		this.factory = factory;
 		this.bundleId = bundle.getBundleId();
         this.bundle = bundle;
         // Referencing the bean type is safe: It either stems from the source bundle, or a bundle the source bundle depends on
         // via an import-package relationship. Thus, if the type changes, the source bundle is re-loaded as well thus
         // causing this bean source to be re-created.
-        this.beanType = factory.getType(beanName);
-		this.hashCode = new HashCodeBuilder().append(beanName).append(bundleId).toHashCode();
+        this.modelType = factory.getType(modelName);
+		this.hashCode = new HashCodeBuilder().append(modelName).append(bundleId).toHashCode();
 	}
 	
 	@SuppressWarnings("unchecked")
-    public T getBean() {
-		return (T) this.factory.getBean(this.getBeanName());
+    public T getModel() {
+		return (T) this.factory.getModel(this.getModelName());
 	}
 	
-	public Class<?> getBeanType() {
-		return this.beanType;
+	public Class<?> getModelType() {
+		return this.modelType;
 	}
 
 	public long getBundleId() {
 		return this.bundleId;
 	}
 
-	public BeanFactory getFactory() {
+	public ResourceModelFactory getFactory() {
 		return this.factory;
 	}
 
-    public String getBeanName() {
-        return beanName;
+    public String getModelName() {
+        return modelName;
     }
 
     /**
@@ -94,7 +95,7 @@ public class OsgiBeanSource<T> {
 
 	@Override
 	public String toString() {
-        return "Bean " + '"' + this.getBeanName() + '"' + " from bundle with id " + this.bundleId;
+        return "Bean " + '"' + this.getModelName() + '"' + " from bundle with id " + this.bundleId;
 	}
 	
 	@Override
@@ -111,12 +112,12 @@ public class OsgiBeanSource<T> {
 	        return false;
 	    }
 	    
-        OsgiBeanSource<?> other = (OsgiBeanSource<?>) obj;
+        OsgiModelSourceSource<?> other = (OsgiModelSourceSource<?>) obj;
 
-        // Why are bundleId and beanName compared, but not simply the bean type?
+        // Why are bundleId and modelName compared, but not simply the bean type?
         // Theoretically, it is possible to register the same type in two different OSGi bundles
         return this.bundleId == other.bundleId && 
-               this.beanName.equals(other.beanName);
+               this.modelName.equals(other.modelName);
 	}
 
     /**
