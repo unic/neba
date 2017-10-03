@@ -24,10 +24,6 @@ import org.osgi.framework.BundleException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import static io.neba.core.util.BundleUtil.displayNameOf;
-import static org.osgi.framework.Bundle.ACTIVE;
-import static org.osgi.framework.Bundle.STARTING;
-
 /**
  * When an application context activation fails, NEBA removes any previously
  * registered resource models, self tests, MVC infrastructure and the like, since these
@@ -66,7 +62,7 @@ public class ContextFailedHandler extends ContextShutdownHandler
                 bundle.stop();
             }
         } catch (BundleException e) {
-            throw new RuntimeException("Unable to stop bundle " + BundleUtil.displayNameOf(bundle) + ".", e);
+            throw new RuntimeException("Unable to stop bundle " + bundle.getSymbolicName() + ".", e);
         }
     }
 

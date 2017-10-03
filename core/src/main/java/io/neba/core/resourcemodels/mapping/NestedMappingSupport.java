@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p/>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p/>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p/>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p/>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.mapping;
 
@@ -97,7 +97,7 @@ public class NestedMappingSupport {
                 i += other.i;
             }
 
-            public int decrement() {
+            int decrement() {
                 --i;
                 return i;
             }
@@ -117,7 +117,7 @@ public class NestedMappingSupport {
      *         yet. The provided mapping <em>must</em> only be executed if this emthod returns <code>null</code>.
      *         Otherwise, the execution results in an infinite loop.
      */
-    public <T> Mapping<T> begin(Mapping<T> mapping) {
+    <T> Mapping<T> begin(Mapping<T> mapping) {
         notNull(mapping, "Method argument mapping must not be null.");
         OngoingMappings ongoingMappings = getOrCreateMappings();
         @SuppressWarnings("unchecked")
@@ -172,7 +172,7 @@ public class NestedMappingSupport {
      * @return An unsafe view of the ongoing mappings. Modifications to the returned set will modify
      * the state of this instance. Never null.
      */
-    public Set<Mapping> getOngoingMappings() {
+    Set<Mapping> getOngoingMappings() {
         return getOrCreateMappings().getMappings();
     }
 
@@ -181,7 +181,7 @@ public class NestedMappingSupport {
      * @return whether there is an ongoing (parent) mapping for the resource model represented by the provided
      * meta data.
      */
-    public boolean hasOngoingMapping(ResourceModelMetaData metadata) {
+    boolean hasOngoingMapping(ResourceModelMetaData metadata) {
         notNull(metadata, "Method argument metadata must not be null.");
         return getOrCreateMappings().contains(metadata);
     }

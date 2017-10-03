@@ -16,6 +16,8 @@
 
 package io.neba.api.configuration;
 
+import javax.annotation.Nonnull;
+
 /**
  * A source for values of variables of the form
  * <pre>${key}</pre>.
@@ -30,5 +32,5 @@ public interface PlaceholderVariableResolver {
      * @return the resolved value, or null if no value can be resolved for the 
      * variable name.
      */
-	String resolve(String variableName);
+	String resolve(@Nonnull String variableName);
 }

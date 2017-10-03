@@ -16,6 +16,8 @@
 package io.neba.api.resourcemodels;
 
 import java.util.NoSuchElementException;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * <p>
@@ -40,8 +42,8 @@ import java.util.NoSuchElementException;
  * }
  * </pre>
  * <p>
- *     This interface <em>may</em> also be used to explicitly lazy-load collection-typed resource model relationships, such as
- *     {@link io.neba.api.annotations.Children} or {@link io.neba.api.annotations.Reference} collections:
+ * This interface <em>may</em> also be used to explicitly lazy-load collection-typed resource model relationships, such as
+ * {@link io.neba.api.annotations.Children} or {@link io.neba.api.annotations.Reference} collections:
  * </p>
  * <pre>
  * &#64;{@link io.neba.api.annotations.ResourceModel}(types = "...")
@@ -51,13 +53,13 @@ import java.util.NoSuchElementException;
  * }
  * </pre>
  * <p>
- *     However, collection-typed relationships are automatically provided as lazy-loading proxies, thus there usually is no
- *     reason to make them {@link io.neba.api.resourcemodels.Optional}.
+ * However, collection-typed relationships are automatically provided as lazy-loading proxies, thus there usually is no
+ * reason to make them {@link io.neba.api.resourcemodels.Optional}.
  * </p>
  *
- * @deprecated Use {@link Lazy} instead.
  * @param <T> the type of the lazy-loaded object.
  * @author Olaf Otto
+ * @deprecated Use {@link Lazy} instead.
  */
 @Deprecated
 public interface Optional<T> {
@@ -65,12 +67,14 @@ public interface Optional<T> {
      * @return the non-<code>null</code> value, or throws a {@link java.util.NoSuchElementException} if no value exists.
      * @throws NoSuchElementException if no value exists.
      */
+    @Nonnull
     T get() throws NoSuchElementException;
 
     /**
      * @param defaultValue can be <code>null</code>.
      * @return the value if non-<code>null</code>, otherwise the default value, which can be <code>null</code>.
      */
+    @CheckForNull
     T orElse(T defaultValue);
 
     /**

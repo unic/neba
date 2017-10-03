@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -97,7 +97,7 @@ public class ResourceModelProviderImpl implements ResourceModelProvider {
             if (includeBaseTypes || !isMappedFromGenericBaseType(lookupResult)) {
 
                 @SuppressWarnings("unchecked")
-                OsgiModelSourceSource<T> source = (OsgiModelSourceSource<T>) lookupResult.getSource();
+                OsgiModelSource<T> source = (OsgiModelSource<T>) lookupResult.getSource();
 
                 model = this.caches.lookup(resource, source);
                 if (model != null) {

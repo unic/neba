@@ -43,7 +43,7 @@ public class ModelProcessor {
      * @param metaData must not be <code>null</code>.
      * @param model must not be <code>null</code>.
      */
-    public <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
+    <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
         if (metaData == null) {
             throw new IllegalArgumentException("Method argument metaData must not be null.");
         }
@@ -68,7 +68,7 @@ public class ModelProcessor {
      * @param metaData must not be <code>null</code>.
      * @param model must not be <code>null</code>.
      */
-    public <T> void processBeforeMapping(ResourceModelMetaData metaData, T model) {
+    <T> void processBeforeMapping(ResourceModelMetaData metaData, T model) {
         if (metaData == null) {
             throw new IllegalArgumentException("Method argument metaData must not be null.");
         }

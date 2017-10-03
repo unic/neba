@@ -17,6 +17,9 @@
 package io.neba.api.tags;
 
 import io.neba.api.resourcemodels.ResourceModelProvider;
+import javax.annotation.CheckForNull;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -24,11 +27,9 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 import tldgen.Tag;
 import tldgen.TagAttribute;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
 
 import static io.neba.api.Constants.MODEL;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 /**
@@ -64,14 +65,14 @@ public final class DefineObjectsTag extends TagSupport {
             "models will always include generic base models, regardless of whether " +
             "includeGenericBaseTypes is false.",
             runtimeValueAllowed = true)
-    public void setUseModelNamed(String name) {
+    public void setUseModelNamed(@CheckForNull String name) {
         this.modelBeanName = name;
     }
 
     @TagAttribute(description = "The variable name to publish the model under. " +
             "Defaults to the default model name 'm' if not defined, null or empty."  ,
             runtimeValueAllowed = true)
-    public void setVar(String var) {
+    public void setVar(@CheckForNull String var) {
         this.var = var;
     }
 
@@ -107,11 +108,11 @@ public final class DefineObjectsTag extends TagSupport {
         return slingRequest.getResource();
     }
 
-    protected SlingBindings getBindings() {
+    private SlingBindings getBindings() {
         return (SlingBindings) this.pageContext.getRequest().getAttribute(SlingBindings.class.getName());
     }
 
-    protected SlingScriptHelper getScriptHelper() {
+    private SlingScriptHelper getScriptHelper() {
         SlingBindings bindings = getBindings();
 
         if (bindings == null) {

@@ -1,12 +1,12 @@
 /**
  * Copyright 2013 the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 the "License";
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
-
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,12 +15,13 @@
  **/
 package io.neba.api.resourcemodels;
 
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
 
 /**
  * OSGi services implementing this interface may customize the mapping of arbitrary fields during
@@ -93,18 +94,21 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
          * or <code>null</code> if no value could be resolved for the field. This value
          * has not been set to the {@link #getField() field} at this point.
          */
+        @Nonnull
         FieldType getResolvedValue();
 
         /**
          * @return The instance of {@link #getAnnotationType() the annotation this mapper is registered for}.
          *         Never <code>null</code>.
          */
+        @Nonnull
         AnnotationType getAnnotation();
 
         /**
          * @return The mapped model. At this point, the mapping is still incomplete and
          *         no post-processors have been invoked on the model. Never <code>null</code>.
          */
+        @Nonnull
         Object getModel();
 
         /**
@@ -113,12 +117,14 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
          *          but use the {@link #getFieldType() provided field type} instead, as these types may be different, for instance in case
          *          of {@link io.neba.api.resourcemodels.Optional} fields.
          */
+        @Nonnull
         Field getField();
 
         /**
          * @return All annotations (including meta-annotations, i.e. annotations of annotations) present on the field.
          *         Never <code>null</code>.
          */
+        @Nonnull
         Map<Class<? extends Annotation>, Annotation> getAnnotationsOfField();
 
         /**
@@ -127,12 +133,14 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
          *         are not applied optional fields but to the subsequent mapping, when the {@link Optional#get() optional value is actually mapped.
          *         Never <code>null</code>.
          */
+        @Nonnull
         Class<?> getFieldType();
 
         /**
          * @return the generic type parameter of the {@link #getFieldType() field type}, or <code>null</code> if
          *         no such parameter exists.
          */
+        @CheckForNull
         Class<?> getFieldTypeParameter();
 
         /**
@@ -140,11 +148,13 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
          *         field name or {@link io.neba.api.annotations.Path path annotation}. Placeholders
          *         in the path are resolved at this point. Never <code>null</code>.
          */
+        @Nonnull
         String getRepositoryPath();
 
         /**
          * @return The resource that is mapped to the model. Never <code>null</code>, but may be a synthetic resource.
          */
+        @Nonnull
         Resource getResource();
 
         /**
@@ -152,17 +162,20 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
          *         This value map does support primitive types, e.g. {@link int.class}. May be <code>null</code> if the resource
          *         has no properties, e.g. if it is synthetic.
          */
+        @CheckForNull
         ValueMap getProperties();
     }
 
     /**
      * @return never <code>null</code>.
      */
+    @Nonnull
     Class<? super FieldType> getFieldType();
 
     /**
      * @return never <code>null</code>.
      */
+    @Nonnull
     Class<AnnotationType> getAnnotationType();
 
     /**
@@ -172,5 +185,6 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
      *         <strong>Must return a value that is assignment-compatible to {@link OngoingMapping#getFieldType()}</strong>.
      *         Can be <code>null</code>.
      */
+    @CheckForNull
     FieldType map(OngoingMapping<FieldType, AnnotationType> ongoingMapping);
 }

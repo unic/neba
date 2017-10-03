@@ -17,10 +17,9 @@
 package io.neba.spring.blueprint;
 
 import io.neba.spring.mvc.MvcServlet;
-import io.neba.core.placeholdervariables.PlaceholderVariableResolverRegistrar;
-import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.web.RequestScopeConfigurator;
-import io.neba.core.web.ServletInfrastructureAwareConfigurer;
+import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
+import io.neba.spring.web.RequestScopeConfigurator;
+import io.neba.spring.web.ServletInfrastructureAwareConfigurer;
 import org.eclipse.gemini.blueprint.extender.OsgiBeanFactoryPostProcessor;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,38 +28,28 @@ import org.springframework.stereotype.Service;
 
 /**
  * Post-processes {@link ConfigurableListableBeanFactory bean factories}
- * created by the gemini-blueprint-extender before they are initialized. 
+ * created by the gemini-blueprint-extender before they are initialized.
  * Calls other services that must perform actions during post-processing of a bean factory
- * such as the {@link ModelRegistrar} and {@link PlaceholderVariableResolverRegistrar}.
- * 
+ * such as the {@link SpringModelRegistrar}.
+ *
  * @author Olaf Otto
  */
 @Service
 public class SlingBeanFactoryPostProcessor implements OsgiBeanFactoryPostProcessor {
     @Autowired
-    private PlaceholderVariableResolverRegistrar variableResolverRegistrar;
-    @Autowired
-    private ModelRegistrar modelRegistrar;
+    private SpringModelRegistrar springModelRegistrar;
     @Autowired
     private RequestScopeConfigurator requestScopeConfigurator;
     @Autowired
     private MvcServlet dispatcherServlet;
     @Autowired
     private ServletInfrastructureAwareConfigurer servletInfrastructureAwareConfigurer;
-    @Autowired
-    private EventhandlingBarrier barrier;
 
     @Override
     public void postProcessBeanFactory(BundleContext bundleContext, ConfigurableListableBeanFactory factory) {
-        this.barrier.begin();
-        try {
-            this.requestScopeConfigurator.registerRequestScope(factory);
-            this.servletInfrastructureAwareConfigurer.enableServletContextAwareness(factory);
-            this.variableResolverRegistrar.registerResolvers(bundleContext, factory);
-            this.modelRegistrar.registerModels(bundleContext, factory);
-            this.dispatcherServlet.enableMvc(factory, bundleContext);
-        } finally {
-            this.barrier.end();
-        }
+        this.requestScopeConfigurator.registerRequestScope(factory);
+        this.servletInfrastructureAwareConfigurer.enableServletContextAwareness(factory);
+        this.springModelRegistrar.registerModels(bundleContext, factory);
+        this.dispatcherServlet.enableMvc(factory, bundleContext);
     }
 }

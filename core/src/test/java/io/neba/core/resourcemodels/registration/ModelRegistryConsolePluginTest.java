@@ -1,22 +1,22 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -40,7 +40,7 @@ import java.util.*;
 
 import static java.lang.System.arraycopy;
 import static org.apache.commons.io.IOUtils.toByteArray;
-import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -81,8 +81,8 @@ public class ModelRegistryConsolePluginTest {
     private URL resourceUrl;
     private Writer internalWriter;
     private String renderedResponse;
-    private Map<String, Collection<OsgiModelSourceSource<?>>> typeMappings;
-    private Collection<OsgiModelSourceSource<?>> beanSources;
+    private Map<String, Collection<OsgiModelSource<?>>> typeMappings;
+    private Collection<OsgiModelSource<?>> beanSources;
 
     @InjectMocks
     private ModelRegistryConsolePlugin testee;
@@ -287,7 +287,7 @@ public class ModelRegistryConsolePluginTest {
 
     private void withPathResourceLookedUp() {
         Set<LookupResult> lookupResults = new HashSet<>();
-        for (OsgiModelSourceSource<?> source : this.beanSources) {
+        for (OsgiModelSource<?> source : this.beanSources) {
             LookupResult result = mock(LookupResult.class);
             doReturn(source).when(result).getSource();
             doReturn(pathResource.getResourceType()).when(result).getResourceType();
@@ -382,8 +382,8 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withRegisteredModel(String typeName, Class<Model> modelType, long bundleId, String beanName) {
-        List<OsgiModelSourceSource<?>> sources = new ArrayList<>();
-        OsgiModelSourceSource<?> source = mock(OsgiModelSourceSource.class);
+        List<OsgiModelSource<?>> sources = new ArrayList<>();
+        OsgiModelSource<?> source = mock(OsgiModelSource.class);
         doReturn(modelType).when(source).getModelType();
         doReturn(bundleId).when(source).getBundleId();
         doReturn(beanName).when(source).getModelName();

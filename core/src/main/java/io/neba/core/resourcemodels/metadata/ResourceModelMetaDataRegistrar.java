@@ -1,22 +1,22 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.metadata;
 
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,10 +45,10 @@ public class ResourceModelMetaDataRegistrar {
      * @author Olaf Otto
      */
     private static class ResourceModelMetadataHolder {
-        private final OsgiModelSourceSource<?> source;
+        private final OsgiModelSource<?> source;
         private final ResourceModelMetaData metaData;
 
-        private ResourceModelMetadataHolder(OsgiModelSourceSource<?> source, ResourceModelMetaData metaData) {
+        private ResourceModelMetadataHolder(OsgiModelSource<?> source, ResourceModelMetaData metaData) {
             this.source = source;
             this.metaData = metaData;
         }
@@ -100,7 +100,7 @@ public class ResourceModelMetaDataRegistrar {
      * @param beanSource must not be <code>null</code>.
      * @return the newly created meta data. Never <code>null</code>.
      */
-    public ResourceModelMetaData register(OsgiModelSourceSource<?> beanSource) {
+    public ResourceModelMetaData register(OsgiModelSource<?> beanSource) {
         if (beanSource == null) {
             throw new IllegalArgumentException("method parameter beanSource must not be null");
         }
@@ -129,7 +129,7 @@ public class ResourceModelMetaDataRegistrar {
         Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
         Iterator<Map.Entry<Class<?>, ResourceModelMetadataHolder>> it = newCache.entrySet().iterator();
         while (it.hasNext()) {
-            OsgiModelSourceSource<?> source = it.next().getValue().source;
+            OsgiModelSource<?> source = it.next().getValue().source;
             if (source.getBundleId() == bundle.getBundleId()) {
                 it.remove();
             }

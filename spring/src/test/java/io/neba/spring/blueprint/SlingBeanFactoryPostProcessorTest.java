@@ -1,26 +1,25 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.spring.blueprint;
 
 import io.neba.spring.mvc.MvcServlet;
-import io.neba.core.placeholdervariables.PlaceholderVariableResolverRegistrar;
-import io.neba.core.resourcemodels.registration.ModelRegistrar;
-import io.neba.core.web.RequestScopeConfigurator;
-import io.neba.core.web.ServletInfrastructureAwareConfigurer;
+import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
+import io.neba.spring.web.RequestScopeConfigurator;
+import io.neba.spring.web.ServletInfrastructureAwareConfigurer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -46,9 +46,7 @@ public class SlingBeanFactoryPostProcessorTest {
 	@Mock
     private ConfigurableListableBeanFactory beanFactory;
     @Mock
-    private ModelRegistrar modelRegistrar;
-    @Mock
-    private PlaceholderVariableResolverRegistrar variableResolver;
+    private SpringModelRegistrar modelRegistrar;
     @Mock
     private RequestScopeConfigurator requestScopeConfigurator;
     @Mock
@@ -57,9 +55,7 @@ public class SlingBeanFactoryPostProcessorTest {
     private Bundle bundle;
     @Mock
     private MvcServlet dispatcherServlet;
-    @Mock
-    private EventhandlingBarrier barrier;
-    
+
     @InjectMocks
     private SlingBeanFactoryPostProcessor testee;
 
@@ -73,20 +69,15 @@ public class SlingBeanFactoryPostProcessorTest {
         postProcessBeanFactory();
         
         InOrder inOrder = inOrder(
-            this.barrier,
     		this.requestScopeConfigurator,
             this.servletInfrastructureAwareConfigurer,
-    		this.variableResolver, 
-    		this.modelRegistrar, 
+    		this.modelRegistrar,
         	this.dispatcherServlet);
 
-        inOrder.verify(this.barrier).begin();
         inOrder.verify(this.requestScopeConfigurator).registerRequestScope(eq(this.beanFactory));
         inOrder.verify(this.servletInfrastructureAwareConfigurer).enableServletContextAwareness(eq(this.beanFactory));
-        inOrder.verify(this.variableResolver).registerResolvers(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.modelRegistrar).registerModels(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.dispatcherServlet).enableMvc(eq(this.beanFactory), eq(this.context));
-        inOrder.verify(this.barrier).end();
     }
 
     private void postProcessBeanFactory() {

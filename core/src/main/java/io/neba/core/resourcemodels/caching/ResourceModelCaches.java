@@ -19,7 +19,7 @@ package io.neba.core.resourcemodels.caching;
 import io.neba.api.resourcemodels.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.felix.scr.annotations.Component;
@@ -44,7 +44,7 @@ public class ResourceModelCaches {
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
-     * Looks up the {@link #store(Resource, OsgiModelSourceSource, Object)} cached model}
+     * Looks up the {@link #store(Resource, OsgiModelSource, Object)} cached model}
      * of the given type for the given resource.
      * Returns the first model found in the caches.
      *
@@ -52,7 +52,7 @@ public class ResourceModelCaches {
      * @param modelSource must not be <code>null</code>.
      * @return can be <code>null</code>.
      */
-    public <T> T lookup(Resource resource, OsgiModelSourceSource<?> modelSource) {
+    public <T> T lookup(Resource resource, OsgiModelSource<?> modelSource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
@@ -84,7 +84,7 @@ public class ResourceModelCaches {
      * @param modelSource must not be <code>null</code>.
      * @param model can be <code>null</code>.
      */
-    public <T> void store(Resource resource, OsgiModelSourceSource<?> modelSource, T model) {
+    public <T> void store(Resource resource, OsgiModelSource<?> modelSource, T model) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }

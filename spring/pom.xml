@@ -89,6 +89,30 @@
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.bgservlets</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -106,16 +130,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -150,27 +164,6 @@
                         </Import-Package>
                     </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <executions>
-                    <execution>
-                        <!-- This is a workaround for FELIX-5173 -->
-                        <id>inline-scr-configuration-descriptions</id>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                        <phase>prepare-package</phase>
-                        <configuration>
-                            <delimiters>
-                                <delimiter>%*</delimiter>
-                            </delimiters>
-                            <file>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.xml</file>
-                            <tokenValueMap>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.properties</tokenValueMap>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

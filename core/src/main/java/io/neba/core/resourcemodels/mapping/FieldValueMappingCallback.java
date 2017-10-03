@@ -38,7 +38,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ReflectionUtils.getField;
 import static org.springframework.util.ReflectionUtils.setField;
 

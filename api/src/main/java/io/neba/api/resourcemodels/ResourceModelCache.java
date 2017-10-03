@@ -16,6 +16,8 @@
 
 package io.neba.api.resourcemodels;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
 
 /**
@@ -59,12 +61,12 @@ public interface ResourceModelCache {
 	 * @param key The key used to identify the stored model. Never <code>null</code>.
 	 * @return The cached model, or <code>null</code>.
 	 */
-	<T> T get(Object key);
+	@CheckForNull <T> T get(Object key);
 	
 	/**
 	 * @param resource The resource {@link Resource#adaptTo(Class) adapted} to the target type. Never <code>null</code>.
 	 * @param model the model representing the mapped result of the adaptation. Can be <code>null</code>.
      * @param key the key by which the model is identified and {@link #get(Object) retrieved}. Never <code>null</code>.
 	 */
-	<T> void put(Resource resource, T model, Object key);
+	<T> void put(@Nonnull Resource resource, @CheckForNull T model, @Nonnull Object key);
 }

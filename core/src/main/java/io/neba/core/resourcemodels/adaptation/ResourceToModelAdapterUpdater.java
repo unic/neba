@@ -17,7 +17,7 @@
 package io.neba.core.resourcemodels.adaptation;
 
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -42,8 +42,8 @@ import org.slf4j.LoggerFactory;
 
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static org.apache.commons.lang.ClassUtils.getAllInterfaces;
-import static org.apache.commons.lang.ClassUtils.getAllSuperclasses;
+import static org.apache.commons.lang3.ClassUtils.getAllInterfaces;
+import static org.apache.commons.lang3.ClassUtils.getAllSuperclasses;
 import static org.apache.sling.api.adapter.AdapterFactory.ADAPTABLE_CLASSES;
 import static org.apache.sling.api.adapter.AdapterFactory.ADAPTER_CLASSES;
 import static org.osgi.framework.Bundle.ACTIVE;
@@ -154,21 +154,21 @@ public class ResourceToModelAdapterUpdater {
     }
 
     /**
-     * Obtains all {@link OsgiModelSourceSource bean sources} from the
-     * {@link io.neba.core.resourcemodels.registration.ModelRegistrar} and adds the {@link OsgiModelSourceSource#getModelType()
+     * Obtains all {@link OsgiModelSource bean sources} from the
+     * {@link io.neba.core.resourcemodels.registration.ModelRegistrar} and adds the {@link OsgiModelSource#getModelType()
      * model type name} as well as the type name of all of its superclasses and
      * interfaces to the set.
      * 
      * @return never null but rather an empty set.
      * 
-     * @see org.apache.commons.lang.ClassUtils#getAllInterfaces(Class)
-     * @see org.apache.commons.lang.ClassUtils#getAllSuperclasses(Class)
+     * @see org.apache.commons.lang3.ClassUtils#getAllInterfaces(Class)
+     * @see org.apache.commons.lang3.ClassUtils#getAllSuperclasses(Class)
      */
     @SuppressWarnings("unchecked")
     private Set<String> getAdapterTypeNames() {
-        List<OsgiModelSourceSource<?>> beanSources = this.registry.getBeanSources();
+        List<OsgiModelSource<?>> beanSources = this.registry.getBeanSources();
         Set<String> modelNames = new HashSet<>();
-        for (OsgiModelSourceSource<?> source : beanSources) {
+        for (OsgiModelSource<?> source : beanSources) {
             Class<?> c = source.getModelType();
             modelNames.add(c.getName());
             modelNames.addAll(toClassnameList(getAllInterfaces(c)));

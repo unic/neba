@@ -62,8 +62,10 @@ public class MvcServletTest {
     @Mock
     private SlingHttpServletResponse response;
     @Mock
+    @SuppressWarnings("unused") // injected into testee
     private ServletConfig servletConfig;
     @Mock
+    @SuppressWarnings("unused") // injected into testee
     private ServletResolver servletResolver;
 
     private BundleSpecificDispatcherServlet injectedDispatcherServlet;
@@ -149,7 +151,7 @@ public class MvcServletTest {
         withRealDispatcherServletCreated();
         enableMvc();
 
-        assertServletNameOfBundleSpecificDispatcherServletIs("BundleSpecificDispatcherServlet for bundle symbolic-name 1.2.3");
+        assertServletNameOfBundleSpecificDispatcherServletIs("BundleSpecificDispatcherServlet for bundle symbolic-name");
     }
 
     private void withRealDispatcherServletCreated() {

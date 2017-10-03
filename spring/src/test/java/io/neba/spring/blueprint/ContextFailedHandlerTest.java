@@ -17,7 +17,7 @@
 package io.neba.spring.blueprint;
 
 import io.neba.spring.mvc.MvcServlet;
-import io.neba.core.resourcemodels.registration.ModelRegistrar;
+import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
 import org.eclipse.gemini.blueprint.context.event.OsgiBundleApplicationContextEvent;
 import org.eclipse.gemini.blueprint.context.event.OsgiBundleContextFailedEvent;
 import org.eclipse.gemini.blueprint.context.event.OsgiBundleContextRefreshedEvent;
@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -49,13 +50,11 @@ import static org.osgi.framework.Bundle.STOPPING;
 @RunWith(MockitoJUnitRunner.class)
 public class ContextFailedHandlerTest {
     @Mock
-    private ModelRegistrar modelRegistrar;
+    private SpringModelRegistrar modelRegistrar;
     @Mock
     private MvcServlet dispatcherServlet;
     @Mock
     private Bundle bundle;
-    @Mock
-    private EventhandlingBarrier barrier;
 
     private OsgiBundleApplicationContextEvent event;
 
@@ -121,11 +120,9 @@ public class ContextFailedHandlerTest {
     }
 
     private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
-        InOrder inOrder = inOrder(this.barrier, this.modelRegistrar, this.dispatcherServlet);
-        inOrder.verify(this.barrier).begin();
+        InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);
         inOrder.verify(this.dispatcherServlet).disableMvc(this.bundle);
-        inOrder.verify(this.barrier).end();
     }
 
     private void withResolvedBundle() {

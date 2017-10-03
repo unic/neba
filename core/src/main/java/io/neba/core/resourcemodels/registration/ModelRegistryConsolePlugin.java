@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -49,11 +49,11 @@ import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Character.isUpperCase;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
 import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
 import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
@@ -67,8 +67,8 @@ import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
 @Component
 public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     public static final String LABEL = "modelregistry";
-    public static final String PREFIX_STATIC = "/static";
 
+    private static final String PREFIX_STATIC = "/static";
     private static final long serialVersionUID = -8676958166611686979L;
     private static final String API_PATH = "/api";
     private static final String API_FILTER = "/filter";
@@ -142,8 +142,8 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         writer.write("<table id=\"plugin_table\" class=\"nicetable tablesorter noauto\">");
         writer.write("<thead><tr><th>Type</th><th>Model type</th><th>Bean name</th><th>Source bundle</th></tr></thead>");
         writer.write("<tbody>");
-        for (Entry<String, Collection<OsgiModelSourceSource<?>>> entry : this.registry.getTypeMappings().entrySet()) {
-            for (OsgiModelSourceSource<?> source : entry.getValue()) {
+        for (Entry<String, Collection<OsgiModelSource<?>>> entry : this.registry.getTypeMappings().entrySet()) {
+            for (OsgiModelSource<?> source : entry.getValue()) {
                 String sourceBundleName = displayNameOf(source.getBundle());
 
                 writer.write("<tr data-modeltype=\"" + source.getModelType().getName() + "\">");
@@ -188,7 +188,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
     private void provideAllModelTypes(HttpServletResponse res) throws IOException {
         Set<String> typeNames = new HashSet<>();
-        for (OsgiModelSourceSource<?> source : this.registry.getBeanSources()) {
+        for (OsgiModelSource<?> source : this.registry.getBeanSources()) {
             for (Class<?> type : hierarchyOf(source.getModelType())) {
                 if (type == Object.class) {
                     continue;
@@ -239,8 +239,11 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private ResourceResolver getResourceResolver() {
         try {
+            // A resource resolver with administrative privileges is required here. Registering a non-admin system account
+            // would require administrative privileges, thus beating the point of non using the admin account.
             return this.resourceResolverFactory.getAdministrativeResourceResolver(null);
         } catch (LoginException e) {
             throw new IllegalStateException(e);
@@ -251,7 +254,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         String modelTypePrefix = req.getParameter(PARAM_TYPENAME);
         String resourcePath = req.getParameter(PARAM_PATH);
 
-        Collection<OsgiModelSourceSource<?>> types;
+        Collection<OsgiModelSource<?>> types;
         if (isEmpty(resourcePath)) {
             types = this.registry.getBeanSources();
         } else {
@@ -263,7 +266,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
         boolean exactMatch = !isEmpty(typeNameCandidate) && isUpperCase(typeNameCandidate.charAt(0));
 
-        for (OsgiModelSourceSource<?> source : types) {
+        for (OsgiModelSource<?> source : types) {
             if (modelTypePrefix == null) {
                 matchingModelTypeNames.add(source.getModelType().getName());
             } else {
@@ -280,8 +283,8 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         res.getWriter().write(toJson(matchingModelTypeNames));
     }
 
-    private Collection<OsgiModelSourceSource<?>> resolveModelTypesFor(String resourcePath) {
-        Collection<OsgiModelSourceSource<?>> types = new ArrayList<>(64);
+    private Collection<OsgiModelSource<?>> resolveModelTypesFor(String resourcePath) {
+        Collection<OsgiModelSource<?>> types = new ArrayList<>(64);
 
         if (!isEmpty(resourcePath)) {
             ResourceResolver resolver = getResourceResolver();
@@ -342,7 +345,9 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
             Resource componentIcon = resolver.getResource(iconPath + "/icon.png");
             if (componentIcon != null) {
                 in = componentIcon.adaptTo(InputStream.class);
-                copy(in, response.getOutputStream());
+                if (in != null) {
+                    copy(in, response.getOutputStream());
+                }
             }
         } finally {
             resolver.close();

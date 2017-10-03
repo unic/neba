@@ -21,7 +21,7 @@ import io.neba.api.resourcemodels.ResourceModelPostProcessor;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.felix.scr.annotations.Component;
@@ -33,7 +33,7 @@ import org.springframework.aop.framework.Advised;
 
 
 import static java.lang.System.currentTimeMillis;
-import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.springframework.util.Assert.notNull;
 
 /**
@@ -63,7 +63,7 @@ public class ResourceToModelMapper {
      * @param <T>      the bean type.
      * @return never <code>null</code>.
      */
-    public <T> T map(final Resource resource, final OsgiModelSourceSource<T> modelSource) {
+    public <T> T map(final Resource resource, final OsgiModelSource<T> modelSource) {
         notNull(resource, "Method argument resource must not be null.");
         notNull(modelSource, "Method argument modelSource must not be null.");
 

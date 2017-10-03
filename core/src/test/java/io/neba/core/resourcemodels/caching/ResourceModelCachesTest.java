@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class ResourceModelCachesTest {
 	@Mock
 	private ResourceModelStatistics resourceModelStatistics;
 	@Mock
-	private OsgiModelSourceSource modelSource;
+	private OsgiModelSource modelSource;
 	
 	private List<ResourceModelCache> mockedCaches = new LinkedList<>();
 	private Class<Object> targetType = Object.class;

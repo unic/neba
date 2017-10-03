@@ -18,7 +18,7 @@ package io.neba.core.resourcemodels.caching;
 
 import io.neba.api.resourcemodels.ResourceModelCache;
 import io.neba.core.util.Key;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;

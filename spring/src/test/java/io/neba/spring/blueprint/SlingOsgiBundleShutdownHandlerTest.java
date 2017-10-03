@@ -17,7 +17,7 @@
 package io.neba.spring.blueprint;
 
 import io.neba.spring.mvc.MvcServlet;
-import io.neba.core.resourcemodels.registration.ModelRegistrar;
+import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -42,15 +43,13 @@ public class SlingOsgiBundleShutdownHandlerTest {
 	@Mock
 	private MvcServlet dispatcherServlet;
     @Mock
-    private ModelRegistrar modelRegistrar;
+    private SpringModelRegistrar modelRegistrar;
     @Mock
     private BundleEvent event;
     @Mock
     private Bundle bundle;
     @Mock
     private BundleContext context;
-    @Mock
-    private EventhandlingBarrier barrier;
 
     @InjectMocks
     private SlingOsgiBundleShutdownHandler testee;
@@ -90,11 +89,9 @@ public class SlingOsgiBundleShutdownHandlerTest {
     }
 
     private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
-        InOrder inOrder = inOrder(this.barrier, this.modelRegistrar, this.dispatcherServlet);
-        inOrder.verify(this.barrier).begin();
+        InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);
         inOrder.verify(this.dispatcherServlet).disableMvc(this.bundle);
-        inOrder.verify(this.barrier).end();
     }
 
     private void verifyShutdownHandlerIsRemovedAsBundleListener() {

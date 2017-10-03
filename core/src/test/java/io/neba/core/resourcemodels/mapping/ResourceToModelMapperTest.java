@@ -23,7 +23,7 @@ import io.neba.core.resourcemodels.metadata.MethodMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
@@ -333,7 +333,7 @@ public class ResourceToModelMapperTest {
 
     @SuppressWarnings("unchecked")
     private void mapResourceToModel() {
-        OsgiModelSourceSource<TestModel> source = mock(OsgiModelSourceSource.class);
+        OsgiModelSource<TestModel> source = mock(OsgiModelSource.class);
         when(source.getModel()).thenReturn(this.model);
         when(source.getFactory()).thenReturn(this.factory);
         doReturn(this.beanType).when(source).getModelType();

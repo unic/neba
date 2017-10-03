@@ -35,9 +35,9 @@ import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Math.round;
 import static org.apache.commons.collections.CollectionUtils.find;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 /**
  * Provides a RESTFul JSON API for {@link io.neba.api.annotations.ResourceModel} metadata,

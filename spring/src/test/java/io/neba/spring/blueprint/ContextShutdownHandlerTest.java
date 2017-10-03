@@ -17,7 +17,7 @@ package io.neba.spring.blueprint;
 
 
 import io.neba.spring.mvc.MvcServlet;
-import io.neba.core.resourcemodels.registration.ModelRegistrar;
+import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -26,16 +26,15 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
+
 import static org.mockito.Mockito.inOrder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ContextShutdownHandlerTest {
     @Mock
-    private ModelRegistrar modelRegistrar;
+    private SpringModelRegistrar modelRegistrar;
     @Mock
     private MvcServlet dispatcherServlet;
-    @Mock
-    private EventhandlingBarrier barrier;
     @Mock
     private Bundle bundle;
 
@@ -58,11 +57,9 @@ public class ContextShutdownHandlerTest {
     public void testBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
         handleStop();
 
-        InOrder inOrder = inOrder(this.barrier, this.modelRegistrar, this.dispatcherServlet);
-        inOrder.verify(this.barrier).begin();
+        InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);
         inOrder.verify(this.dispatcherServlet).disableMvc(this.bundle);
-        inOrder.verify(this.barrier).end();
     }
 
     private void handleStop() {

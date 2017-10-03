@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 @RunWith(MockitoJUnitRunner.class)
 public class LookupResultTest {
     @Mock
-    private OsgiModelSourceSource<?> beanSource;
+    private OsgiModelSource<?> beanSource;
     private LookupResult testee;
 
     @Before
@@ -71,7 +71,7 @@ public class LookupResultTest {
 
     @Test
     public void testEqualsToResultForOtherSource() throws Exception {
-        OsgiModelSourceSource<?> beanSource = mock(OsgiModelSourceSource.class);
+        OsgiModelSource<?> beanSource = mock(OsgiModelSource.class);
         LookupResult other = new LookupResult(beanSource, "junit/test/type");
 
         assertLookupResultIsNotEqualTo(other);

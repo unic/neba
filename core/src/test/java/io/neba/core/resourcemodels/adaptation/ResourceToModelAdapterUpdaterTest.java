@@ -18,7 +18,7 @@ package io.neba.core.resourcemodels.adaptation;
 
 import io.neba.core.Eventual;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     @Mock
     private Bundle bundle;
 
-    private List<OsgiModelSourceSource<?>> beanSources;
+    private List<OsgiModelSource<?>> beanSources;
     private Dictionary<String, Object> updatedProperties;
 
     @InjectMocks
@@ -203,7 +203,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
 
     @SuppressWarnings({"rawtypes"})
     private void withModel(Class<?> modelType) {
-        OsgiModelSourceSource source = mock(OsgiModelSourceSource.class);
+        OsgiModelSource source = mock(OsgiModelSource.class);
         when(source.getModelType()).thenReturn(modelType);
         this.beanSources.add(source);
     }

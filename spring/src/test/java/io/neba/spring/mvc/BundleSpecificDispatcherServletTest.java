@@ -16,7 +16,14 @@
 
 package io.neba.spring.mvc;
 
-import io.neba.core.web.WebApplicationContextAdapter;
+import io.neba.spring.web.WebApplicationContextAdapter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.ServletResolver;
 import org.junit.Before;
@@ -33,6 +40,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -46,13 +54,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyBoolean;
@@ -91,7 +92,7 @@ public class BundleSpecificDispatcherServletTest {
     @Mock
     private SlingHttpServletResponse response;
 
-    private List<?> registeredArgumentResolvers = new ArrayList<>();
+    private List<HandlerMethodArgumentResolver> registeredArgumentResolvers = new ArrayList<>();
     private HandlerMapping handlerMapping;
 
     private BundleSpecificDispatcherServlet testee;
@@ -402,7 +403,7 @@ public class BundleSpecificDispatcherServletTest {
     private RequestMappingHandlerAdapter mockRequestMappingHandler() {
         RequestMappingHandlerAdapter requestMappingHandlerAdapter = mock(RequestMappingHandlerAdapter.class);
         Answer<Object> verifyList = invocation -> {
-            registeredArgumentResolvers = (List<?>) invocation.getArguments()[0];
+            registeredArgumentResolvers = (List<HandlerMethodArgumentResolver>) invocation.getArguments()[0];
             return null;
         };
 
@@ -412,14 +413,18 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     private void verifyNebaArgumentResolversAreRegistered() {
-        assertThat(this.registeredArgumentResolvers).describedAs("The list of registered NEBA argument resolvers").hasSize(3);
+        assertThat(this.registeredArgumentResolvers)
+                .describedAs("The list of registered NEBA argument resolvers")
+                .hasSize(3);
         assertThat(this.registeredArgumentResolvers.get(0)).isInstanceOf(RequestPathInfoArgumentResolver.class);
         assertThat(this.registeredArgumentResolvers.get(1)).isInstanceOf(ResourceResolverArgumentResolver.class);
         assertThat(this.registeredArgumentResolvers.get(2)).isInstanceOf(ResourceParamArgumentResolver.class);
     }
 
     private void verifyNebaArgumentResolversAreNotRegistered() {
-        assertThat(this.registeredArgumentResolvers).describedAs("The list of registered NEBA argument resolvers").isEmpty();
+        assertThat(this.registeredArgumentResolvers)
+                .describedAs("The list of registered NEBA argument resolvers")
+                .isEmpty();
     }
 
     private void verifyMvcContextIgnoresEvent() {

@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.spring.mvc;
 
@@ -53,15 +53,15 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
         assertParameterIsUnsupported();
     }
 
-    public void withParameterType(Class<?> type) {
+    private void withParameterType(Class<?> type) {
         doReturn(type).when(this.parameter).getParameterType();
     }
 
-    public void resolveArguments() throws Exception {
+    void resolveArguments() throws Exception {
         this.argument = getTestee().resolveArgument(this.parameter, null, this.nativeWebRequest, null);
     }
 
-    public void assertResolvedArgumentIs(Object value) {
+    void assertResolvedArgumentIs(Object value) {
         assertThat(this.argument).isSameAs(value);
     }
 
@@ -71,7 +71,7 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
 
     public abstract T getTestee();
 
-    public void assertResolverSupports(Class<?> parameterType) {
+    void assertResolverSupports(Class<?> parameterType) {
         withParameterType(parameterType);
         assertParameterIsSupported();
     }

@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -101,11 +101,11 @@ public class ResourceToModelAdapterTest {
 
         doAnswer(storeInCache)
                 .when(this.caches)
-                .store(isA(Resource.class), isA(OsgiModelSourceSource.class), any());
+                .store(isA(Resource.class), isA(OsgiModelSource.class), any());
 
         doAnswer(lookupFromCache)
                 .when(this.caches)
-                .lookup(isA(Resource.class), isA(OsgiModelSourceSource.class));
+                .lookup(isA(Resource.class), isA(OsgiModelSource.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
     }
@@ -189,7 +189,7 @@ public class ResourceToModelAdapterTest {
 
     @SuppressWarnings("unchecked")
     private void verifyAdapterDoesNotMapResourceToModel() {
-        verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiModelSourceSource.class));
+        verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiModelSource.class));
     }
 
     private void withNullReturnedAsBeanSourceFromRegistrar() {
@@ -218,7 +218,7 @@ public class ResourceToModelAdapterTest {
     }
 
     private void verifyAdapterMapsResourceToModel(int i) {
-        OsgiModelSourceSource<?> source = this.sources.get(i).getSource();
+        OsgiModelSource<?> source = this.sources.get(i).getSource();
         verify(this.mapper).map(eq(this.resource), eq(source));
     }
 
@@ -229,7 +229,7 @@ public class ResourceToModelAdapterTest {
         when(this.registry.lookupMostSpecificModels(isA(Resource.class), isA(Class.class))).thenReturn(this.sources);
 
         for (Object model : models) {
-            OsgiModelSourceSource source = mock(OsgiModelSourceSource.class);
+            OsgiModelSource source = mock(OsgiModelSource.class);
             LookupResult result = mock(LookupResult.class);
             when(result.getSource()).thenReturn(source);
             this.sources.add(result);
@@ -260,7 +260,7 @@ public class ResourceToModelAdapterTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        OsgiModelSourceSource<?> modelSource = (OsgiModelSourceSource<?>) invocation.getArguments()[1];
+        OsgiModelSource<?> modelSource = (OsgiModelSource<?>) invocation.getArguments()[1];
         return new Key(resource.getPath(), modelSource.getModelType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

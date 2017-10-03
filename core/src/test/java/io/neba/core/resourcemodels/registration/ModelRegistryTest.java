@@ -17,28 +17,28 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.core.util.OsgiModelSourceSource;
+import io.neba.core.util.OsgiModelSource;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.nodetype.NodeType;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.nodetype.NodeType;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -57,8 +57,6 @@ public class ModelRegistryTest {
 	private Bundle bundle;
     @Mock
     private ResourceResolver resolver;
-    @Mock
-    private EventhandlingBarrier barrier;
 
     private Set<ResourceModel> resourceModelAnnotations;
     private long bundleId;
@@ -70,11 +68,6 @@ public class ModelRegistryTest {
     @Before
     public void setUp() throws LoginException {
         this.resourceModelAnnotations = new HashSet<>();
-
-        doReturn(true)
-                .when(this.barrier)
-                .tryBegin();
-
     	withBundleId(12345L);
     }
     
@@ -398,30 +391,6 @@ public class ModelRegistryTest {
         assertLookedUpModelTypesAre(TargetType1.class, TargetType2.class);
     }
 
-    @Test
-    public void testRemovalOfInvalidReferencesToModels() throws Exception {
-        withInvalidBeanSource("some/resource/type", TargetType1.class);
-        assertRegistryHasModels(1);
-
-        removeInvalidReferences();
-
-        verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier();
-        assertRegistryHasModels(0);
-    }
-
-    @Test
-    public void testValidBeanSourcesAreNotRemovedUponConsistencyCheck() throws Exception {
-        withModelForType("some/resource/type", TargetType1.class);
-
-        assertRegistryHasModels(1);
-
-        removeInvalidReferences();
-
-        verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier();
-        verifySourcesWhereTestedForValidity();
-        assertRegistryHasModels(1);
-    }
-
     /**
      * Make sure that models for a resource's primary type do not depend on the sling:resourceType of the resource.
      */
@@ -517,11 +486,9 @@ public class ModelRegistryTest {
             mixinTypes[i] = mock(NodeType.class);
             when(mixinTypes[i].getName()).thenReturn(mixins[i]);
         }
-        when(node.getMixinNodeTypes()).thenReturn(mixinTypes);
-    }
-
-    private void removeInvalidReferences() {
-        this.testee.removeInvalidReferences();
+        if (node != null) {
+            when(node.getMixinNodeTypes()).thenReturn(mixinTypes);
+        }
     }
 
     private void withBundleId(final long withBundleId) {
@@ -557,12 +524,6 @@ public class ModelRegistryTest {
         ResourceModel annotation = mock(ResourceModel.class);
         when(annotation.types()).thenReturn(new String[] {resourceType});
         this.resourceModelAnnotations.add(annotation);
-    }
-
-    private void verifySourcesWhereTestedForValidity() {
-        for (OsgiModelSourceSource<?> source : this.testee.getBeanSources()) {
-            verify(source).isValid();
-        }
     }
 
     private void assertLookedUpModelTypesAre(Class<?>... types) {
@@ -642,27 +603,18 @@ public class ModelRegistryTest {
         withModelForType(resourceType, modelType, "defaultBeanName");
     }
 
-    private void withInvalidBeanSource(String resourceType, @SuppressWarnings("rawtypes") Class modelType) {
-        withModelForType(resourceType, modelType, "defaultBeanName", false);
-    }
-
-	private void withModelForType(String resourceType, @SuppressWarnings("rawtypes") Class modelType, String modelBeanName) {
-        withModelForType(resourceType, modelType, modelBeanName, true);
-    }
-
     @SuppressWarnings("unchecked")
-    private void withModelForType(String resourceType, @SuppressWarnings("rawtypes") Class modelType, String modelBeanName, boolean isValid) {
-        OsgiModelSourceSource<?> source = mock(OsgiModelSourceSource.class);
+    private void withModelForType(String resourceType, @SuppressWarnings("rawtypes") Class modelType, String modelBeanName) {
+        OsgiModelSource<?> source = mock(OsgiModelSource.class);
         when(source.getModelType()).thenReturn(modelType);
         when(source.getBundleId()).thenReturn(this.bundleId);
         when(source.getModelName()).thenReturn(modelBeanName);
-        when(source.isValid()).thenReturn(isValid);
         this.testee.add(new String[] {resourceType}, source);
     }
 
     private void withBeanSourcesForAllResourceModels() {
         for (ResourceModel model : this.resourceModelAnnotations) {
-            OsgiModelSourceSource<?> source = mock(OsgiModelSourceSource.class);
+            OsgiModelSource<?> source = mock(OsgiModelSource.class);
             when(source.getBundleId()).thenReturn(this.bundleId);
             this.testee.add(model.types(), source);
         }
@@ -670,11 +622,5 @@ public class ModelRegistryTest {
     
     private void removeBundle() {
         this.testee.removeResourceModels(this.bundle);
-    }
-
-    private void verifyRemovalOfInvalidReferencesProtectedStateUsingBarrier() {
-        InOrder inOrder = inOrder(this.barrier);
-        inOrder.verify(this.barrier).tryBegin();
-        inOrder.verify(this.barrier).end();
     }
 }

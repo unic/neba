@@ -17,6 +17,7 @@
 package io.neba.core.util;
 
 import io.neba.api.resourcemodels.ResourceModelFactory;
+import io.neba.api.resourcemodels.ResourceModelFactory.ModelDefinition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,27 +27,28 @@ import org.osgi.framework.Bundle;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.osgi.framework.Bundle.ACTIVE;
-import static org.osgi.framework.Bundle.UNINSTALLED;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class OsgiModelSourceSourceTest {
+public class OsgiModelSourceTest {
     @Mock
     private ResourceModelFactory factory;
     @Mock
     private Bundle bundleOne;
     @Mock
     private Bundle bundleTwo;
+    @Mock
+    private ModelDefinition modelDefinition;
 
-    private String modelName = "testBean";
     private String modelSourceAsString;
 
-    private OsgiModelSourceSource<Object> testee;
+    private OsgiModelSource<Object> testee;
 
     @Before
     public void prepareBeanSource() {
@@ -66,77 +68,62 @@ public class OsgiModelSourceSourceTest {
                 .when(this.bundleTwo)
                 .getBundleId();
 
-        this.testee = new OsgiModelSourceSource<>(this.modelName, this.factory, this.bundleOne);
+        doReturn("testModel").when(this.modelDefinition).getName();
+
+        this.testee = new OsgiModelSource<>(this.modelDefinition, this.factory, this.bundleOne);
     }
-    
+
     @Test
     public void testToStringRepresentation() throws Exception {
         modelSourceToString();
-        assertModelSourceAsStringIs("Bean \"testBean\" from bundle with id 123");
+        assertModelSourceAsStringIs("Model \"testModel\" from bundle with id 123");
     }
-    
+
     @Test
     public void testBeanRetrievalFromFactory() throws Exception {
         getModel();
         verifyModelSourceGetsModelFromModelFactory();
     }
-    
+
     @Test
     public void testBeanTypeRetrievalFromFactory() throws Exception {
         getModelType();
-        verifyBeanSourceGetsBeanTypeFromFactory();
-    }
-
-    @Test
-    public void testIsValidIsTrueWhenBundleIsActive() throws Exception {
-        assertSourceIsValid();
-    }
-
-    @Test
-    public void testIsValidIsTrueWhenBundleIsNotActive() throws Exception {
-        withUninstalledBundles();
-        assertSourceIsInvalid();
+        verifyBeanSourceModelTypeFromModelDefinitision();
     }
 
     @Test
     public void testHashCodeAndEquals() throws Exception {
-        OsgiModelSourceSource<?> one = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
-        OsgiModelSourceSource<?> two = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
+        OsgiModelSource<?> one = new OsgiModelSource<>(modelDefinition("one"), mock(ResourceModelFactory.class), this.bundleOne);
+        OsgiModelSource<?> two = new OsgiModelSource<>(modelDefinition("one"), mock(ResourceModelFactory.class), this.bundleOne);
 
         assertThat(one.hashCode()).isEqualTo(two.hashCode());
         assertThat(one).isEqualTo(two);
         assertThat(two).isEqualTo(one);
 
-        one = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
-        two = new OsgiModelSourceSource<>("two", mock(ResourceModelFactory.class), this.bundleOne);
+        one = new OsgiModelSource<>(modelDefinition("one"), mock(ResourceModelFactory.class), this.bundleOne);
+        two = new OsgiModelSource<>(modelDefinition("two"), mock(ResourceModelFactory.class), this.bundleOne);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
         assertThat(one).isNotEqualTo(two);
         assertThat(two).isNotEqualTo(one);
 
-        one = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleOne);
-        two = new OsgiModelSourceSource<>("one", mock(ResourceModelFactory.class), this.bundleTwo);
+        one = new OsgiModelSource<>(modelDefinition("one"), mock(ResourceModelFactory.class), this.bundleOne);
+        two = new OsgiModelSource<>(modelDefinition("one"), mock(ResourceModelFactory.class), this.bundleTwo);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
         assertThat(one).isNotEqualTo(two);
         assertThat(two).isNotEqualTo(one);
     }
 
-    private void assertSourceIsInvalid() {
-        assertThat(this.testee.isValid()).isFalse();
+    private ModelDefinition modelDefinition(String modelName) {
+        ModelDefinition definition = mock(ModelDefinition.class);
+        doReturn(modelName).when(definition).getName();
+        return definition;
     }
 
-    private void withUninstalledBundles() {
-        doReturn(UNINSTALLED).when(this.bundleOne).getState();
-        doReturn(UNINSTALLED).when(this.bundleTwo).getState();
-    }
 
-    private void assertSourceIsValid() {
-        assertThat(this.testee.isValid()).isTrue();
-    }
-
-    private void verifyBeanSourceGetsBeanTypeFromFactory() {
-        verify(this.factory).getType(eq(this.modelName));
+    private void verifyBeanSourceModelTypeFromModelDefinitision() {
+        verify(this.modelDefinition).getType();
     }
 
     private void getModelType() {
@@ -144,7 +131,7 @@ public class OsgiModelSourceSourceTest {
     }
 
     private void verifyModelSourceGetsModelFromModelFactory() {
-        verify(this.factory).getModel(eq(this.modelName));
+        verify(this.factory).getModel(this.modelDefinition);
     }
 
     private void getModel() {

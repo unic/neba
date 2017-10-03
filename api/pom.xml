@@ -1,66 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>io.neba.neba-api</artifactId>
-	<packaging>bundle</packaging>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>io.neba.neba-api</artifactId>
+    <packaging>bundle</packaging>
     <name>NEBA API</name>
 
-	<description>
-	Contains all annotations, tag libraries and lifecycle callback interfaces of NEBA.
-	All packages of this API bundle are exported. Change to the API that are not byte code compatible
-	only occur in major revisions.
-	</description>
+    <description>
+        Contains all annotations, tag libraries and lifecycle callback interfaces of NEBA.
+        All packages of this API bundle are exported. Change to the API that are not byte code compatible
+        only occur in major revisions.
+    </description>
 
-	<parent>
-		<groupId>io.neba</groupId>
-		<artifactId>io.neba.neba-parent</artifactId>
-		<version>4.3.3-SNAPSHOT</version>
-		<relativePath>../parent/pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>io.neba</groupId>
+        <artifactId>io.neba.neba-parent</artifactId>
+        <version>4.3.3-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
 
-	<properties>
-		<bundle.symbolicName>io.neba-api</bundle.symbolicName>
-		<bundle.namespace>io.neba</bundle.namespace>
-		<api.version>4.3.0</api.version>
-	</properties>
+    <properties>
+        <bundle.symbolicName>io.neba-api</bundle.symbolicName>
+        <bundle.namespace>io.neba</bundle.namespace>
+        <api.version>4.3.0</api.version>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<configuration>
-					<instructions>
-                        <Include-Resource>{maven-resources}, META-INF/=${project.build.directory}/classes/META-INF/</Include-Resource>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Include-Resource>{maven-resources}, META-INF/=${project.build.directory}/classes/META-INF/
+                        </Include-Resource>
                         <Bundle-Name>NEBA API</Bundle-Name>
-						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Category>neba</Bundle-Category>
-						<Import-Package>
-							org.springframework.*;resolution:=optional,
-							*
-						</Import-Package>
-						<Export-Package>
-							io.neba.api.*;version=${api.version}
-						</Export-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Category>neba</Bundle-Category>
+                        <Import-Package>
+                            org.springframework.*;resolution:=optional,
+                            *
+                        </Import-Package>
+                        <Export-Package>
+                            io.neba.api.*;version=${api.version}
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
         </plugins>
-	</build>
+    </build>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
@@ -69,41 +71,45 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
         </dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.sling</groupId>
-			<artifactId>org.apache.sling.api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.code.tld-generator</groupId>
             <artifactId>tld-generator</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+    </dependencies>
 </project>

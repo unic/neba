@@ -16,6 +16,13 @@
 
 package io.neba.spring.mvc;
 
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.ServletResolver;
@@ -29,15 +36,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static io.neba.core.util.BundleUtil.displayNameOf;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static org.springframework.beans.factory.BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 
@@ -98,7 +97,7 @@ public class MvcServlet extends SlingAllMethodsServlet {
         this.mvcCapableBundles.remove(bundle);
     }
 
-    protected BundleSpecificDispatcherServlet createBundleSpecificDispatcherServlet(ConfigurableListableBeanFactory factory, BundleContext context) {
+    BundleSpecificDispatcherServlet createBundleSpecificDispatcherServlet(ConfigurableListableBeanFactory factory, BundleContext context) {
         BundleAwareServletConfig bundleAwareServletConfig = new BundleAwareServletConfig(context);
         return new BundleSpecificDispatcherServlet(bundleAwareServletConfig, this.servletResolver, factory);
     }
@@ -138,7 +137,7 @@ public class MvcServlet extends SlingAllMethodsServlet {
         handle(request, response);
     }
 
-    protected void handle(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    void handle(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         final SlingMvcServletRequest slingRequest = new SlingMvcServletRequest(request);
 
         for (BundleSpecificDispatcherServlet context : this.mvcCapableBundles.values()) {
@@ -152,7 +151,7 @@ public class MvcServlet extends SlingAllMethodsServlet {
             this.logger.debug("No controller found for request " + request + ".");
         }
 
-        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        response.sendError(SC_NOT_FOUND);
     }
 
     private String generateNameFor(Class<?> type) {
@@ -174,7 +173,7 @@ public class MvcServlet extends SlingAllMethodsServlet {
 
         @Override
         public String getServletName() {
-            return BundleSpecificDispatcherServlet.class.getSimpleName() + " for bundle " + BundleUtil.displayNameOf(context.getBundle());
+            return BundleSpecificDispatcherServlet.class.getSimpleName() + " for bundle " + context.getBundle().getSymbolicName();
         }
 
         @Override

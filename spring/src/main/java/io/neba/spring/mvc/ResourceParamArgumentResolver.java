@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.spring.mvc;
 
@@ -27,7 +27,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
 
 /**
@@ -79,7 +80,7 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         final SlingHttpServletRequest request = (SlingHttpServletRequest) nativeRequest;
         final ResourceParam resourceParam = getParameterAnnotation(parameter);
         final String parameterName = resolveParameterName(parameter, resourceParam);
-        final boolean required = resourceParam.required() && StringUtils.isEmpty(resourceParam.defaultValue());
+        final boolean required = resourceParam.required() && isEmpty(resourceParam.defaultValue());
         final String resourcePath = resolveResourcePath(request, resourceParam, parameterName, required);
 
         if (resourcePath == null) {
@@ -90,7 +91,7 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
         ResourceResolver resolver = request.getResourceResolver();
         Resource resource = resolver.resolve(request, resourcePath);
 
-        if (resource == null || ResourceUtil.isNonExistingResource(resource)) {
+        if (isNonExistingResource(resource)) {
             if (required) {
                 throw new UnresolvableResourceException("Unable to resolve resource " + resourcePath +
                                                         " for the required parameter '" + parameterName + "'.");
@@ -117,18 +118,18 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
                                        boolean required) throws MissingServletRequestParameterException {
 
         String resourcePath = request.getParameter(parameterName);
-        if (StringUtils.isEmpty(resourcePath)) {
+        if (isEmpty(resourcePath)) {
             resourcePath = resourceParam.defaultValue();
         }
 
-        if (StringUtils.isEmpty(resourcePath)) {
+        if (isEmpty(resourcePath)) {
             if (required) {
                 throw new MissingServletRequestParameterException(parameterName, String.class.getSimpleName());
             }
             return null;
         }
 
-        if (!StringUtils.isEmpty(resourceParam.append())) {
+        if (!isEmpty(resourceParam.append())) {
             resourcePath += resourceParam.append();
         }
         return resourcePath;
@@ -136,7 +137,7 @@ public class ResourceParamArgumentResolver implements HandlerMethodArgumentResol
 
     private String resolveParameterName(MethodParameter parameter, ResourceParam param) {
         String parameterName = param.value();
-        if (StringUtils.isEmpty(parameterName)) {
+        if (isEmpty(parameterName)) {
             parameterName = parameter.getParameterName();
         }
         return parameterName;

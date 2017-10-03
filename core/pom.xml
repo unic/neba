@@ -58,10 +58,6 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
         </dependency>
@@ -72,10 +68,6 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -141,6 +133,11 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -154,9 +151,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Category>neba</Bundle-Category>
                         <Fragment-Host>org.eclipse.gemini.blueprint.extender</Fragment-Host>
-                        <!-- Legacy support: Embed dependencies not available on older sling platforms -->
-                        <Embed-Dependency>commons-lang3</Embed-Dependency>
-                        <Embed-Directory>lib</Embed-Directory>
                         <Private-Package>
                             io.neba.core.*
                         </Private-Package>
@@ -169,6 +163,27 @@
                         </Import-Package>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <executions>
+                    <execution>
+                        <!-- This is a workaround for FELIX-5173 -->
+                        <id>inline-scr-configuration-descriptions</id>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <delimiters>
+                                <delimiter>%*</delimiter>
+                            </delimiters>
+                            <file>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.xml</file>
+                            <tokenValueMap>${project.build.outputDirectory}/OSGI-INF/metatype/io.neba.core.resourcemodels.caching.RequestScopedResourceModelCacheConfiguration.properties</tokenValueMap>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
