@@ -83,6 +83,8 @@ public class ResourceToModelMapperTest {
     @Mock
     private AnnotatedFieldMappers annotatedFieldMappers;
     @Mock
+    private PlaceholderVariableResolvers placeholderVariableResolvers;
+    @Mock
     private Mapping<Object> ongoingMapping;
 
     private TestModel model;

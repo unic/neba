@@ -234,7 +234,7 @@ public class MappedFieldMetaDataTest {
     @Test
     public void testDetectionOfPathExpression() throws Exception {
         createMetadataForTestModelFieldWithName("stringFieldWithPlaceholder");
-        assertFieldHasPathExpression();
+        assertFieldHasPathVariables();
     }
 
     @Test
@@ -335,8 +335,8 @@ public class MappedFieldMetaDataTest {
         assertThat(this.testee.getResolveBelowEveryChildPathOnChildren()).isEqualTo(path);
     }
 
-    private void assertFieldHasPathExpression() {
-        assertThat(this.testee.isPathExpressionPresent()).isTrue();
+    private void assertFieldHasPathVariables() {
+        assertThat(this.testee.getPath().hasVariables()).isTrue();
     }
 
     private void assertFieldIsInstantiableCollectionType() {
@@ -344,7 +344,7 @@ public class MappedFieldMetaDataTest {
     }
 
     private void assertFieldHasPath(String path) {
-		assertThat(this.testee.getPath()).isEqualTo(path);
+		assertThat(this.testee.getPath().toString()).isEqualTo(path);
 	}
 
 	private void assertFieldHasPathAnnotation() {

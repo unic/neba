@@ -21,6 +21,7 @@ import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.api.resourcemodels.ResourceModelFactory;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
+import io.neba.core.util.PathWithPlaceholders;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
 import java.lang.annotation.Annotation;
@@ -30,6 +31,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.springframework.cglib.proxy.LazyLoader;
@@ -56,14 +59,22 @@ public class FieldValueMappingCallback {
     private final ValueMap properties;
     private final Resource resource;
     private final AnnotatedFieldMappers annotatedFieldMappers;
+    private final PlaceholderVariableResolvers placeholderVariableResolvers;
 
     /**
-     * @param model    the model to be mapped. Must not be null.
-     * @param resource the source of property values for the model. Must not be null.
-     * @param factory  must not be null.
-     * @param annotatedFieldMappers  must not be null.
+     * @param model     the model to be mapped. Must not be <code>null</code>.
+     * @param resource  the source of property values for the model. Must not be <code>null</code>.
+     * @param factory   must not be <code>null</code>.
+     * @param mappers   must not be <code>null</code>.
+     * @param resolvers must not be <code>null</code>.
      */
-    public FieldValueMappingCallback(Object model, Resource resource, ResourceModelFactory factory, AnnotatedFieldMappers annotatedFieldMappers) {
+    FieldValueMappingCallback(
+            Object model,
+            Resource resource,
+            ResourceModelFactory factory,
+            AnnotatedFieldMappers mappers,
+            PlaceholderVariableResolvers resolvers) {
+
         if (model == null) {
             throw new IllegalArgumentException("Constructor parameter model must not be null.");
         }
@@ -73,24 +84,28 @@ public class FieldValueMappingCallback {
         if (factory == null) {
             throw new IllegalArgumentException("Constructor parameter factory must not be null.");
         }
-        if (annotatedFieldMappers == null) {
-            throw new IllegalArgumentException("Method argument customFieldMappers must not be null.");
+        if (mappers == null) {
+            throw new IllegalArgumentException("Method argument mappers must not be null.");
+        }
+        if (resolvers == null) {
+            throw new IllegalArgumentException("Method argument resolvers must not be null");
         }
 
         this.model = model;
         this.properties = toValueMap(resource);
         this.resource = resource;
-        this.annotatedFieldMappers = annotatedFieldMappers;
+        this.annotatedFieldMappers = mappers;
+        this.placeholderVariableResolvers = resolvers;
     }
 
     /**
      * Invoked for each {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData#getMappableFields() mappable field}
      * of a {@link io.neba.api.annotations.ResourceModel} to map the {@link MappedFieldMetaData#getField() corresponding field's}
-     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, ResourceModelFactory, AnnotatedFieldMappers) constructor}.
+     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, ResourceModelFactory, AnnotatedFieldMappers, PlaceholderVariableResolvers) constructor}.
      *
      * @param metaData must not be <code>null</code>.
      */
-    public final void doWith(final MappedFieldMetaData metaData) {
+    final void doWith(final MappedFieldMetaData metaData) {
         if (metaData == null) {
             throw new IllegalArgumentException("Method argument metaData must not be null.");
         }
@@ -143,7 +158,7 @@ public class FieldValueMappingCallback {
      * {@link AnnotatedFieldMapper custom field mappers}.
      *
      * @param fieldData must not be <code>null</code>.
-     * @param value can be <code>null</code>.
+     * @param value     can be <code>null</code>.
      * @return the post-processed value, can be <code>null</code>.
      */
     private Object postProcessResolvedValue(FieldData fieldData, Object value) {
@@ -473,23 +488,49 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Evaluates the {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isPathExpressionPresent() path expression}
-     * of the field (if any).
+     * Evaluates the {@link PathWithPlaceholders#hasVariables() variables}
+     * in the {@link MappedFieldMetaData#getPath()} path} of the field, if any.
      */
     private String evaluateFieldPath(MappedFieldMetaData fieldMetaData) {
-        String path = fieldMetaData.getPath();
-        if (fieldMetaData.isPathExpressionPresent()) {
-            path = evaluatePathExpression(path);
-        }
-        return path;
+        PathWithPlaceholders path = fieldMetaData.getPath();
+        return path.resolve(this.placeholderVariableResolvers::resolve).toString();
     }
 
     /**
      * FIXME: re-implement not based on the bean factory
      */
-    private String evaluatePathExpression(String pathWithExpression) {
-        String path = pathWithExpression;
-        return path;
+    private String evaluatePathExpression(String path) {
+        final int pathLength = path.length();
+        StringBuilder pathBuilder = new StringBuilder(pathLength * 2);
+
+        for (int i = 0; i < pathLength; ++i) {
+            if (path.charAt(i) == '$' && i < pathLength - 1) {
+                ++i;
+                if (path.charAt(i) == '{') {
+                    int varStart = i++;
+                    for (; i < pathLength; ++i) {
+                        if (path.charAt(i) == '}') {
+                            String varName = path.substring(varStart, i);
+                            String resolved = this.placeholderVariableResolvers.resolve(varName);
+                            if (resolved != null) {
+                                pathBuilder.append(resolved);
+                                break;
+                            }
+                        }
+                    }
+                    if (i >= pathLength) {
+                        pathBuilder.append(path.substring(varStart - 1, i - 1));
+                    }
+                } else {
+                    pathBuilder.append(path.charAt(i - 1));
+                    pathBuilder.append(path.charAt(i));
+                }
+            } else {
+                pathBuilder.append(path.charAt(i));
+            }
+        }
+
+        return pathBuilder.toString();
     }
 
     /**
@@ -508,7 +549,7 @@ public class FieldValueMappingCallback {
      *
      * @param resource must not be <code>null</code>.
      * @return the value map, or <code>null</code> if the resource has no properties,
-     *         e.g. if it is synthetic.
+     * e.g. if it is synthetic.
      */
     private static ValueMap toValueMap(Resource resource) {
         ValueMap propertyMap = resource.adaptTo(ValueMap.class);
@@ -565,11 +606,11 @@ public class FieldValueMappingCallback {
          * Determines whether the mappedFieldMetaData represents a reference to another resource.
          * This is the case IFF:
          * </p>
-         *
+         * <p>
          * <ul>
-         *   <li>it has a type that {@link MappedFieldMetaData#isPropertyType() can only be a property} or</li>
-         *   <li>it it is annotated with an absolute path or</li>
-         *   <li>it it is annotated with a relative path</li>
+         * <li>it has a type that {@link MappedFieldMetaData#isPropertyType() can only be a property} or</li>
+         * <li>it it is annotated with an absolute path or</li>
+         * <li>it it is annotated with a relative path</li>
          * </ul>.
          */
         private boolean isReferenceToOtherResource() {
@@ -714,8 +755,8 @@ public class FieldValueMappingCallback {
     /**
      * Lazy-loads collections of children.
      *
-     * @see #createCollectionOfChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)
      * @author Olaf Otto
+     * @see #createCollectionOfChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)
      */
     private static class LazyChildrenLoader implements LazyLoader {
         private final FieldData field;
@@ -737,8 +778,8 @@ public class FieldValueMappingCallback {
     /**
      * Lazy-loads collections of references.
      *
-     * @see #createCollectionOfReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[])
      * @author Olaf Otto
+     * @see #createCollectionOfReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[])
      */
     private static class LazyReferencesLoader implements LazyLoader {
         private final FieldData field;
@@ -785,52 +826,62 @@ public class FieldValueMappingCallback {
             this.properties = properties;
         }
 
+        @CheckForNull
         @Override
         public Object getResolvedValue() {
             return resolvedValue;
         }
 
         @Override
+        @Nonnull
         public Object getAnnotation() {
             return mapping.getAnnotation();
         }
 
         @Override
+        @Nonnull
         public Object getModel() {
             return model;
         }
 
         @Override
+        @Nonnull
         public Field getField() {
             return metaData.getField();
         }
 
         @Override
+        @Nonnull
         public Map<Class<? extends Annotation>, Annotation> getAnnotationsOfField() {
             return metaData.getAnnotations().getAnnotations();
         }
 
         @Override
+        @Nonnull
         public Class<?> getFieldType() {
             return metaData.getType();
         }
 
         @Override
+        @CheckForNull
         public Class<?> getFieldTypeParameter() {
             return this.metaData.getTypeParameter();
         }
 
         @Override
+        @Nonnull
         public String getRepositoryPath() {
             return fieldData.path;
         }
 
         @Override
+        @Nonnull
         public Resource getResource() {
             return resource;
         }
 
         @Override
+        @Nonnull
         public ValueMap getProperties() {
             return properties;
         }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:task="http://www.springframework.org/schema/task"
+
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util-4.3.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task-4.3.xsd
+           http://www.osgi.org/xmlns/blueprint/v1.0.0
+           http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<context:component-scan base-package="io.neba.spring" />
+
+	<task:annotation-driven proxy-target-class="true" executor="defaultExecutor" />
+
+	<!-- Explicitly define a default executor for all non-qualified @Async methods. This is necessary as
+	     the FelixTaskExecutor, which is synchronous, is published with the default executor name "taskExecutor" and
+	     would thus be used for all such method invocations. -->
+	<task:executor id="defaultExecutor" />
+
+    <!-- A java.util.Properties instance called "extenderProperties" is automatically used by blueprint extender (naming convention) -->
+    <util:properties id="extenderProperties" location="io/neba/spring/blueprint/extender.properties" />
+
+	<bp:blueprint>
+		<!-- References to other OSGi services -->
+		<bp:reference interface="javax.servlet.ServletContext" id="servletContext" />
+		<bp:reference interface="javax.servlet.ServletConfig" id="servletConfig" />
+		<bp:reference interface="org.apache.sling.api.servlets.ServletResolver" id="servletResolver" />
+
+		<!-- Beans not providable by classpath scanning -->
+		<bp:bean class="org.springframework.web.filter.RequestContextFilter" id="requestContextFilter" />
+
+		<!-- Beans exported as OSGi services -->
+		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" id="requestContextFilterService">
+			<bp:service-properties>
+				<entry key="sling.filter.scope">
+					<array value-type="java.lang.String">
+						<value>REQUEST</value>
+						<value>ERROR</value>
+					</array>
+				</entry>
+				<entry key="service.description" value="Exposes HTTP requests and their attributes via a ThreadLocal." />
+				<entry key="service.vendor" value="Spring.io" />
+			</bp:service-properties>
+		</bp:service>
+		<bp:service interface="javax.servlet.Servlet" ref="mvcServlet">
+			<bp:service-properties>
+				<entry key="sling.servlet.paths">
+                    <array value-type="java.lang.String">
+                        <value>/mvc</value>
+                        <value>/bin/mvc</value>
+                    </array>
+				</entry>
+				<entry key="service.description" value="A generic servlet that handles all requests using Spring MVC." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
+	</bp:blueprint>
+</beans>

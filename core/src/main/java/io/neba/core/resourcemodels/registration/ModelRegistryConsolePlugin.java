@@ -34,6 +34,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
@@ -65,9 +67,13 @@ import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
  */
 @Service(Servlet.class)
 @Component
+@Properties({
+        @Property(name = "felix.webconsole.label", value = ModelRegistryConsolePlugin.LABEL),
+        @Property(name = "service.description", value="Provides a felix console plugin listing all registered @ResourceModel's."),
+        @Property(name = "service.vendor", value="neba.io")
+})
 public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
-    public static final String LABEL = "modelregistry";
-
+    static final String LABEL = "modelregistry";
     private static final String PREFIX_STATIC = "/static";
     private static final long serialVersionUID = -8676958166611686979L;
     private static final String API_PATH = "/api";

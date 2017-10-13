@@ -22,11 +22,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
@@ -50,10 +53,15 @@ import static org.springframework.util.ClassUtils.isPresent;
  *
  * @author Olaf Otto
  */
-@Service(LogfileViewerConsolePlugin.class)
+@Service(Servlet.class)
 @Component
+@Properties({
+        @Property(name = "felix.webconsole.label", value = LogfileViewerConsolePlugin.LABEL),
+        @Property(name = "service.description", value="Provides a Felix console plugin for monitoring and downloading Sling logfiles."),
+        @Property(name = "service.vendor", value="neba.io")
+})
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
-    private static final String LABEL = "logviewer";
+    static final String LABEL = "logviewer";
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
     private static final String DECORATED_OBJECT_FACTORY = "org.eclipse.jetty.util.DecoratedObjectFactory";
 

@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 
@@ -28,7 +29,10 @@ import static java.lang.annotation.ElementType.FIELD;
  * Defines the relative or absolute path of a property or resource mapped to a
  * field. Can be used when the name of the field does not match the name of
  * the mapped child resource or property, e.g. in case namespaces are used, or
- * if an absolute or relative path is to be mapped. <br />
+ * if an absolute or relative path is to be mapped. <br /> Supports placehodlers of the form
+ * ${name}, which either resolves to {@link System#getenv() environment} or {@link System#getProperties() system} properties
+ * or are resolved by a custom {@link io.neba.api.resourcemodels.PlaceholderVariableResolver} service.
+ *
  * Example
  * <p>
  * 
@@ -39,6 +43,8 @@ import static java.lang.annotation.ElementType.FIELD;
  *     &#064;Path(&quot;/content/homepage&quot;)
  *     private Page homepage;
  *     &#064;Path(&quot;../toolbar&quot;)
+ *     private Page toolbar;
+ *     &#064;Path(&quot;/content/${market}/${language}&quot;)
  *     private Page toolbar;
  * }
  * </pre>

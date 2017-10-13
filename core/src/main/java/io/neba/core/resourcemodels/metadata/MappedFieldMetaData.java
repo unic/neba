@@ -23,23 +23,26 @@ import io.neba.api.annotations.This;
 import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.util.Annotations;
+import io.neba.core.util.PathWithPlaceholders;
 import io.neba.core.util.ReflectionUtil;
-import org.apache.commons.lang3.ClassUtils;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.LazyLoader;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import org.apache.commons.lang3.ClassUtils;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.Factory;
+import org.springframework.cglib.proxy.LazyLoader;
+
 
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.springframework.util.ReflectionUtils.makeAccessible;
 
@@ -66,13 +69,12 @@ public class MappedFieldMetaData {
 
     private final Field field;
     private final Annotations annotations;
-    private final String path;
+    private final PathWithPlaceholders path;
     private final boolean isReference;
     private final boolean isAppendPathPresentOnReference;
     private final String appendPathOnReference;
     private final boolean isThisReference;
     private final boolean isPathAnnotationPresent;
-    private final boolean isPathExpressionPresent;
     private final boolean isPropertyType;
     private final boolean isCollectionType;
     private final boolean isInstantiableCollectionType;
@@ -127,7 +129,6 @@ public class MappedFieldMetaData {
         this.typeParameter = resolveTypeParameter();
         this.arrayTypeOfComponentType = resolveArrayTypeOfComponentType();
         this.path = getPathInternal();
-        this.isPathExpressionPresent = isPathExpressionPresentInternal();
         this.isPropertyType = isPropertyTypeInternal();
         this.isInstantiableCollectionType = ReflectionUtil.isInstantiableCollectionType(this.fieldType);
 
@@ -199,14 +200,6 @@ public class MappedFieldMetaData {
                relativePath.charAt(0) == '/' ? relativePath.substring(1) : relativePath;
     }
 
-    /**
-     * @return Whether the path name contains an expression.
-     * An expression has the form ${value}, e.g. &#64;Path("/content/${language}/homepage").
-     */
-    private boolean isPathExpressionPresentInternal() {
-        return this.isPathAnnotationPresent && this.path.contains("$");
-    }
-
     private Class<?> resolveTypeParameter() {
         Class<?> typeParameter = null;
         if (this.isCollectionType) {
@@ -238,7 +231,7 @@ public class MappedFieldMetaData {
      * The path is derived from either the field name (this is the default)
      * or from an explicit {@link io.neba.api.annotations.Path} annotation.
      */
-    private String getPathInternal() {
+    private PathWithPlaceholders getPathInternal() {
         String resolvedPath;
         if (isPathAnnotationPresent()) {
             Path path = this.annotations.get(Path.class);
@@ -250,7 +243,7 @@ public class MappedFieldMetaData {
         } else {
             resolvedPath = field.getName();
         }
-        return resolvedPath;
+        return new PathWithPlaceholders(resolvedPath);
     }
 
     /**
@@ -310,7 +303,7 @@ public class MappedFieldMetaData {
      * @return The path from which this field's value shall be mapped; may stem
      * from the field name or a {@link io.neba.api.annotations.Path} annotation.
      */
-    public String getPath() {
+    public PathWithPlaceholders getPath() {
         return this.path;
     }
 
@@ -329,14 +322,6 @@ public class MappedFieldMetaData {
         return this.isPathAnnotationPresent;
     }
 
-
-    /**
-     * @ return Whether this field has a {@link io.neba.api.annotations.Path} annotation
-     * containing an expression such as <code>${path}</code>.
-     */
-    public boolean isPathExpressionPresent() {
-        return this.isPathExpressionPresent;
-    }
 
     /**
      * Whether the type of this field can only be represented by a resource property (and not a resource).
@@ -438,4 +423,5 @@ public class MappedFieldMetaData {
     public String toString() {
         return getClass().getName() + " [" + this.field + "]";
     }
+
 }

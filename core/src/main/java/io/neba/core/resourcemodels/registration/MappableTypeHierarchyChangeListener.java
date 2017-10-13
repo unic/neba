@@ -21,17 +21,22 @@ import java.util.concurrent.ExecutorService;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
+import static org.apache.sling.api.SlingConstants.TOPIC_RESOURCE_CHANGED;
+import static org.osgi.service.event.EventConstants.EVENT_FILTER;
+import static org.osgi.service.event.EventConstants.EVENT_TOPIC;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Listens for <em>resource property</em> changes potentially altering the resource type -&gt; model relationships. Invalidates the
@@ -56,8 +61,31 @@ import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
  */
 @Service(EventHandler.class)
 @Component
+@Properties({
+        @Property(name = EVENT_TOPIC, value = TOPIC_RESOURCE_CHANGED),
+        /*
+         * React to changes potentially altering the cacheable resource type hierarchy, unless they are occurring
+         * in a location known not to contain data relevant to the type hierarchy, such as /var or /content
+         */
+        @Property(name = EVENT_FILTER, value = "(&amp;" +
+                "(!(path=/content/*))" +
+                " (!(path=/var/*))" +
+                " (!(path=/jcr:*))" +
+                " (!(path=/oak:*))" +
+                " (|" +
+                "  (resourceAddedAttributes=jcr:mixinTypes)" +
+                "  (resourceAddedAttributes=sling:resourceSuperType)" +
+                "  (resourceChangedAttributes=jcr:mixinTypes)" +
+                "  (resourceChangedAttributes=sling:resourceType)" +
+                "  (resourceChangedAttributes=sling:resourceSuperType)" +
+                "  (resourceRemovedAttributes=sling:resourceSuperType)" +
+                "  (resourceRemovedAttributes=jcr:mixinTypes)" +
+                "))"),
+        @Property(name = "service.description", value="An event handler invalidating cache resource type hierarchy information."),
+        @Property(name = "service.vendor", value="neba.io")
+})
 public class MappableTypeHierarchyChangeListener implements EventHandler {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = getLogger(getClass());
     private final ExecutorService executorService = newSingleThreadExecutor();
     private final BlockingQueue<Object> invalidationRequests = new ArrayBlockingQueue<>(1);
     private boolean isShutDown = false;

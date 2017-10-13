@@ -25,11 +25,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
+import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MULTIPLE;
+import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
 
 /**
  * Represents all registered {@link io.neba.api.resourcemodels.AnnotatedFieldMapper custom field mappers}
@@ -71,6 +74,10 @@ public class AnnotatedFieldMappers {
           = new ConcurrentDistinctMultiValueMap<>();
 
     private final AtomicInteger state = new AtomicInteger(0);
+
+    @Reference(cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+    @SuppressWarnings("unused")
+    private Collection<AnnotatedFieldMapper<?, ?>> mappers;
 
     public synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {

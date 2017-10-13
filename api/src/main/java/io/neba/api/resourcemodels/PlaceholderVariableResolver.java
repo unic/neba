@@ -14,13 +14,13 @@
  * limitations under the License.
 **/
 
-package io.neba.api.configuration;
+package io.neba.api.resourcemodels;
 
 import javax.annotation.Nonnull;
 
 /**
- * A source for values of variables of the form
- * <pre>${key}</pre>.
+ * A source for values of variables of the form <pre>${key}</pre>, as
+ * supported by the {@link io.neba.api.annotations.Path} annotation.
  * 
  * @author Olaf Otto
  */

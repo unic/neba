@@ -411,7 +411,7 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void getResource(String resource) {
-        String resourcePath = "/" + ModelRegistryConsolePlugin.LABEL + "/static/" + resource;
+        String resourcePath = "/" + "modelregistry" + "/static/" + resource;
         this.resourceUrl = this.testee.getResource(resourcePath);
     }
 

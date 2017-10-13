@@ -27,6 +27,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
@@ -48,8 +50,13 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
  */
 @Service(Servlet.class)
 @Component
+@Properties({
+        @Property(name = "felix.webconsole.label", value = ModelStatisticsConsolePlugin.LABEL),
+        @Property(name = "service.description", value="Provides a Felix console plugin visualizing resource @ResourceModel statistics."),
+        @Property(name = "service.vendor", value="neba.io")
+})
 public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
-    public static final String LABEL = "modelstatistics";
+    static final String LABEL = "modelstatistics";
     private static final long serialVersionUID = -8676958166611686979L;
     private static final String STATISTICS_API_PATH = "/api/statistics";
     private static final String RESET_API_PATH = "/api/reset";

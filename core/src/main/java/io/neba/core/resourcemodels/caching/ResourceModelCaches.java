@@ -27,6 +27,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 
+
+import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MULTIPLE;
+import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
+
 /**
  * Represents all currently registered {@link ResourceModelCache resource model cache services}.
  * <br />
@@ -41,7 +45,8 @@ public class ResourceModelCaches {
     @Reference
     private ResourceModelMetaDataRegistrar metaDataRegistrar;
 
-    private final List<ResourceModelCache> caches = new ArrayList<>();
+    @Reference(cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+    private List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
      * Looks up the {@link #store(Resource, OsgiModelSource, Object)} cached model}
@@ -105,11 +110,11 @@ public class ResourceModelCaches {
         }
     }
 
-    public void bind(ResourceModelCache cache) {
+    protected void bind(ResourceModelCache cache) {
         this.caches.add(cache);
     }
 
-    public void unbind(ResourceModelCache cache) {
+    protected void unbind(ResourceModelCache cache) {
         if (cache == null) {
             return;
         }

@@ -34,6 +34,8 @@ import org.springframework.aop.framework.Advised;
 
 import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MULTIPLE;
+import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
 import static org.springframework.util.Assert.notNull;
 
 /**
@@ -47,13 +49,16 @@ import static org.springframework.util.Assert.notNull;
 @Service(ResourceToModelMapper.class)
 @Component
 public class ResourceToModelMapper {
-    private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
+    @Reference(cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+    private List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
     @Reference
     private ModelProcessor modelProcessor;
     @Reference
     private NestedMappingSupport nestedMappingSupport;
     @Reference
-    private AnnotatedFieldMappers annotatedFieldMappers;
+    private AnnotatedFieldMappers fieldMappers;
+    @Reference
+    private PlaceholderVariableResolvers variableResolvers;
     @Reference
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
@@ -152,7 +157,7 @@ public class ResourceToModelMapper {
             model = getTargetObjectOfAdvisedBean((Advised) bean);
         }
 
-        final FieldValueMappingCallback callback = new FieldValueMappingCallback(model, resource, factory, this.annotatedFieldMappers);
+        final FieldValueMappingCallback callback = new FieldValueMappingCallback(model, resource, factory, this.fieldMappers, this.variableResolvers);
 
         for (MappedFieldMetaData mappedFieldMetaData : metaData.getMappableFields()) {
             callback.doWith(mappedFieldMetaData);
@@ -190,11 +195,11 @@ public class ResourceToModelMapper {
         return currentModel;
     }
 
-    public void bind(ResourceModelPostProcessor postProcessor) {
+    protected void bind(ResourceModelPostProcessor postProcessor) {
         this.postProcessors.add(postProcessor);
     }
 
-    public void unbind(ResourceModelPostProcessor postProcessor) {
+    protected void unbind(ResourceModelPostProcessor postProcessor) {
         if (postProcessor == null) {
             return;
         }

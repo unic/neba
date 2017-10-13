@@ -24,6 +24,7 @@ import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.Annotations;
+import io.neba.core.util.PathWithPlaceholders;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -85,6 +86,10 @@ public class FieldValueMappingCallbackTest {
     private AnnotatedFieldMappers annotatedFieldMappers;
     @Mock
     private AnnotatedFieldMapper annotatedFieldMapper;
+    @Mock
+    private PlaceholderVariableResolvers placeholderVariableResolvers;
+    @Mock
+    private PathWithPlaceholders path;
 
     private LazyLoader lazyLoadingCollectionCallback;
 
@@ -105,17 +110,10 @@ public class FieldValueMappingCallbackTest {
     private OngoingMapping ongoingMapping;
 
     @Before
-    public void prepareMappedField() throws Exception {
+    public void setUp() throws Exception {
         withMappedField("mappedFieldOfTypeObject");
-    }
-
-    @Before
-    public void prepareTestResource() {
         withResource(mock(Resource.class));
-    }
 
-    @Before
-    public void mockLazyLoadingCollectionFactory() {
         Answer<Object> loadImmediately = invocationOnMock -> {
             lazyLoadingCollectionCallback = (LazyLoader) invocationOnMock.getArguments()[0];
             return lazyLoadingCollectionCallback.loadObject();
@@ -127,11 +125,10 @@ public class FieldValueMappingCallbackTest {
         doReturn(lazyLoadingCollectionFactory)
                 .when(this.mappedFieldMetadata)
                 .getCollectionProxyFactory();
-    }
 
-    @Before
-    public void prepareCustomFieldMappers() throws Exception {
         doReturn(emptyList()).when(this.annotatedFieldMappers).get(isA(MappedFieldMetaData.class));
+        doReturn(this.path).when(this.mappedFieldMetadata).getPath();
+        doReturn(this.path).when(this.path).resolve(any());
     }
 
     /**
@@ -139,7 +136,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullModelInConstructor() throws Exception {
-        new FieldValueMappingCallback(null, this.resource, this.factory, this.annotatedFieldMappers);
+        new FieldValueMappingCallback(null, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
     /**
@@ -147,7 +144,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullResourceInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, null, this.factory, this.annotatedFieldMappers);
+        new FieldValueMappingCallback(this.model, null, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
     /**
@@ -155,7 +152,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, null, this.annotatedFieldMappers);
+        new FieldValueMappingCallback(this.model, this.resource, null, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
     /**
@@ -163,7 +160,7 @@ public class FieldValueMappingCallbackTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFactoryInMapping() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers).doWith(null);
+        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers).doWith(null);
     }
 
     /**
@@ -858,42 +855,11 @@ public class FieldValueMappingCallbackTest {
     @Test
     public void testPlaceholderResolutionInPath() throws Exception {
         withResourceModelFactory();
-        withPlaceholderResolution("text-${language}", "text-de");
-        withPropertyFieldWithPath(String.class, "text-${language}");
-        withPathExpressionDetected();
+        withPathVariableResolution("title-de");
+        withPropertyFieldWithPath(String.class, "title-${language}");
         mapField();
-        assertFieldMapperAttemptsToResolvePlaceholdersIn("text-${language}");
-        assertFieldMapperLoadsFromValueMap("text-de");
-    }
-
-    /**
-     * When no value for a placeholder in a path can be resolved, the original path including the placeholder
-     * shall be used.
-     *
-     * @see #testPlaceholderResolutionInPath()
-     */
-    @Test
-    public void testPlaceholderResolutionWithoutSubstitution() throws Exception {
-        withResourceModelFactory();
-        withPropertyFieldWithPath(String.class, "text-${language}");
-        withPathExpressionDetected();
-        mapField();
-        assertFieldMapperAttemptsToResolvePlaceholdersIn("text-${language}");
-        assertFieldMapperLoadsFromValueMap("text-${language}");
-    }
-
-    /**
-     * Placeholders can only occur if a {@link io.neba.api.annotations.Path} annotation
-     * was used. The mapper must thus not attempt to resolve placeholders in paths
-     * resolved from the field name.
-     *
-     * @see #testPlaceholderResolutionInPath()
-     */
-    @Test
-    public void testPlaceholdersAreOnlyResolvedForPathAnnotationValues() throws Exception {
-        withResourceModelFactory();
-        mapPropertyField(String.class, "someValue");
-        assertFieldMapperDoesNotAttemptToResolvePlaceholders();
+        verifyFieldMapperResolvesPath();
+        assertFieldMapperLoadsFromValueMap("title-de");
     }
 
     /**
@@ -1674,10 +1640,6 @@ public class FieldValueMappingCallbackTest {
         withPropertyTypedField();
     }
 
-    private void withPathExpressionDetected() {
-        when(this.mappedFieldMetadata.isPathExpressionPresent()).thenReturn(true);
-    }
-
     private void mapChildResourceField(Class<?> fieldType) throws NoSuchFieldException {
         withField(fieldType);
         mapField();
@@ -1709,8 +1671,10 @@ public class FieldValueMappingCallbackTest {
         this.targetValue = target;
     }
 
-    private void withPlaceholderResolution(String key, String value) {
-        throw new RuntimeException("TODO: do not use the bean factory");
+    private void withPathVariableResolution(String to) {
+        PathWithPlaceholders resolved = mock(PathWithPlaceholders.class);
+        doReturn(to).when(resolved).toString();
+        doReturn(resolved).when(this.path).resolve(any());
     }
 
     private void withResourceModelFactory() {
@@ -1805,7 +1769,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void withFieldPath(String path) {
-        doReturn(path).when(this.mappedFieldMetadata).getPath();
+        doReturn(path).when(this.path).toString();
     }
 
     private void withReferenceAnnotationPresent() {
@@ -1832,7 +1796,7 @@ public class FieldValueMappingCallbackTest {
     private <T> void withField(Class<T> fieldType) throws NoSuchFieldException {
         mappedField.setAccessible(true);
         doReturn(mappedField).when(this.mappedFieldMetadata).getField();
-        doReturn("field").when(this.mappedFieldMetadata).getPath();
+        doReturn("field").when(this.path).toString();
         doReturn(fieldType).when(this.mappedFieldMetadata).getType();
 
         Annotations annotations = mock(Annotations.class);
@@ -1841,7 +1805,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void mapField() {
-        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers)
+        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers)
                 .doWith(this.mappedFieldMetadata);
     }
 
@@ -1934,10 +1898,6 @@ public class FieldValueMappingCallbackTest {
         }
     }
 
-    private void assertFieldMapperDoesNotAttemptToResolvePlaceholders() {
-        throw new RuntimeException("TODO: do not use the bean factory");
-    }
-
     private void assertChildResourceIsNotLoadedForField() {
         verify(this.resource, never()).getChild(eq("field"));
     }
@@ -1955,17 +1915,17 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertFieldIsFetchedFromValueMap() {
-        String fieldPath = this.mappedFieldMetadata.getPath();
+        String fieldPath = this.mappedFieldMetadata.getPath().toString();
         verify(this.valueMap).get(eq(fieldPath), eq(String.class));
     }
 
     private void assertFieldIsNotFetchedFromValueMap() {
-        String fieldPath = this.mappedFieldMetadata.getPath();
+        String fieldPath = this.mappedFieldMetadata.getPath().toString();
         verify(this.valueMap, never()).get(eq(fieldPath), eq(String.class));
     }
 
     private void assertFieldIsFetchedFromValueMapAs(Class<?> expectedPropertyType) {
-        String fieldPath = this.mappedFieldMetadata.getPath();
+        String fieldPath = this.mappedFieldMetadata.getPath().toString();
         verify(this.valueMap).get(fieldPath, expectedPropertyType);
     }
 
@@ -1973,8 +1933,8 @@ public class FieldValueMappingCallbackTest {
         verify(this.valueMap).get(eq(key), eq(String.class));
     }
 
-    private void assertFieldMapperAttemptsToResolvePlaceholdersIn(String placeholder) {
-        throw new RuntimeException("TODO: do not use the bean factory.");
+    private void verifyFieldMapperResolvesPath() {
+        verify(this.path).resolve(any());
     }
 
     @SuppressWarnings("unchecked")

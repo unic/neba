@@ -94,7 +94,7 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
          * or <code>null</code> if no value could be resolved for the field. This value
          * has not been set to the {@link #getField() field} at this point.
          */
-        @Nonnull
+        @CheckForNull
         FieldType getResolvedValue();
 
         /**
