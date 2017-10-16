@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 
+import static io.neba.core.util.ResourcePaths.path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeast;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.verify;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PathWithPlaceholdersTest {
+public class ResourcePathsTest {
     @Mock
     private Function<String, String> resolver;
 
@@ -86,8 +87,8 @@ public class PathWithPlaceholdersTest {
 
     @Test
     public void testDetectionOfVariables() throws Exception {
-        assertThat(new PathWithPlaceholders("").hasVariables()).isFalse();
-        assertThat(new PathWithPlaceholders("${variable}").hasVariables()).isTrue();
+        assertThat(path("").hasPlaceholders()).isFalse();
+        assertThat(path("${variable}").hasPlaceholders()).isTrue();
     }
 
     private void assertReplacedValueIs(String k) {
@@ -107,6 +108,6 @@ public class PathWithPlaceholdersTest {
     }
 
     private void replace(String s) {
-        this.resolvedValue = new PathWithPlaceholders(s).resolve(this.resolver).toString();
+        this.resolvedValue = path(s).resolve(this.resolver).toString();
     }
 }

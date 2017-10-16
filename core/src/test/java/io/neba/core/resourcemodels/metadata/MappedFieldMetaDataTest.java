@@ -336,7 +336,7 @@ public class MappedFieldMetaDataTest {
     }
 
     private void assertFieldHasPathVariables() {
-        assertThat(this.testee.getPath().hasVariables()).isTrue();
+        assertThat(this.testee.getPath().hasPlaceholders()).isTrue();
     }
 
     private void assertFieldIsInstantiableCollectionType() {

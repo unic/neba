@@ -21,9 +21,9 @@ import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.api.resourcemodels.ResourceModelFactory;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
-import io.neba.core.util.PathWithPlaceholders;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
+import io.neba.core.util.ResourcePaths;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -488,11 +488,11 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Evaluates the {@link PathWithPlaceholders#hasVariables() variables}
+     * Evaluates the {@link ResourcePaths.ResourcePath#hasPlaceholders() variables}
      * in the {@link MappedFieldMetaData#getPath()} path} of the field, if any.
      */
     private String evaluateFieldPath(MappedFieldMetaData fieldMetaData) {
-        PathWithPlaceholders path = fieldMetaData.getPath();
+        ResourcePaths.ResourcePath path = fieldMetaData.getPath();
         return path.resolve(this.placeholderVariableResolvers::resolve).toString();
     }
 

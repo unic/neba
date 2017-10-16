@@ -20,7 +20,7 @@ import io.neba.api.annotations.Path;
 import io.neba.api.annotations.ResourceModel;
 
 /**
- * Contains a member with an invalid <code>@Path</code> annotation.
+ * Contains a member with an invalid {@link Path} annotation.
  * 
  * @author Olaf Otto
  */

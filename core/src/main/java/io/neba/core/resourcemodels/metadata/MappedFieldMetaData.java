@@ -23,8 +23,8 @@ import io.neba.api.annotations.This;
 import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.resourcemodels.Optional;
 import io.neba.core.util.Annotations;
-import io.neba.core.util.PathWithPlaceholders;
 import io.neba.core.util.ReflectionUtil;
+import io.neba.core.util.ResourcePaths;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -40,6 +40,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
+import static io.neba.core.util.ResourcePaths.path;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -69,7 +70,7 @@ public class MappedFieldMetaData {
 
     private final Field field;
     private final Annotations annotations;
-    private final PathWithPlaceholders path;
+    private final ResourcePaths.ResourcePath path;
     private final boolean isReference;
     private final boolean isAppendPathPresentOnReference;
     private final String appendPathOnReference;
@@ -231,7 +232,7 @@ public class MappedFieldMetaData {
      * The path is derived from either the field name (this is the default)
      * or from an explicit {@link io.neba.api.annotations.Path} annotation.
      */
-    private PathWithPlaceholders getPathInternal() {
+    private ResourcePaths.ResourcePath getPathInternal() {
         String resolvedPath;
         if (isPathAnnotationPresent()) {
             Path path = this.annotations.get(Path.class);
@@ -243,7 +244,7 @@ public class MappedFieldMetaData {
         } else {
             resolvedPath = field.getName();
         }
-        return new PathWithPlaceholders(resolvedPath);
+        return path(resolvedPath);
     }
 
     /**
@@ -303,7 +304,7 @@ public class MappedFieldMetaData {
      * @return The path from which this field's value shall be mapped; may stem
      * from the field name or a {@link io.neba.api.annotations.Path} annotation.
      */
-    public PathWithPlaceholders getPath() {
+    public ResourcePaths.ResourcePath getPath() {
         return this.path;
     }
 

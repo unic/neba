@@ -24,7 +24,7 @@ import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.Annotations;
-import io.neba.core.util.PathWithPlaceholders;
+import io.neba.core.util.ResourcePaths;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -89,7 +89,7 @@ public class FieldValueMappingCallbackTest {
     @Mock
     private PlaceholderVariableResolvers placeholderVariableResolvers;
     @Mock
-    private PathWithPlaceholders path;
+    private ResourcePaths.ResourcePath path;
 
     private LazyLoader lazyLoadingCollectionCallback;
 
@@ -1672,7 +1672,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void withPathVariableResolution(String to) {
-        PathWithPlaceholders resolved = mock(PathWithPlaceholders.class);
+        ResourcePaths.ResourcePath resolved = mock(ResourcePaths.ResourcePath.class);
         doReturn(to).when(resolved).toString();
         doReturn(resolved).when(this.path).resolve(any());
     }
