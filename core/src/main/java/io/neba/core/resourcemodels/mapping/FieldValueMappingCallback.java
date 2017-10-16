@@ -41,6 +41,7 @@ import org.springframework.cglib.proxy.LazyLoader;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ReflectionUtils.getField;
 import static org.springframework.util.ReflectionUtils.setField;
@@ -117,7 +118,7 @@ public class FieldValueMappingCallback {
 
         if (metaData.isLazy()) {
             // Lazy fields are never null, regardless of whether a value is mappable.
-            Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : LazyFieldValue.EMPTY;
+            Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : java.util.Optional::empty;
             setField(metaData.getField(), this.model, lazy);
             return;
         }
@@ -493,44 +494,7 @@ public class FieldValueMappingCallback {
      */
     private String evaluateFieldPath(MappedFieldMetaData fieldMetaData) {
         ResourcePaths.ResourcePath path = fieldMetaData.getPath();
-        return path.resolve(this.placeholderVariableResolvers::resolve).toString();
-    }
-
-    /**
-     * FIXME: re-implement not based on the bean factory
-     */
-    private String evaluatePathExpression(String path) {
-        final int pathLength = path.length();
-        StringBuilder pathBuilder = new StringBuilder(pathLength * 2);
-
-        for (int i = 0; i < pathLength; ++i) {
-            if (path.charAt(i) == '$' && i < pathLength - 1) {
-                ++i;
-                if (path.charAt(i) == '{') {
-                    int varStart = i++;
-                    for (; i < pathLength; ++i) {
-                        if (path.charAt(i) == '}') {
-                            String varName = path.substring(varStart, i);
-                            String resolved = this.placeholderVariableResolvers.resolve(varName);
-                            if (resolved != null) {
-                                pathBuilder.append(resolved);
-                                break;
-                            }
-                        }
-                    }
-                    if (i >= pathLength) {
-                        pathBuilder.append(path.substring(varStart - 1, i - 1));
-                    }
-                } else {
-                    pathBuilder.append(path.charAt(i - 1));
-                    pathBuilder.append(path.charAt(i));
-                }
-            } else {
-                pathBuilder.append(path.charAt(i));
-            }
-        }
-
-        return pathBuilder.toString();
+        return (path.hasPlaceholders() ? path.resolve(this.placeholderVariableResolvers::resolve) : path).toString();
     }
 
     /**
@@ -640,6 +604,7 @@ public class FieldValueMappingCallback {
          * {@inheritDoc}
          */
         @Override
+        @Nonnull
         public Object get() {
             if (this.value == NULL) {
                 load();
@@ -695,6 +660,7 @@ public class FieldValueMappingCallback {
         }
 
         @Override
+        @Nonnull
         public Object get() throws NoSuchElementException {
             throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
         }
@@ -716,7 +682,6 @@ public class FieldValueMappingCallback {
      * @author Olaf Otto
      */
     private static class LazyFieldValue implements Lazy<Object> {
-        private static final Lazy<Object> EMPTY = java.util.Optional::empty;
         private static final Object NULL = new Object();
 
         private final FieldData fieldData;
@@ -733,11 +698,12 @@ public class FieldValueMappingCallback {
          * {@inheritDoc}
          */
         @Override
+        @Nonnull
         public java.util.Optional<Object> asOptional() {
             if (this.value == NULL) {
                 load();
             }
-            return java.util.Optional.ofNullable(this.value);
+            return ofNullable(this.value);
         }
 
         /**

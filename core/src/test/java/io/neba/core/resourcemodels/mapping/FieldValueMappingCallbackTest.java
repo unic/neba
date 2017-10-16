@@ -857,6 +857,7 @@ public class FieldValueMappingCallbackTest {
         withResourceModelFactory();
         withPathVariableResolution("title-de");
         withPropertyFieldWithPath(String.class, "title-${language}");
+        withPathPlaceholdersDetected();
         mapField();
         verifyFieldMapperResolvesPath();
         assertFieldMapperLoadsFromValueMap("title-de");
@@ -1770,6 +1771,10 @@ public class FieldValueMappingCallbackTest {
 
     private void withFieldPath(String path) {
         doReturn(path).when(this.path).toString();
+    }
+
+    private void withPathPlaceholdersDetected() {
+        doReturn(true).when(this.path).hasPlaceholders();
     }
 
     private void withReferenceAnnotationPresent() {
