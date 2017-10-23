@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 
 
@@ -18,9 +19,11 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
  */
 @Service(PlaceholderVariableResolvers.class)
 @Component
+@References({
+        @Reference(referenceInterface = PlaceholderVariableResolver.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+})
 public class PlaceholderVariableResolvers {
-    @Reference(cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
-    private Collection<PlaceholderVariableResolver> resolvers = new ArrayList<>();
+    private final Collection<PlaceholderVariableResolver> resolvers = new ArrayList<>();
 
     protected void bind(PlaceholderVariableResolver resolver) {
         this.resolvers.add(resolver);

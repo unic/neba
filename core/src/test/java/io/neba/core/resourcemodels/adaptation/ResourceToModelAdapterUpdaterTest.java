@@ -176,7 +176,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         assertAdaptersPropertyIs();
     }
 
-    private void assertUpdaterUpdatesModelAdapter() {
+    private void assertUpdaterUpdatesModelAdapter() throws InterruptedException {
         eventually(() -> {
             verify(this.registration).unregister();
             verify(this.context).registerService(anyString(), eq(this.adapter), eq(this.updatedProperties));

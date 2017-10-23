@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 
 
@@ -42,6 +43,9 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
  */
 @Service(AnnotatedFieldMappers.class)
 @Component
+@References({
+    @Reference(referenceInterface = AnnotatedFieldMapper.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+})
 public class AnnotatedFieldMappers {
     /**
      * Represents the relation of an {@link java.lang.annotation.Annotation} and and a
@@ -69,17 +73,13 @@ public class AnnotatedFieldMappers {
 
     private static final Collection<AnnotationMapping> EMPTY = emptyList();
     private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache
-          = new ConcurrentDistinctMultiValueMap<>();
+            = new ConcurrentDistinctMultiValueMap<>();
     private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers
-          = new ConcurrentDistinctMultiValueMap<>();
+            = new ConcurrentDistinctMultiValueMap<>();
 
     private final AtomicInteger state = new AtomicInteger(0);
 
-    @Reference(cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
-    @SuppressWarnings("unused")
-    private Collection<AnnotatedFieldMapper<?, ?>> mappers;
-
-    public synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
+    protected synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
@@ -91,7 +91,7 @@ public class AnnotatedFieldMappers {
     /**
      * @param mapper must not be <code>null</code>.
      */
-    public synchronized void unbind(AnnotatedFieldMapper<?, ?> mapper) {
+    protected synchronized void unbind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             return;
         }
@@ -123,7 +123,7 @@ public class AnnotatedFieldMappers {
             if (mappersForAnnotation == null) {
                 continue; // with next element
             }
-            for (AnnotatedFieldMapper<?, ?> mapper:  mappersForAnnotation) {
+            for (AnnotatedFieldMapper<?, ?> mapper : mappersForAnnotation) {
                 // Mappers supporting boxed types shall also support the primitive equivalent,
                 // e.g. Boolean and boolean, Integer / int.
                 Class type = primitiveToWrapper(metaData.getType());

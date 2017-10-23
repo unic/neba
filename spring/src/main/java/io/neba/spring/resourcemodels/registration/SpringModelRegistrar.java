@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
+import javax.annotation.PreDestroy;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -67,16 +69,19 @@ public class SpringModelRegistrar {
                             }
                             return new ResourceModelFactory.ModelDefinition() {
                                 @Override
+                                @Nonnull
                                 public ResourceModel getResourceModel() {
                                     return model;
                                 }
 
                                 @Override
+                                @Nonnull
                                 public String getName() {
                                     return n;
                                 }
 
                                 @Override
+                                @Nonnull
                                 public Class<?> getType() {
                                     return factory.getType(n);
                                 }
@@ -89,12 +94,14 @@ public class SpringModelRegistrar {
                 ResourceModelFactory.class.getName(),
                 new ResourceModelFactory() {
                     @Override
+                    @Nonnull
                     public Collection<ModelDefinition> getModelDefinitions() {
                         return modelDefinitions;
                     }
 
                     @Override
-                    public Object getModel(ModelDefinition modelDefinition) {
+                    @Nonnull
+                    public Object getModel(@Nonnull ModelDefinition modelDefinition) {
                         return factory.getBean(modelDefinition.getName());
                     }
                 },
@@ -104,5 +111,16 @@ public class SpringModelRegistrar {
 
     public void unregister(Bundle bundle) {
         ofNullable(this.bundlesWithModels.remove(bundle)).ifPresent(ServiceRegistration::unregister);
+    }
+
+    @PreDestroy
+    protected void shutdown() {
+        this.bundlesWithModels.forEach((b, s) -> {
+            try {
+                s.unregister();
+            } catch (IllegalStateException e) {
+                logger.trace("Cannot unregister the resource model factory service. The service may already have been unregistered.", e);
+            }
+        });
     }
 }

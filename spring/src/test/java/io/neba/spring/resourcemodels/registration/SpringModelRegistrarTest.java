@@ -92,10 +92,25 @@ public class SpringModelRegistrarTest {
 
         sendStopEventToRegistrar();
 
-        assertRegistrarUnregistersModelFActoryFactory();
+        assertRegistrarUnregistersModelFactory();
     }
 
-    private void assertRegistrarUnregistersModelFActoryFactory() {
+    @Test
+    public void testRegistrarUnregistersAllFactoriesWhenRegistrarStops() throws Exception {
+        withBeanFactory();
+        withResourceModelsInApplicationContext("bean1", "bean2");
+        registerResourceModels();
+
+        shutdown();
+
+        assertRegistrarUnregistersModelFactory();
+    }
+
+    private void shutdown() {
+        this.testee.shutdown();
+    }
+
+    private void assertRegistrarUnregistersModelFactory() {
         verify(this.serviceRegistration).unregister();
     }
 

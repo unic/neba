@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.springframework.aop.TargetSource;
@@ -48,9 +49,11 @@ import static org.springframework.util.Assert.notNull;
  */
 @Service(ResourceToModelMapper.class)
 @Component
+@References({
+        @Reference(referenceInterface = ResourceModelPostProcessor.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+})
 public class ResourceToModelMapper {
-    @Reference(cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
-    private List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
+    private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
     @Reference
     private ModelProcessor modelProcessor;
     @Reference
@@ -63,9 +66,9 @@ public class ResourceToModelMapper {
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     /**
-     * @param resource must not be <code>null</code>.
-     * @param modelSource   must not be <code>null</code>.
-     * @param <T>      the bean type.
+     * @param resource    must not be <code>null</code>.
+     * @param modelSource must not be <code>null</code>.
+     * @param <T>         the bean type.
      * @return never <code>null</code>.
      */
     public <T> T map(final Resource resource, final OsgiModelSource<T> modelSource) {

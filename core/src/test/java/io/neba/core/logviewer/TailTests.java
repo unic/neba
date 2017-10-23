@@ -30,7 +30,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 
-import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 import static java.lang.Thread.yield;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,19 +122,13 @@ public abstract class TailTests {
      * @param c must not be <code>null</code>.
      */
     public void uponWriteToRemoteDo(Callable c) throws IOException {
-        Thread unitTest = currentThread();
-
         doAnswer(invocation -> {
             // Still track the received text
             recordText.answer(invocation);
             // As soon as bytes are received, call the callable and interrupt the test case, as it
             // may await this event.
             c.call();
-            synchronized (unitTest) {
-                unitTest.interrupt();
-            }
             return null;
         }).when(getRemote()).sendBytes(isA(ByteBuffer.class));
     }
-
 }

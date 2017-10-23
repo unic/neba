@@ -16,24 +16,28 @@
 
 package io.neba.core;
 
-import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
- * A test mixin for cases requiring {@link #eventually(Runnable) eventual} assertions.
+ * A test mixin for cases requiring {@link #eventually(MayFail) eventual} assertions.
  *
  * @author Olaf Otto
  */
 public interface Eventual {
 
+    @FunctionalInterface
+    interface MayFail {
+        void run() throws Exception;
+    }
+
     /**
      * Expects the execution of the provided runnable to stop failing within ten seconds, trying every 100 milliseconds.
      *
-     * @param runnable not null. Expected to throw an exception should the embodied assertions fail.
+     * @param mayFail not null. Expected to throw an exception should the embodied assertions fail.
      */
-    default void eventually(Runnable runnable) {
+    default void eventually(MayFail mayFail) throws InterruptedException {
         long max = SECONDS.toMillis(waitUntilSeconds()),
                 waited = 0,
                 interval = intervalInMillis();
@@ -42,17 +46,12 @@ public interface Eventual {
 
         while (waited < max) {
             try {
-                runnable.run();
+                mayFail.run();
                 return;
             } catch (Throwable t) {
                 issue = t;
-                long timeBeforeSleep = currentTimeMillis();
-                try {
-                    sleep(interval);
-                } catch (InterruptedException e1) {
-                    // continue
-                }
-                waited += (currentTimeMillis() - timeBeforeSleep);
+                sleep(interval);
+                waited += interval;
             }
         }
 

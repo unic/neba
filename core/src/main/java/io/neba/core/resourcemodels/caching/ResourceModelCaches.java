@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 
@@ -41,12 +42,14 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
  */
 @Service(ResourceModelCaches.class)
 @Component
+@References({
+        @Reference(referenceInterface = ResourceModelCache.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+})
 public class ResourceModelCaches {
     @Reference
     private ResourceModelMetaDataRegistrar metaDataRegistrar;
 
-    @Reference(cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
-    private List<ResourceModelCache> caches = new ArrayList<>();
+    private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
      * Looks up the {@link #store(Resource, OsgiModelSource, Object)} cached model}
