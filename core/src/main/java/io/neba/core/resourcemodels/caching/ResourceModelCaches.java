@@ -43,7 +43,13 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
 @Service(ResourceModelCaches.class)
 @Component
 @References({
-        @Reference(referenceInterface = ResourceModelCache.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+        @Reference(
+                referenceInterface = ResourceModelCache.class,
+                cardinality = OPTIONAL_MULTIPLE,
+                policy = DYNAMIC,
+                name = "caches",
+                bind = "bind",
+                unbind = "unbind")
 })
 public class ResourceModelCaches {
     @Reference

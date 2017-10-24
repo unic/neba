@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.annotation.PreDestroy;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.Bundle;
@@ -297,8 +297,8 @@ public class ModelRegistry {
     /**
      * Clears the registry upon shutdown.
      */
-    @PreDestroy
-    public void shutdown() {
+    @Deactivate
+    protected void deActivate() {
         this.logger.info("The model registry is shutting down.");
         clearRegisteredModels();
         clearLookupCaches();

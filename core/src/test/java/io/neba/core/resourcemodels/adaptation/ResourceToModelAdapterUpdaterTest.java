@@ -102,7 +102,6 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
                 .thenReturn(this.bundle);
 
         this.testee.activate(this.context);
-        this.testee.registerModelAdapter();
     }
 
     @Test

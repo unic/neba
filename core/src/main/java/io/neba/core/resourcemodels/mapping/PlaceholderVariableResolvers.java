@@ -20,7 +20,12 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
 @Service(PlaceholderVariableResolvers.class)
 @Component
 @References({
-        @Reference(referenceInterface = PlaceholderVariableResolver.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+        @Reference(referenceInterface = PlaceholderVariableResolver.class,
+                cardinality = OPTIONAL_MULTIPLE,
+                policy = DYNAMIC,
+                name = "resolvers",
+                bind = "bind",
+                unbind = "unbind")
 })
 public class PlaceholderVariableResolvers {
     private final Collection<PlaceholderVariableResolver> resolvers = new ArrayList<>();

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -83,6 +82,7 @@ public class ResourceToModelAdapterUpdater {
     protected void activate(BundleContext context) {
         this.context = context;
         this.executorService = newSingleThreadExecutor();
+        registerModelAdapter();
     }
 
     @Deactivate
@@ -98,7 +98,7 @@ public class ResourceToModelAdapterUpdater {
         });
     }
 
-    public void setExecutorService(ExecutorService executorService) {
+    void setExecutorService(ExecutorService executorService) {
         this.executorService = executorService;
     }
 
@@ -128,8 +128,7 @@ public class ResourceToModelAdapterUpdater {
      * {@link BundleContext#registerService(String, Object, Dictionary) Registers} 
      * the {@link ResourceToModelAdapter}, i.e. publishes it as an OSGi service.  
      */
-    @PostConstruct
-    public void registerModelAdapter() {
+    private void registerModelAdapter() {
         Dictionary<String, Object> properties = createResourceToModelAdapterProperties();
         String serviceClassName = AdapterFactory.class.getName();
         this.resourceToModelAdapterRegistration = this.context.registerService(serviceClassName, this.adapter, properties);

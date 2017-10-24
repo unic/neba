@@ -67,8 +67,9 @@ import static org.slf4j.LoggerFactory.getLogger;
          * React to changes potentially altering the cacheable resource type hierarchy, unless they are occurring
          * in a location known not to contain data relevant to the type hierarchy, such as /var or /content
          */
-        @Property(name = EVENT_FILTER, value = "(&amp;" +
-                "(!(path=/content/*))" +
+        @Property(name = EVENT_FILTER, value =
+                "(&" +
+                " (!(path=/content/*))" +
                 " (!(path=/var/*))" +
                 " (!(path=/jcr:*))" +
                 " (!(path=/oak:*))" +

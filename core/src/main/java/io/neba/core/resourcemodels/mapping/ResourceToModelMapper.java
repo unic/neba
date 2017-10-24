@@ -50,7 +50,12 @@ import static org.springframework.util.Assert.notNull;
 @Service(ResourceToModelMapper.class)
 @Component
 @References({
-        @Reference(referenceInterface = ResourceModelPostProcessor.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+        @Reference(referenceInterface = ResourceModelPostProcessor.class,
+                cardinality = OPTIONAL_MULTIPLE,
+                policy = DYNAMIC,
+                name = "processors",
+                bind = "bind",
+                unbind = "unbind")
 })
 public class ResourceToModelMapper {
     private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();

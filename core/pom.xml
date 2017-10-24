@@ -158,6 +158,7 @@
                             org.eclipse.jetty.*;version="[9.2, 10)",
                             org.eclipse.jetty.util;version="[9.2, 10)",
                             org.eclipse.jetty.websocket.server;version="[9.2, 10)",
+                            javax.annotation.*;version="0.0.0";resolution:=optional,
                             *
                         </Import-Package>
                     </instructions>

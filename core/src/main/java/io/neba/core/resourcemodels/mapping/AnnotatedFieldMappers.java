@@ -44,7 +44,12 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
 @Service(AnnotatedFieldMappers.class)
 @Component
 @References({
-    @Reference(referenceInterface = AnnotatedFieldMapper.class, cardinality = OPTIONAL_MULTIPLE, policy = DYNAMIC, bind = "bind", unbind = "unbind")
+        @Reference(referenceInterface = AnnotatedFieldMapper.class,
+                cardinality = OPTIONAL_MULTIPLE,
+                policy = DYNAMIC,
+                name = "mappers",
+                bind = "bind",
+                unbind = "unbind")
 })
 public class AnnotatedFieldMappers {
     /**

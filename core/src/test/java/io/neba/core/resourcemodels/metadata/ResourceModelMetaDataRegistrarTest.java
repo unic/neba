@@ -120,7 +120,7 @@ public class ResourceModelMetaDataRegistrarTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullValuesAreNotToleratedForBundleDeRegistration() throws Exception {
-        this.testee.remove(null);
+        this.testee.removeMetadataForModelsIn(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -147,7 +147,7 @@ public class ResourceModelMetaDataRegistrarTest {
     private void removeBundle() {
         Bundle bundle = mock(Bundle.class);
         when(bundle.getBundleId()).thenReturn(this.bundleId);
-        this.testee.remove(bundle);
+        this.testee.removeMetadataForModelsIn(bundle);
     }
 
     private void tearDown() {

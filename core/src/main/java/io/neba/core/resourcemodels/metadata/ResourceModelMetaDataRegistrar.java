@@ -121,7 +121,7 @@ public class ResourceModelMetaDataRegistrar {
      *
      * @param bundle must not be <code>null</code>
      */
-    public void remove(Bundle bundle) {
+    public void removeMetadataForModelsIn(Bundle bundle) {
         if (bundle == null) {
             throw new IllegalArgumentException("method parameter bundle must not be null");
         }

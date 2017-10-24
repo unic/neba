@@ -38,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.join;
  * @author Olaf Otto
  * @see ResourceToModelAdapterUpdater
  */
-@Service
+@Service(ResourceToModelAdapter.class)
 @Component
 public class ResourceToModelAdapter implements AdapterFactory {
     @Reference

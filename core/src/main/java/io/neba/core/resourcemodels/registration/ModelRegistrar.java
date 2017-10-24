@@ -28,22 +28,20 @@ import org.apache.felix.scr.annotations.Reference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static org.apache.commons.lang3.StringUtils.join;
-import static org.osgi.framework.ServiceEvent.MODIFIED;
-import static org.osgi.framework.ServiceEvent.REGISTERED;
-import static org.osgi.framework.ServiceEvent.UNREGISTERING;
 
 /**
  * @author Olaf Otto
  */
-@Component
+@Component(immediate = true)
 public class ModelRegistrar {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -53,39 +51,36 @@ public class ModelRegistrar {
     private ResourceToModelAdapterUpdater resourceToModelAdapterUpdater;
     @Reference
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
-
-    private ServiceListener listener;
-    private BundleContext context;
+    private ServiceTracker tracker;
 
     @Activate
     protected void activate(BundleContext context) throws InvalidSyntaxException {
-        this.listener = event -> {
-            final ServiceReference serviceReference = event.getServiceReference();
-            final int eventType = event.getType();
-
-            if (eventType == UNREGISTERING) {
-                unregister(serviceReference.getBundle());
-                return;
+       this.tracker = new ServiceTracker(context, ResourceModelFactory.class.getName(), new ServiceTrackerCustomizer() {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                final ResourceModelFactory factory = (ResourceModelFactory) context.getService(reference);
+                registerModels(reference.getBundle(), factory);
+                return context.getService(reference);
             }
 
-            if (eventType == MODIFIED) {
-                unregister(serviceReference.getBundle());
+            @Override
+            public void modifiedService(ServiceReference reference, Object service) {
+                final ResourceModelFactory factory = (ResourceModelFactory) context.getService(reference);
+                unregister(reference.getBundle());
+                registerModels(reference.getBundle(), factory);
             }
 
-            final ResourceModelFactory factory = (ResourceModelFactory) context.getService(serviceReference);
-            if (eventType == MODIFIED || eventType == REGISTERED) {
-                registerModels(serviceReference.getBundle(), factory);
+            @Override
+            public void removedService(ServiceReference reference, Object service) {
+                unregister(reference.getBundle());
             }
-
-        };
-        this.context = context;
-
-        this.context.addServiceListener(listener, "(objectClass=" + ResourceModelFactory.class.getName() + ")");
+        });
+       this.tracker.open(true);
     }
 
     @Deactivate
     protected void deactivate() {
-        this.context.removeServiceListener(this.listener);
+        this.tracker.close();
     }
 
     private void registerModels(Bundle bundle, ResourceModelFactory factory) {
@@ -104,7 +99,7 @@ public class ModelRegistrar {
 
     private void unregister(Bundle bundle) {
         this.registry.removeResourceModels(bundle);
-        this.resourceModelMetaDataRegistrar.remove(bundle);
+        this.resourceModelMetaDataRegistrar.removeMetadataForModelsIn(bundle);
         this.resourceToModelAdapterUpdater.refresh();
     }
 }

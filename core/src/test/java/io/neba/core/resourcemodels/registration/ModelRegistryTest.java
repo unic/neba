@@ -588,7 +588,7 @@ public class ModelRegistryTest {
     }
     
     private void shutdownRegistry() {
-        this.testee.shutdown();
+        this.testee.deActivate();
     }
 
     private void withBeanSources(int i) {
