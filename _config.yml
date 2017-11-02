@@ -8,3 +8,4 @@ collections:
   - mainNavItems
   - versions
 contextpath:
+include: [_headers]
