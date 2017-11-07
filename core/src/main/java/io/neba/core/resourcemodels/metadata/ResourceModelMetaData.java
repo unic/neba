@@ -18,19 +18,21 @@ package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.Unmapped;
 import io.neba.core.util.Annotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ReflectionUtils;
-
-import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.function.Consumer;
+import javax.annotation.Resource;
+
 
 import static io.neba.core.util.Annotations.annotations;
-import static org.springframework.util.ReflectionUtils.doWithFields;
-import static org.springframework.util.ReflectionUtils.doWithMethods;
+import static io.neba.core.util.ReflectionUtil.methodsOf;
+import static java.lang.reflect.Modifier.isAbstract;
+import static org.apache.commons.lang3.reflect.FieldUtils.getAllFieldsList;
 
 /**
  * Represents meta-data of a {@link io.neba.api.annotations.ResourceModel}. Used
@@ -45,12 +47,12 @@ public class ResourceModelMetaData {
     /**
      * @author Olaf Otto
      */
-    private static class MethodMetadataCreator implements ReflectionUtils.MethodCallback {
+    private static class MethodMetadataCreator implements Consumer<Method> {
         private final Collection<MethodMetaData> postMappingMethods = new ArrayList<>(32);
         private final Collection<MethodMetaData> preMappingMethods = new ArrayList<>(32);
 
         @Override
-        public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+        public void accept(Method method) {
             MethodMetaData methodMetaData = new MethodMetaData(method);
             if (methodMetaData.isPostMappingCallback()) {
                 this.postMappingMethods.add(methodMetaData);
@@ -72,8 +74,8 @@ public class ResourceModelMetaData {
     /**
      * @author Olaf Otto
      */
-    private static class FieldMetadataCreator implements ReflectionUtils.FieldCallback {
-        private final Collection<MappedFieldMetaData> mappableFields = new ArrayList<>();
+    private static class FieldMetadataCreator implements Consumer<Field> {
+        private final Deque<MappedFieldMetaData> mappableFields = new LinkedList<>();
         private final Class<?> modelType;
 
         FieldMetadataCreator(Class<?> modelType) {
@@ -84,10 +86,10 @@ public class ResourceModelMetaData {
         }
 
         @Override
-        public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+        public void accept(Field field) {
             if (isMappingCandidate(field)) {
                 MappedFieldMetaData fieldMetaData = new MappedFieldMetaData(field, this.modelType);
-                this.mappableFields.add(fieldMetaData);
+                this.mappableFields.addFirst(fieldMetaData);
             }
         }
 
@@ -122,7 +124,7 @@ public class ResourceModelMetaData {
             final Annotations annotations = annotations(field);
             return annotations.contains(Unmapped.class) ||
                     annotations.containsName("javax.inject.Inject") || // @Inject is an optional dependency, thus using a name constant
-                    annotations.containsName(Autowired.class.getName()) ||
+                    annotations.containsName("org.springframework.beans.factory.annotation.Autowired") ||
                     annotations.containsName(Resource.class.getName());
         }
     }
@@ -136,10 +138,10 @@ public class ResourceModelMetaData {
 
     public ResourceModelMetaData(Class<?> modelType) {
         FieldMetadataCreator fc = new FieldMetadataCreator(modelType);
-        doWithFields(modelType, fc);
+        getAllFieldsList(modelType).forEach(fc);
 
         MethodMetadataCreator mc = new MethodMetadataCreator();
-        doWithMethods(modelType, mc);
+        methodsOf(modelType).stream().filter(m -> !m.getDeclaringClass().isInterface() || isAbstract(m.getModifiers())).forEach(mc);
 
         this.mappableFields = fc.getMappableFields();
         this.preMappingMethods = mc.getPreMappingMethods();

@@ -19,8 +19,6 @@ package io.neba.core.util;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 
-import static org.springframework.util.Assert.notNull;
-
 /**
  * References a bean from a {@link org.osgi.framework.Bundle}.
  *
@@ -34,7 +32,9 @@ public class OsgiBeanReference<T> {
     private final int hashCode;
 
     OsgiBeanReference(T bean, long bundleId) {
-        notNull(bean, "Constructor argument bean must not be null.");
+        if (bean == null) {
+            throw new IllegalArgumentException("Constructor argument bean must not be null");
+        }
         this.bean = bean;
         this.bundleId = bundleId;
         this.beanClass = bean.getClass();

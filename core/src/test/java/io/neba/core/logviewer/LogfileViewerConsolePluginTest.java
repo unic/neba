@@ -49,6 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 
+import static io.neba.core.util.ReflectionUtil.findField;
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.io.IOUtils.toByteArray;
@@ -64,8 +65,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.util.ReflectionUtils.findField;
-import static org.springframework.util.ReflectionUtils.findMethod;
 
 /**
  * @author Olaf Otto
@@ -268,27 +267,20 @@ public class LogfileViewerConsolePluginTest {
         verify(context, never()).removeAttribute(any());
     }
 
-    private void invokeInit(Servlet servlet, ServletConfig config) throws InvocationTargetException, IllegalAccessException {
-        Method method = findMethod(
-                servlet.getClass(),
-                "init",
-                ServletConfig.class);
+    private void invokeInit(Servlet servlet, ServletConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method method = servlet.getClass().getMethod("init", ServletConfig.class);
         method.setAccessible(true);
         method.invoke(servlet, config);
     }
 
-    private void invokeDestroy(Servlet servlet) throws InvocationTargetException, IllegalAccessException {
-        Method method = findMethod(
-                servlet.getClass(),
-                "destroy");
+    private void invokeDestroy(Servlet servlet) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method method = servlet.getClass().getMethod("destroy");
         method.setAccessible(true);
         method.invoke(servlet);
     }
 
-    private void injectTailServlet(Object o) throws InvocationTargetException, IllegalAccessException {
-        Field field = findField(
-                o.getClass(),
-                "tailServlet");
+    private void injectTailServlet(Object o) throws InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+        Field field = findField(o.getClass(), "tailServlet");
         field.setAccessible(true);
         field.set(o, this.tailServlet);
     }

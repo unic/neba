@@ -28,7 +28,6 @@ import org.osgi.framework.Bundle;
 
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.util.ClassUtils.getUserClass;
 
 /**
  * Builds and caches {@link ResourceModelMetaData} for each {@link io.neba.api.annotations.ResourceModel}.
@@ -139,6 +138,16 @@ public class ResourceModelMetaDataRegistrar {
 
     private Map<Class<?>, ResourceModelMetadataHolder> copyCache() {
         return new HashMap<>(this.cache);
+    }
+
+    private Class<?> getUserClass(Class<?> type){
+        if (type.getName().contains("$$")) {
+            Class<?> superclass = type.getSuperclass();
+            if (superclass != null && Object.class != superclass) {
+                return superclass;
+            }
+        }
+        return type;
     }
 
     @Deactivate

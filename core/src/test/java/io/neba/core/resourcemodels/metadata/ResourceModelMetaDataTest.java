@@ -27,7 +27,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.util.ReflectionUtils.findField;
 
 /**
  * 
@@ -108,8 +107,8 @@ public class ResourceModelMetaDataTest {
 		this.testee = new ResourceModelMetaData(modelType);
 	}
 
-	private void assertMappableFieldsDoesNotContain(String name) {
-    	Field field = findField(this.modelType, name);
+	private void assertMappableFieldsDoesNotContain(String name) throws NoSuchFieldException {
+    	Field field = this.modelType.getDeclaredField(name);
 		assertThat(field).overridingErrorMessage("Field " + this.modelType.getSimpleName() + "." + name + " does not exist.").isNotNull();
 		assertThat(this.testee.getMappableFields())
 				.extracting("field")

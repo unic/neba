@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Vector;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.LazyLoader;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -45,8 +47,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.LazyLoader;
 
 
 import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
@@ -849,8 +849,8 @@ public class FieldValueMappingCallbackTest {
 
     /**
      * {@link io.neba.api.annotations.Path} annotations may contain placeholders of the form
-     * <code>${variableName}</code>. Such placeholders must be resolved using the {@link org.springframework.context.ApplicationContext}
-     * of the {@link io.neba.api.annotations.ResourceModel}.
+     * <code>${variableName}</code>. Such placeholders may be resolved using a {@link io.neba.api.resourcemodels.PlaceholderVariableResolver}
+     * service.
      */
     @Test
     public void testPlaceholderResolutionInPath() throws Exception {

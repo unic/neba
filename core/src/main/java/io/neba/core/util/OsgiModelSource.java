@@ -22,8 +22,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.osgi.framework.Bundle;
 
 /**
- * A source for beans in an {@link org.springframework.context.ApplicationContext} obtained
- * from a {@link org.osgi.framework.Bundle}.
+ * A source for models provided by a {@link ResourceModelFactory} provided
+ * by a {@link org.osgi.framework.Bundle}.
  *
  * @param <T> The bean's type.
  * @author Olaf Otto

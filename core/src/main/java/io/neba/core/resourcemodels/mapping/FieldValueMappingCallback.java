@@ -33,9 +33,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import net.sf.cglib.proxy.LazyLoader;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.springframework.cglib.proxy.LazyLoader;
 
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
@@ -43,8 +43,6 @@ import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.springframework.util.ReflectionUtils.getField;
-import static org.springframework.util.ReflectionUtils.setField;
 
 /**
  * Attempts to load the property or resource associated with each
@@ -119,14 +117,14 @@ public class FieldValueMappingCallback {
         if (metaData.isLazy()) {
             // Lazy fields are never null, regardless of whether a value is mappable.
             Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : java.util.Optional::empty;
-            setField(metaData.getField(), this.model, lazy);
+            setField(metaData, lazy);
             return;
         }
 
         if (metaData.isOptional()) {
             // Optional fields are never null, regardless of whether a value is mappable.
             Optional<Object> optional = isMappable ? new OptionalFieldValue(fieldData, this) : new EmptyOptional(fieldData);
-            setField(metaData.getField(), this.model, optional);
+            setField(metaData, optional);
             return;
         }
 
@@ -139,7 +137,7 @@ public class FieldValueMappingCallback {
         value = postProcessResolvedValue(fieldData, value);
 
         if (value != null) {
-            setField(metaData.getField(), this.model, value);
+            setField(metaData, value);
         }
     }
 
@@ -170,7 +168,7 @@ public class FieldValueMappingCallback {
                         !fieldData.metaData.isLazy() &&
                         !fieldData.metaData.isOptional() &&
                         fieldData.metaData.isInstantiableCollectionType() &&
-                        getField(fieldData.metaData.getField(), this.model) == null;
+                        getField(fieldData) == null;
 
         @SuppressWarnings("unchecked")
         Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) fieldData.metaData.getType()) : null;
@@ -521,6 +519,22 @@ public class FieldValueMappingCallback {
             propertyMap = new PrimitiveSupportingValueMap(propertyMap);
         }
         return propertyMap;
+    }
+
+    private Object getField(FieldData fieldData) {
+        try {
+            return fieldData.metaData.getField().get(this.model);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private void setField(MappedFieldMetaData metaData, Object value) {
+        try {
+            metaData.getField().set(this.model, value);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**

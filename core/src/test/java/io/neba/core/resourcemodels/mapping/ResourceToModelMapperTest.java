@@ -24,6 +24,7 @@ import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.OsgiModelSource;
+import net.sf.cglib.proxy.Enhancer;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
@@ -35,10 +36,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.NoOp;
 
-
+import static net.sf.cglib.proxy.NoOp.INSTANCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -274,7 +273,7 @@ public class ResourceToModelMapperTest {
     private void withSpringAopProxyFor(Class<TestModel> superclass) throws Exception {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(superclass);
-        enhancer.setCallback(NoOp.INSTANCE);
+        enhancer.setCallback(INSTANCE);
         enhancer.setInterfaces(new Class[]{Advised.class});
         Object enhanced = spy(enhancer.create());
         assertThat(enhanced).isNotNull();

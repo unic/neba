@@ -16,10 +16,22 @@
 
 package io.neba.core.util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.addAll;
 
 /**
  * @author Olaf Otto
@@ -36,7 +48,7 @@ public final class ReflectionUtil {
      *   private Optional&lt;MyModel&gt; myModel -&gt; MyModel.
      * </pre>
      *
-     * @param type        must not be <code>null</code>.
+     * @param type must not be <code>null</code>.
      * @return never null.
      */
     public static Type getLowerBoundOfSingleTypeParameter(Type type) {
@@ -146,6 +158,60 @@ public final class ReflectionUtil {
      */
     public static <K, T extends Collection<K>> Collection<K> instantiateCollectionType(Class<T> collectionType) {
         return instantiateCollectionType(collectionType, DEFAULT_COLLECTION_SIZE);
+    }
+
+    /**
+     * All methods of the given type, its super types and interfaces, starting with the methods of
+     * the given type.
+     *
+     * @param type must not be <code>null</code>.
+     * @return never <code>null</code> but rather an empty list.
+     */
+    public static List<Method> methodsOf(Class<?> type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Method argument type must not be null");
+        }
+        List<Method> methods = new LinkedList<>();
+        Queue<Class<?>> classes = new LinkedList<>();
+        classes.add(type);
+        while (!classes.isEmpty()) {
+            Class<?> c = classes.poll();
+            methods.addAll(asList(c.getDeclaredMethods()));
+            if (c.getSuperclass() != null) {
+                classes.add(c.getSuperclass());
+            }
+            addAll(classes, c.getInterfaces());
+        }
+        return methods;
+    }
+
+    /**
+     * Rerturns the {@link Class#getDeclaredFields() declared field} with the given name.
+     *
+     * @param type must not be <code>null</code>.
+     * @param name must not be <code>null</code>.
+     * @return the field, or <code>null</code>
+     */
+    public static Field findField(Class<?> type, String name) {
+        if (type == null) {
+            throw new IllegalArgumentException("Method argument type must not be null");
+        }
+        if (name == null) {
+            throw new IllegalArgumentException("Method argument name must not be null");
+        }
+
+        Class<?> c = type;
+
+        do {
+            for( Field f : c.getDeclaredFields()) {
+                if(name.equals(f.getName())) {
+                    return f;
+                }
+            }
+            c = c.getSuperclass();
+        } while (c != null);
+
+        return null;
     }
 
     private ReflectionUtil() {

@@ -30,6 +30,11 @@
             <artifactId>io.neba.neba-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>io.neba.neba-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- External dependencies -->
         <dependency>
@@ -238,6 +243,11 @@
                         <embedded>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>io.neba.neba-core</artifactId>
+                            <target>${neba.installation.path}/19</target>
+                        </embedded>
+                        <embedded>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>io.neba.neba-spring</artifactId>
                             <target>${neba.installation.path}/19</target>
                         </embedded>
                     </embeddeds>

@@ -37,7 +37,6 @@ import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MULTIPLE;
 import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
-import static org.springframework.util.Assert.notNull;
 
 /**
  * Maps the properties of a {@link Resource} onto a {@link io.neba.api.annotations.ResourceModel} using
@@ -77,10 +76,14 @@ public class ResourceToModelMapper {
      * @return never <code>null</code>.
      */
     public <T> T map(final Resource resource, final OsgiModelSource<T> modelSource) {
-        notNull(resource, "Method argument resource must not be null.");
-        notNull(modelSource, "Method argument modelSource must not be null.");
+        if (resource == null) {
+            throw new IllegalArgumentException("Method argument resource must not be null");
+        }
+        if (modelSource == null) {
+            throw new IllegalArgumentException("Method argument modelSource must not be null");
+        }
 
-        T model = null;
+        T model;
 
         final Class<?> beanType = modelSource.getModelType();
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(beanType);

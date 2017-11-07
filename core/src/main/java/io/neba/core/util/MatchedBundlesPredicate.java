@@ -20,8 +20,6 @@ import org.apache.commons.collections.Predicate;
 import org.osgi.framework.Bundle;
 
 
-import static org.springframework.util.Assert.notNull;
-
 /**
  * {@link #evaluate(Object)} returns <code>false</code> if the bundle matches to
  * signal
@@ -37,7 +35,9 @@ public class MatchedBundlesPredicate implements Predicate {
     private int filteredElements = 0;
 
     public MatchedBundlesPredicate(Bundle bundle) {
-        notNull(bundle, "Constructor parameter bundle must not be null.");
+        if (bundle == null) {
+            throw new IllegalArgumentException("Method argument bundle must not be null");
+        }
         this.bundle = bundle;
     }
 

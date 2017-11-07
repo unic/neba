@@ -23,15 +23,17 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.inject.Inject;
 import org.junit.Test;
 
 
+import static io.neba.core.util.ReflectionUtil.findField;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.ReflectionUtil.isInstantiableCollectionType;
+import static io.neba.core.util.ReflectionUtil.methodsOf;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.util.ReflectionUtils.findField;
 
 /**
  * @author Olaf Otto
@@ -40,7 +42,7 @@ public class ReflectionUtilTest {
     /**
      * Declares a member with a type variable.
      */
-    private abstract static  class Root<T> {
+    private abstract static class Root<T> {
         @SuppressWarnings("unused")
         private List<T> rootList;
     }
@@ -60,6 +62,39 @@ public class ReflectionUtilTest {
     private static class GenericModelImpl extends GenericModel<Boolean, Integer> {
         @SuppressWarnings("unused")
         private List<Boolean> booleans;
+    }
+
+    private interface TestInterface {
+        default void interfaceMethod() {
+        }
+
+        @Inject
+        void abstractInterfaceMethod();
+    }
+
+    private static abstract class TestSuperClass {
+        private String superClassField;
+
+        private void superClassMethod() {}
+
+        @Inject
+        abstract void abstractSuperClassMethod();
+    }
+
+    private static class TestClass extends TestSuperClass implements TestInterface {
+        public String testClassField;
+
+        @Inject
+        private void classMethod() {}
+
+        @Override
+        void abstractSuperClassMethod() {
+        }
+
+        @Override
+        public void abstractInterfaceMethod() {
+
+        }
     }
 
     @SuppressWarnings({"unused", "rawtypes"})
@@ -159,6 +194,25 @@ public class ReflectionUtilTest {
         this.type = GenericModelImpl.class;
         getGenericTypeParameterOf("booleans");
         assertTypeParameterIs(Boolean.class);
+    }
+
+    @Test
+    public void testResolutionOfMethods() throws Exception {
+        assertThat(methodsOf(TestClass.class))
+                .contains(
+                        TestClass.class.getDeclaredMethod("classMethod"),
+                        TestClass.class.getDeclaredMethod("abstractSuperClassMethod"),
+                        TestClass.class.getDeclaredMethod("abstractInterfaceMethod"),
+                        TestSuperClass.class.getDeclaredMethod("superClassMethod"),
+                        TestSuperClass.class.getDeclaredMethod("abstractSuperClassMethod"),
+                        TestInterface.class.getMethod("interfaceMethod"),
+                        TestInterface.class.getMethod("abstractInterfaceMethod"));
+    }
+
+    @Test
+    public void testFindField() throws Exception {
+        assertThat(findField(TestClass.class, "testClassField")).isEqualTo(TestClass.class.getDeclaredField("testClassField"));
+        assertThat(findField(TestClass.class, "superClassField")).isEqualTo(TestSuperClass.class.getDeclaredField("superClassField"));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

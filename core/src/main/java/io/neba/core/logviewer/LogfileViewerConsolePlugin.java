@@ -45,7 +45,6 @@ import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
-import static org.springframework.util.ClassUtils.isPresent;
 
 /**
  * A web console plugin for tailing and downloading the CQ log files placed within the sling log directory as configured in the
@@ -57,8 +56,8 @@ import static org.springframework.util.ClassUtils.isPresent;
 @Component
 @Properties({
         @Property(name = "felix.webconsole.label", value = LogfileViewerConsolePlugin.LABEL),
-        @Property(name = "service.description", value="Provides a Felix console plugin for monitoring and downloading Sling logfiles."),
-        @Property(name = "service.vendor", value="neba.io")
+        @Property(name = "service.description", value = "Provides a Felix console plugin for monitoring and downloading Sling logfiles."),
+        @Property(name = "service.vendor", value = "neba.io")
 })
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     static final String LABEL = "logviewer";
@@ -145,12 +144,21 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
 
     private void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         ServletContext servletContext = getServletContext();
-        if (servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isPresent(DECORATED_OBJECT_FACTORY, getClass().getClassLoader())) {
+        if (servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isDecoratedObjectFactoryAvailable()) {
             return;
         }
 
         servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
         this.isManagingDecoratedObjectFactory = true;
+    }
+
+    private boolean isDecoratedObjectFactoryAvailable() {
+        try {
+            forName(DECORATED_OBJECT_FACTORY, false, getClass().getClassLoader());
+            return true;
+        } catch (Throwable ex) {
+            return false;
+        }
     }
 
     private void removeDecoratorObjectFactoryFromServletContext() {

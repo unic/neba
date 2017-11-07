@@ -115,6 +115,10 @@
             <groupId>javax.jcr</groupId>
             <artifactId>jcr</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -150,6 +154,8 @@
                         <Bundle-Name>NEBA core</Bundle-Name>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Category>neba</Bundle-Category>
+                        <Embed-Dependency>cglib-nodep</Embed-Dependency>
+                        <Embed-Directory>lib</Embed-Directory>
                         <Private-Package>
                             io.neba.core.*
                         </Private-Package>

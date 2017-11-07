@@ -22,7 +22,6 @@ import org.junit.Test;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.util.ReflectionUtils.findMethod;
 
 /**
  * @author Olaf Otto
@@ -60,7 +59,7 @@ public class MethodMetadataTest {
 
 	@Test
     public void testHashCodeAndEquals() throws Exception {
-        Method method = findMethod(TestResourceModelWithLifecycleCallbacks.class, "beforeMapping");
+        Method method = TestResourceModelWithLifecycleCallbacks.class.getMethod("beforeMapping");
 
         MethodMetaData one = new MethodMetaData(method);
         MethodMetaData two = new MethodMetaData(method);
@@ -69,7 +68,7 @@ public class MethodMetadataTest {
         assertThat(one).isEqualTo(two);
         assertThat(two).isEqualTo(one);
 
-        method = findMethod(TestResourceModelWithLifecycleCallbacks.class, "afterMapping");
+        method = TestResourceModelWithLifecycleCallbacks.class.getMethod("afterMapping");
         two = new MethodMetaData(method);
 
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
@@ -93,8 +92,8 @@ public class MethodMetadataTest {
 		assertThat(this.testee.isPreMappingCallback()).isFalse();
 	}
 
-	private void createMetadataForTestModelMethodWithName(String name) {
-		Method method = findMethod(TestResourceModelWithLifecycleCallbacks.class, name);
+	private void createMetadataForTestModelMethodWithName(String name) throws NoSuchMethodException {
+		Method method = TestResourceModelWithLifecycleCallbacks.class.getMethod(name);
 		this.testee = new MethodMetaData(method);
 	}
 }

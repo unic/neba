@@ -25,8 +25,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 
 
-import static org.springframework.util.Assert.notNull;
-
 /**
  * Provides thread-local tracking of mapping invocations in order to support cycles in mappings
  * and gather statistical data regarding mapping depths of
@@ -118,7 +116,9 @@ public class NestedMappingSupport {
      *         Otherwise, the execution results in an infinite loop.
      */
     <T> Mapping<T> begin(Mapping<T> mapping) {
-        notNull(mapping, "Method argument mapping must not be null.");
+        if (mapping == null) {
+            throw new IllegalArgumentException("Method argument mapping must not be null");
+        }
         OngoingMappings ongoingMappings = getOrCreateMappings();
         @SuppressWarnings("unchecked")
         Mapping<T> alreadyExistingMapping = ongoingMappings.get(mapping);
@@ -135,7 +135,9 @@ public class NestedMappingSupport {
      * @param mapping must not be <code>null</code>.
      */
     public void end(Mapping mapping) {
-        notNull(mapping, "Method argument mapping must not be null.");
+        if (mapping == null) {
+            throw new IllegalArgumentException("Method argument mapping must not be null");
+        }
         OngoingMappings ongoingMappings = this.ongoingMappings.get();
         if (ongoingMappings != null) {
             ongoingMappings.remove(mapping);
@@ -182,7 +184,9 @@ public class NestedMappingSupport {
      * meta data.
      */
     boolean hasOngoingMapping(ResourceModelMetaData metadata) {
-        notNull(metadata, "Method argument metadata must not be null.");
+        if (metadata == null) {
+            throw new IllegalArgumentException("Method argument metadata must not be null");
+        }
         return getOrCreateMappings().contains(metadata);
     }
 }

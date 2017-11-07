@@ -27,9 +27,8 @@ import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 
 
+import static io.neba.core.util.ReflectionUtil.findField;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.util.ReflectionUtils.findField;
-import static org.springframework.util.ReflectionUtils.setField;
 
 /**
  * @author Olaf Otto
@@ -188,7 +187,7 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test(expected =  IllegalArgumentException.class)
-    public void testChildrenAnnotationOnInvalidFieldType() {
+    public void testChildrenAnnotationOnInvalidFieldType() throws NoSuchFieldException {
         withModelType(TestResourceModelWithUnsupportedCollectionTypes.class);
         createMetadataForTestModelFieldWithName("hashMapField");
     }
@@ -303,7 +302,7 @@ public class MappedFieldMetaDataTest {
     public void testMetadataMakesFieldAccessible() throws Exception {
         TestResourceModel testResourceModel = new TestResourceModel();
         createMetadataForTestModelFieldWithName("stringField");
-        setField(this.testee.getField(), testResourceModel, "JunitTest");
+        this.testee.getField().set(testResourceModel, "JunitTest");
         assertThat(testResourceModel.getStringField()).isEqualTo("JunitTest");
     }
 
@@ -408,8 +407,8 @@ public class MappedFieldMetaDataTest {
 	}
 
 	private void createMetadataForTestModelFieldWithName(String fieldName) {
-		Field field = findField(this.modelType, fieldName);
-		this.testee = new MappedFieldMetaData(field, this.modelType);
+        Field field = findField(this.modelType, fieldName);
+        this.testee = new MappedFieldMetaData(field, this.modelType);
 	}
 
 	private void withModelType(Class<?> type) {

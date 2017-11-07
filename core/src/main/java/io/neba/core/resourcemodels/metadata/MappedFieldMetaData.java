@@ -31,10 +31,10 @@ import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.LazyLoader;
 import org.apache.commons.lang3.ClassUtils;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.LazyLoader;
 
 
 import static io.neba.core.util.Annotations.annotations;
@@ -45,7 +45,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
-import static org.springframework.util.ReflectionUtils.makeAccessible;
 
 /**
  * Represents meta-data of a mappable {@link io.neba.api.annotations.ResourceModel resource model} field.
@@ -91,7 +90,6 @@ public class MappedFieldMetaData {
     private final Class<?> modelType;
     private final Factory collectionProxyFactory;
 
-
     /**
      * Immediately extracts all metadata for the provided field.
      *
@@ -136,7 +134,7 @@ public class MappedFieldMetaData {
         enforceInstantiableCollectionTypeForExplicitlyMappedFields();
         this.collectionProxyFactory = prepareProxyFactoryForCollectionTypes();
 
-        makeAccessible(field);
+        field.setAccessible(true);
     }
 
     /**
@@ -152,10 +150,10 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * Prepares a proxy instance of a collection type for use as a {@link org.springframework.cglib.proxy.Factory}.
-     * Proxy instances are always {@link org.springframework.cglib.proxy.Factory factories}.
-     * Using {@link org.springframework.cglib.proxy.Factory#newInstance(org.springframework.cglib.proxy.Callback)}
-     * is significantly more efficient than using {@link org.springframework.cglib.proxy.Enhancer#create(Class, org.springframework.cglib.proxy.Callback)}.
+     * Prepares a proxy instance of a collection type for use as a {@link Factory}.
+     * Proxy instances are always {@link Factory factories}.
+     * Using {@link Factory#newInstance(net.sf.cglib.proxy.Callback)}
+     * is significantly more efficient than using {@link Enhancer#create(Class, net.sf.cglib.proxy.Callback)}.
      */
     private Factory prepareProxyFactoryForCollectionTypes() {
         if (this.isInstantiableCollectionType) {
@@ -198,7 +196,7 @@ public class MappedFieldMetaData {
         // The path must be relative, otherwise resource#getChild will be equivalent to
         // resolver.getResource("/..."), i.e. the resolution will not be relative.
         return isResolveBelowEveryChildPathPresentOnChildren &&
-               relativePath.charAt(0) == '/' ? relativePath.substring(1) : relativePath;
+                relativePath.charAt(0) == '/' ? relativePath.substring(1) : relativePath;
     }
 
     private Class<?> resolveTypeParameter() {
@@ -257,12 +255,12 @@ public class MappedFieldMetaData {
         return
                 // References are always contained in properties of type String or String[].
                 isReference()
-                    || isPropertyType(type)
-                    || (type.isArray() || isCollectionType) && isPropertyType(getTypeParameter());
+                        || isPropertyType(type)
+                        || (type.isArray() || isCollectionType) && isPropertyType(getTypeParameter());
     }
 
     /**
-     * @return The {@link org.springframework.util.ReflectionUtils#makeAccessible(java.lang.reflect.Field) accessible}
+     * @return The {@link java.lang.reflect.Field#setAccessible(boolean) accessible}
      * {@link java.lang.reflect.Field} represented by this meta data.
      */
     public Field getField() {
