@@ -16,6 +16,8 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.api.spi.ResourceModelCache;
+
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.copyOf;
@@ -99,7 +101,7 @@ public class ResourceModelStatistics {
     }
 
     /**
-     * @return The number of types a {@link io.neba.api.resourcemodels.ResourceModelCache} contained an instance
+     * @return The number of types a {@link ResourceModelCache} contained an instance
      * of the resource model.
      */
     long getCacheHits() {

@@ -16,22 +16,21 @@
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.ResourceModelFactory;
-import io.neba.api.resourcemodels.ResourceModelPostProcessor;
+import io.neba.api.spi.AopSupport;
+import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelPostProcessor;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiModelSource;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
-import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.Advised;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -53,11 +52,20 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
                 cardinality = OPTIONAL_MULTIPLE,
                 policy = DYNAMIC,
                 name = "processors",
-                bind = "bind",
-                unbind = "unbind")
+                bind = "bindProcessor",
+                unbind = "unbindProcessor"),
+        @Reference(referenceInterface = AopSupport.class,
+                cardinality = OPTIONAL_MULTIPLE,
+                policy = DYNAMIC,
+                name = "aopSupport",
+                bind = "bindAopSupport",
+                unbind = "unbindAopSupport")
+
 })
 public class ResourceToModelMapper {
     private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
+    private final List<AopSupport> aopSupports = new ArrayList<>();
+
     @Reference
     private ModelProcessor modelProcessor;
     @Reference
@@ -139,34 +147,10 @@ public class ResourceToModelMapper {
         return model;
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T getTargetObjectOfAdvisedBean(Advised bean) {
-        TargetSource targetSource = bean.getTargetSource();
-        if (targetSource == null) {
-            throw new IllegalStateException("Model " + bean + " is " + Advised.class.getName() + ", but its target source is null.");
-        }
-        Object target;
-        try {
-            target = targetSource.getTarget();
-        } catch (Exception e) {
-            throw new IllegalStateException("Unable to obtain the target of the advised model " + bean + ".", e);
-        }
-        if (target == null) {
-            throw new IllegalStateException("The advised target of bean " + bean + " must not be null.");
-        }
-        return (T) target;
-    }
-
     private <T> T map(final Resource resource, final T bean, final ResourceModelMetaData metaData, final ResourceModelFactory factory) {
         T preprocessedModel = preProcess(resource, bean, factory);
 
-        T model = preprocessedModel;
-        // Unwrap proxied beans prior to mapping. The mapping must access the target
-        // bean's fields in order to perform value injection there.
-        // FIXME make this optional, check if spring on classpath
-        if (preprocessedModel instanceof Advised) {
-            model = getTargetObjectOfAdvisedBean((Advised) bean);
-        }
+        T model = prepareAopEnhancedModelTypes(preprocessedModel);
 
         final FieldValueMappingCallback callback = new FieldValueMappingCallback(model, resource, factory, this.fieldMappers, this.variableResolvers);
 
@@ -176,6 +160,15 @@ public class ResourceToModelMapper {
 
         // Do not expose the unwrapped model to the post processors, use the proxy (if any) instead.
         return postProcess(resource, preprocessedModel, factory);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T prepareAopEnhancedModelTypes(T preprocessedModel) {
+        T model = preprocessedModel;
+        for (AopSupport aopSupport : this.aopSupports) {
+            model = (T) aopSupport.prepareForFieldInjection(model);
+        }
+        return model;
     }
 
     private <T> T preProcess(final Resource resource, final T model, final ResourceModelFactory factory) {
@@ -206,14 +199,25 @@ public class ResourceToModelMapper {
         return currentModel;
     }
 
-    protected void bind(ResourceModelPostProcessor postProcessor) {
+    protected void bindProcessor(ResourceModelPostProcessor postProcessor) {
         this.postProcessors.add(postProcessor);
     }
 
-    protected void unbind(ResourceModelPostProcessor postProcessor) {
+    protected void unbindProcessor(ResourceModelPostProcessor postProcessor) {
         if (postProcessor == null) {
             return;
         }
         this.postProcessors.remove(postProcessor);
+    }
+
+    protected void bindAopSupport(AopSupport aopSupport) {
+        this.aopSupports.add(aopSupport);
+    }
+
+    protected void unbindAopSupport(AopSupport support) {
+        if (support == null) {
+            return;
+        }
+        this.aopSupports.remove(support);
     }
 }

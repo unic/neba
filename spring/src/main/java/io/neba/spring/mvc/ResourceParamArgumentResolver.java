@@ -16,7 +16,7 @@
 
 package io.neba.spring.mvc;
 
-import io.neba.api.annotations.ResourceParam;
+import io.neba.spring.api.ResourceParam;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -40,7 +40,7 @@ import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
  * <p>
  * <pre>
  *  &#64;{@link org.springframework.web.bind.annotation.RequestMapping}(...)
- *  public void myHandlerMethod(&#64;{@link io.neba.api.annotations.ResourceParam} MyModel model, ...) {
+ *  public void myHandlerMethod(&#64;{@link ResourceParam} MyModel model, ...) {
  *      ...
  *  }
  * </pre>
@@ -48,7 +48,7 @@ import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
  *
  * This will expect a String parameter "model", which is a path to a JCR resource adapting to "MyModel". This argument resolver
  * will resolve the path and adapt to the desired model. Unless the resource param is not
- * {@link io.neba.api.annotations.ResourceParam#required() required}, an exception will be thrown
+ * {@link ResourceParam#required() required}, an exception will be thrown
  * if the parameter is missing, the path is unresolvable or the resource cannot be adapted to the desired model,
  * i.e. the resulting model instance is guaranteed not to be <code>null</code>.
  *

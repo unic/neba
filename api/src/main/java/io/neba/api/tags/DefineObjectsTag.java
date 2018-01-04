@@ -16,7 +16,7 @@
 
 package io.neba.api.tags;
 
-import io.neba.api.resourcemodels.ResourceModelProvider;
+import io.neba.api.services.ResourceModelResolver;
 import javax.annotation.CheckForNull;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
@@ -78,12 +78,12 @@ public final class DefineObjectsTag extends TagSupport {
 
     private void provideMostSpecificResourceModel() {
         SlingScriptHelper scriptHelper = getScriptHelper();
-        ResourceModelProvider modelProvider = scriptHelper.getService(ResourceModelProvider.class);
+        ResourceModelResolver modelProvider = scriptHelper.getService(ResourceModelResolver.class);
 
         if (modelProvider == null) {
             // Can be the case if called before / after provider lifetime, e.g.
             // when the application context is stopped. Fail fast.
-            throw new IllegalStateException("The " + ResourceModelProvider.class.getSimpleName() + " must not be null." +
+            throw new IllegalStateException("The " + ResourceModelResolver.class.getSimpleName() + " must not be null." +
                                             " Is this tag used while the NEBA core is not started?");
         }
 

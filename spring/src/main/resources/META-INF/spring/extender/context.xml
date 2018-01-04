@@ -63,5 +63,12 @@
 				<entry key="service.vendor" value="neba.io" />
 			</bp:service-properties>
 		</bp:service>
+
+		<bp:service interface="io.neba.api.spi.AopSupport" ref="aopSupport">
+			<bp:service-properties>
+				<entry key="service.description" value="Supports AOP-enhanced Spring beans as NEBA resource models." />
+				<entry key="service.vendor" value="neba.io" />
+			</bp:service-properties>
+		</bp:service>
 	</bp:blueprint>
 </beans>

@@ -21,21 +21,20 @@ import io.neba.api.annotations.Path;
 import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.This;
 import io.neba.api.resourcemodels.Lazy;
-import io.neba.api.resourcemodels.Optional;
 import io.neba.core.util.Annotations;
 import io.neba.core.util.ReflectionUtil;
 import io.neba.core.util.ResourcePaths;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.LazyLoader;
+import org.apache.commons.lang3.ClassUtils;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.Factory;
-import net.sf.cglib.proxy.LazyLoader;
-import org.apache.commons.lang3.ClassUtils;
-
 
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
@@ -81,7 +80,6 @@ public class MappedFieldMetaData {
     private final boolean isChildrenAnnotationPresent;
     private final boolean isResolveBelowEveryChildPathPresentOnChildren;
     private final String resolveBelowEveryChildPathOnChildren;
-    private final boolean isOptional;
 
     private final Class<?> typeParameter;
     private final Class<?> arrayTypeOfComponentType;
@@ -106,14 +104,13 @@ public class MappedFieldMetaData {
         // Atomic initialization
         this.modelType = modelType;
         this.field = field;
-        this.isOptional = field.getType() == Optional.class;
         this.isLazy = field.getType() == Lazy.class;
         this.annotations = annotations(field);
 
         // Treat Optional<X> fields transparently like X fields: This way, anyone operating on the metadata is not
         // forced to be aware of the lazy-loading value holder indirection but can operate on the target type directly.
-        this.genericFieldType = this.isLazy || this.isOptional ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
-        this.fieldType = this.isLazy || this.isOptional ? getRawType(this.genericFieldType, this.modelType) : field.getType();
+        this.genericFieldType = this.isLazy ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
+        this.fieldType = this.isLazy ? getRawType(this.genericFieldType, this.modelType) : field.getType();
         this.isCollectionType = Collection.class.isAssignableFrom(this.fieldType);
         this.isPathAnnotationPresent = this.annotations.contains(Path.class);
         this.isReference = this.annotations.contains(Reference.class);
@@ -308,7 +305,7 @@ public class MappedFieldMetaData {
 
     /**
      * @return the type the resolved value for the field shall have, which is either the {@link java.lang.reflect.Field#getType() field type},
-     * or the generic parameter type in case of {@link #isLazy() lazy} or {@link #isOptional() optional} fields.
+     * or the generic parameter type in case of {@link #isLazy() lazy}} fields.
      */
     public Class<?> getType() {
         return this.fieldType;
@@ -388,13 +385,6 @@ public class MappedFieldMetaData {
      */
     public Annotations getAnnotations() {
         return annotations;
-    }
-
-    /**
-     * @return whether the field is of type {@link io.neba.api.resourcemodels.Optional}.
-     */
-    public boolean isOptional() {
-        return isOptional;
     }
 
     /**

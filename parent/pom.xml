@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
@@ -8,8 +9,7 @@
     <packaging>pom</packaging>
 
     <description>
-        NEBA integrates the Spring Framework into Sling. It makes available all of Spring's features to allow using
-        mature, best-practice solutions for the majority of system-level concerns common to Sling-based applications.
+        NEBA provides simple and high performance content-to-object mapping for Apache Sling.
     </description>
 
     <url>http://www.neba.io</url>
@@ -365,13 +365,14 @@
                 <version>3.2.5</version>
             </dependency>
 
-            <!-- Test dependencies -->
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-                <version>1_1</version>
-                <scope>test</scope>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-atinject_1.0_spec</artifactId>
+                <version>1.0</version>
+                <scope>provided</scope>
             </dependency>
+
+            <!-- Test dependencies -->
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>

@@ -15,7 +15,7 @@
  */
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.AnnotatedFieldMapper;
+import io.neba.api.spi.AnnotatedFieldMapper;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import java.lang.annotation.Annotation;
@@ -36,7 +36,7 @@ import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MUL
 import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
 
 /**
- * Represents all registered {@link io.neba.api.resourcemodels.AnnotatedFieldMapper custom field mappers}
+ * Represents all registered {@link AnnotatedFieldMapper custom field mappers}
  * and provides the corresponding lookup and caching of lookup results.
  *
  * @author Olaf Otto
@@ -54,7 +54,7 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
 public class AnnotatedFieldMappers {
     /**
      * Represents the relation of an {@link java.lang.annotation.Annotation} and and a
-     * {@link io.neba.api.resourcemodels.AnnotatedFieldMapper#getAnnotationType() compatible mapper}.
+     * {@link AnnotatedFieldMapper#getAnnotationType() compatible mapper}.
      *
      * @author Olaf Otto
      */

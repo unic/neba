@@ -15,8 +15,9 @@
 */
 
 /**
- * Contains the implementation of the {@link io.neba.api.spi.ResourceModelCache resource model cache API}
- * as well as the default resource model cache implementation, the
- * configurable {@link io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache}.
+ * All interfaces in this package are part of NEBA's <em>Service Provider Interface</em>.
+ * OSGi services implementing these interfaces are automatically picked up by by the NEBA core in order to extend NEBA's capabilities.
+ * For instance, custom annotations are supported via {@link io.neba.api.spi.AnnotatedFieldMapper} services.
  */
-package io.neba.core.resourcemodels.caching;
+package io.neba.api.spi;
+

@@ -54,7 +54,7 @@ import static org.mockito.Mockito.when;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ResourceModelProviderImplTest {
+public class ResourceModelResolverImplTest {
     @Mock
     private ModelRegistry registry;
     @Mock
@@ -75,7 +75,7 @@ public class ResourceModelProviderImplTest {
     private final Object model = new Object();
 
     @InjectMocks
-    private ResourceModelProviderImpl testee;
+    private ResourceModelResolverImpl testee;
 
     @Before
     @SuppressWarnings("unchecked")

@@ -6,7 +6,7 @@
 	<packaging>pom</packaging>
 	
 	<description>
-		NEBA - the best of Sling, powered by Spring.
+		NEBA - simple and high performance content to object mapping for Apache Sling.
 	</description>
 
 	<parent>

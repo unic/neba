@@ -167,7 +167,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
 
         int lazyFields = 0, greedyFields = 0;
         for (MappedFieldMetaData field : metaData.getMappableFields()) {
-            boolean isLazyLoadedField = field.isOptional() ||
+            boolean isLazyLoadedField = field.isLazy() ||
                     field.isChildrenAnnotationPresent() ||
                     field.isReference() && field.isInstantiableCollectionType();
             if (isLazyLoadedField) {

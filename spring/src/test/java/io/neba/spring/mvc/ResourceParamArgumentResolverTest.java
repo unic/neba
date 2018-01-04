@@ -16,7 +16,7 @@
 
 package io.neba.spring.mvc;
 
-import io.neba.api.annotations.ResourceParam;
+import io.neba.spring.api.ResourceParam;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.NonExistingResource;

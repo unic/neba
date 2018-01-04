@@ -14,9 +14,23 @@
   limitations under the License.
 */
 
+package io.neba.api.spi;
+
+import javax.annotation.Nonnull;
+
 /**
- * Contains the implementation of the {@link io.neba.api.spi.ResourceModelCache resource model cache API}
- * as well as the default resource model cache implementation, the
- * configurable {@link io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache}.
+ * A source for values of variables of the form <pre>${key}</pre>, as
+ * supported by the {@link io.neba.api.annotations.Path} annotation.
+ * 
+ * @author Olaf Otto
  */
-package io.neba.core.resourcemodels.caching;
+public interface PlaceholderVariableResolver {
+    /**
+     * Invoked to resolve variables of the form ${name}.
+     * Example: For ${name}, invoked with "name".
+     * @param variableName never null.
+     * @return the resolved value, or null if no value can be resolved for the 
+     * variable name.
+     */
+	String resolve(@Nonnull String variableName);
+}

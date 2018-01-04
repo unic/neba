@@ -1,6 +1,6 @@
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.PlaceholderVariableResolver;
+import io.neba.api.spi.PlaceholderVariableResolver;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.felix.scr.annotations.Component;

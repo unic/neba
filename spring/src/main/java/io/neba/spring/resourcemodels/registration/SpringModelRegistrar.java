@@ -17,7 +17,7 @@
 package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.api.resourcemodels.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;

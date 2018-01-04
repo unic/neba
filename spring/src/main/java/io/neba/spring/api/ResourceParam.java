@@ -14,7 +14,7 @@
  * limitations under the License.
 **/
 
-package io.neba.api.annotations;
+package io.neba.spring.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

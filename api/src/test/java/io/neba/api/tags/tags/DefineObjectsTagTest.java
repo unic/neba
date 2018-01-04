@@ -17,7 +17,7 @@
 package io.neba.api.tags.tags;
 
 import io.neba.api.Constants;
-import io.neba.api.resourcemodels.ResourceModelProvider;
+import io.neba.api.services.ResourceModelResolver;
 import io.neba.api.tags.DefineObjectsTag;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -61,7 +61,7 @@ public class DefineObjectsTagTest {
     @Mock
     private SlingScriptHelper sling;
     @Mock
-    private ResourceModelProvider resourceModelProvider;
+    private ResourceModelResolver resourceModelResolver;
 
     private int tagExecutionReturnCode;
     private Object model = new Object();
@@ -76,10 +76,10 @@ public class DefineObjectsTagTest {
         doReturn(this.request).when(this.context).getRequest();
         doReturn(this.sling).when(this.bindings).get(eq(SLING));
 
-        doReturn(this.resourceModelProvider).when(this.sling).getService(eq(ResourceModelProvider.class));
-        doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModel(eq(this.resource));
-        doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
-        doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModelWithBeanName(eq(this.resource), anyString());
+        doReturn(this.resourceModelResolver).when(this.sling).getService(eq(ResourceModelResolver.class));
+        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModel(eq(this.resource));
+        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
+        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModelWithBeanName(eq(this.resource), anyString());
 
         withBindings(this.bindings);
         this.testee.setPageContext(this.context);
@@ -159,11 +159,11 @@ public class DefineObjectsTagTest {
     }
 
     private void withMissingProviderService() {
-        doReturn(null).when(this.sling).getService(eq(ResourceModelProvider.class));
+        doReturn(null).when(this.sling).getService(eq(ResourceModelResolver.class));
     }
 
     private void verifyResourceIsAdaptedToMostSpecificModelWithProvidedBeanName() {
-        verify(this.resourceModelProvider).resolveMostSpecificModelWithBeanName(eq(this.resource), eq(this.desiredModelName));
+        verify(this.resourceModelResolver).resolveMostSpecificModelWithBeanName(eq(this.resource), eq(this.desiredModelName));
     }
 
     private void withDesiredModelNamed(String name) {
@@ -172,11 +172,11 @@ public class DefineObjectsTagTest {
     }
 
     private void verifyResourceIsAdaptedToMostSpecificModelIncludingBaseTypes() {
-        verify(this.resourceModelProvider).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
+        verify(this.resourceModelResolver).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
     }
 
     private void verifyResourceIsAdaptedToMostSpecificModel() {
-        verify(this.resourceModelProvider).resolveMostSpecificModel(eq(this.resource));
+        verify(this.resourceModelResolver).resolveMostSpecificModel(eq(this.resource));
     }
 
     private void enableBaseTypeSupport() {

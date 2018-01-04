@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.caching;
 
-import io.neba.api.resourcemodels.ResourceModelCache;
+import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;

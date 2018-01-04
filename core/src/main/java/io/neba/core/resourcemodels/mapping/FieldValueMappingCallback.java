@@ -16,27 +16,25 @@
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.api.resourcemodels.Lazy;
-import io.neba.api.resourcemodels.Optional;
-import io.neba.api.resourcemodels.ResourceModelFactory;
+import io.neba.api.spi.AnnotatedFieldMapper;
+import io.neba.api.spi.ResourceModelFactory;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
 import io.neba.core.util.ResourcePaths;
+import net.sf.cglib.proxy.LazyLoader;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import net.sf.cglib.proxy.LazyLoader;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
-
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
@@ -121,13 +119,6 @@ public class FieldValueMappingCallback {
             return;
         }
 
-        if (metaData.isOptional()) {
-            // Optional fields are never null, regardless of whether a value is mappable.
-            Optional<Object> optional = isMappable ? new OptionalFieldValue(fieldData, this) : new EmptyOptional(fieldData);
-            setField(metaData, optional);
-            return;
-        }
-
         Object value = null;
 
         if (isMappable) {
@@ -142,7 +133,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Resumes a mapping temporarily suspended by an {@link Optional} field, i.e.
+     * Resumes a mapping temporarily suspended by an {@link Lazy} field, i.e.
      * effectively loads a lazy-loaded field value.
      *
      * @param fieldData must not be <code>null</code>.
@@ -166,7 +157,6 @@ public class FieldValueMappingCallback {
         boolean preventNullCollection =
                 value == null &&
                         !fieldData.metaData.isLazy() &&
-                        !fieldData.metaData.isOptional() &&
                         fieldData.metaData.isInstantiableCollectionType() &&
                         getField(fieldData) == null;
 
@@ -180,7 +170,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Applies all {@link io.neba.api.resourcemodels.AnnotatedFieldMapper registered field mappers}
+     * Applies all {@link AnnotatedFieldMapper registered field mappers}
      * to the provided value and returns the result.
      */
     @SuppressWarnings("unchecked")
@@ -256,14 +246,14 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isOptional() optional},
+     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isLazy() lazy},
      * {@link #loadChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)} directly loads}
      * the children. Otherwise, provides a lazy loading collection.
      *
      * @return never <code>null</code> but rather an empty collection.
      */
     private Collection<?> createCollectionOfChildren(final FieldData field, final Resource parent) {
-        if (field.metaData.isOptional()) {
+        if (field.metaData.isLazy()) {
             // The field was already lazy-loaded - do not lazy-load again.
             return loadChildren(field, parent);
         }
@@ -333,7 +323,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isOptional() optional},
+     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isLazy() lazy},
      * {@link #loadReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[]) directly loads}
      * the references. Otherwise, provides a lazy loading collection.
      *
@@ -341,7 +331,7 @@ public class FieldValueMappingCallback {
      * @return never <code>null</code> but rather an empty collection.
      */
     private Collection<Object> createCollectionOfReferences(final FieldData field, final String[] paths) {
-        if (field.metaData.isLazy() || field.metaData.isOptional()) {
+        if (field.metaData.isLazy()) {
             // The field was already lazy-loaded - no not lazy-load again.
             return loadReferences(field, paths);
         }
@@ -597,100 +587,6 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Implements explicit lazy-loading via {@link io.neba.api.resourcemodels.Optional}. Leverages the internal
-     * {@link #resolve(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData)}
-     * method and {@link io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData} for this purpose.
-     *
-     * @author Olaf Otto
-     */
-    private static class OptionalFieldValue implements Optional<Object> {
-        private static final Object NULL = new Object();
-        private final FieldData fieldData;
-        private final FieldValueMappingCallback callback;
-        private Object value = NULL;
-
-        OptionalFieldValue(FieldData fieldData, FieldValueMappingCallback callback) {
-            this.fieldData = fieldData;
-            this.callback = callback;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        @Nonnull
-        public Object get() {
-            if (this.value == NULL) {
-                load();
-            }
-            if (this.value == null) {
-                throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
-            }
-            return this.value;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Object orElse(Object defaultValue) {
-            if (this.value == NULL) {
-                load();
-            }
-            return this.value == null ? defaultValue : this.value;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isPresent() {
-            return orElse(null) != null;
-        }
-
-        /**
-         * The semantics of the value holder must adhere to the semantics of a non-lazy-loaded field value:
-         * The value is loaded exactly once, subsequent or concurrent access to the field value means accessing the
-         * same value. Thus, the value is retained and this method is thread-safe.
-         */
-        private synchronized void load() {
-            if (this.value == NULL) {
-                this.value = this.callback.resumeMapping(this.fieldData);
-            }
-        }
-    }
-
-    /**
-     * An {@link Optional} that is empty. Represents cases where it is already clear
-     * at mapping time that the value will be null.
-     *
-     * @author Olaf Otto
-     */
-    private static class EmptyOptional implements Optional<Object> {
-        private final FieldData fieldData;
-
-        private EmptyOptional(FieldData fieldData) {
-            this.fieldData = fieldData;
-        }
-
-        @Override
-        @Nonnull
-        public Object get() throws NoSuchElementException {
-            throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
-        }
-
-        @Override
-        public Object orElse(Object defaultValue) {
-            return defaultValue;
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false;
-        }
-    }
-
-    /**
      * Implements explicit lazy-loading via {@link io.neba.api.resourcemodels.Lazy}.
      *
      * @author Olaf Otto
@@ -750,7 +646,7 @@ public class FieldValueMappingCallback {
         }
 
         @Override
-        public Object loadObject() throws Exception {
+        public Object loadObject() {
             return this.mapper.loadChildren(field, resource);
         }
     }
@@ -773,7 +669,7 @@ public class FieldValueMappingCallback {
         }
 
         @Override
-        public Object loadObject() throws Exception {
+        public Object loadObject() {
             return this.callback.loadReferences(field, paths);
         }
     }

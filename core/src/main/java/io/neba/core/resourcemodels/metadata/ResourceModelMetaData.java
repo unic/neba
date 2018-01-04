@@ -123,7 +123,8 @@ public class ResourceModelMetaData {
         private boolean isUnmapped(Field field) {
             final Annotations annotations = annotations(field);
             return annotations.contains(Unmapped.class) ||
-                    annotations.containsName("javax.inject.Inject") || // @Inject is an optional dependency, thus using a name constant
+                    // @Inject and @Autowired are optional dependencies, thus using name constants
+                    annotations.containsName("javax.inject.Inject") ||
                     annotations.containsName("org.springframework.beans.factory.annotation.Autowired") ||
                     annotations.containsName(Resource.class.getName());
         }

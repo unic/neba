@@ -18,6 +18,7 @@
     <properties>
         <bundle.symbolicName>io.neba-spring</bundle.symbolicName>
         <bundle.namespace>io.neba</bundle.namespace>
+        <api.version>5.0.0</api.version>
     </properties>
 
     <dependencies>
@@ -144,10 +145,9 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Category>neba</Bundle-Category>
                         <Fragment-Host>org.eclipse.gemini.blueprint.extender</Fragment-Host>
-                        <Private-Package>
-                            io.neba.spring.*
-                        </Private-Package>
-                        <Export-Package />
+                        <Export-Package>
+                            io.neba.spring.api;version=${api.version}
+                        </Export-Package>
                         <Import-Package>
                             org.apache.sling.bgservlets;version=0.0.0;resolution:=optional,
                             javax.annotation.*;version="0.0.0";resolution:=optional,

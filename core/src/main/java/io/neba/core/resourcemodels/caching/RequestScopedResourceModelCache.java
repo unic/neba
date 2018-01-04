@@ -16,17 +16,8 @@
 
 package io.neba.core.resourcemodels.caching;
 
-import io.neba.api.resourcemodels.ResourceModelCache;
+import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.util.Key;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -39,6 +30,15 @@ import org.apache.sling.api.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.sling.commons.osgi.PropertiesUtil.toBoolean;
 
@@ -186,7 +186,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         // ignore
     }
 

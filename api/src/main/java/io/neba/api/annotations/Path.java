@@ -16,6 +16,8 @@
 
 package io.neba.api.annotations;
 
+import io.neba.api.spi.PlaceholderVariableResolver;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,7 +32,7 @@ import static java.lang.annotation.ElementType.FIELD;
  * field. Can be used when the name of the field does not match the name of
  * the mapped child resource or property, e.g. in case namespaces are used, or
  * if an absolute or relative path is to be mapped. <br /> Supports placeholders of the form
- * ${name}, which are resolved by {@link io.neba.api.resourcemodels.PlaceholderVariableResolver} service.
+ * ${name}, which are resolved by {@link PlaceholderVariableResolver} service.
  *
  * Example
  * <p>

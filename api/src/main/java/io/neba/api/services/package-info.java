@@ -15,8 +15,7 @@
 */
 
 /**
- * Contains the implementation of the {@link io.neba.api.spi.ResourceModelCache resource model cache API}
- * as well as the default resource model cache implementation, the
- * configurable {@link io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache}.
+ * All interfaces in this package represent services always published by the NEBA core.
  */
-package io.neba.core.resourcemodels.caching;
+package io.neba.api.services;
+

@@ -16,8 +16,8 @@
 
 package io.neba.core.util;
 
-import io.neba.api.resourcemodels.ResourceModelFactory;
-import io.neba.api.resourcemodels.ResourceModelFactory.ModelDefinition;
+import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.osgi.framework.Bundle;
 

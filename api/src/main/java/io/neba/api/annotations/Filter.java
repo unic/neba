@@ -14,9 +14,18 @@
   limitations under the License.
 */
 
+package io.neba.api.annotations;
+
 /**
- * Contains the implementation of the {@link io.neba.api.spi.ResourceModelCache resource model cache API}
- * as well as the default resource model cache implementation, the
- * configurable {@link io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache}.
+ * Can be used to specify an OSGi service filter to narrow the service(s) that shall be
+ * injected, for example:
+ *
+ * <pre>
+ * &#064;{@link javax.inject.Inject}
+ * &#064;{@link Filter}("(&amp;(property=value)(otherProperty=otherValue))")
+ * private SomeService service;
+ * </pre>
  */
-package io.neba.core.resourcemodels.caching;
+public @interface Filter {
+    String value() default "";
+}

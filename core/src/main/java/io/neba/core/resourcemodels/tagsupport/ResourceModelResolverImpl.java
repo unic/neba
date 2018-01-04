@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.tagsupport;
 
-import io.neba.api.resourcemodels.ResourceModelProvider;
+import io.neba.api.services.ResourceModelResolver;
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
@@ -43,9 +43,9 @@ import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
  *
  * @author Olaf Otto
  */
-@Service(ResourceModelProvider.class)
+@Service(ResourceModelResolver.class)
 @Component
-public class ResourceModelProviderImpl implements ResourceModelProvider {
+public class ResourceModelResolverImpl implements ResourceModelResolver {
     @Reference
     private ModelRegistry registry;
     @Reference

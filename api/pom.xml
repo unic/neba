@@ -22,7 +22,7 @@
     <properties>
         <bundle.symbolicName>io.neba-api</bundle.symbolicName>
         <bundle.namespace>io.neba</bundle.namespace>
-        <api.version>4.3.0</api.version>
+        <api.version>5.0.0</api.version>
     </properties>
 
     <build>
@@ -38,7 +38,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Category>neba</Bundle-Category>
                         <Import-Package>
-                            org.springframework.*;resolution:=optional,
                             javax.annotation.*;version="0.0.0";resolution:=optional,
                             *
                         </Import-Package>
@@ -60,18 +59,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-        </dependency>
         <dependency>
             <groupId>javax.servlet.jsp</groupId>
             <artifactId>jsp-api</artifactId>
@@ -107,6 +94,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-atinject_1.0_spec</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
