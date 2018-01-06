@@ -19,11 +19,6 @@ package io.neba.core.resourcemodels.adaptation;
 import io.neba.core.Eventual;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiModelSource;
-import java.util.Dictionary;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,13 +30,17 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import java.util.Dictionary;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -78,7 +77,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     @Mock
     private Bundle bundle;
 
-    private List<OsgiModelSource<?>> beanSources;
+    private List<OsgiModelSource<?>> modelSources;
     private Dictionary<String, Object> updatedProperties;
 
     @InjectMocks
@@ -87,10 +86,10 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     @Before
     @SuppressWarnings("unchecked")
     public void prepareTest() {
-        this.beanSources = new LinkedList<>();
+        this.modelSources = new LinkedList<>();
 
-        when(this.registry.getBeanSources())
-                .thenReturn(this.beanSources);
+        when(this.registry.getModelSources())
+                .thenReturn(this.modelSources);
 
         when(this.context.registerService(eq(AdapterFactory.class.getName()), eq(this.adapter), isA(Dictionary.class)))
                 .thenAnswer(inv -> {
@@ -113,10 +112,15 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     }
 
     @Test
-    public void testUpdaterPerformsNoUpdatesWhileBundleNotReady() throws Exception {
+    public void testUpdaterPerformsNoUpdatesWhileBundleNotReady() {
         withSynchronousExecutor();
+        withResolvedBundle();
         signalRegistryChange();
         assertUpdaterDoesNotUpdateModelAdapter();
+    }
+
+    private void withResolvedBundle() {
+        doReturn(Bundle.RESOLVED).when(this.bundle).getState();
     }
 
     @Test
@@ -184,7 +188,6 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
 
     private void assertUpdaterDoesNotUpdateModelAdapter() {
         verify(this.registration, never()).unregister();
-        verify(this.context, never()).registerService(anyString(), anyObject(), isA(Properties.class));
     }
 
     private void assertAdaptersPropertyIs(Object... elements) {
@@ -204,7 +207,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     private void withModel(Class<?> modelType) {
         OsgiModelSource source = mock(OsgiModelSource.class);
         when(source.getModelType()).thenReturn(modelType);
-        this.beanSources.add(source);
+        this.modelSources.add(source);
     }
 
     private void signalIllegalStateWhenUnregisteringService() {

@@ -136,9 +136,9 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testHandlingOfNullBeanSource() throws Exception {
+    public void testHandlingOfNullModelSource() throws Exception {
         withTargetType(TestModel.class);
-        withNullReturnedAsBeanSourceFromRegistrar();
+        withNullReturnedAsModelSourceFromRegistrar();
         adapt();
         verifyAdapterObtainsSourceFromRegistrar();
         assertResourceWasNotAdaptedToModel();
@@ -192,7 +192,7 @@ public class ResourceToModelAdapterTest {
         verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiModelSource.class));
     }
 
-    private void withNullReturnedAsBeanSourceFromRegistrar() {
+    private void withNullReturnedAsModelSourceFromRegistrar() {
         when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(null);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), eq(this.targetType))).thenReturn(null);
     }

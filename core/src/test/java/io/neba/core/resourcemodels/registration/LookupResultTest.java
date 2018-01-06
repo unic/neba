@@ -33,19 +33,19 @@ import static org.mockito.Mockito.mock;
 @RunWith(MockitoJUnitRunner.class)
 public class LookupResultTest {
     @Mock
-    private OsgiModelSource<?> beanSource;
+    private OsgiModelSource<?> modelSource;
     private LookupResult testee;
 
     @Before
     public void setUp() throws Exception {
-        this.testee = new LookupResult(this.beanSource, "junit/test/type");
+        this.testee = new LookupResult(this.modelSource, "junit/test/type");
 
         doReturn(123L)
-                .when(this.beanSource)
+                .when(this.modelSource)
                 .getBundleId();
 
         doReturn(Object.class)
-                .when(this.beanSource)
+                .when(this.modelSource)
                 .getModelType();
     }
 
@@ -56,7 +56,7 @@ public class LookupResultTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorArgumentResourceTypeMustNotBeNull() throws Exception {
-        new LookupResult(this.beanSource, null);
+        new LookupResult(this.modelSource, null);
     }
 
     @Test
@@ -71,25 +71,25 @@ public class LookupResultTest {
 
     @Test
     public void testEqualsToResultForOtherSource() throws Exception {
-        OsgiModelSource<?> beanSource = mock(OsgiModelSource.class);
-        LookupResult other = new LookupResult(beanSource, "junit/test/type");
+        OsgiModelSource<?> modelSource = mock(OsgiModelSource.class);
+        LookupResult other = new LookupResult(modelSource, "junit/test/type");
 
         assertLookupResultIsNotEqualTo(other);
     }
 
     @Test
     public void testEqualsToResultForDifferentResourceType() throws Exception {
-        assertLookupResultIsNotEqualTo(new LookupResult(this.beanSource, "junit/other/type"));
+        assertLookupResultIsNotEqualTo(new LookupResult(this.modelSource, "junit/other/type"));
     }
 
     @Test
     public void testEqualsToResultForSameSourceAndResourceType() throws Exception {
-        assertThat(this.testee).isEqualTo(new LookupResult(this.beanSource, "junit/test/type"));
+        assertThat(this.testee).isEqualTo(new LookupResult(this.modelSource, "junit/test/type"));
     }
 
     @Test
     public void testStringRepresentation() throws Exception {
-        assertThat(this.testee.toString()).isEqualTo("junit/test/type -> [beanSource]");
+        assertThat(this.testee.toString()).isEqualTo("junit/test/type -> [modelSource]");
     }
 
     private void assertLookupResultIsNotEqualTo(Object other) {

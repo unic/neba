@@ -82,7 +82,7 @@ public class ModelRegistryConsolePluginTest {
     private Writer internalWriter;
     private String renderedResponse;
     private Map<String, Collection<OsgiModelSource<?>>> typeMappings;
-    private Collection<OsgiModelSource<?>> beanSources;
+    private Collection<OsgiModelSource<?>> modelSources;
 
     @InjectMocks
     private ModelRegistryConsolePlugin testee;
@@ -93,7 +93,7 @@ public class ModelRegistryConsolePluginTest {
         this.internalWriter = new StringWriter();
         Writer writer = new PrintWriter(this.internalWriter);
         this.typeMappings = new HashMap<>();
-        this.beanSources = new ArrayList<>();
+        this.modelSources = new ArrayList<>();
 
         doReturn(writer)
                 .when(this.response)
@@ -103,9 +103,9 @@ public class ModelRegistryConsolePluginTest {
                 .when(this.modelRegistry)
                 .getTypeMappings();
 
-        doReturn(this.beanSources)
+        doReturn(this.modelSources)
                 .when(this.modelRegistry)
-                .getBeanSources();
+                .getModelSources();
 
         doReturn(this.resolver)
                 .when(this.factory)
@@ -142,25 +142,25 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testRenderingOfRegisteredModelsTable() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
 
         renderContent();
 
         assertResponseContainsTableHead();
         assertResponseContainsNumberOfModelsText(1);
-        assertResponseContains("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "beanName");
+        assertResponseContains("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "modelName");
     }
 
     @Test
     public void testRenderingOfLinkToCrxDe() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withResolution("cq/Page", "/libs/foundation/components/primary/cq/Page");
 
         renderContent();
 
         assertResponseContains("<a href=\"/crx/de/#" +
                 "/libs/foundation/components/primary/cq/Page\" class=\"crxdelink\">" +
-                "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "beanName");
+                "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "modelName");
     }
 
     @Test
@@ -191,7 +191,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testModelTypesApi() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
 
         get("/system/console/modelregistry/api/modeltypes");
 
@@ -237,7 +237,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByPackageName() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withParameter("modelTypeName", "io.neba");
 
         get("/system/console/modelregistry/api/filter");
@@ -248,7 +248,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByTypeName() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withParameter("modelTypeName", "io.neba.core.resourcemodels.registration.ModelRegistryConsolePluginTest$Model");
 
         get("/system/console/modelregistry/api/filter");
@@ -259,7 +259,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByResource() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withPathResource("/junit/test", "cq:Page");
         withPathResourceLookedUp();
         withParameter("path", "/junit/test");
@@ -272,7 +272,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByResourceAndModelType() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withPathResource("/junit/test", "cq:Page");
         withPathResourceLookedUp();
 
@@ -287,7 +287,7 @@ public class ModelRegistryConsolePluginTest {
 
     private void withPathResourceLookedUp() {
         Set<LookupResult> lookupResults = new HashSet<>();
-        for (OsgiModelSource<?> source : this.beanSources) {
+        for (OsgiModelSource<?> source : this.modelSources) {
             LookupResult result = mock(LookupResult.class);
             doReturn(source).when(result).getSource();
             doReturn(pathResource.getResourceType()).when(result).getResourceType();
@@ -367,9 +367,9 @@ public class ModelRegistryConsolePluginTest {
         doReturn(resourcePath).when(mock).getPath();
     }
 
-    private void assertResponseContains(String typeName, Class<Model> modelType, long bundleId, String beanName) {
+    private void assertResponseContains(String typeName, Class<Model> modelType, long bundleId, String modelName) {
         assertThat(this.renderedResponse).contains("<td>" + typeName + "</td><td>" + modelType.getName() +
-                                                   "</td><td>" + beanName + "</td><td><a href=\"bundles/" + bundleId +
+                                                   "</td><td>" + modelName + "</td><td><a href=\"bundles/" + bundleId +
                                                    "\" title=\"JUnit test bundle 1.0.0\">" + bundleId + "</a></td>");
     }
 
@@ -381,22 +381,22 @@ public class ModelRegistryConsolePluginTest {
         assertThat(this.renderedResponse).isEqualTo(expected);
     }
 
-    private void withRegisteredModel(String typeName, Class<Model> modelType, long bundleId, String beanName) {
+    private void withRegisteredModel(String typeName, Class<Model> modelType, long bundleId, String modelName) {
         List<OsgiModelSource<?>> sources = new ArrayList<>();
         OsgiModelSource<?> source = mock(OsgiModelSource.class);
         doReturn(modelType).when(source).getModelType();
         doReturn(bundleId).when(source).getBundleId();
-        doReturn(beanName).when(source).getModelName();
+        doReturn(modelName).when(source).getModelName();
         doReturn(this.bundle).when(source).getBundle();
         sources.add(source);
-        this.beanSources.add(source);
+        this.modelSources.add(source);
         this.typeMappings.put(typeName, sources);
     }
 
     private void assertResponseContainsTableHead() {
         assertThat(this.renderedResponse).contains("<th>Type</th>");
         assertThat(this.renderedResponse).contains("<th>Model type</th>");
-        assertThat(this.renderedResponse).contains("<th>Bean name</th>");
+        assertThat(this.renderedResponse).contains("<th>Model name</th>");
         assertThat(this.renderedResponse).contains("<th>Source bundle</th>");
     }
 

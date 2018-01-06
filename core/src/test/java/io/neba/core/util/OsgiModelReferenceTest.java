@@ -28,16 +28,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class OsgiBeanReferenceTest {
+public class OsgiModelReferenceTest {
 	@Mock
 	private Bundle bundle;
-	private Object bean = new Object();
+	private Object model = new Object();
 	private long bundleId = 123L;
 
 	@Test
 	public void testEqualsAndHashCodeForBundleId() throws Exception {
-		OsgiBeanReference<Object> referenceOne = createReference();
-		OsgiBeanReference<Object> referenceTwo = createReference();
+		OsgiModelReference<Object> referenceOne = createReference();
+		OsgiModelReference<Object> referenceTwo = createReference();
 		
 		assertThat(referenceOne.equals(referenceTwo)).isTrue();
 		assertThat(referenceTwo.equals(referenceOne)).isTrue();
@@ -52,17 +52,17 @@ public class OsgiBeanReferenceTest {
 	}
 
 	@Test
-	public void testEqualsHandHashCodeDependsOnBeanTypeAndNotOnInstance() throws Exception {
-		OsgiBeanReference<Object> referenceOne = createReference();
+	public void testEqualsHandHashCodeDependsOnModelTypeAndNotOnInstance() throws Exception {
+		OsgiModelReference<Object> referenceOne = createReference();
 		
-		withNewBean(); 
-		OsgiBeanReference<Object> referenceTwo = createReference();
+		withNewModel();
+		OsgiModelReference<Object> referenceTwo = createReference();
 
 		assertThat(referenceOne.equals(referenceTwo)).isTrue();
 		assertThat(referenceTwo.equals(referenceOne));
 		assertThat(referenceOne.hashCode()).isEqualTo(referenceTwo.hashCode());
 		
-		withStringBean();
+		withStringModel();
 		referenceTwo = createReference();
 		assertThat(referenceOne.equals(referenceTwo)).isFalse();
 		assertThat(referenceTwo.equals(referenceOne)).isFalse();
@@ -71,40 +71,40 @@ public class OsgiBeanReferenceTest {
 
     @Test
     public void testEqualsSelf() throws Exception {
-        OsgiBeanReference<Object> reference = createReference();
+        OsgiModelReference<Object> reference = createReference();
         assertThat(reference.equals(reference)).isTrue();
     }
 
     @Test
     public void testEqualsWithOtherType() throws Exception {
-        OsgiBeanReference<Object> reference = createReference();
+        OsgiModelReference<Object> reference = createReference();
         assertThat(reference.equals("")).isFalse();
     }
 
     @Test
     public void testEqualsToNull() throws Exception {
-        OsgiBeanReference<Object> reference = createReference();
+        OsgiModelReference<Object> reference = createReference();
         assertThat(reference.equals(null)).isFalse();
     }
 
     @Test
     public void testToStringRepresentation() throws Exception {
-        assertThat(createReference().toString()).isEqualTo("Bean with type \"java.lang.Object\" from bundle with id 123");
+        assertThat(createReference().toString()).isEqualTo("Model with type \"java.lang.Object\" from bundle with id 123");
     }
 
-    private void withStringBean() {
-		this.bean = "";
+    private void withStringModel() {
+		this.model = "";
 	}
 
-	private void withNewBean() {
-		this.bean = new Object();
+	private void withNewModel() {
+		this.model = new Object();
 	}
 
 	private void withBundleId(long l) {
 		this.bundleId = l;
 	}
 
-	private OsgiBeanReference<Object> createReference() {
-		return new OsgiBeanReference<>(this.bean, this.bundleId);
+	private OsgiModelReference<Object> createReference() {
+		return new OsgiModelReference<>(this.model, this.bundleId);
 	}
 }

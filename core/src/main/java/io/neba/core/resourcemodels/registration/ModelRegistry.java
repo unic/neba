@@ -122,27 +122,27 @@ public class ModelRegistry {
 
     /**
      * @param sources  can be <code>null</code>.
-     * @param beanName can be <code>null</code>.
-     * @return the original collection if sources or beanName are
+     * @param modelName can be <code>null</code>.
+     * @return the original collection if sources or modelName are
      * <code>null</code>, or a collection representing the models
-     * who's {@link OsgiModelSource#getModelName()} bean name}
-     * is equal to the given bean name.
+     * who's {@link OsgiModelSource#getModelName()} model name}
+     * is equal to the given model name.
      */
-    private static Collection<OsgiModelSource<?>> filter(Collection<OsgiModelSource<?>> sources, String beanName) {
-        Collection<OsgiModelSource<?>> sourcesWithBeanName = sources;
-        if (sources != null && beanName != null) {
-            sourcesWithBeanName = new ArrayList<>(sources.size());
+    private static Collection<OsgiModelSource<?>> filter(Collection<OsgiModelSource<?>> sources, String modelName) {
+        Collection<OsgiModelSource<?>> sourcesWithModelName = sources;
+        if (sources != null && modelName != null) {
+            sourcesWithModelName = new ArrayList<>(sources.size());
             for (OsgiModelSource<?> source : sources) {
-                if (beanName.equals(source.getModelName())) {
-                    sourcesWithBeanName.add(source);
+                if (modelName.equals(source.getModelName())) {
+                    sourcesWithModelName.add(source);
                 }
             }
         }
-        return sourcesWithBeanName;
+        return sourcesWithModelName;
     }
 
     private final ConcurrentDistinctMultiValueMap<String, OsgiModelSource<?>>
-            typeNameToBeanSourcesMap = new ConcurrentDistinctMultiValueMap<>();
+            typeNameToModelSourcesMap = new ConcurrentDistinctMultiValueMap<>();
     private final ConcurrentDistinctMultiValueMap<Key, LookupResult>
             lookupCache = new ConcurrentDistinctMultiValueMap<>();
 
@@ -151,22 +151,22 @@ public class ModelRegistry {
     private final AtomicInteger state = new AtomicInteger(0);
 
     /**
-     * Finds the most specific models for the given {@link Resource}. The model's bean
-     * name must match the provided bean name.
+     * Finds the most specific models for the given {@link Resource}. The model's model
+     * name must match the provided model name.
      *
      * @param resource must not be <code>null</code>.
-     * @param beanName must not be <code>null</code>.
+     * @param modelName must not be <code>null</code>.
      * @return the resolved models, or <code>null</code> if no such models exist.
      */
-    public Collection<LookupResult> lookupMostSpecificModels(Resource resource, String beanName) {
+    public Collection<LookupResult> lookupMostSpecificModels(Resource resource, String modelName) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
-        if (beanName == null) {
-            throw new IllegalArgumentException("Method argument beanName must not be null.");
+        if (modelName == null) {
+            throw new IllegalArgumentException("Method argument modelName must not be null.");
         }
 
-        Key key = key(resource, beanName);
+        Key key = key(resource, modelName);
 
         if (isUnmapped(key)) {
             return null;
@@ -176,7 +176,7 @@ public class ModelRegistry {
         if (matchingModels == null) {
             final int currentStateId = this.state.get();
 
-            matchingModels = resolveMostSpecificBeanSources(resource, beanName);
+            matchingModels = resolveMostSpecificModelSources(resource, modelName);
 
             if (matchingModels.isEmpty()) {
                 markAsUnmapped(key, currentStateId);
@@ -211,7 +211,7 @@ public class ModelRegistry {
 
         if (sources == null) {
             final int currentStateId = this.state.get();
-            sources = resolveMostSpecificBeanSources(resource);
+            sources = resolveMostSpecificModelSources(resource);
 
             if (sources.isEmpty()) {
                 markAsUnmapped(key, currentStateId);
@@ -245,7 +245,7 @@ public class ModelRegistry {
 
         if (sources == null) {
             final int currentStateId = this.state.get();
-            sources = resolveBeanSources(resource, null, false);
+            sources = resolveModelSources(resource, null, false);
 
             if (sources.isEmpty()) {
                 markAsUnmapped(key, currentStateId);
@@ -282,7 +282,7 @@ public class ModelRegistry {
         Collection<LookupResult> matchingModels = lookupFromCache(key);
         if (matchingModels == null) {
             final int currentStateId = this.state.get();
-            matchingModels = resolveMostSpecificBeanSources(resource, targetType);
+            matchingModels = resolveMostSpecificModelSources(resource, targetType);
 
             if (matchingModels.isEmpty()) {
                 markAsUnmapped(key, currentStateId);
@@ -312,7 +312,7 @@ public class ModelRegistry {
     void removeResourceModels(final Bundle bundle) {
         this.logger.info("Removing resource models of bundle " + displayNameOf(bundle) + "...");
         MatchedBundlesPredicate sourcesWithBundles = new MatchedBundlesPredicate(bundle);
-        for (Collection<OsgiModelSource<?>> values : this.typeNameToBeanSourcesMap.values()) {
+        for (Collection<OsgiModelSource<?>> values : this.typeNameToModelSourcesMap.values()) {
             CollectionUtils.filter(values, sourcesWithBundles);
         }
         clearLookupCaches();
@@ -324,8 +324,8 @@ public class ModelRegistry {
      * @return a shallow copy of all registered sources for models, never
      * <code>null</code> but rather an empty list.
      */
-    public List<OsgiModelSource<?>> getBeanSources() {
-        Collection<Collection<OsgiModelSource<?>>> sources = this.typeNameToBeanSourcesMap.values();
+    public List<OsgiModelSource<?>> getModelSources() {
+        Collection<Collection<OsgiModelSource<?>>> sources = this.typeNameToModelSourcesMap.values();
         List<OsgiModelSource<?>> linearizedSources = new LinkedList<>();
         sources.forEach(linearizedSources::addAll);
         return linearizedSources;
@@ -339,7 +339,7 @@ public class ModelRegistry {
      */
     public void add(String[] types, OsgiModelSource<?> source) {
         for (String resourceType : types) {
-            this.typeNameToBeanSourcesMap.put(resourceType, source);
+            this.typeNameToModelSourcesMap.put(resourceType, source);
         }
         clearLookupCaches();
     }
@@ -348,7 +348,7 @@ public class ModelRegistry {
      * @return all type -&gt; model mappings.
      */
     Map<String, Collection<OsgiModelSource<?>>> getTypeMappings() {
-        return this.typeNameToBeanSourcesMap.getContents();
+        return this.typeNameToModelSourcesMap.getContents();
     }
 
     /**
@@ -371,29 +371,29 @@ public class ModelRegistry {
     }
 
     private void clearRegisteredModels() {
-        this.typeNameToBeanSourcesMap.clear();
+        this.typeNameToModelSourcesMap.clear();
         this.logger.debug("Registry cleared.");
     }
 
     /**
-     * @see #resolveMostSpecificBeanSources(org.apache.sling.api.resource.Resource, Class)
+     * @see #resolveMostSpecificModelSources(org.apache.sling.api.resource.Resource, Class)
      */
-    private Collection<LookupResult> resolveMostSpecificBeanSources(Resource resource) {
-        return resolveMostSpecificBeanSources(resource, (Class<?>) null);
+    private Collection<LookupResult> resolveMostSpecificModelSources(Resource resource) {
+        return resolveMostSpecificModelSources(resource, (Class<?>) null);
     }
 
     /**
-     * @see #resolveBeanSources(org.apache.sling.api.resource.Resource, Class, boolean)
+     * @see #resolveModelSources(org.apache.sling.api.resource.Resource, Class, boolean)
      */
-    private Collection<LookupResult> resolveMostSpecificBeanSources(
+    private Collection<LookupResult> resolveMostSpecificModelSources(
             Resource resource,
             Class<?> compatibleType) {
 
-        return resolveBeanSources(resource, compatibleType, true);
+        return resolveModelSources(resource, compatibleType, true);
     }
 
     /**
-     * Finds all {@link OsgiModelSource bean sources} representing models for the given
+     * Finds all {@link OsgiModelSource model sources} representing models for the given
      * {@link Resource}.
      *
      * @param resource            must not be <code>null</code>.
@@ -402,10 +402,10 @@ public class ModelRegistry {
      * @param resolveMostSpecific whether to resolve only the most specific models.
      * @return never <code>null</code> but rather an empty collection.
      */
-    private Collection<LookupResult> resolveBeanSources(Resource resource, Class<?> compatibleType, boolean resolveMostSpecific) {
+    private Collection<LookupResult> resolveModelSources(Resource resource, Class<?> compatibleType, boolean resolveMostSpecific) {
         Collection<LookupResult> sources = new ArrayList<>(64);
         for (final String resourceType : mappableTypeHierarchyOf(resource)) {
-            Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
+            Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToModelSourcesMap.get(resourceType);
             Collection<OsgiModelSource<?>> sourcesForCompatibleType = filter(allSourcesForType, compatibleType);
             if (sourcesForCompatibleType != null && !sourcesForCompatibleType.isEmpty()) {
                 sources.addAll(sourcesForCompatibleType.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
@@ -418,21 +418,21 @@ public class ModelRegistry {
     }
 
     /**
-     * Finds all {@link OsgiModelSource bean sources} representing models for the given
-     * {@link Resource} whos {@link OsgiModelSource#getModelName() bean name}
-     * matches the given bean name.
+     * Finds all {@link OsgiModelSource model sources} representing models for the given
+     * {@link Resource} who's {@link OsgiModelSource#getModelName() model name}
+     * matches the given model name.
      *
      * @param resource must not be <code>null</code>.
-     * @param beanName can be <code>null</code>.
+     * @param modelName can be <code>null</code>.
      * @return never <code>null</code> but rather an empty collection.
      */
-    private Collection<LookupResult> resolveMostSpecificBeanSources(Resource resource, String beanName) {
+    private Collection<LookupResult> resolveMostSpecificModelSources(Resource resource, String modelName) {
         Collection<LookupResult> sources = new ArrayList<>();
         for (final String resourceType : mappableTypeHierarchyOf(resource)) {
-            Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToBeanSourcesMap.get(resourceType);
-            Collection<OsgiModelSource<?>> sourcesWithMatchingBeanName = filter(allSourcesForType, beanName);
-            if (sourcesWithMatchingBeanName != null && !sourcesWithMatchingBeanName.isEmpty()) {
-                sources.addAll(sourcesWithMatchingBeanName.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
+            Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToModelSourcesMap.get(resourceType);
+            Collection<OsgiModelSource<?>> sourcesWithMatchingModelName = filter(allSourcesForType, modelName);
+            if (sourcesWithMatchingModelName != null && !sourcesWithMatchingModelName.isEmpty()) {
+                sources.addAll(sourcesWithMatchingModelName.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
                 break;
             }
         }

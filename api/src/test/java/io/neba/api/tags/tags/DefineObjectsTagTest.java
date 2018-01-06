@@ -79,7 +79,7 @@ public class DefineObjectsTagTest {
         doReturn(this.resourceModelResolver).when(this.sling).getService(eq(ResourceModelResolver.class));
         doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModel(eq(this.resource));
         doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
-        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModelWithBeanName(eq(this.resource), anyString());
+        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModelWithName(eq(this.resource), anyString());
 
         withBindings(this.bindings);
         this.testee.setPageContext(this.context);
@@ -112,15 +112,15 @@ public class DefineObjectsTagTest {
     }
 
     @Test
-    public void testResolutionOfGenericModelWithExplicitModelBeanName() throws Exception {
+    public void testResolutionOfGenericModelWithExplicitModelModelName() throws Exception {
         withDesiredModelNamed("name");
         executeTag();
-        verifyResourceIsAdaptedToMostSpecificModelWithProvidedBeanName();
+        verifyResourceIsAdaptedToMostSpecificModelWithProvidedModelName();
         verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test
-    public void testResolutionOfGenericModelWithEmptyModelBeanName() throws Exception {
+    public void testResolutionOfGenericModelWithEmptyModelModelName() throws Exception {
         withDesiredModelNamed(" ");
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModel();
@@ -162,8 +162,8 @@ public class DefineObjectsTagTest {
         doReturn(null).when(this.sling).getService(eq(ResourceModelResolver.class));
     }
 
-    private void verifyResourceIsAdaptedToMostSpecificModelWithProvidedBeanName() {
-        verify(this.resourceModelResolver).resolveMostSpecificModelWithBeanName(eq(this.resource), eq(this.desiredModelName));
+    private void verifyResourceIsAdaptedToMostSpecificModelWithProvidedModelName() {
+        verify(this.resourceModelResolver).resolveMostSpecificModelWithName(eq(this.resource), eq(this.desiredModelName));
     }
 
     private void withDesiredModelNamed(String name) {

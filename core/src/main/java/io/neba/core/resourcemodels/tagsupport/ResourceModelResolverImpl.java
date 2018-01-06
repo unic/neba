@@ -57,14 +57,14 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
      * {@inheritDoc}
      */
     @Override
-    public Object resolveMostSpecificModelWithBeanName(Resource resource, String beanName) {
+    public Object resolveMostSpecificModelWithName(Resource resource, String name) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
-        if (beanName == null) {
-            throw new IllegalArgumentException("Method argument beanName must not be null.");
+        if (name == null) {
+            throw new IllegalArgumentException("Method argument modelName must not be null.");
         }
-        return resolveMostSpecificModelForResource(resource, true, beanName);
+        return resolveMostSpecificModelForResource(resource, true, name);
     }
 
     /**
@@ -86,11 +86,11 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
         return resolveMostSpecificModelForResource(resource, true, null);
     }
 
-    private <T> T resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String beanName) {
+    private <T> T resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String modelName) {
         T model = null;
-        Collection<LookupResult> models = (beanName == null) ?
+        Collection<LookupResult> models = (modelName == null) ?
                 this.registry.lookupMostSpecificModels(resource) :
-                this.registry.lookupMostSpecificModels(resource, beanName);
+                this.registry.lookupMostSpecificModels(resource, modelName);
 
         if (models != null && models.size() == 1) {
             LookupResult lookupResult = models.iterator().next();

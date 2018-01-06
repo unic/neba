@@ -41,7 +41,7 @@ public final class DefineObjectsTag extends TagSupport {
     private static final long serialVersionUID = 3746304163438347809L;
 
     private boolean includeGenericBaseTypes = false;
-    private String modelBeanName;
+    private String modelName;
     private String var;
 
     @Override
@@ -59,14 +59,14 @@ public final class DefineObjectsTag extends TagSupport {
         this.includeGenericBaseTypes = includeGenericBaseTypes;
     }
 
-    @TagAttribute(description = "The explicit bean name of the resource model that shall " +
+    @TagAttribute(description = "The explicit model name of the resource model that shall " +
             "be provided for the resource. The targeted resource model must still be " +
             "declared for a resource type compatible with the resource's type. The searched " +
             "models will always include generic base models, regardless of whether " +
             "includeGenericBaseTypes is false.",
             runtimeValueAllowed = true)
     public void setUseModelNamed(@CheckForNull String name) {
-        this.modelBeanName = name;
+        this.modelName = name;
     }
 
     @TagAttribute(description = "The variable name to publish the model under. " +
@@ -89,8 +89,8 @@ public final class DefineObjectsTag extends TagSupport {
 
         Resource resource = getResource();
         Object model;
-        if (!isBlank(this.modelBeanName)) {
-            model = modelProvider.resolveMostSpecificModelWithBeanName(resource, this.modelBeanName);
+        if (!isBlank(this.modelName)) {
+            model = modelProvider.resolveMostSpecificModelWithName(resource, this.modelName);
         } else if (this.includeGenericBaseTypes) {
             model = modelProvider.resolveMostSpecificModelIncludingModelsForBaseTypes(resource);
         } else {

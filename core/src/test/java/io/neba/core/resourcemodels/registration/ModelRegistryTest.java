@@ -73,7 +73,7 @@ public class ModelRegistryTest {
     
     @Test
     public void testRegistryEmptiesOnShutdown() {
-        withBeanSources(2);
+        withModelSources(2);
 
         assertRegistryHasModels(2);
 
@@ -84,7 +84,7 @@ public class ModelRegistryTest {
 
     @Test
     public void testUnregistrationOfModelsWhenSourceBundleIsRemoved() throws Exception {
-        withBeanSources(2);
+        withModelSources(2);
 
         assertRegistryHasModels(2);
 
@@ -94,8 +94,8 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testBeanSourceLookupByResourceType() throws Exception {
-        withBeanSources(10);
+    public void testModelSourceLookupByResourceType() throws Exception {
+        withModelSources(10);
 
         assertRegistryHasModels(10);
         assertRegistryFindsResourceModelsByResourceType();
@@ -106,8 +106,8 @@ public class ModelRegistryTest {
      * is used if same lookup occurs more than once. 
      */
     @Test
-    public void testRepeatedBeanSourceLookupByResourceType() throws Exception {
-        withBeanSources(10);
+    public void testRepeatedModelSourceLookupByResourceType() throws Exception {
+        withModelSources(10);
 
         assertRegistryHasModels(10);
         assertRegistryFindsResourceModelsByResourceType();
@@ -115,24 +115,24 @@ public class ModelRegistryTest {
     }
     
     @Test
-    public void testBeanSourceLookupByResourceSuperType() throws Exception {
-        withBeanSources(10);
+    public void testModelSourceLookupByResourceSuperType() throws Exception {
+        withModelSources(10);
 
         assertRegistryHasModels(10);
         assertRegistryFindsResourceModelsByResourceSupertype();
     }
     
     @Test
-    public void testBeanSourceLookupForMostSpecificMapping() throws Exception {
+    public void testModelSourceLookupForMostSpecificMapping() throws Exception {
         withResourceModel("some/resourcetype");
         withResourceModel("some/resourcetype/supertype");
 
-        withBeanSourcesForAllResourceModels();
+        withModelSourcesForAllResourceModels();
 
-        lookupMostSpecificBeanSources(mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/supertype"));
+        lookupMostSpecificModelSources(mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/supertype"));
 
         assertRegistryHasModels(2);
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        assertNumberOfLookedUpModelSourcesIs(1);
     }
 
     /**
@@ -140,30 +140,30 @@ public class ModelRegistryTest {
      * is used if same lookup occurs more than once. 
      */
     @Test
-    public void testRepeatedBeanSourceLookupForMostSpecificMapping() throws Exception {
+    public void testRepeatedModelSourceLookupForMostSpecificMapping() throws Exception {
         withResourceModel("some/resourcetype");
         withResourceModel("some/resourcetype/supertype");
 
-        withBeanSourcesForAllResourceModels();
+        withModelSourcesForAllResourceModels();
 
-        lookupMostSpecificBeanSources(mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/supertype"));
-
-        assertRegistryHasModels(2);
-        assertNumberOfLookedUpBeanSourcesIs(1);
-
-        lookupMostSpecificBeanSources(mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/supertype"));
+        lookupMostSpecificModelSources(mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/supertype"));
 
         assertRegistryHasModels(2);
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        assertNumberOfLookedUpModelSourcesIs(1);
+
+        lookupMostSpecificModelSources(mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/supertype"));
+
+        assertRegistryHasModels(2);
+        assertNumberOfLookedUpModelSourcesIs(1);
     }
 
     @Test
     public void testMultipleMappingsToSameResourceType() throws Exception {
         withResourceModel("some/resourcetype");
         withResourceModel("some/resourcetype");
-        withBeanSourcesForAllResourceModels();
-        lookupMostSpecificBeanSources(mockResourceWithResourceType("some/resourcetype"));
-        assertNumberOfLookedUpBeanSourcesIs(2);
+        withModelSourcesForAllResourceModels();
+        lookupMostSpecificModelSources(mockResourceWithResourceType("some/resourcetype"));
+        assertNumberOfLookedUpModelSourcesIs(2);
     }
     
     @Test
@@ -174,60 +174,60 @@ public class ModelRegistryTest {
         withBundleId(2);
         withModelForType("some/resourcetype", TargetType2.class);
 
-        lookupMostSpecificBeanSources(mockResourceWithResourceType("some/resourcetype"));
-        assertNumberOfLookedUpBeanSourcesIs(2);
+        lookupMostSpecificModelSources(mockResourceWithResourceType("some/resourcetype"));
+        assertNumberOfLookedUpModelSourcesIs(2);
 
         removeBundle();
-        lookupMostSpecificBeanSources(mockResourceWithResourceType("some/resourcetype"));
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        lookupMostSpecificModelSources(mockResourceWithResourceType("some/resourcetype"));
+        assertNumberOfLookedUpModelSourcesIs(1);
         
         withBundleId(1);
         removeBundle();
-        lookupMostSpecificBeanSources(mockResourceWithResourceType("some/resourcetype"));
-        assertLookedUpBeanSourcesAreNull();
+        lookupMostSpecificModelSources(mockResourceWithResourceType("some/resourcetype"));
+        assertLookedUpModelSourcesAreNull();
     }
     
     @Test
     public void testNoMappingsToResourceType() throws Exception {
-        withBeanSourcesForAllResourceModels();
+        withModelSourcesForAllResourceModels();
 
-        lookupMostSpecificBeanSources(mockResourceWithResourceType("some/resourcetype"));
+        lookupMostSpecificModelSources(mockResourceWithResourceType("some/resourcetype"));
 
-        assertLookedUpBeanSourcesAreNull();
+        assertLookedUpModelSourcesAreNull();
     }
     
     @Test
-    public void testLookupOfBeanSourceForSpecificTypeWithSingleMapping() throws Exception {
+    public void testLookupOfModelSourceForSpecificTypeWithSingleMapping() throws Exception {
         withModelForType("some/resourcetype", TargetType1.class);
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
+        lookupModelSourcesForType(TargetType1.class, resource);
 
-        assertLookedUpBeanSourcesAreNotNull();
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType1.class);
     }
 
     @Test
-    public void testLookupOfBeanSourceForSpecificTypeWithMultipleCompatibleModels() throws Exception {
+    public void testLookupOfModelSourceForSpecificTypeWithMultipleCompatibleModels() throws Exception {
         withModelForType("some/resourcetype/parent", TargetType1.class);
         withModelForType("some/resourcetype", ExtendedTargetType1.class);
 
         Resource resource = mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/parent");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
+        lookupModelSourcesForType(TargetType1.class, resource);
 
-        assertLookedUpBeanSourcesAreNotNull();
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        assertLookedUpModelSourcesAreNotNull();
+        assertNumberOfLookedUpModelSourcesIs(1);
     }
 
     @Test
-    public void testlookupOfBeanSourceForSpecificTypeWithoutModel() throws Exception {
+    public void testlookupOfModelSourceForSpecificTypeWithoutModel() throws Exception {
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
+        lookupModelSourcesForType(TargetType1.class, resource);
 
-        assertLookedUpBeanSourcesAreNull();
+        assertLookedUpModelSourcesAreNull();
     }
 
     /**
@@ -236,15 +236,15 @@ public class ModelRegistryTest {
      * must be provided by the registry.
      */
     @Test
-    public void testLookupOfBeanSourceForTypeWithMultipleIncompatibleModels() throws Exception {
+    public void testLookupOfModelSourceForTypeWithMultipleIncompatibleModels() throws Exception {
         withModelForType("some/resourcetype", TargetType1.class);
         withModelForType("some/resourcetype", TargetType2.class);
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
+        lookupModelSourcesForType(TargetType1.class, resource);
 
-        assertLookedUpBeanSourcesAreNotNull();
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType1.class);
     }
 
@@ -262,24 +262,24 @@ public class ModelRegistryTest {
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertLookedUpBeanSourcesAreNotNull();
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType1.class);
         
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertLookedUpBeanSourcesAreNotNull();
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType1.class);
 
-        lookupBeanSourcesForType(TargetType3.class, resource);
-        assertLookedUpBeanSourcesAreNotNull();
+        lookupModelSourcesForType(TargetType3.class, resource);
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType3.class);
 
-        lookupBeanSourcesForType(TargetType2.class, resource);
-        assertLookedUpBeanSourcesAreNotNull();
+        lookupModelSourcesForType(TargetType2.class, resource);
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType2.class);
 
-        lookupBeanSourcesForType(TargetType4.class, resource);
-        assertLookedUpBeanSourcesAreNotNull();
+        lookupModelSourcesForType(TargetType4.class, resource);
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType4.class);
     }
 
@@ -288,94 +288,94 @@ public class ModelRegistryTest {
      * models must be provided by the registry.
      */
     @Test
-    public void testLookupOfBeanSourceForTypeWithMultipleCompatibleModels() throws Exception {
+    public void testLookupOfModelSourceForTypeWithMultipleCompatibleModels() throws Exception {
         withModelForType("some/resourcetype", TargetType1.class);
         withModelForType("some/resourcetype", ExtendedTargetType1.class);
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertLookedUpBeanSourcesAreNotNull();
-		assertNumberOfLookedUpBeanSourcesIs(2);
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertLookedUpModelSourcesAreNotNull();
+		assertNumberOfLookedUpModelSourcesIs(2);
     }
 
     /**
      * One may query the model registry for a model with a specific type and specific name for a given resource.
-     * If a bean with the specific name exists, the registry must return it.
+     * If a model with the specific name exists, the registry must return it.
      */
     @Test
-    public void testLookupOfModelWithSpecificBeanName() throws Exception {
-        withModelForType("some/resourcetype", TargetType1.class, "junitBeanOne");
-        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitBeanTwo");
+    public void testLookupOfModelWithSpecificModelName() throws Exception {
+        withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
+        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesWithBeanName("junitBeanTwo", resource);
+        lookupModelSourcesWithModelName("junitModelTwo", resource);
         assertLookedUpModelTypesAre(ExtendedTargetType1.class);
     }
 
     /**
-     * The behavior tested in {@link #testLookupOfModelWithSpecificBeanName()} above
+     * The behavior tested in {@link #testLookupOfModelWithSpecificModelName()} above
      * must be still consistent when the result is fetched from the cache.
      */
     @Test
-    public void testCachedLookupOfModelWithSpecificBeanName() throws Exception {
-        withModelForType("some/resourcetype", TargetType1.class, "junitBeanOne");
-        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitBeanTwo");
+    public void testCachedLookupOfModelWithSpecificModelName() throws Exception {
+        withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
+        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesWithBeanName("junitBeanTwo", resource);
+        lookupModelSourcesWithModelName("junitModelTwo", resource);
         // The second request also tests the result from the cache
-        lookupBeanSourcesWithBeanName("junitBeanTwo", resource);
+        lookupModelSourcesWithModelName("junitModelTwo", resource);
 
         assertLookedUpModelTypesAre(ExtendedTargetType1.class);
     }
 
     @Test
-    public void testLookupOfModelWithSpecificBeanNameProvidesMostSpecificModel() throws Exception {
-        withModelForType("some/resourcetype", TargetType1.class, "junitBean");
-        withModelForType("some/resource/supertype", ExtendedTargetType1.class, "junitBean");
+    public void testLookupOfModelWithSpecificModelNameProvidesMostSpecificModel() throws Exception {
+        withModelForType("some/resourcetype", TargetType1.class, "junitModel");
+        withModelForType("some/resource/supertype", ExtendedTargetType1.class, "junitModel");
 
         Resource resource = mockResourceWithResourceSuperType("some/resourcetype", "some/resource/supertype");
 
-        lookupBeanSourcesWithBeanName("junitBean", resource);
+        lookupModelSourcesWithModelName("junitModel", resource);
 
         assertLookedUpModelTypesAre(TargetType1.class);
     }
 
     /**
      * One may query the model registry for a model with a specific type and specific name for a given resource.
-     * If no bean with the specific name exists, the registry must return no model.
+     * If no model with the specific name exists, the registry must return no model.
      */
     @Test
-    public void testLookupOfModelWithSpecificNonexistentBeanName() throws Exception {
-        withModelForType("some/resourcetype", TargetType1.class, "junitBeanOne");
-        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitBeanTwo");
+    public void testLookupOfModelWithSpecificNonexistentModelName() throws Exception {
+        withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
+        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesWithBeanName("junitBeanThree", resource);
+        lookupModelSourcesWithModelName("junitModelThree", resource);
 
-        assertLookedUpBeanSourcesAreNull();
+        assertLookedUpModelSourcesAreNull();
     }
 
     /**
-     * The behavior tested in {@link #testLookupOfModelWithSpecificNonexistentBeanName()} above
+     * The behavior tested in {@link #testLookupOfModelWithSpecificNonexistentModelName()} above
      * must be still consistent when the result is fetched from the cache.
      */
     @Test
-    public void testCachedLookupOfModelWithSpecificNonexistentBeanName() throws Exception {
-        withModelForType("some/resourcetype", TargetType1.class, "junitBeanOne");
-        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitBeanTwo");
+    public void testCachedLookupOfModelWithSpecificNonexistentModelName() throws Exception {
+        withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
+        withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
-        lookupBeanSourcesWithBeanName("junitBeanThree", resource);
+        lookupModelSourcesWithModelName("junitModelThree", resource);
         // The second request also tests the result from the cache
-        lookupBeanSourcesWithBeanName("junitBeanThree", resource);
+        lookupModelSourcesWithModelName("junitModelThree", resource);
 
-        assertLookedUpBeanSourcesAreNull();
+        assertLookedUpModelSourcesAreNull();
     }
 
     @Test
@@ -385,9 +385,9 @@ public class ModelRegistryTest {
 
         Resource resource = mockResourceWithResourceSuperType("some/resourcetype", "some/resourcetype/parent");
 
-        lookupAllBeanSourcesFor(resource);
+        lookupAllModelSourcesFor(resource);
 
-        assertLookedUpBeanSourcesAreNotNull();
+        assertLookedUpModelSourcesAreNotNull();
         assertLookedUpModelTypesAre(TargetType1.class, TargetType2.class);
     }
 
@@ -401,12 +401,12 @@ public class ModelRegistryTest {
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
         withPrimaryType(resource, "some:JcrType");
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertNumberOfLookedUpModelSourcesIs(1);
 
         withPrimaryType(resource, "nt:unstructured");
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertLookedUpBeanSourcesAreNull();
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertLookedUpModelSourcesAreNull();
     }
 
 
@@ -421,12 +421,12 @@ public class ModelRegistryTest {
         Resource resource = mockResourceWithResourceType("my/page/type");
         withPrimaryType(resource, "some:JcrType");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertNumberOfLookedUpModelSourcesIs(1);
 
         withPrimaryType(resource, "nt:unstructured");
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertNumberOfLookedUpModelSourcesIs(1);
     }
 
     /**
@@ -443,13 +443,13 @@ public class ModelRegistryTest {
 
         withMixinTypes(resource, "mix:SomeMixing", "mix:OtherMixin");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertNumberOfLookedUpModelSourcesIs(1);
 
         withMixinTypes(resource, "mix:DifferentMixin", "mix:OtherMixin");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertLookedUpBeanSourcesAreNull();
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertLookedUpModelSourcesAreNull();
     }
 
     /**
@@ -466,14 +466,14 @@ public class ModelRegistryTest {
         Resource resource = mockResourceWithResourceSuperType("my/page/type", "some/super/type");
         withPrimaryType(resource, "nt:unstructured");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertNumberOfLookedUpBeanSourcesIs(1);
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertNumberOfLookedUpModelSourcesIs(1);
 
         resource = mockResourceWithResourceType("my/page/type");
         withPrimaryType(resource, "nt:unstructured");
 
-        lookupBeanSourcesForType(TargetType1.class, resource);
-        assertLookedUpBeanSourcesAreNull();
+        lookupModelSourcesForType(TargetType1.class, resource);
+        assertLookedUpModelSourcesAreNull();
     }
 
     /**
@@ -504,20 +504,20 @@ public class ModelRegistryTest {
         when(resource.adaptTo(Node.class)).thenReturn(node);
     }
 
-    private void lookupAllBeanSourcesFor(Resource resource) {
+    private void lookupAllModelSourcesFor(Resource resource) {
         this.lookedUpModels = this.testee.lookupAllModels(resource);
     }
 
-    private void lookupMostSpecificBeanSources(Resource resource) {
+    private void lookupMostSpecificModelSources(Resource resource) {
         this.lookedUpModels = this.testee.lookupMostSpecificModels(resource);
     }
 
-    private void lookupBeanSourcesForType(Class<?> targetType, Resource resource) {
+    private void lookupModelSourcesForType(Class<?> targetType, Resource resource) {
         this.lookedUpModels = this.testee.lookupMostSpecificModels(resource, targetType);
     }
 
-    private void lookupBeanSourcesWithBeanName(String beanName, Resource resource) {
-        this.lookedUpModels = this.testee.lookupMostSpecificModels(resource, beanName);
+    private void lookupModelSourcesWithModelName(String modelName, Resource resource) {
+        this.lookedUpModels = this.testee.lookupMostSpecificModels(resource, modelName);
     }
 
     private void withResourceModel(String resourceType) {
@@ -530,15 +530,15 @@ public class ModelRegistryTest {
         assertThat(this.lookedUpModels).extracting("source.modelType").containsOnly((Object[]) types);
     }
 
-	private void assertNumberOfLookedUpBeanSourcesIs(int i) {
+	private void assertNumberOfLookedUpModelSourcesIs(int i) {
         assertThat(this.lookedUpModels).hasSize(i);
 	}
         
-    private void assertLookedUpBeanSourcesAreNull() {
+    private void assertLookedUpModelSourcesAreNull() {
         assertThat(this.lookedUpModels).isNull();
     }
 
-    private void assertLookedUpBeanSourcesAreNotNull() {
+    private void assertLookedUpModelSourcesAreNotNull() {
         assertThat(this.lookedUpModels).isNotNull();
     }
 
@@ -565,7 +565,7 @@ public class ModelRegistryTest {
     }
 
     private void assertRegistryHasModels(int i) {
-    	assertThat(this.testee.getBeanSources()).hasSize(i);
+    	assertThat(this.testee.getModelSources()).hasSize(i);
     }
     
     private Resource mockResourceWithResourceType(String resourceTypeName) {
@@ -591,28 +591,28 @@ public class ModelRegistryTest {
         this.testee.deActivate();
     }
 
-    private void withBeanSources(int i) {
+    private void withModelSources(int i) {
         for (int k = 0; k < i; ++k) {
             String resourceType = "/mock/resourcetype/" + k;
             withResourceModel(resourceType);
         }
-        withBeanSourcesForAllResourceModels();
+        withModelSourcesForAllResourceModels();
     }
     
     private void withModelForType(String resourceType, Class modelType) {
-        withModelForType(resourceType, modelType, "defaultBeanName");
+        withModelForType(resourceType, modelType, "defaultModelName");
     }
 
     @SuppressWarnings("unchecked")
-    private void withModelForType(String resourceType, @SuppressWarnings("rawtypes") Class modelType, String modelBeanName) {
+    private void withModelForType(String resourceType, @SuppressWarnings("rawtypes") Class modelType, String modelModelName) {
         OsgiModelSource<?> source = mock(OsgiModelSource.class);
         when(source.getModelType()).thenReturn(modelType);
         when(source.getBundleId()).thenReturn(this.bundleId);
-        when(source.getModelName()).thenReturn(modelBeanName);
+        when(source.getModelName()).thenReturn(modelModelName);
         this.testee.add(new String[] {resourceType}, source);
     }
 
-    private void withBeanSourcesForAllResourceModels() {
+    private void withModelSourcesForAllResourceModels() {
         for (ResourceModel model : this.resourceModelAnnotations) {
             OsgiModelSource<?> source = mock(OsgiModelSource.class);
             when(source.getBundleId()).thenReturn(this.bundleId);

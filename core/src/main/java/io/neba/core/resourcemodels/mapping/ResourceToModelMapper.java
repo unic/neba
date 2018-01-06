@@ -80,7 +80,7 @@ public class ResourceToModelMapper {
     /**
      * @param resource    must not be <code>null</code>.
      * @param modelSource must not be <code>null</code>.
-     * @param <T>         the bean type.
+     * @param <T>         the model type.
      * @return never <code>null</code>.
      */
     public <T> T map(final Resource resource, final OsgiModelSource<T> modelSource) {
@@ -93,8 +93,8 @@ public class ResourceToModelMapper {
 
         T model;
 
-        final Class<?> beanType = modelSource.getModelType();
-        final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(beanType);
+        final Class<?> modelType = modelSource.getModelType();
+        final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(modelType);
         final Mapping<T> mapping = new Mapping<>(resource.getPath(), metaData);
         // Do not track mapping time for nested resource models of the same type: this would yield
         // a useless average and total mapping time as the mapping durations would sum up multiple times.
@@ -104,21 +104,21 @@ public class ResourceToModelMapper {
 
         if (alreadyOngoingMapping == null) {
             try {
-                // Phase 1: Obtain bean instance. All standard bean lifecycle phases (such as @PostConstruct)
+                // Phase 1: Obtain model instance. All standard model lifecycle phases (such as @PostConstruct)
                 // and processors are executed during this invocation.
-                final T bean = modelSource.getModel();
+                final T mappedModel = modelSource.getModel();
 
                 metaData.getStatistics().countInstantiation();
 
-                // Phase 2: Retain the bean prior to mapping in order to return it if the mapping results in a cycle.
-                mapping.setMappedModel(bean);
+                // Phase 2: Retain the model prior to mapping in order to return it if the mapping results in a cycle.
+                mapping.setMappedModel(mappedModel);
 
-                // Phase 3: Map the bean (may create a cycle).
+                // Phase 3: Map the model (may create a cycle).
 
                 // Retain current time for statistics
                 final long startTimeInMs = trackMappingDuration ? currentTimeMillis() : 0;
 
-                model = map(resource, bean, metaData, modelSource.getFactory());
+                model = map(resource, mappedModel, metaData, modelSource.getFactory());
 
                 if (trackMappingDuration) {
                     // Update statistics with mapping duration
@@ -129,30 +129,30 @@ public class ResourceToModelMapper {
                 this.nestedMappingSupport.end(mapping);
             }
         } else {
-            // Yield the currently mapped bean.
+            // Yield the currently mapped model.
             model = alreadyOngoingMapping.getMappedModel();
 
             if (model == null) {
                 // This can only be the case if a cycle was introduced during phase 1.
-                // Cycles introduced during bean initialization in the bean factory always
-                // represent unresolvable programming errors (the bean depends on itself to initialize itself),
+                // Cycles introduced during model initialization in the model factory always
+                // represent unresolvable programming errors (the model depends on itself to initialize itself),
                 // thus we must raise an exception.
-                throw new CycleInBeanInitializationException("Unable to provide bean " + beanType +
-                        " for resource " + resource + ". The bean initialization resulted in a cycle: "
+                throw new CycleInModelInitializationException("Unable to provide model " + modelType +
+                        " for resource " + resource + ". The model initialization resulted in a cycle: "
                         + join(this.nestedMappingSupport.getOngoingMappings(), " >> ") + " >> " + mapping + ". " +
-                        "Does the bean depend on itself to initialize, e.g. in a @PostConstruct method?");
+                        "Does the model depend on itself to initialize, e.g. in a @PostConstruct method?");
             }
         }
 
         return model;
     }
 
-    private <T> T map(final Resource resource, final T bean, final ResourceModelMetaData metaData, final ResourceModelFactory factory) {
-        T preprocessedModel = preProcess(resource, bean, factory);
+    private <T> T map(final Resource resource, final T model, final ResourceModelMetaData metaData, final ResourceModelFactory factory) {
+        T preprocessedModel = preProcess(resource, model, factory);
 
-        T model = prepareAopEnhancedModelTypes(preprocessedModel);
+        T fieldInjectionViewOnPreprocessedModel = prepareAopEnhancedModelTypes(preprocessedModel);
 
-        final FieldValueMappingCallback callback = new FieldValueMappingCallback(model, resource, factory, this.fieldMappers, this.variableResolvers);
+        final FieldValueMappingCallback callback = new FieldValueMappingCallback(fieldInjectionViewOnPreprocessedModel, resource, factory, this.fieldMappers, this.variableResolvers);
 
         for (MappedFieldMetaData mappedFieldMetaData : metaData.getMappableFields()) {
             callback.doWith(mappedFieldMetaData);

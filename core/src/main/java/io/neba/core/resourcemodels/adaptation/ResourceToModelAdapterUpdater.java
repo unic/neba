@@ -153,7 +153,7 @@ public class ResourceToModelAdapterUpdater {
     }
 
     /**
-     * Obtains all {@link OsgiModelSource bean sources} from the
+     * Obtains all {@link OsgiModelSource model sources} from the
      * {@link io.neba.core.resourcemodels.registration.ModelRegistrar} and adds the {@link OsgiModelSource#getModelType()
      * model type name} as well as the type name of all of its superclasses and
      * interfaces to the set.
@@ -165,9 +165,9 @@ public class ResourceToModelAdapterUpdater {
      */
     @SuppressWarnings("unchecked")
     private Set<String> getAdapterTypeNames() {
-        List<OsgiModelSource<?>> beanSources = this.registry.getBeanSources();
+        List<OsgiModelSource<?>> modelSources = this.registry.getModelSources();
         Set<String> modelNames = new HashSet<>();
-        for (OsgiModelSource<?> source : beanSources) {
+        for (OsgiModelSource<?> source : modelSources) {
             Class<?> c = source.getModelType();
             modelNames.add(c.getName());
             modelNames.addAll(toClassnameList(getAllInterfaces(c)));

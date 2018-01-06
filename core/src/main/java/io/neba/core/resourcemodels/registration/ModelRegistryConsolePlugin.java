@@ -146,7 +146,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         writeScriptIncludes(res);
 
         writer.write("<table id=\"plugin_table\" class=\"nicetable tablesorter noauto\">");
-        writer.write("<thead><tr><th>Type</th><th>Model type</th><th>Bean name</th><th>Source bundle</th></tr></thead>");
+        writer.write("<thead><tr><th>Type</th><th>Model type</th><th>Model name</th><th>Source bundle</th></tr></thead>");
         writer.write("<tbody>");
         for (Entry<String, Collection<OsgiModelSource<?>>> entry : this.registry.getTypeMappings().entrySet()) {
             for (OsgiModelSource<?> source : entry.getValue()) {
@@ -194,7 +194,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
     private void provideAllModelTypes(HttpServletResponse res) throws IOException {
         Set<String> typeNames = new HashSet<>();
-        for (OsgiModelSource<?> source : this.registry.getBeanSources()) {
+        for (OsgiModelSource<?> source : this.registry.getModelSources()) {
             for (Class<?> type : hierarchyOf(source.getModelType())) {
                 if (type == Object.class) {
                     continue;
@@ -262,7 +262,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
         Collection<OsgiModelSource<?>> types;
         if (isEmpty(resourcePath)) {
-            types = this.registry.getBeanSources();
+            types = this.registry.getModelSources();
         } else {
             types = resolveModelTypesFor(resourcePath);
         }
@@ -329,7 +329,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private Object getNumberOfModels() {
-        return this.registry.getBeanSources().size();
+        return this.registry.getModelSources().size();
     }
 
     private void spoolComponentIcon(HttpServletResponse response, String suffix) throws IOException {

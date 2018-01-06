@@ -51,7 +51,7 @@ public class OsgiModelSourceTest {
     private OsgiModelSource<Object> testee;
 
     @Before
-    public void prepareBeanSource() {
+    public void prepareModelSource() {
         doReturn(ACTIVE)
                 .when(this.bundleOne)
                 .getState();
@@ -80,15 +80,15 @@ public class OsgiModelSourceTest {
     }
 
     @Test
-    public void testBeanRetrievalFromFactory() throws Exception {
+    public void testModelRetrievalFromFactory() throws Exception {
         getModel();
         verifyModelSourceGetsModelFromModelFactory();
     }
 
     @Test
-    public void testBeanTypeRetrievalFromFactory() throws Exception {
+    public void testModelTypeRetrievalFromFactory() throws Exception {
         getModelType();
-        verifyBeanSourceModelTypeFromModelDefinitision();
+        verifyModelSourceModelTypeFromModelDefinitision();
     }
 
     @Test
@@ -122,7 +122,7 @@ public class OsgiModelSourceTest {
     }
 
 
-    private void verifyBeanSourceModelTypeFromModelDefinitision() {
+    private void verifyModelSourceModelTypeFromModelDefinitision() {
         verify(this.modelDefinition).getType();
     }
 

@@ -105,7 +105,7 @@ public class SpringModelRegistrar {
                         return factory.getBean(modelDefinition.getName());
                     }
                 },
-                new Hashtable()
+                new Hashtable<>()
         ));
     }
 

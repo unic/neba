@@ -94,22 +94,22 @@ public class ResourceModelMetaDataRegistrar {
 
     /**
      * Creates a new {@link ResourceModelMetaData} for the model represented
-     * yb the provided bean source.
+     * by the provided model source.
      *
-     * @param beanSource must not be <code>null</code>.
+     * @param modelSource must not be <code>null</code>.
      * @return the newly created meta data. Never <code>null</code>.
      */
-    public ResourceModelMetaData register(OsgiModelSource<?> beanSource) {
-        if (beanSource == null) {
-            throw new IllegalArgumentException("method parameter beanSource must not be null");
+    public ResourceModelMetaData register(OsgiModelSource<?> modelSource) {
+        if (modelSource == null) {
+            throw new IllegalArgumentException("method parameter modelSource must not be null");
         }
 
-        Class<?> beanType = beanSource.getModelType();
-        ResourceModelMetaData modelMetaData = new ResourceModelMetaData(beanType);
-        ResourceModelMetadataHolder holder = new ResourceModelMetadataHolder(beanSource, modelMetaData);
+        Class<?> modelType = modelSource.getModelType();
+        ResourceModelMetaData modelMetaData = new ResourceModelMetaData(modelType);
+        ResourceModelMetadataHolder holder = new ResourceModelMetadataHolder(modelSource, modelMetaData);
 
         Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
-        newCache.put(getUserClass(beanType), holder);
+        newCache.put(getUserClass(modelType), holder);
 
         this.cache = newCache;
         return modelMetaData;

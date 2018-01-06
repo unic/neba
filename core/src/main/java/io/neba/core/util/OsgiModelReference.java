@@ -20,29 +20,29 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 
 /**
- * References a bean from a {@link org.osgi.framework.Bundle}.
+ * References a model from a {@link org.osgi.framework.Bundle}.
  *
- * @param <T> the type of the bean.
+ * @param <T> the type of the model.
  * @author Olaf Otto
  */
-public class OsgiBeanReference<T> {
-    private final T bean;
+public class OsgiModelReference<T> {
+    private final T model;
     private final long bundleId;
-    private final Class<?> beanClass;
+    private final Class<?> modelClass;
     private final int hashCode;
 
-    OsgiBeanReference(T bean, long bundleId) {
-        if (bean == null) {
-            throw new IllegalArgumentException("Constructor argument bean must not be null");
+    OsgiModelReference(T model, long bundleId) {
+        if (model == null) {
+            throw new IllegalArgumentException("Constructor argument model must not be null");
         }
-        this.bean = bean;
+        this.model = model;
         this.bundleId = bundleId;
-        this.beanClass = bean.getClass();
-        this.hashCode = new HashCodeBuilder().append(beanClass.getName()).append(bundleId).toHashCode();
+        this.modelClass = model.getClass();
+        this.hashCode = new HashCodeBuilder().append(modelClass.getName()).append(bundleId).toHashCode();
     }
 
-    public T getBean() {
-        return bean;
+    public T getModel() {
+        return model;
     }
 
     public long getBundleId() {
@@ -63,14 +63,14 @@ public class OsgiBeanReference<T> {
             return false;
         }
 
-        OsgiBeanReference<?> other = (OsgiBeanReference<?>) obj;
+        OsgiModelReference<?> other = (OsgiModelReference<?>) obj;
 
         return this.bundleId == other.bundleId &&
-                this.beanClass.getName().equals(other.beanClass.getName());
+                this.modelClass.getName().equals(other.modelClass.getName());
     }
 
     @Override
     public String toString() {
-        return "Bean with type " + '"' + this.beanClass.getName() + '"' + " from bundle with id " + this.bundleId;
+        return "Model with type " + '"' + this.modelClass.getName() + '"' + " from bundle with id " + this.bundleId;
     }
 }

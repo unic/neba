@@ -90,7 +90,7 @@ public class ResourceToModelMapperTest {
     private Mapping<Object> ongoingMapping;
 
     private TestModel model;
-    private Class<?> beanType;
+    private Class<?> modelType;
     private ResourceModelPostProcessor postProcessor;
     private TestModel modelReturnedFromPostProcessor;
     private TestModel mappedModel;
@@ -127,11 +127,11 @@ public class ResourceToModelMapperTest {
                 .thenReturn(this.resourceModelStatistics);
 
         this.model = new TestModel();
-        this.beanType = TestModel.class;
+        this.modelType = TestModel.class;
     }
 
     @Test
-    public void testFieldMappingWithBeanSource() {
+    public void testFieldMappingWithModelSource() {
         mapResourceToModel();
         assertModelReturnedFromMapperIsOriginalModel();
     }
@@ -189,8 +189,8 @@ public class ResourceToModelMapperTest {
         verify(this.modelProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
     }
 
-    @Test(expected = CycleInBeanInitializationException.class)
-    public void testHandlingOfCyclesDuringBeanInitialization() {
+    @Test(expected = CycleInModelInitializationException.class)
+    public void testHandlingOfCyclesDuringModelInitialization() {
         withCycleCheckerReportingCycle();
         mapResourceToModel();
     }
@@ -205,7 +205,7 @@ public class ResourceToModelMapperTest {
     }
 
     @Test
-    public void testHandlingOfAdvisedModelBean() {
+    public void testHandlingOfAdvisedModelModel() {
         withAopSupportServiceReturningOriginalModel();
         mapResourceToModel();
         verifyMapperObtainsModelFromAopSupport();
@@ -348,7 +348,7 @@ public class ResourceToModelMapperTest {
         OsgiModelSource<TestModel> source = mock(OsgiModelSource.class);
         when(source.getModel()).thenReturn(this.model);
         when(source.getFactory()).thenReturn(this.factory);
-        doReturn(this.beanType).when(source).getModelType();
+        doReturn(this.modelType).when(source).getModelType();
         this.mappedModel = this.testee.map(this.resource, source);
     }
 }

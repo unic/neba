@@ -13,17 +13,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */
-
-package io.neba.core.resourcemodels.mapping;
+package io.neba.core.resourcemodels.factory;
 
 /**
- * Represents a cycle in the bean initialization detected when
- * mapping a {@link io.neba.api.annotations.ResourceModel} to a resource.
- *
- * @author Olaf Otto
+ * Represents a failed attempt to instantiate a class annotated with {@link io.neba.api.annotations.ResourceModel}.
  */
-class CycleInBeanInitializationException extends RuntimeException {
-    CycleInBeanInitializationException(String message) {
-        super(message);
+class ModelInstantiationException extends RuntimeException {
+    ModelInstantiationException(String message, Exception cause) {
+        super(message, cause);
     }
 }

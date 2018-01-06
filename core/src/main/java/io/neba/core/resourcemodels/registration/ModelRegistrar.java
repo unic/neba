@@ -20,30 +20,29 @@ import io.neba.api.spi.ResourceModelFactory;
 import io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiModelSource;
-import java.util.Collection;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Olaf Otto
  */
 @Component(immediate = true)
 public class ModelRegistrar {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = getLogger(getClass());
 
     @Reference
     private ModelRegistry registry;
@@ -54,24 +53,24 @@ public class ModelRegistrar {
     private ServiceTracker tracker;
 
     @Activate
-    protected void activate(BundleContext context) throws InvalidSyntaxException {
-       this.tracker = new ServiceTracker(context, ResourceModelFactory.class.getName(), new ServiceTrackerCustomizer() {
+    protected void activate(BundleContext context) {
+       this.tracker = new ServiceTracker<>(context, ResourceModelFactory.class.getName(), new ServiceTrackerCustomizer<ResourceModelFactory, ResourceModelFactory>() {
             @Override
-            public Object addingService(ServiceReference reference) {
-                final ResourceModelFactory factory = (ResourceModelFactory) context.getService(reference);
+            public ResourceModelFactory addingService(ServiceReference<ResourceModelFactory> reference) {
+                final ResourceModelFactory factory = context.getService(reference);
                 registerModels(reference.getBundle(), factory);
                 return context.getService(reference);
             }
 
             @Override
-            public void modifiedService(ServiceReference reference, Object service) {
-                final ResourceModelFactory factory = (ResourceModelFactory) context.getService(reference);
+            public void modifiedService(ServiceReference<ResourceModelFactory> reference, ResourceModelFactory service) {
+                final ResourceModelFactory factory = context.getService(reference);
                 unregister(reference.getBundle());
                 registerModels(reference.getBundle(), factory);
             }
 
             @Override
-            public void removedService(ServiceReference reference, Object service) {
+            public void removedService(ServiceReference reference, ResourceModelFactory service) {
                 unregister(reference.getBundle());
             }
         });

@@ -15,13 +15,12 @@
  */
 package io.neba.api.resourcemodels;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
 
 import static java.util.Objects.requireNonNull;
 
@@ -117,9 +116,9 @@ public interface Lazy<T> {
     @Nonnull
     default <U> Lazy<U> flatMap(Function<? super T, Lazy<U>> f) {
         requireNonNull(f);
-        if (!isPresent())
+        if (!isPresent()) {
             return java.util.Optional::empty;
-        else {
+        } else {
             return requireNonNull(f.apply(get()));
         }
     }

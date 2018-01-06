@@ -130,13 +130,13 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelWithBeanNameRequiresResource() throws Exception {
-        this.testee.resolveMostSpecificModelWithBeanName(null, "beanName");
+    public void testResolveMostSpecificModelWithModelNameRequiresResource() throws Exception {
+        this.testee.resolveMostSpecificModelWithName(null, "modelName");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelWithBeanNameRequiresBeanName() throws Exception {
-        this.testee.resolveMostSpecificModelWithBeanName(mock(Resource.class), null);
+    public void testResolveMostSpecificModelWithModelNameRequiresModelName() throws Exception {
+        this.testee.resolveMostSpecificModelWithName(mock(Resource.class), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -202,18 +202,18 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithSpecificBeanName() throws Exception {
-        provideMostSpecificModelWithBeanName("unitTestBean");
-        verifyRegistryIsQueriedWithBeanName();
+    public void testResolutionOfAnyModelWithSpecificModelName() throws Exception {
+        provideMostSpecificModelWithModelName("unitTestModel");
+        verifyRegistryIsQueriedWithModelName();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
 
     @Test
-    public void testResolutionOfAnyModelWithSpecificBeanNameDisregardsBasicTypes() throws Exception {
+    public void testResolutionOfAnyModelWithSpecificModelNameDisregardsBasicTypes() throws Exception {
         withModelFoundForResourceType("nt:base");
-        provideMostSpecificModelWithBeanName("unitTestBean");
-        verifyRegistryIsQueriedWithBeanName();
+        provideMostSpecificModelWithModelName("unitTestModel");
+        verifyRegistryIsQueriedWithModelName();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
@@ -253,12 +253,12 @@ public class ResourceModelResolverImplTest {
         doReturn(path).when(this.resource).getPath();
     }
 
-    private void verifyRegistryIsQueriedWithBeanName() {
+    private void verifyRegistryIsQueriedWithModelName() {
         verify(this.registry).lookupMostSpecificModels(eq(this.resource), anyString());
     }
 
-    private void provideMostSpecificModelWithBeanName(String name) {
-        this.resolutionResult = this.testee.resolveMostSpecificModelWithBeanName(this.resource, name);
+    private void provideMostSpecificModelWithModelName(String name) {
+        this.resolutionResult = this.testee.resolveMostSpecificModelWithName(this.resource, name);
     }
 
     private void provideMostSpecificModelIncludingBaseTypes() {

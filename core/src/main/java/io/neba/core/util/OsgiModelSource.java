@@ -25,7 +25,7 @@ import org.osgi.framework.Bundle;
  * A source for models provided by a {@link ResourceModelFactory} provided
  * by a {@link org.osgi.framework.Bundle}.
  *
- * @param <T> The bean's type.
+ * @param <T> The model's type.
  * @author Olaf Otto
  */
 public class OsgiModelSource<T> {
@@ -53,7 +53,7 @@ public class OsgiModelSource<T> {
 
         // Referencing the definition is safe: It either stems from the source bundle, or a bundle the source bundle depends on
         // via an import-package relationship. Thus, if the type changes, the source bundle is re-loaded as well thus
-        // causing this bean source to be re-created.
+        // causing this model source to be re-created.
         this.modelDefinition = modelDefinition;
         this.factory = factory;
         this.bundleId = bundle.getBundleId();
@@ -103,7 +103,7 @@ public class OsgiModelSource<T> {
 
         OsgiModelSource<?> other = (OsgiModelSource<?>) obj;
 
-        // Why are bundleId and modelDefinition name compared, but not simply the bean type?
+        // Why are bundleId and modelDefinition name compared, but not simply the model type?
         // Theoretically, it is possible to register the same type in two different OSGi bundles
         return this.bundleId == other.bundleId &&
                 this.modelDefinition.getName().equals(other.modelDefinition.getName());

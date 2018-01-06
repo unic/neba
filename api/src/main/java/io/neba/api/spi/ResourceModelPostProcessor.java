@@ -26,12 +26,12 @@ import javax.annotation.Nonnull;
  * {@link io.neba.api.annotations.ResourceModel resource models}. <br />
  *
  * {@link #processBeforeMapping(Object, Resource, ResourceModelFactory)} is invoked after
- * the bean was created and its dependencies (annotated with <code>@Inject</code>) have been injected, but before
+ * the model was created and its dependencies (annotated with <code>@Inject</code>) have been injected, but before
  * all resource properties are mapped. All lifecycle callbacks, e.g. <code>@PostConstruct</code> methods, where
  * already called at this point. <br />
  *
  * {@link #processAfterMapping(Object, Resource, ResourceModelFactory)} is invoked after
- * the bean was created and injected and all
+ * the model was created and injected and all
  * resource properties are mapped. All lifecycle callbacks where already
  * called at this point. <br />
  *
