@@ -39,6 +39,7 @@ import java.util.Date;
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
+import static io.neba.core.util.ReflectionUtil.makeAccessible;
 import static io.neba.core.util.ResourcePaths.path;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -131,7 +132,7 @@ public class MappedFieldMetaData {
         enforceInstantiableCollectionTypeForExplicitlyMappedFields();
         this.collectionProxyFactory = prepareProxyFactoryForCollectionTypes();
 
-        field.setAccessible(true);
+        makeAccessible(field);
     }
 
     /**

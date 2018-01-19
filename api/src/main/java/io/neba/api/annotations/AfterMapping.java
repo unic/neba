@@ -27,7 +27,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Methods of a {@link ResourceModel} with this annotation are invoked after
  * all properties have been mapped from the model's resource.
- * If multiple methods are annotated, all of them are executed in the order of declaration.
+ * If multiple methods are annotated, all of them are executed in no particular order. Inherited annotated
+ * methods are executed as well, though after the execution of the callbacks on the child class.
  *
  * Example:
  * <pre>

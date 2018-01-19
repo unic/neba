@@ -24,6 +24,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.lang.annotation.Retention;
 import java.util.List;
@@ -204,6 +205,16 @@ public class ModelInstantiatorTest {
             return;
         }
         fail("Since the model has an @Inject setter with multiple arguments, creating instantiation metadata must fail.");
+    }
+
+    @Test
+    public void testOrderOfPostConstructInvocationsIsParentsFirst() throws Exception {
+        withMetadataFor(TestModelWithLifecycleCallbacks.class);
+
+        createModelInstance();
+
+        assertThat(this.modelInstance).hasFieldOrPropertyWithValue("parentPostConstructInvocation", 0);
+        assertThat(this.modelInstance).hasFieldOrPropertyWithValue("localPostConstructInvocation", 1);
     }
 
     @Test
@@ -478,6 +489,40 @@ public class ModelInstantiatorTest {
         }
     }
 
+    public static class TestParentWithPostConstruct extends TestModel {
+        @PostConstruct
+        private void parentPostConstruct() {
+            parentPostConstructCalled();
+        }
+
+        void parentPostConstructCalled() {
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static class TestModelWithLifecycleCallbacks extends TestParentWithPostConstruct {
+        private int invocation = 0;
+        private int parentPostConstructInvocation = 0;
+        private int localPostConstructInvocation = 0;
+
+        @PostConstruct
+        protected void localPostConstruct() {
+            this.localPostConstructInvocation = invocation++;
+        }
+
+        @Override
+        public void parentPostConstructCalled() {
+            this.parentPostConstructInvocation = invocation++;
+        }
+
+        public int getParentPostConstructInvocation() {
+            return parentPostConstructInvocation;
+        }
+
+        public int getLocalPostConstructInvocation() {
+            return localPostConstructInvocation;
+        }
+    }
 
     private interface ServiceInterface {
     }

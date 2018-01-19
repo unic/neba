@@ -16,6 +16,7 @@
 package io.neba.core.resourcemodels.factory;
 
 import io.neba.api.annotations.Filter;
+import io.neba.core.util.ReflectionUtil;
 import org.osgi.framework.BundleContext;
 
 import javax.annotation.Nonnull;
@@ -29,7 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.neba.core.util.Annotations.annotations;
+import static io.neba.core.util.ReflectionUtil.methodsOf;
 import static java.lang.reflect.Modifier.isStatic;
+import static org.apache.commons.lang3.ArrayUtils.reverse;
 
 /**
  * Represents the way in which a model can be instantiated, including resolution of the
@@ -37,12 +40,16 @@ import static java.lang.reflect.Modifier.isStatic;
  */
 class ModelInstantiator<T> {
     private static final String INJECT_ANNOTATION_NAME = "javax.inject.Inject";
+    private static final String POSTCONSTRUCT_ANNOTATION_NAME = "javax.annotation.PostConstruct";
+
     private final ModelConstructor<T> constructor;
     private final ModelServiceSetter[] setters;
+    private final Method[] postConstructMethods;
 
     ModelInstantiator(@Nonnull Class<T> modelType) {
-        constructor = resolveConstructor(modelType);
-        setters = resolveServiceSetters(modelType);
+        this.constructor = resolveConstructor(modelType);
+        this.setters = resolveServiceSetters(modelType);
+        this.postConstructMethods = resolvePostConstructMethods(modelType);
     }
 
     /**
@@ -51,8 +58,13 @@ class ModelInstantiator<T> {
     @Nonnull
     public T create(@Nonnull BundleContext context) throws ReflectiveOperationException {
         T instance = this.constructor.instantiate(context);
+
         for (ModelServiceSetter setter : this.setters) {
             setter.set(context, instance);
+        }
+
+        for (Method m : this.postConstructMethods) {
+            m.invoke(instance);
         }
 
         return instance;
@@ -83,6 +95,30 @@ class ModelInstantiator<T> {
             serviceSetters.add(new ModelServiceSetter(serviceDependency, method));
         }
         return serviceSetters.toArray(new ModelServiceSetter[serviceSetters.size()]);
+    }
+
+    @Nonnull
+    private Method[] resolvePostConstructMethods(@Nonnull Class<T> modelType) {
+        Method[] postConstructMethods = methodsOf(modelType).stream()
+                .filter(m -> annotations(m).containsName(POSTCONSTRUCT_ANNOTATION_NAME))
+                .peek(m -> {
+                    if (isStatic(m.getModifiers())) {
+                        throw new InvalidModelException("The @PostConstruct callback '" + m + "' must not be static.");
+                    }
+                    if (m.getParameterCount() != 0) {
+                        throw new InvalidModelException("The @PostConstruct callback '" + m + "' must not take any arguments.");
+                    }
+                })
+                .peek(ReflectionUtil::makeAccessible)
+                .toArray(Method[]::new);
+
+        // The post construct methods shall be applied in inverse order, i.e. the once stemming from base classes shall be called first.
+        // The assumption is that child classes depend on the initialization of their base classes. Note that this is
+        // a deviation from the contract described in @PostConstruct, which states that there shall only be one post construct method.
+        // However, invoking all is the de facto standard used e.g. by the spring framework.
+        reverse(postConstructMethods);
+
+        return postConstructMethods;
     }
 
     /**
@@ -131,7 +167,8 @@ class ModelInstantiator<T> {
         return constructor;
     }
 
-    private static @Nullable Filter findFilterAnnotation(@Nonnull Annotation[] annotations) {
+    @Nullable
+    private static Filter findFilterAnnotation(@Nonnull Annotation[] annotations) {
         Filter filter = null;
         for (Annotation annotation : annotations) {
             if (annotation.annotationType() == Filter.class) {

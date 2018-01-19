@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static io.neba.core.util.ReflectionUtil.makeAccessible;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -53,7 +54,7 @@ public class ModelProcessor {
 
         for (MethodMetaData methodMetaData : metaData.getAfterMappingMethods()) {
             Method method = methodMetaData.getMethod();
-            method.setAccessible(true);
+            makeAccessible(method);
             try {
                 method.invoke(model);
             } catch (InvocationTargetException | SecurityException e) {

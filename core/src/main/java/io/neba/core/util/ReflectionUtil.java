@@ -17,6 +17,7 @@
 package io.neba.core.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-
+import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.asList;
 import static java.util.Collections.addAll;
 
@@ -203,8 +204,8 @@ public final class ReflectionUtil {
         Class<?> c = type;
 
         do {
-            for( Field f : c.getDeclaredFields()) {
-                if(name.equals(f.getName())) {
+            for (Field f : c.getDeclaredFields()) {
+                if (name.equals(f.getName())) {
                     return f;
                 }
             }
@@ -212,6 +213,45 @@ public final class ReflectionUtil {
         } while (c != null);
 
         return null;
+    }
+
+    /**
+     * Makes the {@link Field#setAccessible(boolean) accessible} only if it is not.
+     * @param field must not be <code>null</code>.
+     * @return the given field.
+     */
+    public static Field makeAccessible(Field field) {
+        if (field == null) {
+            throw new IllegalArgumentException("Method argument field must not be null.");
+        }
+        if (isInaccessible(field) && !field.isAccessible()) {
+            field.setAccessible(true);
+        }
+
+        return field;
+    }
+
+    /**
+     * Makes the {@link Method#setAccessible(boolean) accessible} only if it is not.
+     *
+     * @param method must not be <code>null</code>.
+     * @return the given method.
+     */
+    public static Method makeAccessible(Method method) {
+        if (method == null) {
+            throw new IllegalArgumentException("Method argument method must not be null.");
+        }
+
+        if (isInaccessible(method) && !method.isAccessible()) {
+            method.setAccessible(true);
+        }
+
+        return method;
+    }
+
+    private static boolean isInaccessible(Member member) {
+        return !isPublic(member.getModifiers()) ||
+                !isPublic(member.getDeclaringClass().getModifiers());
     }
 
     private ReflectionUtil() {
