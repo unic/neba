@@ -102,9 +102,7 @@ public class ModelInstantiatorTest {
         } catch (InvalidModelException e) {
             assertThat(e).hasMessage(
                     "Unable to instantiate model class io.neba.core.resourcemodels.factory.ModelInstantiatorTest$TestModelWithMultipleInjectConstructors. " +
-                            "Found more than one constructor annotated with @Inject: " +
-                            "public io.neba.core.resourcemodels.factory.ModelInstantiatorTest$TestModelWithMultipleInjectConstructors(io.neba.core.resourcemodels.factory.ModelInstantiatorTest$ServiceInterface), " +
-                            "public io.neba.core.resourcemodels.factory.ModelInstantiatorTest$TestModelWithMultipleInjectConstructors(io.neba.core.resourcemodels.factory.ModelInstantiatorTest$OtherServiceInterface)");
+                    "Found more than one constructor annotated with @Inject: ");
             return;
         }
         fail("Since the model has multiple @Inject constructors, creating instantiation metadata must fail.");
