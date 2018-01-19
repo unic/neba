@@ -16,6 +16,13 @@
 
 package io.neba.api.annotations;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 /**
  * Can be used to specify an OSGi service filter to narrow the service(s) that shall be
  * injected, for example:
@@ -26,6 +33,8 @@ package io.neba.api.annotations;
  * private SomeService service;
  * </pre>
  */
+@Retention(RUNTIME)
+@Target({PARAMETER, ANNOTATION_TYPE})
 public @interface Filter {
-    String value() default "";
+    String value();
 }

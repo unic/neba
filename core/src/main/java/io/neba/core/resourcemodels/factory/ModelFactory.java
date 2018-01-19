@@ -21,17 +21,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.osgi.framework.Bundle;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static io.neba.core.util.Annotations.annotations;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -47,126 +46,87 @@ import static java.util.stream.Collectors.toList;
  */
 class ModelFactory implements ResourceModelFactory {
     private final Bundle bundle;
-    private List<ModelDefinition> modelDefinitions = null;
+    private List<ModelDefinition> modelDefinitions;
+    private Map<ModelDefinition, ModelInstantiator<?>> modelMetadata;
 
     ModelFactory(Bundle bundle) {
         this.bundle = bundle;
+
+        String packages = this.bundle.getHeaders().get("Neba-Packages");
+
+        this.modelDefinitions = packages == null ? emptyList() :
+                unmodifiableList(stream(packages.split(","))
+                        .map(String::trim)
+                        .filter(StringUtils::isNotBlank)
+                        .map(this::packageNameToDirectory)
+                        .map(this::findClassesInDirectory)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .flatMap(this::streamUrls)
+                        .map(this::urlToClassName)
+                        .map(this::loadClass)
+                        .filter(o -> o.map(c -> c.isAnnotationPresent(ResourceModel.class)).orElse(false))
+                        .map(Optional::get)
+                        .map(ClassBasedModelDefinition::new)
+                        .distinct()
+                        .collect(toList()));
+
+        Map<ModelDefinition, ModelInstantiator<?>> metaData = new HashMap<>();
+        for (ModelDefinition definition : this.modelDefinitions) {
+            metaData.put(definition, new ModelInstantiator<>(definition.getType()));
+        }
+
+        this.modelMetadata = metaData;
     }
 
     @Nonnull
     @Override
     public Collection<ModelDefinition> getModelDefinitions() {
-        if (modelDefinitions == null) {
-            String packages = this.bundle.getHeaders().get("Neba-Packages");
-
-            modelDefinitions = packages == null ? emptyList() :
-                    unmodifiableList(stream(packages.split(","))
-                    .map(String::trim)
-                    .filter(StringUtils::isNotBlank)
-                    .map(packageNameToDirectory())
-                    .map(findClassesInDirectory())
-                    .flatMap(streamUrls())
-                    .map(urlToClassName())
-                    .map(loadClass())
-                    .filter(o -> o.map(c -> c.isAnnotationPresent(ResourceModel.class)).orElse(false))
-                    .map(Optional::get)
-                    .map(ClassBasedModelDefinition::new)
-                    .distinct()
-                    .collect(toList()));
-        }
-
-        return modelDefinitions;
+        return this.modelDefinitions;
     }
 
     @SuppressWarnings("unchecked")
-    private Function<String, Optional<Enumeration<URL>>> findClassesInDirectory() {
-        return s -> ofNullable(bundle.findEntries(s, "*.class", true));
+    private Optional<Enumeration<URL>> findClassesInDirectory(String directory) {
+        return ofNullable(bundle.findEntries(directory, "*.class", true));
     }
 
-    private Function<String, String> packageNameToDirectory() {
-        return s ->  '/' + s.replace('.', '/');
+    private String packageNameToDirectory(String packageName) {
+        return '/' + packageName.replace('.', '/');
     }
 
-    private Function<String, Optional<Class<?>>> loadClass() {
-        return name -> {
-            try {
-                return of(this.bundle.loadClass(name));
-            } catch (ClassNotFoundException e) {
-                return empty();
-            }
-        };
+    private String urlToClassName(URL url) {
+        String file = url.getFile();
+        final String classFileName = file.substring(1, file.length() - ".class".length());
+        return classFileName.replace('/', '.');
     }
 
-    private Function<URL, String> urlToClassName() {
-        return u -> {
-            String file = u.getFile();
-            final String classFileName = file.substring(1, file.length() - ".class".length());
-            return classFileName.replace('/', '.');
-        };
+    private Optional<Class<?>> loadClass(String name) {
+        try {
+            return of(this.bundle.loadClass(name));
+        } catch (ClassNotFoundException e) {
+            return empty();
+        }
     }
 
-    private Function<Optional<Enumeration<URL>>, Stream<? extends URL>> streamUrls() {
-        return o -> o.map(e -> {
-            List<URL> urls = new ArrayList<>(32);
-            while (e.hasMoreElements()) {
-                urls.add(e.nextElement());
-            }
-            return urls;
-        }).orElse(emptyList()).stream();
+    private Stream<? extends URL> streamUrls(Enumeration<URL> urls) {
+        List<URL> l = new ArrayList<>(32);
+        while (urls.hasMoreElements()) {
+            l.add(urls.nextElement());
+        }
+        return l.stream();
     }
 
     @Nonnull
     @Override
     public Object getModel(@Nonnull ModelDefinition modelDefinition) {
-        // Step 1; Find a suitable constructor. This is either a constructor annotated with @Inject or
-        // a no.args default constructor.
-
-        // TODO: cache the resolved meta data
-        Constructor injectionConstructor = null,
-                    defaultConstructor = null;
-        for (Constructor c : modelDefinition.getType().getConstructors()) {
-            if (c.getParameterCount() == 0) {
-                defaultConstructor = c;
-            }
-
-            if (!annotations(c).containsName("javax.inject.Inject")) {
-                continue;
-            }
-
-            if (injectionConstructor != null) {
-                throw new InvalidModelException(
-                        "Unable to instantiate model " + modelDefinition.getType() + ". " +
-                        "Found more than one constructor annotated with @Inject: " + injectionConstructor + ", " + c);
-            }
-
-            injectionConstructor = c;
+        ModelInstantiator modelInstantiator = this.modelMetadata.get(modelDefinition);
+        if (modelInstantiator == null) {
+            throw new IllegalStateException("Unable to instantiate " + modelDefinition + ", there is no model metadata for this model type in this factory.");
         }
-
-        Object instance = null;
-
-        if (injectionConstructor != null) {
-            // FIXME: Service lookup for each argument, consider @Filter
-            instance = null;
+        try {
+            return modelInstantiator.create(this.bundle.getBundleContext());
+        } catch (ReflectiveOperationException e) {
+            throw new ModelInstantiationException("Unable to instantiate model " + modelDefinition, e);
         }
-
-        if (defaultConstructor != null) {
-            try {
-                instance = defaultConstructor.newInstance();
-            } catch (Exception e) {
-                throw new ModelInstantiationException("Unable to invoke " + defaultConstructor + ".", e);
-            }
-        }
-
-        if (instance == null) {
-            throw new InvalidModelException(
-                    "Unable to instantiate model " + modelDefinition.getType() + ". " +
-                            "The model has neither a public default constructor nor a public constructor annotated with @Inject."
-            );
-        }
-
-        // FIXME: for each @Inject field, perform service injection.
-
-        return instance;
     }
-
 }

@@ -59,4 +59,11 @@ class ClassBasedModelDefinition implements ResourceModelFactory.ModelDefinition 
     public boolean equals(Object obj) {
         return obj.getClass() == getClass() && ((ResourceModelFactory.ModelDefinition) obj).getClass().equals(getClass());
     }
+
+    @Override
+    public String toString() {
+        return "ClassBasedModelDefinition{" +
+                "c=" + c +
+                '}';
+    }
 }

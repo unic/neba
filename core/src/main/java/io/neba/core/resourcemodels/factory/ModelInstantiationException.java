@@ -22,4 +22,8 @@ class ModelInstantiationException extends RuntimeException {
     ModelInstantiationException(String message, Exception cause) {
         super(message, cause);
     }
+
+    ModelInstantiationException(String message) {
+        super(message);
+    }
 }

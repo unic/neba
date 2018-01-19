@@ -23,4 +23,8 @@ class InvalidModelException extends RuntimeException {
     InvalidModelException(String message) {
         super(message);
     }
+
+    InvalidModelException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
