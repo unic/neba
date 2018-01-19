@@ -30,7 +30,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -42,10 +41,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -117,10 +114,7 @@ public class ResourceToModelMapperTest {
         when(this.resourceMetaData.getMappableFields())
                 .thenReturn(new MappedFieldMetaData[]{});
 
-        when(this.resourceMetaData.getPostMappingMethods())
-                .thenReturn(new MethodMetaData[]{});
-
-        when(this.resourceMetaData.getPreMappingMethods())
+        when(this.resourceMetaData.getAfterMappingMethods())
                 .thenReturn(new MethodMetaData[]{});
 
         when(this.resourceMetaData.getStatistics())
@@ -144,14 +138,6 @@ public class ResourceToModelMapperTest {
     }
 
     @Test
-    public void testModelChangeInPreProcessing() {
-        withPostProcessor(mock(ResourceModelPostProcessor.class));
-        withModelReturnedFromPreProcessing(new TestModel());
-        mapResourceToModel();
-        assertModelReturnedFromMapperWasProvidedByPostProcessor();
-    }
-
-    @Test
     public void testModelChangeInPostProcessing() {
         withPostProcessor(mock(ResourceModelPostProcessor.class));
         withModelReturnedFromPostProcessing(new TestModel());
@@ -168,24 +154,14 @@ public class ResourceToModelMapperTest {
     }
 
     @Test
-    public void testNoModelChangeInPreProcessing() {
-        withPostProcessor(mock(ResourceModelPostProcessor.class));
-        withModelReturnedFromPreProcessing(null);
-        mapResourceToModel();
-        assertModelReturnedFromMapperIsOriginalModel();
-    }
-
-    @Test
     public void testMappingPostProcessorIsInvokedOnDirectAdaptation() {
         mapResourceToModel();
-        verify(this.modelProcessor).processBeforeMapping(isA(ResourceModelMetaData.class), eq(this.model));
         verify(this.modelProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
     }
 
     @Test
     public void testMappingPostProcessorIsInvokedOnIndirectAdaptation() {
         mapResourceToModel();
-        verify(this.modelProcessor).processBeforeMapping(isA(ResourceModelMetaData.class), eq(this.model));
         verify(this.modelProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
     }
 
@@ -289,7 +265,7 @@ public class ResourceToModelMapperTest {
     private void unbindAopSupport() {
         this.testee.unbindAopSupport(this.aopSupport);
     }
-    
+
     private void withAopSupportServiceReturningOriginalModel() {
         this.model = new AopTestModel();
         this.aopSupport = mock(AopSupport.class);
@@ -324,18 +300,8 @@ public class ResourceToModelMapperTest {
         assertThat(this.mappedModel).isEqualTo(this.model);
     }
 
-    private void withModelReturnedFromPreProcessing(TestModel model) {
-        this.modelReturnedFromPostProcessor = model;
-        when(this.postProcessor.processBeforeMapping(eq(this.model), eq(this.resource), eq(this.factory)))
-                .thenReturn(this.modelReturnedFromPostProcessor);
-    }
-
     private void verifyPostProcessorIsInvokedBeforeAndAfterMapping() {
-        InOrder inOrder = inOrder(this.postProcessor, this.postProcessor);
-        inOrder.verify(this.postProcessor, times(1))
-                .processBeforeMapping(anyObject(), eq(this.resource), eq(this.factory));
-        inOrder.verify(this.postProcessor, times(1))
-                .processAfterMapping(anyObject(), eq(this.resource), eq(this.factory));
+        verify(this.postProcessor).processAfterMapping(anyObject(), eq(this.resource), eq(this.factory));
     }
 
     private void withPostProcessor(ResourceModelPostProcessor mock) {

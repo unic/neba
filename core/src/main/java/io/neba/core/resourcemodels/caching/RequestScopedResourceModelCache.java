@@ -74,7 +74,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
             label = "Safemode",
             description = "In safemode, caching is sensitive to the current page resource and request parameters " +
                     "such as selectors, suffix, extension and the query string. Should @ResourceModels erroneously cache such state, " +
-                    "e.g. by initializing the corresponding value once in a @PostMapping method, safemode prevents errors caused " +
+                    "e.g. by initializing the corresponding value once in a @AfterMapping method, safemode prevents errors caused " +
                     "when performing subsequent internal changes to the request state (e.g. during forwards and includes). Note that " +
                     "enabling this feature is likely to a significant negative performance impact. It is highly recommended to disable " +
                     "safemode in favor of safe-to-cache @ResourceModels.",

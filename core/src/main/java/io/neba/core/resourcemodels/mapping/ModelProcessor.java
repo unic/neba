@@ -16,20 +16,20 @@
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.annotations.PostMapping;
-import io.neba.api.annotations.PreMapping;
+import io.neba.api.annotations.AfterMapping;
 import io.neba.core.resourcemodels.metadata.MethodMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Invokes {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isPreMappingCallback pre-mapping methods}
- * before and the {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isPostMappingCallback post-mapping methods}
+ * Invokes the {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isAfterMappingCallback post-mapping methods}
  * after the {@link io.neba.api.annotations.ResourceModel}'s mapping is complete.
  *
  * @author Olaf Otto
@@ -37,11 +37,11 @@ import org.slf4j.LoggerFactory;
 @Service(ModelProcessor.class)
 @Component
 public class ModelProcessor {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = getLogger(getClass());
 
     /**
      * @param metaData must not be <code>null</code>.
-     * @param model must not be <code>null</code>.
+     * @param model    must not be <code>null</code>.
      */
     <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
         if (metaData == null) {
@@ -51,37 +51,13 @@ public class ModelProcessor {
             throw new IllegalArgumentException("Method argument model must not be null.");
         }
 
-        for (MethodMetaData methodMetaData : metaData.getPostMappingMethods()) {
+        for (MethodMetaData methodMetaData : metaData.getAfterMappingMethods()) {
             Method method = methodMetaData.getMethod();
             method.setAccessible(true);
             try {
                 method.invoke(model);
             } catch (InvocationTargetException | SecurityException e) {
-                logger.error("Unable to invoke the @" + PostMapping.class.getSimpleName() + " method " + method + ".", e);
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
-            }
-        }
-    }
-
-    /**
-     * @param metaData must not be <code>null</code>.
-     * @param model must not be <code>null</code>.
-     */
-    <T> void processBeforeMapping(ResourceModelMetaData metaData, T model) {
-        if (metaData == null) {
-            throw new IllegalArgumentException("Method argument metaData must not be null.");
-        }
-        if (model == null) {
-            throw new IllegalArgumentException("Method argument model must not be null.");
-        }
-        for (MethodMetaData methodMetaData : metaData.getPreMappingMethods()) {
-            Method method = methodMetaData.getMethod();
-            method.setAccessible(true);
-            try {
-                method.invoke(model);
-            } catch (InvocationTargetException | SecurityException e) {
-                logger.error("Unable to invoke the @" + PreMapping.class.getSimpleName() + " method " + method + ".", e);
+                logger.error("Unable to invoke the @" + AfterMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
             }

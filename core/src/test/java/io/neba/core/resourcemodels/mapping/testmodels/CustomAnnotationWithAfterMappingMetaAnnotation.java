@@ -13,32 +13,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */
-
 package io.neba.core.resourcemodels.mapping.testmodels;
 
-import io.neba.api.annotations.PostMapping;
-import io.neba.api.annotations.PreMapping;
-import io.neba.api.annotations.ResourceModel;
+import io.neba.api.annotations.AfterMapping;
+
+import java.lang.annotation.Retention;
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author Olaf Otto
  */
-@ResourceModel(types = "ignored/junit/test/type")
-public class TestResourceModelWithLifecycleCallbacks {
-	@PreMapping
-	public void beforeMapping() {
-	}
-
-	@PostMapping
-	public void afterMapping() {
-	}
-
-	@CustomAnnotationWithPreMappingMetaAnnotation
-	public void beforeMappingWithMetaAnnotation() {
-	}
-
-	@CustomAnnotationWithPostMappingMetaAnnotation
-	public void afterMappingWithMetaAnnotation() {
-	}
-
+@Retention(RUNTIME)
+@AfterMapping
+public @interface CustomAnnotationWithAfterMappingMetaAnnotation {
 }

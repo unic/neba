@@ -25,11 +25,6 @@ import javax.annotation.Nonnull;
  * Lifecycle callback for
  * {@link io.neba.api.annotations.ResourceModel resource models}. <br />
  *
- * {@link #processBeforeMapping(Object, Resource, ResourceModelFactory)} is invoked after
- * the model was created and its dependencies (annotated with <code>@Inject</code>) have been injected, but before
- * all resource properties are mapped. All lifecycle callbacks, e.g. <code>@PostConstruct</code> methods, where
- * already called at this point. <br />
- *
  * {@link #processAfterMapping(Object, Resource, ResourceModelFactory)} is invoked after
  * the model was created and injected and all
  * resource properties are mapped. All lifecycle callbacks where already
@@ -44,19 +39,6 @@ import javax.annotation.Nonnull;
  * @author Olaf Otto
  */
 public interface ResourceModelPostProcessor {
-    /**
-     * Lifecycle callback invoked before the resource properties are mapped onto
-     * the {@link io.neba.api.annotations.ResourceModel}.
-     *
-     * @param resourceModel is never <code>null</code>.
-     * @param resource is never <code>null</code>.
-     * @param factory is never <code>null</code>.
-     * @return a new resource model overriding the provided resourceModel, or
-     *         <code>null</code> if the resource model is not to be changed.
-     */
-    @CheckForNull
-    <T> T processBeforeMapping(@Nonnull T resourceModel, @Nonnull Resource resource, @Nonnull ResourceModelFactory factory);
-
     /**
      * Lifecycle callback invoked after the resource properties are mapped onto
      * the {@link io.neba.api.annotations.ResourceModel}.

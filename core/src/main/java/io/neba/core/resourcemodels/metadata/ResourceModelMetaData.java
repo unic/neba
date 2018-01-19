@@ -18,6 +18,8 @@ package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.Unmapped;
 import io.neba.core.util.Annotations;
+
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -26,8 +28,6 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.function.Consumer;
-import javax.annotation.Resource;
-
 
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.methodsOf;
@@ -39,35 +39,26 @@ import static org.apache.commons.lang3.reflect.FieldUtils.getAllFieldsList;
  * to retain the result of costly reflection on resource models. Instances are model-scoped, i.e. there is exactly one
  * {@link ResourceModelMetaData} instance per detected {@link io.neba.api.annotations.ResourceModel}.
  *
- * @see ResourceModelMetaDataRegistrar
- *
  * @author Olaf Otto
+ * @see ResourceModelMetaDataRegistrar
  */
 public class ResourceModelMetaData {
     /**
      * @author Olaf Otto
      */
     private static class MethodMetadataCreator implements Consumer<Method> {
-        private final Collection<MethodMetaData> postMappingMethods = new ArrayList<>(32);
-        private final Collection<MethodMetaData> preMappingMethods = new ArrayList<>(32);
+        private final Collection<MethodMetaData> afterMappingMethods = new ArrayList<>(32);
 
         @Override
         public void accept(Method method) {
             MethodMetaData methodMetaData = new MethodMetaData(method);
-            if (methodMetaData.isPostMappingCallback()) {
-                this.postMappingMethods.add(methodMetaData);
-            }
-            if (methodMetaData.isPreMappingCallback()) {
-                this.preMappingMethods.add(methodMetaData);
+            if (methodMetaData.isAfterMappingCallback()) {
+                this.afterMappingMethods.add(methodMetaData);
             }
         }
 
-        private MethodMetaData[] getPostMappingMethods() {
-            return this.postMappingMethods.toArray(new MethodMetaData[this.postMappingMethods.size()]);
-        }
-
-        private MethodMetaData[] getPreMappingMethods() {
-            return this.preMappingMethods.toArray(new MethodMetaData[this.preMappingMethods.size()]);
+        private MethodMetaData[] getAfterMappingMethods() {
+            return this.afterMappingMethods.toArray(new MethodMetaData[this.afterMappingMethods.size()]);
         }
     }
 
@@ -104,8 +95,8 @@ public class ResourceModelMetaData {
          */
         private boolean isMappingCandidate(Field field) {
             return !isStatic(field) &&
-                   !isFinal(field) &&
-                   !isUnmapped(field);
+                    !isFinal(field) &&
+                    !isUnmapped(field);
         }
 
         private boolean isFinal(Field field) {
@@ -131,8 +122,7 @@ public class ResourceModelMetaData {
     }
 
     private final MappedFieldMetaData[] mappableFields;
-    private final MethodMetaData[] postMappingMethods;
-    private final MethodMetaData[] preMappingMethods;
+    private final MethodMetaData[] afterMappingMethods;
     private final String typeName;
 
     private final ResourceModelStatistics statistics = new ResourceModelStatistics();
@@ -145,8 +135,7 @@ public class ResourceModelMetaData {
         methodsOf(modelType).stream().filter(m -> !m.getDeclaringClass().isInterface() || isAbstract(m.getModifiers())).forEach(mc);
 
         this.mappableFields = fc.getMappableFields();
-        this.preMappingMethods = mc.getPreMappingMethods();
-        this.postMappingMethods = mc.getPostMappingMethods();
+        this.afterMappingMethods = mc.getAfterMappingMethods();
         this.typeName = modelType.getName();
     }
 
@@ -155,12 +144,8 @@ public class ResourceModelMetaData {
         return mappableFields;
     }
 
-    public MethodMetaData[] getPostMappingMethods() {
-        return postMappingMethods;
-    }
-
-    public MethodMetaData[] getPreMappingMethods() {
-        return preMappingMethods;
+    public MethodMetaData[] getAfterMappingMethods() {
+        return afterMappingMethods;
     }
 
     public String getTypeName() {

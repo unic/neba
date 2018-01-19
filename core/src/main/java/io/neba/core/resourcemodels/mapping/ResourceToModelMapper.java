@@ -148,9 +148,7 @@ public class ResourceToModelMapper {
     }
 
     private <T> T map(final Resource resource, final T model, final ResourceModelMetaData metaData, final ResourceModelFactory factory) {
-        T preprocessedModel = preProcess(resource, model, factory);
-
-        T fieldInjectionViewOnPreprocessedModel = prepareAopEnhancedModelTypes(preprocessedModel);
+        T fieldInjectionViewOnPreprocessedModel = prepareAopEnhancedModelTypes(model);
 
         final FieldValueMappingCallback callback = new FieldValueMappingCallback(fieldInjectionViewOnPreprocessedModel, resource, factory, this.fieldMappers, this.variableResolvers);
 
@@ -159,7 +157,7 @@ public class ResourceToModelMapper {
         }
 
         // Do not expose the unwrapped model to the post processors, use the proxy (if any) instead.
-        return postProcess(resource, preprocessedModel, factory);
+        return postProcess(resource, model, factory);
     }
 
     @SuppressWarnings("unchecked")
@@ -169,20 +167,6 @@ public class ResourceToModelMapper {
             model = (T) aopSupport.prepareForFieldInjection(model);
         }
         return model;
-    }
-
-    private <T> T preProcess(final Resource resource, final T model, final ResourceModelFactory factory) {
-        final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(model.getClass());
-        this.modelProcessor.processBeforeMapping(metaData, model);
-
-        T currentModel = model;
-        for (ResourceModelPostProcessor processor : this.postProcessors) {
-            T processedModel = processor.processBeforeMapping(currentModel, resource, factory);
-            if (processedModel != null) {
-                currentModel = processedModel;
-            }
-        }
-        return currentModel;
     }
 
     private <T> T postProcess(final Resource resource, final T model, final ResourceModelFactory factory) {

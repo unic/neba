@@ -18,101 +18,96 @@ package io.neba.core.resourcemodels.metadata;
 
 import io.neba.core.resourcemodels.mapping.testmodels.ExtendedTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
-import java.lang.reflect.Field;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 
  * @author Olaf Otto
- *
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceModelMetaDataTest {
-	private Class<?> modelType;
-	
-	private ResourceModelMetaData testee;
+    private Class<?> modelType;
 
-	@Before
-	public void prepare() {
-		createMetadataFor(TestResourceModel.class);
-	}
-	
-    @Test
-    public void testStaticFieldsAreNotMappable() throws Exception {
-    	assertMappableFieldsDoesNotContain("staticField");
+    private ResourceModelMetaData testee;
+
+    @Before
+    public void prepare() {
+        createMetadataFor(TestResourceModel.class);
     }
 
-	@Test
+    @Test
+    public void testStaticFieldsAreNotMappable() throws Exception {
+        assertMappableFieldsDoesNotContain("staticField");
+    }
+
+    @Test
     public void testFinalFieldsAreNotMappable() throws Exception {
-		assertMappableFieldsDoesNotContain("finalField");
+        assertMappableFieldsDoesNotContain("finalField");
     }
 
     @Test
     public void testFieldsAnnotatedWithUnmappedAreNotMappable() throws Exception {
-    	assertMappableFieldsDoesNotContain("unmappedStringField");
+        assertMappableFieldsDoesNotContain("unmappedStringField");
     }
 
-	@Test
-	public void testFieldsMetaAnnotatedWithUnmappedAreNotMappable() throws Exception {
-		assertMappableFieldsDoesNotContain("unmappedStringFieldWithUnmappedMetaAnnotation");
-	}
+    @Test
+    public void testFieldsMetaAnnotatedWithUnmappedAreNotMappable() throws Exception {
+        assertMappableFieldsDoesNotContain("unmappedStringFieldWithUnmappedMetaAnnotation");
+    }
 
     @Test
     public void testFieldsAnnotatedWithAtInjectAreNotMappable() throws Exception {
-    	assertMappableFieldsDoesNotContain("injectedField");
+        assertMappableFieldsDoesNotContain("injectedField");
     }
 
-	@Test
-	public void testFieldsAnnotatedWithAutowiredAreNotMappable() throws Exception {
-		assertMappableFieldsDoesNotContain("autowiredField");
-	}
+    @Test
+    public void testFieldsAnnotatedWithAutowiredAreNotMappable() throws Exception {
+        assertMappableFieldsDoesNotContain("autowiredField");
+    }
 
-	@Test
-	public void testFieldsAnnotatedWithAtResourceAreNotMappable() throws Exception {
-		assertMappableFieldsDoesNotContain("resourceField");
-	}
+    @Test
+    public void testFieldsAnnotatedWithAtResourceAreNotMappable() throws Exception {
+        assertMappableFieldsDoesNotContain("resourceField");
+    }
 
-	@Test
+    @Test
     public void testMappableFieldsAreInherited() throws Exception {
-    	createMetadataFor(ExtendedTestResourceModel.class);
-    	assertMetadataEqualsMetadataOf(TestResourceModel.class);
+        createMetadataFor(ExtendedTestResourceModel.class);
+        assertMetadataEqualsMetadataOf(TestResourceModel.class);
     }
 
-	@Test
-	public void testToStringRepresentation() throws Exception {
-		assertThat(this.testee.toString()).isEqualTo("ResourceModelMetaData[" + TestResourceModel.class.getName() + "]");
-	}
+    @Test
+    public void testToStringRepresentation() throws Exception {
+        assertThat(this.testee.toString()).isEqualTo("ResourceModelMetaData[" + TestResourceModel.class.getName() + "]");
+    }
 
-	private void assertMetadataEqualsMetadataOf(Class<?> otherModel) {
-		MappedFieldMetaData[] mappableFields = this.testee.getMappableFields();
-        MethodMetaData[] preMappingMethods = this.testee.getPreMappingMethods();
-		MethodMetaData[] postMappingMethods = this.testee.getPostMappingMethods();
-		
-		ResourceModelMetaData other = new ResourceModelMetaData(otherModel);
-		
-		Assertions.assertThat(mappableFields).isEqualTo(other.getMappableFields());
-		Assertions.assertThat(postMappingMethods).isEqualTo(other.getPostMappingMethods());
-        Assertions.assertThat(preMappingMethods).isEqualTo(other.getPreMappingMethods());
-	}
+    private void assertMetadataEqualsMetadataOf(Class<?> otherModel) {
+        MappedFieldMetaData[] mappableFields = this.testee.getMappableFields();
+        MethodMetaData[] afterMappingMethods = this.testee.getAfterMappingMethods();
 
-	private void createMetadataFor(Class<?> modelType) {
-		this.modelType = modelType;
-		this.testee = new ResourceModelMetaData(modelType);
-	}
+        ResourceModelMetaData other = new ResourceModelMetaData(otherModel);
 
-	private void assertMappableFieldsDoesNotContain(String name) throws NoSuchFieldException {
-    	Field field = this.modelType.getDeclaredField(name);
-		assertThat(field).overridingErrorMessage("Field " + this.modelType.getSimpleName() + "." + name + " does not exist.").isNotNull();
-		assertThat(this.testee.getMappableFields())
-				.extracting("field")
-				.overridingErrorMessage("The detected mappable fields must not contain the field " + field + ".")
-				.doesNotContain(field);
-	}
+        assertThat(mappableFields).isEqualTo(other.getMappableFields());
+        assertThat(afterMappingMethods).isEqualTo(other.getAfterMappingMethods());
+    }
+
+    private void createMetadataFor(Class<?> modelType) {
+        this.modelType = modelType;
+        this.testee = new ResourceModelMetaData(modelType);
+    }
+
+    private void assertMappableFieldsDoesNotContain(String name) throws NoSuchFieldException {
+        Field field = this.modelType.getDeclaredField(name);
+        assertThat(field).overridingErrorMessage("Field " + this.modelType.getSimpleName() + "." + name + " does not exist.").isNotNull();
+        assertThat(this.testee.getMappableFields())
+                .extracting("field")
+                .overridingErrorMessage("The detected mappable fields must not contain the field " + field + ".")
+                .doesNotContain(field);
+    }
 }

@@ -17,15 +17,15 @@
 package io.neba.core.resourcemodels.metadata;
 
 import io.neba.core.util.OsgiModelSource;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.Bundle;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -68,7 +68,7 @@ public class ResourceModelMetaDataRegistrar {
     /**
      * @param modelType must not be <code>null</code>.
      * @return the {@link ResourceModelMetaData} of the specified model. Never <code>null</code> - throws an {@link IllegalStateException}
-     *         if the model type is not known as a resource model must always be registered.
+     * if the model type is not known as a resource model must always be registered.
      */
     public ResourceModelMetaData get(Class<?> modelType) {
         if (modelType == null) {
@@ -97,9 +97,8 @@ public class ResourceModelMetaDataRegistrar {
      * by the provided model source.
      *
      * @param modelSource must not be <code>null</code>.
-     * @return the newly created meta data. Never <code>null</code>.
      */
-    public ResourceModelMetaData register(OsgiModelSource<?> modelSource) {
+    public void register(OsgiModelSource<?> modelSource) {
         if (modelSource == null) {
             throw new IllegalArgumentException("method parameter modelSource must not be null");
         }
@@ -112,7 +111,6 @@ public class ResourceModelMetaDataRegistrar {
         newCache.put(getUserClass(modelType), holder);
 
         this.cache = newCache;
-        return modelMetaData;
     }
 
     /**
@@ -140,7 +138,7 @@ public class ResourceModelMetaDataRegistrar {
         return new HashMap<>(this.cache);
     }
 
-    private Class<?> getUserClass(Class<?> type){
+    private Class<?> getUserClass(Class<?> type) {
         if (type.getName().contains("$$")) {
             Class<?> superclass = type.getSuperclass();
             if (superclass != null && Object.class != superclass) {

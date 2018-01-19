@@ -25,8 +25,8 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Methods of a {@link ResourceModel} with this annotation are invoked before
- * any properties have been mapped from the model's resource.
+ * Methods of a {@link ResourceModel} with this annotation are invoked after
+ * all properties have been mapped from the model's resource.
  * If multiple methods are annotated, all of them are executed in the order of declaration.
  *
  * Example:
@@ -34,23 +34,25 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *     &#064;{@link ResourceModel}
  *     public class MyModel {
  *          &#064;{@link This}
- *          private Resource resouce;
+ *          private Resource resource;
  *
- *          &#064;{@link PreMapping}
- *          public void provideSomeDefaultValue() {
- *              this.resource = ...;
+ *          &#064;{@link AfterMapping}
+ *          public void initializeSomethingElse() {
+ *              // Use the mapped member
+ *              this.resource.getResourceResolver().resolve(...);
+ *              //...
  *          }
- *          &#064;{@link PreMapping}
- *          private void anotherMethodThatNeedsExecutionBeforeMapping() throws Exception {
+ *          &#064;{@link AfterMapping}
+ *          private void anotherMethodThatRequiresMappedProperties() throws Exception {
  *              ...
  *          }
  *     }
  * </pre>
- *
+ * 
  * @author Olaf Otto
  */
 @Documented
 @Retention(RUNTIME)
 @Target({METHOD, ANNOTATION_TYPE})
-public @interface PreMapping {
+public @interface AfterMapping {
 }
