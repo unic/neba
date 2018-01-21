@@ -37,6 +37,9 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+/**
+ * @author Olaf Otto
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class ModelInstantiatorTest {
     @Mock
@@ -217,22 +220,9 @@ public class ModelInstantiatorTest {
         assertThat(this.modelInstance).hasFieldOrPropertyWithValue("localPostConstructInvocation", 1);
     }
 
-    @Test
+    @Test(expected = InvalidModelException.class)
     public void testModelWithInvalidFilterLeadsToInvalidModelException() {
-        try {
-            withMetadataFor(TestModelWithInvalidFilterDeclaration.class);
-        } catch (InvalidModelException e) {
-            assertThat(e).hasMessage(
-                    "The syntax of the filter " +
-                            "'not valid' " +
-                            "for the service dependency " +
-                            "'interface io.neba.core.resourcemodels.factory.ModelInstantiatorTest$ServiceInterface' " +
-                            "of the model " +
-                            "'class io.neba.core.resourcemodels.factory.ModelInstantiatorTest$TestModelWithInvalidFilterDeclaration' " +
-                            "is invalid");
-            return;
-        }
-        fail("Since the model has an invalid @Filter setter argument annotation, creating instantiation metadata must fail.");
+        withMetadataFor(TestModelWithInvalidFilterDeclaration.class);
     }
 
     private void assertModelHasProperty(String name, Object serviceInstance) {

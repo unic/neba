@@ -64,12 +64,12 @@ class ServiceDependency {
         if (filter != null && rawType.isAssignableFrom(List.class)) {
             // If a filter annotation is present, the service type may be a List<X> of services.
             // In this case, the service type is X.
-            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameter(serviceType), modelType);
+            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameterOrFail(serviceType), modelType);
             this.isList = true;
             this.isOptional = false;
-        } else if (serviceType instanceof ParameterizedType && ((ParameterizedType) serviceType).getRawType() == Optional.class) {
+        } else if (serviceType instanceof ParameterizedType && rawType == Optional.class) {
             // If an the type is Optional<X>, the service type type is X.
-            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameter(serviceType), modelType);
+            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameterOrFail(serviceType), modelType);
             this.isOptional = true;
             this.isList = false;
         } else {
@@ -153,5 +153,13 @@ class ServiceDependency {
                 "serviceType=" + serviceType +
                 ", filter=" + filter +
                 '}';
+    }
+
+    private Type getLowerBoundOfSingleTypeParameterOrFail(@Nonnull Type serviceType) {
+        try {
+            return getLowerBoundOfSingleTypeParameter(serviceType);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidModelException("Unable to resolve the type parameter of " + serviceType + ".", e);
+        }
     }
 }
