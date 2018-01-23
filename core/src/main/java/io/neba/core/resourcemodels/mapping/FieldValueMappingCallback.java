@@ -482,7 +482,7 @@ public class FieldValueMappingCallback {
      */
     private String evaluateFieldPath(MappedFieldMetaData fieldMetaData) {
         ResourcePaths.ResourcePath path = fieldMetaData.getPath();
-        return (path.hasPlaceholders() ? path.resolve(this.placeholderVariableResolvers::resolve) : path).toString();
+        return (path.hasPlaceholders() ? path.resolve(this.placeholderVariableResolvers::resolve) : path).getPath();
     }
 
     /**

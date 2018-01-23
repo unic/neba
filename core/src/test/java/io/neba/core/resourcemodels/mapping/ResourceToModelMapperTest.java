@@ -25,6 +25,7 @@ import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResourcePaths;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
@@ -33,6 +34,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -51,16 +54,15 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceToModelMapperTest {
-    /**
-     * @author Olaf Otto
-     */
     public static class TestModel {
     }
 
-    /**
-     * @author Olaf Otto
-     */
     public static class AopTestModel extends TestModel {
+    }
+
+    public static class TestModelWithMappableField extends TestModel {
+        @SuppressWarnings("unused")
+        private String mapped;
     }
 
     @Mock
@@ -76,7 +78,7 @@ public class ResourceToModelMapperTest {
     @Mock
     private NestedMappingSupport nestedMappingSupport;
     @Mock
-    private ResourceModelMetaData resourceMetaData;
+    private ResourceModelMetaData modelMetaData;
     @Mock
     private ResourceModelStatistics resourceModelStatistics;
     @Mock
@@ -106,18 +108,18 @@ public class ResourceToModelMapperTest {
                 .thenReturn("/resource/path");
 
         when(this.resourceModelMetaDataRegistrar.get(isA(Class.class)))
-                .thenReturn(this.resourceMetaData);
+                .thenReturn(this.modelMetaData);
 
         when(this.nestedMappingSupport.begin(isA(Mapping.class)))
                 .thenReturn(null);
 
-        when(this.resourceMetaData.getMappableFields())
+        when(this.modelMetaData.getMappableFields())
                 .thenReturn(new MappedFieldMetaData[]{});
 
-        when(this.resourceMetaData.getAfterMappingMethods())
+        when(this.modelMetaData.getAfterMappingMethods())
                 .thenReturn(new MethodMetaData[]{});
 
-        when(this.resourceMetaData.getStatistics())
+        when(this.modelMetaData.getStatistics())
                 .thenReturn(this.resourceModelStatistics);
 
         this.model = new TestModel();
@@ -131,10 +133,20 @@ public class ResourceToModelMapperTest {
     }
 
     @Test
+    public void testMapperSuccessfullyDelegatesFieldMapping() throws Exception {
+        withModelWithMappableField();
+        withResourceProperty("mapped", "value");
+
+        mapResourceToModel();
+
+        assertMappedModelHasProperty("mapped", "value");
+    }
+
+    @Test
     public void testPostProcessingWithoutChangedModel() {
         withPostProcessor(mock(ResourceModelPostProcessor.class));
         mapResourceToModel();
-        verifyPostProcessorIsInvokedBeforeAndAfterMapping();
+        verifyPostProcessorIsInvokedAfterMapping();
     }
 
     @Test
@@ -229,7 +241,7 @@ public class ResourceToModelMapperTest {
     }
 
     private void withOngoingMappingForSameResourceModel() {
-        doReturn(true).when(this.nestedMappingSupport).hasOngoingMapping(this.resourceMetaData);
+        doReturn(true).when(this.nestedMappingSupport).hasOngoingMapping(this.modelMetaData);
     }
 
     private void verifyMappingDurationIsTracked() {
@@ -296,11 +308,38 @@ public class ResourceToModelMapperTest {
         assertThat(this.mappedModel).isEqualTo(this.modelReturnedFromPostProcessor);
     }
 
+    private void assertMappedModelHasProperty(String name, String value) {
+        assertThat(this.model).hasFieldOrPropertyWithValue(name, value);
+    }
+
+    private void withResourceProperty(String key, String value) {
+        ValueMap properties = mock(ValueMap.class);
+        doReturn(value).when(properties).get(key, String.class);
+        doReturn(properties).when(this.resource).adaptTo(ValueMap.class);
+    }
+
+    private void withModelWithMappableField() throws NoSuchFieldException {
+        this.model = new TestModelWithMappableField();
+
+        ResourcePaths.ResourcePath path = mock(ResourcePaths.ResourcePath.class);
+        Field field = TestModelWithMappableField.class.getDeclaredField("mapped");
+        field.setAccessible(true);
+
+        MappedFieldMetaData mappedFieldMetaData = mock(MappedFieldMetaData.class);
+        doReturn(true).when(mappedFieldMetaData).isPropertyType();
+        doReturn("mapped").when(path).getPath();
+        doReturn(path).when(mappedFieldMetaData).getPath();
+        doReturn(String.class).when(mappedFieldMetaData).getType();
+        doReturn(field).when(mappedFieldMetaData).getField();
+
+        doReturn(new MappedFieldMetaData[]{ mappedFieldMetaData }).when(this.modelMetaData).getMappableFields();
+    }
+
     private void assertModelReturnedFromMapperIsOriginalModel() {
         assertThat(this.mappedModel).isEqualTo(this.model);
     }
 
-    private void verifyPostProcessorIsInvokedBeforeAndAfterMapping() {
+    private void verifyPostProcessorIsInvokedAfterMapping() {
         verify(this.postProcessor).processAfterMapping(anyObject(), eq(this.resource), eq(this.factory));
     }
 

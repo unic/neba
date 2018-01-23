@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -604,6 +605,30 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
+     * A {@link io.neba.api.annotations.Reference} may specify an additional
+     * {@link io.neba.api.annotations.Reference#append() relative path} that is appended to the reference path(s)
+     * prior to resolution. This way, a resource model can directly use children or parents of referenced resources
+     * without further programmatic steps, for instance like so:
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}(append = "/jcr:content")
+     *         &#64;{@link io.neba.api.annotations.Path}("pages")
+     *         private List&lt;ValueMap&gt; pageContents
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testReferenceCollectionResolutionWithAppendedRelativePath() throws Exception {
+        withResourceTargetedByMapping("/content/resource/child");
+        withResourceTargetedByMappingAdaptingTo(ValueMap.class, mock(ValueMap.class));
+        withAppendReferenceAppendPath("/child");
+        mapReferenceCollectionField(List.class, ValueMap.class, "/content/resource");
+        assertMappedFieldValueIsCollectionContainingTargetValue();
+    }
+
+    /**
      * A reference may be a property of a resource containing an array of paths to other resources.
      * Such a references are automatically resolved and adapted in the presence of a
      * {@link io.neba.api.annotations.Reference} annotation.
@@ -901,7 +926,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * A child may not be retrieved directly, but the children colleciton may also contain children of the children
+     * A child may not be retrieved directly, but the children collection may also contain children of the children
      * in case a {@link io.neba.api.annotations.Children#resolveBelowEveryChild()} path is specified, like so:
      * <p/>
      * <p>
@@ -927,6 +952,35 @@ public class FieldValueMappingCallbackTest {
                 "jcr:content");
         mapField();
         assertMappedFieldValueIsCollectionWithEntries(content);
+    }
+
+    /**
+     * A child may not be retrieved directly, but the children collection may also contain children of the children
+     * in case a {@link io.neba.api.annotations.Children#resolveBelowEveryChild()} path is specified, like so:
+     * <p/>
+     * <p>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Children}(resolveBelowEveryChild = "/jcr:content")
+     *         private List&lt;ModelForChild&gt; link;
+     *     }
+     *  </pre>
+     * </p>
+     * This test ensures that children below which the &#64;{@link io.neba.api.annotations.Children}(resolveBelowEveryChild = "...")
+     * path is not resolved are skipped.
+     */
+    @Test
+    public void testChildrenWithResolveBelowEveryChildPathToleratesUnresolvableChildren() throws Exception {
+        withField(Collection.class);
+        withCollectionTypedField();
+        withInstantiableCollectionTypedField();
+        withTypeParameter(Resource.class);
+        withChildrenAnnotationPresent();
+        withResolveBelowChildPathOnChildren("jcr:content");
+        child("child", "not_jcr:content");
+        mapField();
+        assertMappedFieldValueIsEmptyCollection();
     }
 
     /**
@@ -1405,7 +1459,7 @@ public class FieldValueMappingCallbackTest {
 
     private void mapReferenceCollectionField(
     		@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType,
-    		Class<?> componentType, String[] referencePaths)
+    		Class<?> componentType, String... referencePaths)
     				throws NoSuchFieldException {
         withPropertyField(collectionType, referencePaths);
         withTypeParameter(componentType);
@@ -1460,9 +1514,9 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void withPathVariableResolution(String to) {
-        ResourcePaths.ResourcePath resolved = mock(ResourcePaths.ResourcePath.class);
-        doReturn(to).when(resolved).toString();
-        doReturn(resolved).when(this.path).resolve(any());
+        ResourcePaths.ResourcePath resolvedPath = mock(ResourcePaths.ResourcePath.class);
+        doReturn(to).when(resolvedPath).getPath();
+        doReturn(resolvedPath).when(this.path).resolve(any());
     }
 
     private void withResourceModelFactory() {
@@ -1553,7 +1607,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void withFieldPath(String path) {
-        doReturn(path).when(this.path).toString();
+        doReturn(path).when(this.path).getPath();
     }
 
     private void withPathPlaceholdersDetected() {
@@ -1584,7 +1638,7 @@ public class FieldValueMappingCallbackTest {
     private <T> void withField(Class<T> fieldType) throws NoSuchFieldException {
         mappedField.setAccessible(true);
         doReturn(mappedField).when(this.mappedFieldMetadata).getField();
-        doReturn("field").when(this.path).toString();
+        doReturn("field").when(this.path).getPath();
         doReturn(fieldType).when(this.mappedFieldMetadata).getType();
 
         Annotations annotations = mock(Annotations.class);
@@ -1662,17 +1716,17 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertFieldIsFetchedFromValueMap() {
-        String fieldPath = this.mappedFieldMetadata.getPath().toString();
+        String fieldPath = this.mappedFieldMetadata.getPath().getPath();
         verify(this.valueMap).get(eq(fieldPath), eq(String.class));
     }
 
     private void assertFieldIsNotFetchedFromValueMap() {
-        String fieldPath = this.mappedFieldMetadata.getPath().toString();
+        String fieldPath = this.mappedFieldMetadata.getPath().getPath();
         verify(this.valueMap, never()).get(eq(fieldPath), eq(String.class));
     }
 
     private void assertFieldIsFetchedFromValueMapAs(Class<?> expectedPropertyType) {
-        String fieldPath = this.mappedFieldMetadata.getPath().toString();
+        String fieldPath = this.mappedFieldMetadata.getPath().getPath();
         verify(this.valueMap).get(fieldPath, expectedPropertyType);
     }
 

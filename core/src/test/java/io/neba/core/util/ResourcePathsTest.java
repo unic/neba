@@ -15,13 +15,13 @@
 */
 package io.neba.core.util;
 
-import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.function.Function;
 
 import static io.neba.core.util.ResourcePaths.path;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,12 +42,12 @@ public class ResourcePathsTest {
     private String resolvedValue;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn(null).when(this.resolver).apply(anyString());
     }
 
     @Test
-    public void testNonVariablesAreNotResolved() throws Exception {
+    public void testNonVariablesAreNotResolved() {
         replace("");
         assertReplacedValueIs("");
 
@@ -67,7 +67,7 @@ public class ResourcePathsTest {
     }
 
     @Test
-    public void testVariableResolution() throws Exception {
+    public void testVariableResolution() {
         withResolution("key", "value");
 
         replace("${key}");
@@ -86,9 +86,27 @@ public class ResourcePathsTest {
     }
 
     @Test
-    public void testDetectionOfVariables() throws Exception {
+    public void testDetectionOfVariables() {
         assertThat(path("").hasPlaceholders()).isFalse();
         assertThat(path("${variable}").hasPlaceholders()).isTrue();
+    }
+
+    @Test
+    public void testPathRepresentationOfUnresolvedPathWithPlaceholders() {
+        assertThat(path("/some/${placeholders}/in/${path}").getPath())
+             .isEqualTo("/some/${placeholders}/in/${path}");
+    }
+
+    @Test
+    public void testToStringOfPlaceWithoutPlaceholders() {
+        assertThat(path("/path/without/placeholders"))
+           .hasToString("/path/without/placeholders");
+    }
+
+    @Test
+    public void testToStringOfPlaceWithPlaceholders() {
+        assertThat(path("/path/${with}/placeholders"))
+           .hasToString("/path/${with}/placeholders");
     }
 
     private void assertReplacedValueIs(String k) {
@@ -108,6 +126,6 @@ public class ResourcePathsTest {
     }
 
     private void replace(String s) {
-        this.resolvedValue = path(s).resolve(this.resolver).toString();
+        this.resolvedValue = path(s).resolve(this.resolver).getPath();
     }
 }

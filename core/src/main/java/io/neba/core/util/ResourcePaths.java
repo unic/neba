@@ -1,15 +1,13 @@
 package io.neba.core.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+import static java.util.Collections.singletonList;
 import static java.util.regex.Pattern.compile;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A factory for {@link ResourcePath paths}.
@@ -49,6 +47,8 @@ public class ResourcePaths {
          * @return a path with resolved segments, never <code>null</code>.
          */
         ResourcePath resolve(Function<String, String> resolver);
+
+        String getPath();
     }
 
     private static class PathWithPlaceholders implements ResourcePath {
@@ -62,21 +62,27 @@ public class ResourcePaths {
             this.segments = segments;
         }
 
-        public ResourcePath resolve(Function<String, String> resolver) {
-            if (resolver == null) {
-                throw new IllegalArgumentException("Method argument resolver must not be null");
+        public ResourcePath resolve(Function<String, String> placeholderResolver) {
+            if (placeholderResolver == null) {
+                throw new IllegalArgumentException("Method argument placeholderResolver must not be null");
             }
 
-            return new PathWithPlaceholders(
+            return new PathWithoutPlaceholders(
                     this.segments
                             .stream()
-                            .map(s -> s.isPlaceholder() ? new Value(resolver.apply(s.value)) : s)
-                            .collect(toList()));
+                            .map(s -> s.isPlaceholder() ? new Value(placeholderResolver.apply(s.value)) : s)
+                            .map(Value::getValue)
+                            .reduce("", String::concat));
+        }
+
+        @Override
+        public String getPath() {
+            return this.segments.stream().map(Value::getValue).reduce("", String::concat);
         }
 
         @Override
         public String toString() {
-            return this.segments.stream().map(s -> s.value).reduce("", String::concat);
+            return getPath();
         }
 
         public boolean hasPlaceholders() {
@@ -105,19 +111,20 @@ public class ResourcePaths {
             }
 
             @Override
+            public String getValue() {
+                return "${" + super.getValue() + '}';
+            }
+
+            @Override
             public boolean isPlaceholder() {
                 return true;
             }
         }
 
         private static List<Value> segments(String path) {
-            if (path == null) {
-                throw new IllegalArgumentException("Method argument path must not be null");
-            }
-
             final Matcher matcher = PLACEHOLDER.matcher(path);
             if (!matcher.find()) {
-                return Collections.singletonList(new Value(path));
+                return singletonList(new Value(path));
             }
             List<Value> segments = new ArrayList<>(4);
             int last = 0;
@@ -152,6 +159,11 @@ public class ResourcePaths {
         @Override
         public String toString() {
             return this.path;
+        }
+
+        @Override
+        public String getPath() {
+            return path;
         }
     }
 }
