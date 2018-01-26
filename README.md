@@ -1,15 +1,24 @@
 
 
-![NEBA logo](README/neba-logo.png "NEBA logo") NEBA  
+![NEBA](README/neba-logo.png "NEBA logo") 
+
+Simple and fast Content-to-Object mapping for Apache Sling and Adobe AEM
 ====
-
-NEBA integrates the Spring Framework into Apache Sling. It makes available all of Spring's features to allow using mature, best-practice solutions for the majority of system-level concerns common to applications based on Apache Sling, such as Adobe AEM. NEBA does so in full compliance with the open core philosophy - using exclusively mature, standardized open source software - [gemini blueprint](http://www.eclipse.org/gemini/blueprint/) - for the integration into OSGi. 
-
-All Spring and Sling features are accessible to developers using a lightweight, [well documented API](http://neba.io/documentation.html) that does not couple the domain -specific implementation code to any implementation details of Sling, Spring or NEBA.
 
 [![codecov](https://codecov.io/gh/unic/neba/branch/develop/graph/badge.svg)](https://codecov.io/gh/unic/neba) 
 [![Travis](https://api.travis-ci.org/unic/neba.svg?branch=develop)](https://travis-ci.org/unic/neba/) 
 [![Maven Central](https://img.shields.io/maven-central/v/io.neba/io.neba.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aio.neba)
+
+NEBA in a nutshell
+--------------------
+Map Content using a lightweight, [well documented API](http://neba.io/documentation.html).
+Use lazy loading and great tooling to deliver high-performance applications. Completely compatible
+with Sling Models, HTL (Sightly), JSP and any application build atop the Sling API.
+
+Optional Spring integration
+----------------------
+NEBA optionally integrates the Spring framework, making available all of Spring's features, including Spring MVC.
+Spring is integrated using [gemini blueprint](http://www.eclipse.org/gemini/blueprint/), the OSGi Blueprint specification reference implementation.  
 
 Downloading artifacts
 ----------------------
