@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import io.neba.api.annotations.Reference;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidGenericFieldDeclaration;
@@ -24,6 +25,7 @@ import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithUnsup
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -282,6 +284,33 @@ public class MappedFieldMetaDataTest {
         createMetadataForTestModelFieldWithName("stringField");
         this.testee.getField().set(testResourceModel, "JunitTest");
         assertThat(testResourceModel.getStringField()).isEqualTo("JunitTest");
+    }
+
+    @Test
+    public void testHashCodeAndEquals() {
+        Field field1 = findField(this.modelType, "stringField");
+        Field field2 = findField(this.modelType, "dateField");
+
+        MappedFieldMetaData one = new MappedFieldMetaData(field1, this.modelType);
+        MappedFieldMetaData two = new MappedFieldMetaData(field1, this.modelType);
+
+        assertThat(one.hashCode()).isEqualTo(two.hashCode());
+        assertThat(one).isEqualTo(two);
+        assertThat(two).isEqualTo(one);
+
+        two = new MappedFieldMetaData(field2, this.modelType);
+
+        assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
+        assertThat(one).isNotEqualTo(two);
+        assertThat(two).isNotEqualTo(one);
+    }
+
+    @Test
+    public void testRetrievalOfAnnotations() {
+        createMetadataForTestModelFieldWithName("referencedResource");
+        assertThat(this.testee.getAnnotations()).isNotEmpty();
+        assertThat(this.testee.getAnnotations().stream().map(Annotation::annotationType))
+                .contains(Reference.class);
     }
 
     private void assertFieldTypeIs(Class<?> type) {

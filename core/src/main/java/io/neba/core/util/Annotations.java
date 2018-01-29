@@ -17,7 +17,13 @@ package io.neba.core.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static io.neba.core.util.ReadOnlyIterator.readOnly;
 import static java.util.Arrays.asList;
@@ -93,6 +99,13 @@ public class Annotations implements Iterable<Annotation> {
         }
 
         return (T) getAnnotationMap().get(type);
+    }
+
+    /**
+     * @return never <code>null</code>.
+     */
+    public Stream<Annotation> stream() {
+        return StreamSupport.stream(this.spliterator(), false);
     }
 
     /**

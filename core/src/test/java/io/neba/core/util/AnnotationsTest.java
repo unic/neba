@@ -56,7 +56,7 @@ public class AnnotationsTest {
     private Annotations testee = new Annotations(TestType.class);
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         this.allAnnotations = new HashSet<>();
         this.allAnnotations.addAll(asList(TestType.class.getAnnotations()));
         this.allAnnotations.addAll(asList(TestAnnotation.class.getAnnotations()));
@@ -66,53 +66,59 @@ public class AnnotationsTest {
     }
 
     @Test
-    public void testDetectionOfDirectAnnotation() throws Exception {
+    public void testDetectionOfDirectAnnotation() {
         assertAnnotationIsPresent(TestAnnotation.class);
         assertAnnotationInstanceCanBeObtained(TestAnnotation.class);
     }
 
     @Test
-    public void testDetectionOfMetaAnnotations() throws Exception {
+    public void testDetectionOfMetaAnnotations() {
         assertAnnotationIsPresent(MetaAnnotation.class);
         assertAnnotationInstanceCanBeObtained(MetaAnnotation.class);
     }
 
     @Test
-    public void testDetectionOfCyclicMetaAnnotation() throws Exception {
+    public void testDetectionOfCyclicMetaAnnotation() {
         assertAnnotationIsPresent(CyclicAnnotation.class);
         assertAnnotationInstanceCanBeObtained(CyclicAnnotation.class);
     }
 
     @Test
-    public void testContainsAnnotationWithName() throws Exception {
+    public void testContainsAnnotationWithName() {
         assertAnnotationWithNameIsNotPresent("does.no.Exist");
         assertAnnotationWithNameIsPresent(TestAnnotation.class.getName());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullElementArgumentForLookup() throws Exception {
+    public void testHandlingOfNullElementArgumentForLookup() {
         this.testee.get(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullElementArgumentForExistenceTest() throws Exception {
+    public void testHandlingOfNullElementArgumentForExistenceTest() {
         this.testee.contains(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullTypeArgumentForConstructor() throws Exception {
+    public void testHandlingOfNullTypeArgumentForConstructor() {
         new Annotations(null);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetAnnotations() throws Exception {
+    public void testGetAnnotations() {
         assertAnnotationsAre(MetaAnnotation.class, CyclicAnnotation.class);
     }
 
     @Test
-    public void testIteratorProvidesExpectedAnnotations() throws Exception {
+    public void testIteratorProvidesExpectedAnnotations() {
         assertThat(this.testee.iterator()).containsOnly(this.allAnnotations.toArray(new Annotation[]{}));
+    }
+
+    @Test
+    public void testStream() {
+        assertThat(this.testee.stream().map(Annotation::annotationType))
+                .contains(MetaAnnotation.class, TestAnnotation.class);
     }
 
     @SafeVarargs
