@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>4.3.3-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -39,9 +39,7 @@
                             <includeArtifactIds>io.neba.neba-delivery-aem</includeArtifactIds>
                             <includeTypes>zip</includeTypes>
                             <includes>
-                                **/*.jar,
-                                **/*.js,
-                                **/*.config
+                                **/*.jar
                             </includes>
                         </configuration>
                     </execution>

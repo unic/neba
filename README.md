@@ -2,7 +2,7 @@
 
 ![NEBA](README/neba-logo.png "NEBA logo") 
 
-Simple and fast Content-to-Object mapping for Apache Sling and Adobe AEM
+Lightning fast and simple content mapping for Apache Sling and Adobe AEM
 ====
 
 [![codecov](https://codecov.io/gh/unic/neba/branch/develop/graph/badge.svg)](https://codecov.io/gh/unic/neba) 

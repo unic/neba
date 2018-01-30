@@ -36,7 +36,7 @@ import static aQute.bnd.osgi.Processor.printClauses;
  * @author Olaf Otto
  */
 public class SpringBundlesTransformer {
-    public static final String MANIFEST_LOCATION = "META-INF/MANIFEST.MF";
+    private static final String MANIFEST_LOCATION = "META-INF/MANIFEST.MF";
 
     public static void main(String[] args) throws IOException {
         if (args == null || args.length != 2) {
@@ -63,7 +63,7 @@ public class SpringBundlesTransformer {
     private final File unpackedArtifactsDir;
     private final File repackToDirectory;
 
-    public SpringBundlesTransformer(File unpackedArtifactsDir, File repackToDir) {
+    SpringBundlesTransformer(File unpackedArtifactsDir, File repackToDir) {
         if (unpackedArtifactsDir == null) {
             throw new IllegalArgumentException("Method argument unpackedArtifactsDir must not be null.");
         }
@@ -117,7 +117,7 @@ public class SpringBundlesTransformer {
         return true;
     }
 
-    private boolean transformJacksonImportsToRequireBundle(Attributes mainAttributes, Parameters imports) throws IOException {
+    private boolean transformJacksonImportsToRequireBundle(Attributes mainAttributes, Parameters imports) {
         Set<String> jacksonImports = new HashSet<>();
         imports.keySet().forEach(key -> {
             if (key.startsWith("com.fasterxml.jackson")) {
