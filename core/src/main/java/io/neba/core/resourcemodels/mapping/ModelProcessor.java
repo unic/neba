@@ -19,8 +19,7 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.api.annotations.AfterMapping;
 import io.neba.core.resourcemodels.metadata.MethodMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
@@ -35,8 +34,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Olaf Otto
  */
-@Service(ModelProcessor.class)
-@Component
+@Component(service = ModelProcessor.class)
 public class ModelProcessor {
     private final Logger logger = getLogger(getClass());
 

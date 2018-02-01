@@ -169,9 +169,10 @@ public class ServiceDependencyTest {
         fail("Since the model has an invalid @Filter setter argument annotation, creating instantiation metadata must fail.");
     }
 
+    @SuppressWarnings("unchecked")
     private void assertDependencyIsResolvedToEmptyList() {
         assertThat(this.resolvedDependency).isInstanceOf(List.class);
-        assertThat((List) this.resolvedDependency).isEmpty();
+        assertThat((List<?>) this.resolvedDependency).isEmpty();
     }
 
     private void assertResolvedDependencyIsNull() {

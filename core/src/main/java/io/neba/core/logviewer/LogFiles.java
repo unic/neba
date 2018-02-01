@@ -15,23 +15,22 @@
  */
 package io.neba.core.logviewer;
 
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.TreeSet;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-
 
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -42,8 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  * @author Olaf Otto
  */
-@Component
-@Service(LogFiles.class)
+@Component(service = LogFiles.class)
 public class LogFiles {
     // Obtained from the felix console configuration for the log manager.
     private static final String LOG_FILE_PROPERTY = "org.apache.sling.commons.log.file";

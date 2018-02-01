@@ -106,7 +106,7 @@ public class FieldValueMappingCallbackTest {
     private Object targetValue;
     private Object model = this;
 
-    private OngoingMapping ongoingMapping;
+    private OngoingMapping<?, ?> ongoingMapping;
 
     @Before
     public void setUp() throws Exception {
@@ -134,7 +134,7 @@ public class FieldValueMappingCallbackTest {
      * The factory must not accept null arguments to its constructor.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullModelInConstructor() throws Exception {
+    public void testHandlingOfNullModelInConstructor() {
         new FieldValueMappingCallback(null, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
@@ -142,7 +142,7 @@ public class FieldValueMappingCallbackTest {
      * The factory must not accept null arguments to its constructor.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullResourceInConstructor() throws Exception {
+    public void testHandlingOfNullResourceInConstructor() {
         new FieldValueMappingCallback(this.model, null, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
@@ -150,7 +150,7 @@ public class FieldValueMappingCallbackTest {
      * The factory must not accept null arguments to its constructor.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFactoryInConstructor() throws Exception {
+    public void testHandlingOfNullFactoryInConstructor() {
         new FieldValueMappingCallback(this.model, this.resource, null, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
@@ -158,7 +158,7 @@ public class FieldValueMappingCallbackTest {
      * The factory must not accept null arguments to its callback method.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFactoryInMapping() throws Exception {
+    public void testHandlingOfNullFactoryInMapping() {
         new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers).doWith(null);
     }
 
@@ -171,7 +171,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveBooleanField() throws Exception {
+    public void testMappingOfPrimitiveBooleanField() {
         mapPropertyField(boolean.class, true);
         assertFieldIsMapped();
     }
@@ -185,7 +185,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveIntField() throws Exception {
+    public void testMappingOfPrimitiveIntField() {
         mapPropertyField(int.class, 1);
         assertFieldIsMapped();
     }
@@ -199,7 +199,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveLongField() throws Exception {
+    public void testMappingOfPrimitiveLongField() {
         mapPropertyField(long.class, 1L);
         assertFieldIsMapped();
     }
@@ -213,7 +213,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveFloatField() throws Exception {
+    public void testMappingOfPrimitiveFloatField() {
         mapPropertyField(float.class, 1F);
         assertFieldIsMapped();
     }
@@ -227,7 +227,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveDoubleField() throws Exception {
+    public void testMappingOfPrimitiveDoubleField() {
         mapPropertyField(double.class, 1D);
         assertFieldIsMapped();
     }
@@ -241,7 +241,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveShortField() throws Exception {
+    public void testMappingOfPrimitiveShortField() {
         mapPropertyField(short.class, (short) 1);
         assertFieldIsMapped();
     }
@@ -255,7 +255,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfStringField() throws Exception {
+    public void testMappingOfStringField() {
         mapPropertyField(String.class, "test");
         assertFieldIsMapped();
     }
@@ -266,7 +266,7 @@ public class FieldValueMappingCallbackTest {
      * resource.
      */
     @Test
-    public void testMappingOfSyntheticResource() throws Exception {
+    public void testMappingOfSyntheticResource() {
         withResource(mock(SyntheticResource.class));
         withNullValueMap();
         withResourceTargetedByMapping("/absolute/path");
@@ -280,7 +280,7 @@ public class FieldValueMappingCallbackTest {
      * or an attempt to retrieve the value from a child resource.
      */
     @Test
-    public void testMappingOfFieldWithoutValue() throws Exception {
+    public void testMappingOfFieldWithoutValue() {
         mapPropertyField(String.class, null);
         assertFieldIsFetchedFromValueMap();
         assertChildResourceIsNotLoadedForField();
@@ -300,7 +300,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testValueRetrievalFromChildResource() throws Exception {
+    public void testValueRetrievalFromChildResource() {
         withResourceTargetedByMapping(child("field"));
         withResourceTargetedByMappingAdaptingTo(TestResourceModel.class, new TestResourceModel());
         mapChildResourceField(TestResourceModel.class);
@@ -320,7 +320,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testValueRetrievalFromAbsolutePath() throws Exception {
+    public void testValueRetrievalFromAbsolutePath() {
         withPropertyFieldWithPath(String.class, "/absolute/path/to/value");
         mapField();
         assertFieldIsNotFetchedFromValueMap();
@@ -339,7 +339,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testDirectMappingOfChildResourceToField() throws Exception {
+    public void testDirectMappingOfChildResourceToField() {
         withResourceTargetedByMapping(child("field"));
         mapChildResourceField(Resource.class);
         assertMappedFieldValueIs(this.resourceTargetedByMapping);
@@ -358,7 +358,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testInjectionOfResourceWithThisAnnotation() throws Exception {
+    public void testInjectionOfResourceWithThisAnnotation() {
         mapThisReference();
         assertFieldIsMapped();
     }
@@ -379,7 +379,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testReferenceResolution() throws Exception {
+    public void testReferenceResolution() {
         withResourceTargetedByMapping("/path/stored/in/property");
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
         assertMappedFieldValueIs(this.resourceTargetedByMapping);
@@ -400,7 +400,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testLazyLoadingReferenceResolution() throws Exception {
+    public void testLazyLoadingReferenceResolution() {
         withResourceTargetedByMapping("/path/stored/in/property");
         withLazyField();
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
@@ -424,7 +424,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testLazyFieldIsNotNullEvenIfFieldIsNotMappable() throws Exception {
+    public void testLazyFieldIsNotNullEvenIfFieldIsNotMappable() {
         withNullValueMap();
         withField(Resource.class);
         withLazyField();
@@ -457,7 +457,7 @@ public class FieldValueMappingCallbackTest {
      * the collection lazy-loaded via {@link Lazy} should not be a lazy-loading collection.
      */
     @Test
-    public void testLazyCollectionOfReferencesIsExclusivelyLazyLoadedViaLazy() throws Exception {
+    public void testLazyCollectionOfReferencesIsExclusivelyLazyLoadedViaLazy() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
         withMockResources(referencedResources);
         withLazyField();
@@ -481,7 +481,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testCollectionOfReferencesIsLazyLoadedViaProxy() throws Exception {
+    public void testCollectionOfReferencesIsLazyLoadedViaProxy() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
         withMockResources(referencedResources);
         mapReferenceCollectionField(Collection.class, Resource.class, referencedResources);
@@ -502,7 +502,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testLazyCollectionOfChildrenIsExclusivelyLazyLoadedViaLazy() throws Exception {
+    public void testLazyCollectionOfChildrenIsExclusivelyLazyLoadedViaLazy() {
         withField(Collection.class);
         withLazyField();
         withCollectionTypedField();
@@ -533,7 +533,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testCustomMappersAreAppliedWhenLazyFieldsAreLoaded() throws Exception {
+    public void testCustomMappersAreAppliedWhenLazyFieldsAreLoaded() {
         withField(Collection.class);
         withLazyField();
         withCollectionTypedField();
@@ -566,7 +566,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testCollectionOfChildrenIsLazyLoadedViaProxy() throws Exception {
+    public void testCollectionOfChildrenIsLazyLoadedViaProxy() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -597,7 +597,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testReferenceResolutionWithAppendedRelativePath() throws Exception {
+    public void testReferenceResolutionWithAppendedRelativePath() {
         withResourceTargetedByMapping("/content/resource/child");
         withAppendReferenceAppendPath("/child");
         mapSingleReferenceField(Resource.class, "/content/resource");
@@ -620,7 +620,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testReferenceCollectionResolutionWithAppendedRelativePath() throws Exception {
+    public void testReferenceCollectionResolutionWithAppendedRelativePath() {
         withResourceTargetedByMapping("/content/resource/child");
         withResourceTargetedByMappingAdaptingTo(ValueMap.class, mock(ValueMap.class));
         withAppendReferenceAppendPath("/child");
@@ -645,7 +645,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testCollectionOfReferencesResolution() throws Exception {
+    public void testCollectionOfReferencesResolution() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
 
         withMockResources(referencedResources);
@@ -659,7 +659,7 @@ public class FieldValueMappingCallbackTest {
      * of a collection of references.
      */
     @Test
-    public void testSetOfReferencesResolution() throws Exception {
+    public void testSetOfReferencesResolution() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
 
         withMockResources(referencedResources);
@@ -674,7 +674,7 @@ public class FieldValueMappingCallbackTest {
      * be stored in the injected collection of references.
      */
     @Test
-    public void testUnresolvableResourcesInListOfReferences() throws Exception {
+    public void testUnresolvableResourcesInListOfReferences() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
 
         withResourceTargetedByMapping(referencedResources[0]);
@@ -689,7 +689,7 @@ public class FieldValueMappingCallbackTest {
      * service.
      */
     @Test
-    public void testPlaceholderResolutionInPath() throws Exception {
+    public void testPlaceholderResolutionInPath() {
         withResourceModelFactory();
         withPathVariableResolution("title-de");
         withPropertyFieldWithPath(String.class, "title-${language}");
@@ -712,7 +712,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingToOtherTestModelAsThisReference() throws Exception {
+    public void testMappingToOtherTestModelAsThisReference() {
         OtherTestResourceModel target = new OtherTestResourceModel();
         Class<OtherTestResourceModel> fieldType = OtherTestResourceModel.class;
         withResourceAdaptingTo(fieldType, target);
@@ -733,7 +733,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingToOtherModelByPath() throws Exception {
+    public void testMappingToOtherModelByPath() {
         withResourceTargetedByMapping("/another/resource");
         withResourceTargetedByMappingAdaptingTo(OtherTestResourceModel.class, new OtherTestResourceModel());
         mapComplexFieldWithPath(OtherTestResourceModel.class, "/another/resource");
@@ -747,7 +747,7 @@ public class FieldValueMappingCallbackTest {
      * even if the resource's properties (value map) is null.
      */
     @Test
-    public void testChildValuesAreStillResolvedIfResourceHasNoProperties() throws Exception {
+    public void testChildValuesAreStillResolvedIfResourceHasNoProperties() {
         withNullValueMap();
         withResourceTargetedByMapping(child("field"));
         mapChildResourceField(Resource.class);
@@ -766,7 +766,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationOnListOfResources() throws Exception {
+    public void testChildrenAnnotationOnListOfResources() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -792,7 +792,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationOnListOfModels() throws Exception {
+    public void testChildrenAnnotationOnListOfModels() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -822,7 +822,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationWithPathAnnotation() throws Exception {
+    public void testChildrenAnnotationWithPathAnnotation() {
         withResourceTargetedByMapping("field/child");
         withParentOfTargetResource("field");
         withField(Collection.class);
@@ -855,7 +855,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationWithPathAndReferenceAnnotations() throws Exception {
+    public void testChildrenAnnotationWithPathAndReferenceAnnotations() {
         withResourceTargetedByMapping("/referenced/path/child");
         withParentOfTargetResource("/referenced/path");
         withField(Collection.class);
@@ -889,7 +889,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationWithReferenceAnnotation() throws Exception {
+    public void testChildrenAnnotationWithReferenceAnnotation() {
         withResourceTargetedByMapping("/referenced/path/child");
         withParentOfTargetResource("/referenced/path");
         withField(Collection.class);
@@ -912,7 +912,7 @@ public class FieldValueMappingCallbackTest {
      * Such a <code>null</code> value must not be inserted into the injected collection of children.
      */
     @Test
-    public void testChildrenWithNullValuesAsAdaptationResult() throws Exception {
+    public void testChildrenWithNullValuesAsAdaptationResult() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -940,7 +940,7 @@ public class FieldValueMappingCallbackTest {
      * </p>
      */
     @Test
-    public void testChildrenWithResolveBelowEveryChildPath() throws Exception {
+    public void testChildrenWithResolveBelowEveryChildPath() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -971,7 +971,7 @@ public class FieldValueMappingCallbackTest {
      * path is not resolved are skipped.
      */
     @Test
-    public void testChildrenWithResolveBelowEveryChildPathToleratesUnresolvableChildren() throws Exception {
+    public void testChildrenWithResolveBelowEveryChildPathToleratesUnresolvableChildren() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -988,7 +988,7 @@ public class FieldValueMappingCallbackTest {
      * types instead of arrays, e.g. <code>List&lt;String&gt;</code> instead of <code>String[]</code>.
      */
     @Test
-    public void testMappingOfArrayPropertyToCollection() throws Exception {
+    public void testMappingOfArrayPropertyToCollection() {
         String[] propertyValues = {"first value", "second value"};
 
         withField(Collection.class);
@@ -1009,7 +1009,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a property type is mapped from an absolute path
      */
     @Test
-    public void testResolutionOfPropertyWithAbsolutePath() throws Exception {
+    public void testResolutionOfPropertyWithAbsolutePath() {
         withPropertyFieldWithPath(String.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         withResourceTargetedByMappingAdaptingTo(String.class, "propertyValue");
@@ -1025,7 +1025,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a non-property type is mapped, e.g. from a child resource.
      */
     @Test
-    public void testResolutionOfChildResourceOccursEvenIfResourceHasNoProperties() throws Exception {
+    public void testResolutionOfChildResourceOccursEvenIfResourceHasNoProperties() {
         withNullValueMap();
         withField(Resource.class);
         withFieldPath("field");
@@ -1042,7 +1042,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a property type is mapped from an absolute path
      */
     @Test
-    public void testResolutionOfPropertyWithAbsolutePathOccursEvenIfResourceHasNoProperties() throws Exception {
+    public void testResolutionOfPropertyWithAbsolutePathOccursEvenIfResourceHasNoProperties() {
         withNullValueMap();
         withPropertyFieldWithPath(String.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
@@ -1059,7 +1059,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a property type is mapped from a relative path
      */
     @Test
-    public void testResolutionOfPropertyWithRelativePathOccursEvenIfResourceHasNoProperties() throws Exception {
+    public void testResolutionOfPropertyWithRelativePathOccursEvenIfResourceHasNoProperties() {
         withNullValueMap();
         withPropertyFieldWithPath(String.class, "../other/resource/propertyName");
         withResourceTargetedByMapping("../other/resource/propertyName");
@@ -1077,7 +1077,7 @@ public class FieldValueMappingCallbackTest {
      * occurs by retrieval of the property via the parent's {@link ValueMap} representation.
      */
     @Test
-    public void testResolutionOfPropertyWithAbsolutePathUsesValueMapToRetrieveNonStringValues() throws Exception {
+    public void testResolutionOfPropertyWithAbsolutePathUsesValueMapToRetrieveNonStringValues() {
         withPropertyFieldWithPath(Boolean.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         withParentOfTargetResource("/other/resource");
@@ -1094,7 +1094,7 @@ public class FieldValueMappingCallbackTest {
      * occurs by retrieval of the property via the parent's {@link ValueMap} representation.
      */
     @Test
-    public void testResolutionOfPropertyWithRelativePathUsesValueMapToRetrieveNonStringValues() throws Exception {
+    public void testResolutionOfPropertyWithRelativePathUsesValueMapToRetrieveNonStringValues() {
         withPropertyFieldWithPath(Boolean.class, "../other/resource/propertyName");
         withResourceTargetedByMapping("../other/resource/propertyName");
         withParentOfTargetResource("../other/resource");
@@ -1110,7 +1110,7 @@ public class FieldValueMappingCallbackTest {
      * Test that the mapping tolerates if the parent of a mapped property does not exist (e.g., mapping to root nodes)
      */
     @Test
-    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullParent() throws Exception {
+    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullParent() {
         withPropertyFieldWithPath(Boolean.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         mapField();
@@ -1125,7 +1125,7 @@ public class FieldValueMappingCallbackTest {
      * (e.g. in case of a synthetic resource).
      */
     @Test
-    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullValueMap() throws Exception {
+    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullValueMap() {
         withNullValueMap();
         withPropertyFieldWithPath(Boolean.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
@@ -1143,7 +1143,7 @@ public class FieldValueMappingCallbackTest {
      * property resource.
      */
     @Test
-    public void testResolutionOfArrayStringPropertyFromForeignResource() throws Exception {
+    public void testResolutionOfArrayStringPropertyFromForeignResource() {
         withPropertyFieldWithPath(String[].class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         withParentOfTargetResource("/other/resource");
@@ -1163,7 +1163,7 @@ public class FieldValueMappingCallbackTest {
      * In this case, the value must not be mapped.
      */
     @Test
-    public void testMappingOfPropertyToUnsupportedType() throws Exception {
+    public void testMappingOfPropertyToUnsupportedType() {
         withField(Vector.class);
         withTypeParameter(String.class);
         withPropertyTypedField();
@@ -1179,7 +1179,7 @@ public class FieldValueMappingCallbackTest {
      * shall hold true regardless of the field semantics.
      */
     @Test
-    public void testPreventionOfNullValuesInReferenceCollectionFieldWithoutDefaultValue() throws Exception {
+    public void testPreventionOfNullValuesInReferenceCollectionFieldWithoutDefaultValue() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withReferenceAnnotationPresent();
@@ -1194,7 +1194,7 @@ public class FieldValueMappingCallbackTest {
      * shall hold true regardless of the field semantics.
      */
     @Test
-    public void testPreventionOfNullValuesInMappableCollectionFieldWithoutDefaultValue() throws Exception {
+    public void testPreventionOfNullValuesInMappableCollectionFieldWithoutDefaultValue() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
 
@@ -1216,7 +1216,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testNullValuesAreNotPreventedInLazyCollectionTypedFields() throws Exception {
+    public void testNullValuesAreNotPreventedInLazyCollectionTypedFields() {
         withField(Collection.class);
         withLazyField();
         withInstantiableCollectionTypedField();
@@ -1232,7 +1232,7 @@ public class FieldValueMappingCallbackTest {
      * shall hold true regardless of the field semantics.
      */
     @Test
-    public void testPreventionOfNullValuesInMappableCollectionFieldOfSyntheticResource() throws Exception {
+    public void testPreventionOfNullValuesInMappableCollectionFieldOfSyntheticResource() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withNullValueMap();
@@ -1248,7 +1248,7 @@ public class FieldValueMappingCallbackTest {
      * value, this value must not be overwritten.
      */
     @Test
-    public void testDefaultValueOfMappableCollectionTypedFieldIsNotOverwritten() throws Exception {
+    public void testDefaultValueOfMappableCollectionTypedFieldIsNotOverwritten() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
 
@@ -1266,7 +1266,7 @@ public class FieldValueMappingCallbackTest {
      * value, this value must not be overwritten.
      */
     @Test
-    public void testDefaultValueOfMappableCollectionTypedReferenceFieldIsNotOverwritten() throws Exception {
+    public void testDefaultValueOfMappableCollectionTypedReferenceFieldIsNotOverwritten() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withReferenceAnnotationPresent();
@@ -1286,7 +1286,7 @@ public class FieldValueMappingCallbackTest {
      * a field mapper is applied and can override an already resolved value.
      */
     @Test
-    public void testApplicationOfFieldMappersToResoledFieldValue() throws Exception {
+    public void testApplicationOfFieldMappersToResoledFieldValue() {
         withCustomFieldMapperMappingTo("CustomMappedValue");
 
         mapPropertyField(String.class, "PropertyValue");
@@ -1300,7 +1300,7 @@ public class FieldValueMappingCallbackTest {
      * the model, resource and so forth. This test verifies that this contextual data is correct.
      */
     @Test
-    public void testOngoingMappingContainsAccurateMappingData() throws Exception {
+    public void testOngoingMappingContainsAccurateMappingData() {
         withCustomFieldMapperMappingTo("CustomMappedValue");
 
         mapPropertyField(String.class, "PropertyValue");
@@ -1316,7 +1316,7 @@ public class FieldValueMappingCallbackTest {
      * Instead, they should receive an empty default value.
      */
     @Test
-    public void testNullCollectionValuesAreSetToDefaultValueBeforeInvokingFieldMappers() throws Exception {
+    public void testNullCollectionValuesAreSetToDefaultValueBeforeInvokingFieldMappers() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withPropertyTypedField();
@@ -1334,7 +1334,7 @@ public class FieldValueMappingCallbackTest {
      * are passed to the {@link AnnotatedFieldMapper field mappers}.
      */
     @Test
-    public void testNullNonCollectionValuesAreNullWhenInvokingFieldMappers() throws Exception {
+    public void testNullNonCollectionValuesAreNullWhenInvokingFieldMappers() {
         withCustomFieldMapperMappingTo("CustomMappedValue");
         mapPropertyField(String.class, null);
         assertOngoingMappingsResolvedValueIsNull();
@@ -1445,13 +1445,13 @@ public class FieldValueMappingCallbackTest {
         doReturn(path).when(this.mappedFieldMetadata).getResolveBelowEveryChildPathOnChildren();
     }
 
-    private void mapPropertyField(Class<?> fieldType, Object propertyValue) throws NoSuchFieldException {
+    private void mapPropertyField(Class<?> fieldType, Object propertyValue) {
         withPropertyField(fieldType, propertyValue);
         mapField();
         this.targetValue = propertyValue;
     }
 
-    private void mapSingleReferenceField(Class<?> fieldType, String referencePath) throws NoSuchFieldException {
+    private void mapSingleReferenceField(Class<?> fieldType, String referencePath) {
         withPropertyField(fieldType, referencePath);
         withReferenceAnnotationPresent();
         mapField();
@@ -1459,8 +1459,7 @@ public class FieldValueMappingCallbackTest {
 
     private void mapReferenceCollectionField(
     		@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType,
-    		Class<?> componentType, String... referencePaths)
-    				throws NoSuchFieldException {
+    		Class<?> componentType, String... referencePaths) {
         withPropertyField(collectionType, referencePaths);
         withTypeParameter(componentType);
         withReferenceAnnotationPresent();
@@ -1469,29 +1468,29 @@ public class FieldValueMappingCallbackTest {
         mapField();
     }
 
-    private void mapComplexFieldWithPath(Class<?> fieldType, String fieldPath) throws NoSuchFieldException {
+    private void mapComplexFieldWithPath(Class<?> fieldType, String fieldPath) {
         withField(fieldType);
         withFieldPath(fieldPath);
         mapField();
     }
 
-    private void withPropertyFieldWithPath(Class<?> fieldType, String fieldPath) throws NoSuchFieldException {
+    private void withPropertyFieldWithPath(Class<?> fieldType, String fieldPath) {
         withField(fieldType);
         withFieldPath(fieldPath);
         withPathAnnotationPresent();
         withPropertyTypedField();
     }
 
-    private void mapChildResourceField(Class<?> fieldType) throws NoSuchFieldException {
+    private void mapChildResourceField(Class<?> fieldType) {
         withField(fieldType);
         mapField();
     }
 
-    private void mapThisReference() throws NoSuchFieldException {
+    private void mapThisReference() {
         mapThisReference(Resource.class, this.resource);
     }
 
-    private <T> void mapThisReference(Class<T> fieldType, T targetValue) throws NoSuchFieldException {
+    private <T> void mapThisReference(Class<T> fieldType, T targetValue) {
         withField(fieldType);
         withThisReferenceTypedField();
         this.targetValue = targetValue;
@@ -1587,7 +1586,7 @@ public class FieldValueMappingCallbackTest {
         when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(null);
     }
 
-    private void withPropertyField(Class<?> fieldType, Object propertyValue) throws NoSuchFieldException {
+    private void withPropertyField(Class<?> fieldType, Object propertyValue) {
         withField(fieldType);
         withPropertyTypedField();
         withPropertyValue(propertyValue);
@@ -1635,7 +1634,7 @@ public class FieldValueMappingCallbackTest {
         doReturn(value).when(this.valueMap).get(eq("field"), eq(retrievedType));
     }
 
-    private <T> void withField(Class<T> fieldType) throws NoSuchFieldException {
+    private <T> void withField(Class<T> fieldType) {
         mappedField.setAccessible(true);
         doReturn(mappedField).when(this.mappedFieldMetadata).getField();
         doReturn("field").when(this.path).getPath();

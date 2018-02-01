@@ -16,23 +16,20 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-
 
 import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Math.round;
@@ -48,13 +45,14 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
  *
  * @author Olaf Otto
  */
-@Service(Servlet.class)
-@Component
-@Properties({
-        @Property(name = "felix.webconsole.label", value = ModelStatisticsConsolePlugin.LABEL),
-        @Property(name = "service.description", value="Provides a Felix console plugin visualizing resource @ResourceModel statistics."),
-        @Property(name = "service.vendor", value="neba.io")
-})
+@Component(
+        service = Servlet.class,
+        property = {
+            "felix.webconsole.label=" + ModelStatisticsConsolePlugin.LABEL,
+            "service.description=Provides a Felix console plugin visualizing resource @ResourceModel statistics.",
+            "service.vendor=neba.io"
+        }
+)
 public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
     static final String LABEL = "modelstatistics";
     private static final long serialVersionUID = -8676958166611686979L;
@@ -194,7 +192,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
         writeHeadnavigation(res);
         writeBody(res);
     }

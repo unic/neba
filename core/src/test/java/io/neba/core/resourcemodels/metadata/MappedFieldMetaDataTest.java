@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.function.Function;
 
 import static io.neba.core.util.ReflectionUtil.findField;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -306,10 +307,12 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testRetrievalOfAnnotations() {
         createMetadataForTestModelFieldWithName("referencedResource");
         assertThat(this.testee.getAnnotations()).isNotEmpty();
-        assertThat(this.testee.getAnnotations().stream().map(Annotation::annotationType))
+        Function<Annotation, Class<? extends Annotation>> getType = Annotation::annotationType;
+        assertThat(this.testee.getAnnotations().stream().map(getType))
                 .contains(Reference.class);
     }
 

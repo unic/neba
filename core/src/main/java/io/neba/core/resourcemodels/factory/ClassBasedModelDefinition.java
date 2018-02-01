@@ -26,16 +26,16 @@ import static java.lang.Character.toLowerCase;
  * A model definition based on a class annotated with {@link ResourceModel}.
  */
 class ClassBasedModelDefinition implements ResourceModelFactory.ModelDefinition {
-    private final Class c;
+    private final Class<?> c;
 
-    public ClassBasedModelDefinition(Class c) {
+    public ClassBasedModelDefinition(Class<?> c) {
         this.c = c;
     }
 
     @Nonnull
     @Override
     public ResourceModel getResourceModel() {
-        return (ResourceModel) c.getAnnotation(ResourceModel.class);
+        return c.getAnnotation(ResourceModel.class);
     }
 
     @Nonnull

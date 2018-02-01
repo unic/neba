@@ -18,9 +18,6 @@ package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.spi.ResourceModelFactory;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +29,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
@@ -59,6 +59,7 @@ public class SpringModelRegistrarTest {
     private SpringModelRegistrar testee;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void mockBundleContext() {
         when(this.bundle.getBundleId()).thenReturn(12345L);
         when(this.context.getBundle()).thenReturn(this.bundle);

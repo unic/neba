@@ -15,12 +15,10 @@
  */
 package io.neba.core.logviewer;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -29,8 +27,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  *
  * @author Olaf Otto
  */
-@Service(TailServlet.class)
-@Component
+@Component(service = TailServlet.class)
 public class TailServlet extends WebSocketServlet {
     @Reference
     private LogFiles logFiles;

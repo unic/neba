@@ -198,10 +198,12 @@
 
             <!-- Build the content package including bundles with customized manifests (those are already copied to the target/vault-work directory) -->
             <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
-                    <builtContentDirectory>${project.build.directory}/vault.work</builtContentDirectory>
+                    <showImportPackageReport>false</showImportPackageReport>
+                    <version>${project.version}</version>
+                    <jcrRootSourceDirectory>${project.build.directory}/vault.work</jcrRootSourceDirectory>
                     <failOnMissingEmbed>true</failOnMissingEmbed>
                     <embeddeds>
                         <!-- Spring dependencies shall start first at start level 16 -->

@@ -23,19 +23,17 @@ import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiModelSource;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.StringUtils.join;
-import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MULTIPLE;
-import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 /**
  * Maps the properties of a {@link Resource} onto a {@link io.neba.api.annotations.ResourceModel} using
@@ -45,23 +43,7 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
  *
  * @author Olaf Otto
  */
-@Service(ResourceToModelMapper.class)
-@Component
-@References({
-        @Reference(referenceInterface = ResourceModelPostProcessor.class,
-                cardinality = OPTIONAL_MULTIPLE,
-                policy = DYNAMIC,
-                name = "processors",
-                bind = "bindProcessor",
-                unbind = "unbindProcessor"),
-        @Reference(referenceInterface = AopSupport.class,
-                cardinality = OPTIONAL_MULTIPLE,
-                policy = DYNAMIC,
-                name = "aopSupport",
-                bind = "bindAopSupport",
-                unbind = "unbindAopSupport")
-
-})
+@Component(service = ResourceToModelMapper.class)
 public class ResourceToModelMapper {
     private final List<ResourceModelPostProcessor> postProcessors = new ArrayList<>();
     private final List<AopSupport> aopSupports = new ArrayList<>();
@@ -183,6 +165,10 @@ public class ResourceToModelMapper {
         return currentModel;
     }
 
+    @Reference(
+            cardinality = MULTIPLE,
+            policy = DYNAMIC,
+            unbind = "unbindProcessor")
     protected void bindProcessor(ResourceModelPostProcessor postProcessor) {
         this.postProcessors.add(postProcessor);
     }
@@ -198,6 +184,9 @@ public class ResourceToModelMapper {
         this.aopSupports.add(aopSupport);
     }
 
+    @Reference(cardinality = MULTIPLE,
+            policy = DYNAMIC,
+            unbind = "unbindAopSupport")
     protected void unbindAopSupport(AopSupport support) {
         if (support == null) {
             return;

@@ -15,20 +15,17 @@
 */
 package io.neba.core.resourcemodels.registration;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -59,32 +56,33 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Olaf Otto
  */
-@Service(EventHandler.class)
-@Component
-@Properties({
-        @Property(name = EVENT_TOPIC, value = TOPIC_RESOURCE_CHANGED),
-        /*
-         * React to changes potentially altering the cacheable resource type hierarchy, unless they are occurring
-         * in a location known not to contain data relevant to the type hierarchy, such as /var or /content
-         */
-        @Property(name = EVENT_FILTER, value =
-                "(&" +
-                " (!(path=/content/*))" +
-                " (!(path=/var/*))" +
-                " (!(path=/jcr:*))" +
-                " (!(path=/oak:*))" +
-                " (|" +
-                "  (resourceAddedAttributes=jcr:mixinTypes)" +
-                "  (resourceAddedAttributes=sling:resourceSuperType)" +
-                "  (resourceChangedAttributes=jcr:mixinTypes)" +
-                "  (resourceChangedAttributes=sling:resourceType)" +
-                "  (resourceChangedAttributes=sling:resourceSuperType)" +
-                "  (resourceRemovedAttributes=sling:resourceSuperType)" +
-                "  (resourceRemovedAttributes=jcr:mixinTypes)" +
-                "))"),
-        @Property(name = "service.description", value="An event handler invalidating cache resource type hierarchy information."),
-        @Property(name = "service.vendor", value="neba.io")
-})
+@Component(
+        service = EventHandler.class,
+        property = {
+                EVENT_TOPIC + "=" + TOPIC_RESOURCE_CHANGED,
+                /*
+                 * React to changes potentially altering the cacheable resource type hierarchy, unless they are occurring
+                 * in a location known not to contain data relevant to the type hierarchy, such as /var or /content
+                 */
+                EVENT_FILTER + "=" +
+                        "(&" +
+                        " (!(path=/content/*))" +
+                        " (!(path=/var/*))" +
+                        " (!(path=/jcr:*))" +
+                        " (!(path=/oak:*))" +
+                        " (|" +
+                        "  (resourceAddedAttributes=jcr:mixinTypes)" +
+                        "  (resourceAddedAttributes=sling:resourceSuperType)" +
+                        "  (resourceChangedAttributes=jcr:mixinTypes)" +
+                        "  (resourceChangedAttributes=sling:resourceType)" +
+                        "  (resourceChangedAttributes=sling:resourceSuperType)" +
+                        "  (resourceRemovedAttributes=sling:resourceSuperType)" +
+                        "  (resourceRemovedAttributes=jcr:mixinTypes)" +
+                        "))",
+                "service.description=An event handler invalidating cache resource type hierarchy information.",
+                "service.vendor=neba.io"
+        }
+)
 public class MappableTypeHierarchyChangeListener implements EventHandler {
     private final Logger logger = getLogger(getClass());
     private final ExecutorService executorService = newSingleThreadExecutor();

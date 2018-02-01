@@ -21,13 +21,13 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiModelSource;
-import java.util.Collection;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import javax.annotation.Nonnull;
+import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.join;
 
@@ -38,8 +38,7 @@ import static org.apache.commons.lang3.StringUtils.join;
  * @author Olaf Otto
  * @see ResourceToModelAdapterUpdater
  */
-@Service(ResourceToModelAdapter.class)
-@Component
+@Component(service = ResourceToModelAdapter.class)
 public class ResourceToModelAdapter implements AdapterFactory {
     @Reference
     private ModelRegistry registry;
@@ -56,7 +55,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getAdapter(Object adaptable, Class<T> target) {
+    public <T> T getAdapter(@Nonnull Object adaptable, @Nonnull Class<T> target) {
         if (!(adaptable instanceof Resource)) {
             return null;
         }

@@ -22,12 +22,11 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiModelSource;
-import java.util.Collection;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import java.util.Collection;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 
@@ -43,8 +42,7 @@ import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
  *
  * @author Olaf Otto
  */
-@Service(ResourceModelResolver.class)
-@Component
+@Component(service = ResourceModelResolver.class)
 public class ResourceModelResolverImpl implements ResourceModelResolver {
     @Reference
     private ModelRegistry registry;

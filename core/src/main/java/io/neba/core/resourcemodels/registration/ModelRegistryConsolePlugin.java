@@ -12,11 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.util.OsgiModelSource;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -29,21 +41,6 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static io.neba.core.util.ClassHierarchyIterator.hierarchyOf;
@@ -65,13 +62,14 @@ import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
  *
  * @author Olaf Otto
  */
-@Service(Servlet.class)
-@Component
-@Properties({
-        @Property(name = "felix.webconsole.label", value = ModelRegistryConsolePlugin.LABEL),
-        @Property(name = "service.description", value="Provides a felix console plugin listing all registered @ResourceModel's."),
-        @Property(name = "service.vendor", value="neba.io")
-})
+@Component(
+        service = Servlet.class,
+        property = {
+            "felix.webconsole.label=" + ModelRegistryConsolePlugin.LABEL,
+            "service.description=Provides a felix console plugin listing all registered @ResourceModel's.",
+            "service.vendor=neba.io"
+        }
+)
 public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     static final String LABEL = "modelregistry";
     private static final String PREFIX_STATIC = "/static";
@@ -139,7 +137,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
         writeHeadnavigation(res);
 
         PrintWriter writer = res.getWriter();

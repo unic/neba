@@ -17,12 +17,12 @@
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
+import org.osgi.service.component.annotations.Component;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 
 
 /**
@@ -32,8 +32,7 @@ import org.apache.felix.scr.annotations.Service;
  *
  * @author Olaf Otto
  */
-@Service(NestedMappingSupport.class)
-@Component
+@Component(service = NestedMappingSupport.class)
 @SuppressWarnings("rawtypes")
 public class NestedMappingSupport {
     /**

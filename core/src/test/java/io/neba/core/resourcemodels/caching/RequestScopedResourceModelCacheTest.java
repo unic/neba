@@ -16,20 +16,20 @@
 
 package io.neba.core.resourcemodels.caching;
 
+import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache.Configuration;
 import io.neba.core.util.Key;
-import java.util.concurrent.Callable;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletResponse;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletResponse;
+import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
@@ -52,17 +52,19 @@ public class RequestScopedResourceModelCacheTest {
     private ServletResponse response;
     @Mock
     private FilterChain chain;
+    @Mock
+    private Configuration configuration;
 
     private Object model = new Object();
     private Class<?> modelType = Object.class;
 
     private Object cachedModel;
 
-    @InjectMocks
     private RequestScopedResourceModelCache testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
+        this.testee = new RequestScopedResourceModelCache();
         doReturn("GET")
                 .when(this.request)
                 .getMethod();
@@ -70,6 +72,11 @@ public class RequestScopedResourceModelCacheTest {
         doReturn(this.requestPathInfo)
                 .when(this.request)
                 .getRequestPathInfo();
+
+        doReturn(true).when(this.configuration).enabled();
+        doReturn(false).when(this.configuration).safeMode();
+
+        this.testee.activate(this.configuration);
     }
 
     @Test
@@ -270,12 +277,12 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     @Test
-    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheWrite() throws Exception {
+    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheWrite() {
         putModelInCache();
     }
 
     @Test
-    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheRead() throws Exception {
+    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheRead() {
         lookupModelFromCache();
         assertModelIsNotInCache();
     }
@@ -294,11 +301,11 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     private void withDisabledCache() {
-        this.testee.setEnabled(false);
+        doReturn(false).when(this.configuration).enabled();
     }
 
     private void withSafeMode() {
-        this.testee.setSafeMode(true);
+        doReturn(true).when(this.configuration).safeMode();
     }
 
     private void withQueryString(String queryString) {
@@ -329,7 +336,7 @@ public class RequestScopedResourceModelCacheTest {
         assertThat(this.cachedModel).isNull();
     }
 
-    private void lookupModelFromCache() throws Exception {
+    private void lookupModelFromCache() {
         cachedModel = testee.get(new Key(this.resource.getPath(), this.modelType));
     }
 

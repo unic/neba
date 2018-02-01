@@ -17,10 +17,9 @@
 package io.neba.core.resourcemodels.metadata;
 
 import io.neba.core.util.OsgiModelSource;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,8 +36,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Olaf Otto
  */
-@Service(ResourceModelMetaDataRegistrar.class)
-@Component
+@Component(service = ResourceModelMetaDataRegistrar.class)
 public class ResourceModelMetaDataRegistrar {
     /**
      * @author Olaf Otto

@@ -6,7 +6,6 @@ import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiModelSource;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +22,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
+import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
@@ -50,7 +50,7 @@ public class ModelRegistrarTest {
     @Mock
     private BundleContext context;
     @Mock
-    private ServiceReference referenceToModelFactory;
+    private ServiceReference<?> referenceToModelFactory;
     @Mock
     private Bundle bundle;
 
@@ -190,7 +190,7 @@ public class ModelRegistrarTest {
         doReturn(modelDefinitions).when(factory).getModelDefinitions();
     }
 
-    private void activate() throws InvalidSyntaxException {
+    private void activate() {
         this.testee.activate(this.context);
     }
 }

@@ -18,6 +18,17 @@ package io.neba.core.resourcemodels.adaptation;
 
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiModelSource;
+import org.apache.sling.api.adapter.AdapterFactory;
+import org.apache.sling.api.resource.Resource;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -27,18 +38,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.adapter.AdapterFactory;
-import org.apache.sling.api.resource.Resource;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.apache.commons.lang3.ClassUtils.getAllInterfaces;
@@ -64,8 +63,7 @@ import static org.osgi.framework.Bundle.STARTING;
  * 
  * @author Olaf Otto
  */
-@Service(ResourceToModelAdapterUpdater.class)
-@Component
+@Component(service = ResourceToModelAdapterUpdater.class)
 public class ResourceToModelAdapterUpdater {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 

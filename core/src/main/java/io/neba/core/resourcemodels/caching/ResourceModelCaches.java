@@ -20,17 +20,14 @@ import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
+import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
 
-
-import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MULTIPLE;
-import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 /**
  * Represents all currently registered {@link ResourceModelCache resource model cache services}.
@@ -40,21 +37,13 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
  *
  * @author Olaf Otto
  */
-@Service(ResourceModelCaches.class)
-@Component
-@References({
-        @Reference(
-                referenceInterface = ResourceModelCache.class,
-                cardinality = OPTIONAL_MULTIPLE,
-                policy = DYNAMIC,
-                name = "caches",
-                bind = "bind",
-                unbind = "unbind")
-})
+
+@Component(service = ResourceModelCaches.class)
 public class ResourceModelCaches {
     @Reference
     private ResourceModelMetaDataRegistrar metaDataRegistrar;
 
+    @Reference(policy = DYNAMIC, bind = "bind", unbind = "unbind")
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**

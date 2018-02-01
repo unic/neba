@@ -18,22 +18,20 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.api.spi.AnnotatedFieldMapper;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
-
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
-import static org.apache.felix.scr.annotations.ReferenceCardinality.OPTIONAL_MULTIPLE;
-import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 /**
  * Represents all registered {@link AnnotatedFieldMapper custom field mappers}
@@ -41,16 +39,7 @@ import static org.apache.felix.scr.annotations.ReferencePolicy.DYNAMIC;
  *
  * @author Olaf Otto
  */
-@Service(AnnotatedFieldMappers.class)
-@Component
-@References({
-        @Reference(referenceInterface = AnnotatedFieldMapper.class,
-                cardinality = OPTIONAL_MULTIPLE,
-                policy = DYNAMIC,
-                name = "mappers",
-                bind = "bind",
-                unbind = "unbind")
-})
+@Component(service = AnnotatedFieldMappers.class)
 public class AnnotatedFieldMappers {
     /**
      * Represents the relation of an {@link java.lang.annotation.Annotation} and and a
@@ -84,6 +73,7 @@ public class AnnotatedFieldMappers {
 
     private final AtomicInteger state = new AtomicInteger(0);
 
+    @Reference(cardinality = MULTIPLE, policy = DYNAMIC, unbind = "unbind")
     protected synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");

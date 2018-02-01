@@ -20,6 +20,16 @@ import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
 import io.neba.core.util.MatchedBundlesPredicate;
 import io.neba.core.util.OsgiModelSource;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.sling.api.resource.Resource;
+import org.osgi.framework.Bundle;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,17 +39,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
-import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
 import static io.neba.core.util.BundleUtil.displayNameOf;
@@ -52,8 +51,7 @@ import static java.util.Collections.unmodifiableCollection;
  *
  * @author Olaf Otto
  */
-@Service(ModelRegistry.class)
-@Component
+@Component(service = ModelRegistry.class)
 public class ModelRegistry {
     private static final Object NULL_VALUE = new Object();
 

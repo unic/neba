@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Arrays.asList;
@@ -117,8 +118,8 @@ public class AnnotationsTest {
 
     @Test
     public void testStream() {
-        assertThat(this.testee.stream().map(Annotation::annotationType))
-                .contains(MetaAnnotation.class, TestAnnotation.class);
+        Function<Annotation, Class<?>> getType = Annotation::annotationType;
+        assertThat(this.testee.stream().map(getType)).contains(MetaAnnotation.class, TestAnnotation.class);
     }
 
     @SafeVarargs

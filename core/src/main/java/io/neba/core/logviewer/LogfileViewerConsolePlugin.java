@@ -16,26 +16,23 @@
 
 package io.neba.core.logviewer;
 
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
 import static java.lang.Class.forName;
@@ -52,13 +49,14 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
  *
  * @author Olaf Otto
  */
-@Service(Servlet.class)
-@Component
-@Properties({
-        @Property(name = "felix.webconsole.label", value = LogfileViewerConsolePlugin.LABEL),
-        @Property(name = "service.description", value = "Provides a Felix console plugin for monitoring and downloading Sling logfiles."),
-        @Property(name = "service.vendor", value = "neba.io")
-})
+@Component(
+        service = Servlet.class,
+        property = {
+                "felix.webconsole.label=" + LogfileViewerConsolePlugin.LABEL,
+                "service.description=Provides a Felix console plugin for monitoring and downloading logfiles.",
+                "service.vendor=neba.io"
+        }
+)
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     static final String LABEL = "logviewer";
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
@@ -120,7 +118,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
         writeScriptIncludes(res);
         writeHead(res);
     }
@@ -174,8 +172,8 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
                         .append("title=\"").append(file.getAbsolutePath()).append("\">")
                         .append(file.getParentFile().getName()).append('/').append(file.getName())
                         .append("</option>"));
-        writeFromTemplate(res, "head.html", options.toString());
-        writeFromTemplate(res, "body.html");
+        writeHeadFromTemplate(res, options.toString());
+        writeBodyFromTemplate(res);
     }
 
     /**
@@ -203,13 +201,13 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    private void writeFromTemplate(HttpServletResponse response, String templateName, Object... templateArgs) throws IOException {
-        String template = readTemplate(templateName);
+    private void writeHeadFromTemplate(HttpServletResponse response, Object... templateArgs) throws IOException {
+        String template = readTemplate("head.html");
         response.getWriter().printf(template, templateArgs);
     }
 
-    private void writeFromTemplate(HttpServletResponse response, String templateName) throws IOException {
-        String template = readTemplate(templateName);
+    private void writeBodyFromTemplate(HttpServletResponse response) throws IOException {
+        String template = readTemplate("body.html");
         response.getWriter().write(template);
     }
 
