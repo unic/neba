@@ -3,6 +3,8 @@ sudo: false # faster builds
 
 jdk: oraclejdk8
 
+script: mvn -B -e package
+
 after_success:
 - mvn jacoco:report
 - bash <(curl -s https://codecov.io/bash)
