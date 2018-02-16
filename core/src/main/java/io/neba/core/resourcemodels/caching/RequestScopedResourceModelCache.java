@@ -190,7 +190,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
         return key;
     }
 
-    @ObjectClassDefinition(name = "NEBA request-scoped resource model cache", description = "Provides a request-scoped resource model cache.s")
+    @ObjectClassDefinition(name = "NEBA request-scoped resource model cache", description = "Provides a request-scoped resource model cache")
     public @interface Configuration {
         @AttributeDefinition(
                 name = "Enabled",
