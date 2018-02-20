@@ -1,5 +1,5 @@
 /*
-    Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline' https://ajax.googleapis.com https://neba.io https://www.google-analytics.com https://cdn.syndication.twimg.com https://nebaframework.disqus.com https://c.disquscdn.com https://disqus.com; connect-src 'self' https://api.stackexchange.com; img-src 'self' data: https://*.neba.io https://cdn.syndication.twimg.com https://abs.twimg.com https://www.google-analytics.com https://pbs.twimg.com https://referrer.disqus.com https://c.disquscdn.com https://travis-ci.org https://codecov.io https://api.travis-ci.org; style-src 'unsafe-inline' https://fonts.googleapis.com https://neba.io https://c.disquscdn.com; font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com; frame-ancestors 'none'; object-src 'none'; frame-src 'self' https://disqus.com/;
+    Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline' ajax.googleapis.com www.google-analytics.com cdn.syndication.twimg.com nebaframework.disqus.com c.disquscdn.com disqus.com; connect-src 'self' api.stackexchange.com; img-src 'self' data: *.neba.io cdn.syndication.twimg.com abs.twimg.com www.google-analytics.com pbs.twimg.com referrer.disqus.com c.disquscdn.com travis-ci.org codecov.io api.travis-ci.org; style-src 'self' 'unsafe-inline' fonts.googleapis.com c.disquscdn.com; font-src 'self' data: fonts.googleapis.com fonts.gstatic.com; frame-ancestors 'none'; object-src 'none'; frame-src 'self' disqus.com; base-uri 'none'; form-action 'none'; report-uri https://unic.report-uri.com/r/d/csp/enforce; report-to csp
     Pragma: no-cache
     Expires: 0
     X-Content-Type-Options: nosniff
@@ -7,3 +7,4 @@
     X-XSS-Protection: 1; mode=block
     referrer-policy: no-referrer, strict-origin-when-cross-origin
     Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+    Report-To: { "url": "https://unic.report-uri.com/r/d/csp/reportOnly", "group": "cspro", "max-age": 10886400 }, { "url": "https://unic.report-uri.com/r/d/csp/enforce", "group": "csp","max-age": 10886400 }
