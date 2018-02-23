@@ -25,6 +25,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
+ * <p>
  * Marks a field as representing the {@link org.apache.sling.api.resource.Resource resource}
  * represented by the current {@link ResourceModel}.
  * <br />
@@ -32,19 +33,21 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * resource is {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapted}
  * to the type of the field.<br />
  * Example:
- * <p>
+ * </p>
+ *
  * <pre>
  * &#64;{@link ResourceModel}(types = "my/resource/type")
  * public class MyModel {
- *     &#64;{@link This}   
+ *     &#64;{@link This}
  *     private {@link org.apache.sling.api.resource.Resource} resource;
- *     
+ *
  *     &#64;{@link This}
  *     private OtherModelForThisResourceType otherModel;
  * }
  * </pre>
- * </p>
+ *
  * @author Olaf Otto
+ * @since 1.0.0
  */
 @Documented
 @Retention(RUNTIME)

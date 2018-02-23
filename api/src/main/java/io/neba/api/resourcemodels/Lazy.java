@@ -62,6 +62,7 @@ import static java.util.Objects.requireNonNull;
  * reason to make them {@link Lazy}.
  * </p>
  *
+ * @since 4.3.0
  * @param <T> the type of the lazy-loaded object.
  * @author Olaf Otto
  */

@@ -25,6 +25,7 @@ import java.util.Collection;
  * will be tied to the scope of the providing service.
  *
  * @author Olaf Otto
+ * @since 5.0.0
  */
 public interface ResourceModelFactory {
     /**

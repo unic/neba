@@ -17,9 +17,6 @@
 package io.neba.api.tags;
 
 import io.neba.api.services.ResourceModelResolver;
-import javax.annotation.CheckForNull;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -27,6 +24,8 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 import tldgen.Tag;
 import tldgen.TagAttribute;
 
+import javax.annotation.CheckForNull;
+import javax.servlet.jsp.tagext.TagSupport;
 
 import static io.neba.api.Constants.MODEL;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -45,7 +44,7 @@ public final class DefineObjectsTag extends TagSupport {
     private String var;
 
     @Override
-    public int doEndTag() throws JspException {
+    public int doEndTag() {
         provideMostSpecificResourceModel();
         return EVAL_PAGE;
     }

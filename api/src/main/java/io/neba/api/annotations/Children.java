@@ -32,9 +32,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * or a {@link io.neba.api.annotations.Reference referenced} resource.
  * </p>
  *
- * <p>
-*     Examples
- * </p>
+ *
+ * <h2>Examples</h2>
+ *
  *
  * Children of the current resource
  * <pre>
@@ -79,6 +79,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author Olaf Otto
  * @author Daniel Rey
+ * @since 1.0.0
  */
 @Documented
 @Target({FIELD, ANNOTATION_TYPE})

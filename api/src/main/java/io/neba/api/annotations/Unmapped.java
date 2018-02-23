@@ -25,13 +25,14 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
+ * <p>
  * Excludes a field from the resource-to-model mapping. The annotated field's value is not
  * resolved from the {@link org.apache.sling.api.resource.Resource}. Note: Fields annotated with javax.inject.Inject
  * are automatically considered {@link Unmapped}, thus this annotation is not required for such fields.
- *  
- * <br />
- * Example:
- * <p>
+ * </p>
+ *
+ * <h2>Example</h2>
+ *
  * <pre>
  * &#64;{@link ResourceModel}(types = "/my/resource/type")
  * public class MyModel {
@@ -39,9 +40,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *    private String something;
  * }
  * </pre>
- * </p>
- * 
+ *
  * @author Olaf Otto
+ * @since 1.0.0
  */
 @Documented
 @Retention(RUNTIME)

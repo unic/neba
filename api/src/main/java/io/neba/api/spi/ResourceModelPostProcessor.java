@@ -23,20 +23,21 @@ import javax.annotation.Nonnull;
 
 /**
  * Lifecycle callback for
- * {@link io.neba.api.annotations.ResourceModel resource models}. <br />
- *
+ * {@link io.neba.api.annotations.ResourceModel resource models}.
+ * <p>
  * {@link #processAfterMapping(Object, Resource, ResourceModelFactory)} is invoked after
  * the model was created and injected and all
  * resource properties are mapped. All lifecycle callbacks where already
- * called at this point. <br />
- *
+ * called at this point.
+ * </p>
  * OSGi services providing this interface are automatically detected by the core
- * and apply to all resource models. There are no guarantees concerning the
- * order in which these post processors are invoked; if a specific order is
+ * and are applied to <em>all</em> resource models. There are no guarantees concerning the
+ * order in which these post processors are invoked. If a specific order is
  * required, implementing a {@link ResourceModelPostProcessor} that delegates to
  * other post processors in the desired order is advised.
  *
  * @author Olaf Otto
+ * @since 1.0.0
  */
 public interface ResourceModelPostProcessor {
     /**
@@ -44,10 +45,10 @@ public interface ResourceModelPostProcessor {
      * the {@link io.neba.api.annotations.ResourceModel}.
      *
      * @param resourceModel is never <code>null</code>.
-     * @param resource is never <code>null</code>.
-     * @param factory is never <code>null</code>.
+     * @param resource      is never <code>null</code>.
+     * @param factory       is never <code>null</code>.
      * @return a new resource model overriding the provided resourceModel, or
-     *         <code>null</code> if the resource model is not to be changed.
+     * <code>null</code> if the resource model is not to be changed.
      */
     @CheckForNull
     <T> T processAfterMapping(@Nonnull T resourceModel, @Nonnull Resource resource, @Nonnull ResourceModelFactory factory);

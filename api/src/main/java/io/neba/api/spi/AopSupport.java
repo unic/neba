@@ -22,13 +22,15 @@ import javax.annotation.Nonnull;
  * potentially affected by AOP (proxies, enhanced types) for injection. For instance, if a custom {@link ResourceModelFactory} or
  * {@link ResourceModelPostProcessor} service is published that may yield AOP proxies, a suitable {@link AopSupport} service must be published
  * that un-proxies the corresponding model instances such that they can be used for field injection.
+ *
+ * @since 5.0.0
  */
 public interface AopSupport {
     /**
      * @param model never <code>null</code>. A model instance potentially affected by AOP (e.g., a proxy or enhanced type).
      * @return a view of the model instance suitable for field injection. Never <code>null</code>. The returned model is exclusively
-     *         used for field injection, i.e. never directly returned when {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapting to}
-     *         or {@link io.neba.api.services.ResourceModelResolver resolving} a model.
+     * used for field injection, i.e. never directly returned when {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapting to}
+     * or {@link io.neba.api.services.ResourceModelResolver resolving} a model.
      */
     @Nonnull
     Object prepareForFieldInjection(@Nonnull Object model);

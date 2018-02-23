@@ -21,16 +21,18 @@ import javax.annotation.Nonnull;
 /**
  * A source for values of variables of the form <pre>${key}</pre>, as
  * supported by the {@link io.neba.api.annotations.Path} annotation.
- * 
+ *
  * @author Olaf Otto
+ * @since 1.0.0
  */
 public interface PlaceholderVariableResolver {
     /**
      * Invoked to resolve variables of the form ${name}.
      * Example: For ${name}, invoked with "name".
+     *
      * @param variableName never null.
-     * @return the resolved value, or null if no value can be resolved for the 
+     * @return the resolved value, or null if no value can be resolved for the
      * variable name.
      */
-	String resolve(@Nonnull String variableName);
+    String resolve(@Nonnull String variableName);
 }

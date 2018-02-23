@@ -23,6 +23,7 @@ import javax.annotation.CheckForNull;
 /**
  * This service is automatically published by the NEBA core and allows programmatic lookup of resource models.
  *
+ * @since 5.0.0
  * @author Olaf Otto
  */
 public interface ResourceModelResolver {

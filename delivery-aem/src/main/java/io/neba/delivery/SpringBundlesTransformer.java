@@ -5,11 +5,20 @@ import aQute.bnd.header.Parameters;
 import aQute.bnd.osgi.Analyzer;
 import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.jar.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
 import static aQute.bnd.osgi.Constants.BUNDLE_SYMBOLICNAME;
@@ -89,7 +98,21 @@ public class SpringBundlesTransformer {
 
             Parameters imports = new Analyzer().parseHeader(importPackageDirectives);
 
-            if (allowUnstableJavaxImports(imports) || transformJacksonImportsToRequireBundle(mainAttributes, imports)) {
+            boolean change = false;
+
+            if (allowUnstableJavaxImports(imports)) {
+                change = true;
+            }
+
+            if (transformJacksonImportsToRequireBundle(mainAttributes, imports)) {
+                change = true;
+            }
+
+            if (addJavaxValidationExecutableImportIfMissing(imports)) {
+                change = true;
+            }
+
+            if (change) {
                 updateImportPackageDirectives(mainAttributes, imports);
                 alterSymbolicNameToReflectCustomization(mainAttributes);
             }
@@ -116,6 +139,18 @@ public class SpringBundlesTransformer {
         attrs.put("version", "[0,2)");
         return true;
     }
+
+    private boolean addJavaxValidationExecutableImportIfMissing(Parameters imports) {
+        if (!imports.containsKey("javax.validation") ||
+             imports.containsKey("javax.validation.executable")) {
+            return false;
+        }
+        Attrs executableImportAttributes = new Attrs();
+        executableImportAttributes.put("resolution:", "optional");
+        imports.add("javax.validation.executable", executableImportAttributes);
+        return true;
+    }
+
 
     private boolean transformJacksonImportsToRequireBundle(Attributes mainAttributes, Parameters imports) {
         Set<String> jacksonImports = new HashSet<>();

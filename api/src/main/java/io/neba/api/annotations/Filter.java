@@ -24,14 +24,18 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
+ * <p>
  * Can be used to specify an OSGi service filter to narrow the service(s) that shall be
  * injected, for example:
+ * </p>
  *
  * <pre>
  * &#064;{@link javax.inject.Inject}
  * &#064;{@link Filter}("(&amp;(property=value)(otherProperty=otherValue))")
  * private SomeService service;
  * </pre>
+ *
+ * @since 5.0.0
  */
 @Retention(RUNTIME)
 @Target({PARAMETER, ANNOTATION_TYPE})

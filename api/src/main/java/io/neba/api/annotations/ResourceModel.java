@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
-
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+/*
+  Copyright 2013 the original author or authors.
+  <p>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.api.annotations;
 
@@ -33,18 +33,18 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Classes annotated with &#64;{@link ResourceModel} are automatically detected by NEBA when their containing packages
  * are specified in the <code>Neba-packages</code> bundle manifest header, e.g.
  *
- * <p>
  * <pre>
  * &lt;Neba-Packages&gt;
  * com.acme.app.models,
  * com.acme.app.more.models
  * &lt;/Neba-Packages&gt;
  * </pre>
- * </p>
  *
+ * <p>
  * When using NEBA with Spring, models can be declared as Spring beans. In this case, NEBA will automatically detect all beans
  * annotated with {@link ResourceModel} in the application context. Spring beans representing resource models <em>must be prototypically scoped</em> as they represent
  * dynamically created, contextual pieces of data, not singletons.
+ * </p>
  *
  * <h2>Obtaining model instances</h2>
  * Resources with suitable types can be {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapted to}
@@ -66,20 +66,20 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *    public class MyTeaser {
  *       ...
  *    }
- *    
+ *
  *    // A resource model for a JCR node type.
  *    &#64;{@link ResourceModel}(types = "nt:base")
  *    public class MyBaseModel {
  *       ...
  *    }
- *    
+ *
  *    // A resource model for a JCR mixin node type.
  *    &#64;{@link ResourceModel}(types = "mix:versionable")
  *    public class MyVersionableModel {
  *       ...
  *    }
  * </pre>
- * 
+ *
  * <p>
  * A {@link ResourceModel} applies to the <em>type hierarchy</em> of a resource.
  * Therefore, if a {@link org.apache.sling.api.resource.Resource} has no
@@ -91,6 +91,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author Olaf Otto
  * @see org.apache.sling.api.resource.Resource#adaptTo(Class)
+ * @since 1.0.0
  */
 @Target({TYPE, ANNOTATION_TYPE})
 @Retention(RUNTIME)

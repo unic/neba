@@ -15,17 +15,7 @@
 */
 
 /**
- * Contains the NEBA tag libraries.
- * All tag libraries contained in this package are not extensible to prevent direct dependencies
- * of project-specific implementations to the NEBA core, i.e. to prevent
- * project code to inherit from these tag implementations.
+ * Contains the default implementation for NEBA models based on classes annotated with
+ * {@link io.neba.api.annotations.ResourceModel}, exported by bundles which feature the "Neba-Packages" header.
  */
-@TagLibrary(
-        value = "http://neba.io/1.0",
-        descriptorFile = "neba.tld",
-        shortName = "neba",
-        description = "NEBA tag library"
-)
-package io.neba.api.tags;
-
-import tldgen.TagLibrary;
+package io.neba.core.resourcemodels.factory;

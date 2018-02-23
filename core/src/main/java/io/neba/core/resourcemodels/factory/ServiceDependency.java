@@ -46,9 +46,9 @@ class ServiceDependency {
     private final boolean isList;
 
     /**
-     * @param serviceType Either the actual service type (e.g. the service interface), a Optional&lt;ServiceTyp&gt;.
-     *                    If a {@link Filter} is present, List&lt;ServiceType&gt; is supported as well.
-     * @param modelType the type using the service dependency, used to resolve generic type parameters.
+     * @param serviceType Either the actual service type (e.g. the service interface) or {@link Optional}&lt;ServiceTyp&gt;.
+     *                    If a {@link Filter} is present, {@link List}&lt;ServiceType&gt; is supported as well.
+     * @param modelType the type declaring the service dependency, used to resolve generic type parameters.
      * @param filter may be <code>null</code>.
      */
     ServiceDependency(@Nonnull Type serviceType, @Nonnull Class<?> modelType, @Nullable Filter filter) {
