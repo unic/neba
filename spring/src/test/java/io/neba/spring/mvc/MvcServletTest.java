@@ -37,6 +37,7 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -75,7 +76,7 @@ public class MvcServletTest {
     private MvcServlet testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doAnswer(invocation -> {
             injectedDispatcherServlet = (BundleSpecificDispatcherServlet) invocation.getArguments()[1];
             return null;
@@ -95,26 +96,26 @@ public class MvcServletTest {
 
         doReturn(this.dispatcherServlet)
                 .when(this.testee)
-                .createBundleSpecificDispatcherServlet(factory, context);
+                .createBundleSpecificDispatcherServlet(eq(this.factory), isA(ServletConfig.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testEnableMvcRequiresNonNullFactory() throws Exception {
+    public void testEnableMvcRequiresNonNullFactory() {
         this.testee.enableMvc(null, this.context);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testEnableMvcRequiresNonNullContext() throws Exception {
+    public void testEnableMvcRequiresNonNullContext() {
         this.testee.enableMvc(this.factory, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testDisableMvcRequiresNonNullBundle() throws Exception {
+    public void testDisableMvcRequiresNonNullBundle() {
         this.testee.disableMvc(null);
     }
 
     @Test
-    public void testEnableMvc() throws Exception {
+    public void testEnableMvc() {
         enableMvc();
         verifyMvcContextIsInjectedIntoFactory();
         assertInjectMvcContextIsNotNull();
@@ -147,7 +148,7 @@ public class MvcServletTest {
     }
 
     @Test
-    public void testServletConfigurationProvidedToBundleSpecificDispatcherServletHasSensibleServletName() throws Exception {
+    public void testServletConfigurationProvidedToBundleSpecificDispatcherServletHasSensibleServletName() {
         withRealDispatcherServletCreated();
         enableMvc();
 
@@ -155,7 +156,7 @@ public class MvcServletTest {
     }
 
     private void withRealDispatcherServletCreated() {
-        doCallRealMethod().when(this.testee).createBundleSpecificDispatcherServlet(this.factory, this.context);
+        doCallRealMethod().when(this.testee).createBundleSpecificDispatcherServlet(eq(this.factory), isA(ServletConfig.class));
     }
 
     private void assertServletNameOfBundleSpecificDispatcherServletIs(String servletName) {

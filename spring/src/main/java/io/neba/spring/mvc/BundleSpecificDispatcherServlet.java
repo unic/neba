@@ -16,12 +16,8 @@
 package io.neba.spring.mvc;
 
 import io.neba.spring.web.WebApplicationContextAdapter;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.sling.api.servlets.ServletResolver;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -41,15 +37,35 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
+import javax.annotation.Nonnull;
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.springframework.beans.factory.BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 
 /**
+ * <p>
  * Initializes the Spring MVC infrastructure, if required, and adds NEBA-specific customizations.
  * {@link DispatcherServlet#setPublishEvents(boolean) Disables event publication}
  * as event publication requires the presence of a {@link org.springframework.web.context.WebApplicationContext},
  * whereas an {@link org.eclipse.gemini.blueprint.context.support.OsgiBundleXmlApplicationContext} is
  * used by gemini-blueprint.
+ * </p>
+ * <p>
+ * Since this servlet is initialized for individual bundles in a single, global servlet container the lifecycle methods
+ * of this servlet, e.g. {@link #init()} or {@link #init(ServletConfig)} <em>must not be called</em> as they attempt to manage
+ * a {@link org.springframework.web.context.WebApplicationContext} exclusive to this servlet, whereas the context is managed by the
+ * blueprint framework on behalf of a bundle.
+ * <p>
+ * Instead, this servlet is initialized upon initialization of it's application context via
+ * {@link #onApplicationEvent(ApplicationEvent)}.
+ * </p>
  *
  * @author Olaf Otto
  */
@@ -60,9 +76,9 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
 
     private boolean initialized = false;
 
-    public BundleSpecificDispatcherServlet(ServletConfig servletConfig,
-                                           ServletResolver servletResolver,
-                                           ConfigurableListableBeanFactory factory) {
+    BundleSpecificDispatcherServlet(ServletConfig servletConfig,
+                                    ServletResolver servletResolver,
+                                    ConfigurableListableBeanFactory factory) {
 
         super();
         if (servletConfig == null) {
@@ -84,13 +100,14 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
         setDispatchTraceRequest(true);
     }
 
+
     /**
      * Configures the context's bean factory with MVC infrastructure beans.
      *
      * @param event can be <code>null</code>, in which case the event is ignored.
      */
     @Override
-    public void onApplicationEvent(ApplicationEvent event) {
+    public void onApplicationEvent(@Nonnull ApplicationEvent event) {
         if (event instanceof ContextRefreshedEvent) {
             synchronized (this) {
                 ApplicationContext applicationContext = ((ContextRefreshedEvent) event).getApplicationContext();
@@ -117,13 +134,11 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
      * is present in the factory.
      */
     private void registerCustomArgumentResolvers() {
-        RequestMappingHandlerAdapter requestMappingHandlerAdapter = this.factory.getBean(RequestMappingHandlerAdapter.class);
-
-        if (requestMappingHandlerAdapter != null) {
-            List<HandlerMethodArgumentResolver> argumentResolvers = requestMappingHandlerAdapter.getArgumentResolvers();
+        getBean(RequestMappingHandlerAdapter.class).ifPresent(adapter -> {
+            List<HandlerMethodArgumentResolver> argumentResolvers = adapter.getArgumentResolvers();
 
             if (argumentResolvers == null) {
-                throw new IllegalStateException("No argument resolvers found in " + requestMappingHandlerAdapter +
+                throw new IllegalStateException("No argument resolvers found in " + adapter +
                         ". It appears the handler was not initialized by the application context.");
             }
 
@@ -136,8 +151,8 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
             // Subsequently add all existing argument resolvers (they are order-sensitive, ending with a catch-all resolver,
             // thus the custom resolvers have to go first)
             resolvers.addAll(argumentResolvers);
-            requestMappingHandlerAdapter.setArgumentResolvers(resolvers);
-        }
+            adapter.setArgumentResolvers(resolvers);
+        });
     }
 
     /**
@@ -167,7 +182,7 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
             defineBean(ResponseStatusExceptionResolver.class);
             defaultResolver = defineBean(DefaultHandlerExceptionResolver.class);
         } else {
-            defaultResolver = this.factory.getBean(DefaultHandlerExceptionResolver.class);
+            defaultResolver = getBean(DefaultHandlerExceptionResolver.class).orElse(null);
         }
 
         if (defaultResolver != null) {
@@ -221,6 +236,14 @@ public class BundleSpecificDispatcherServlet extends DispatcherServlet implement
 
     private boolean hasBean(Class<?> type) {
         return !this.factory.getBeansOfType(type).isEmpty();
+    }
+
+    private <T> Optional<T> getBean(Class<T> beanType) {
+        try {
+            return of(this.factory.getBean(beanType));
+        } catch (NoSuchBeanDefinitionException ex) {
+            return empty();
+        }
     }
 
     @Override

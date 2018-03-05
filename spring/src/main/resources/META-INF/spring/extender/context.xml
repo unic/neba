@@ -32,7 +32,6 @@
 	<bp:blueprint>
 		<!-- References to other OSGi services -->
 		<bp:reference interface="javax.servlet.ServletContext" id="servletContext" />
-		<bp:reference interface="javax.servlet.ServletConfig" id="servletConfig" />
 		<bp:reference interface="org.apache.sling.api.servlets.ServletResolver" id="servletResolver" />
 
 		<!-- Beans not providable by classpath scanning -->
@@ -51,6 +50,7 @@
 				<entry key="service.vendor" value="Spring.io" />
 			</bp:service-properties>
 		</bp:service>
+
 		<bp:service interface="javax.servlet.Servlet" ref="mvcServlet">
 			<bp:service-properties>
 				<entry key="sling.servlet.paths">

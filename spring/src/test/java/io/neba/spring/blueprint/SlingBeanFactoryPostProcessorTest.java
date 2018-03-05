@@ -19,7 +19,6 @@ package io.neba.spring.blueprint;
 import io.neba.spring.mvc.MvcServlet;
 import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
 import io.neba.spring.web.RequestScopeConfigurator;
-import io.neba.spring.web.ServletInfrastructureAwareConfigurer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +29,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -50,8 +48,6 @@ public class SlingBeanFactoryPostProcessorTest {
     @Mock
     private RequestScopeConfigurator requestScopeConfigurator;
     @Mock
-    private ServletInfrastructureAwareConfigurer servletInfrastructureAwareConfigurer;
-    @Mock
     private Bundle bundle;
     @Mock
     private MvcServlet dispatcherServlet;
@@ -65,17 +61,15 @@ public class SlingBeanFactoryPostProcessorTest {
     }
 
     @Test
-    public void testOrderOfRegistrarInvocations() throws Exception {
+    public void testOrderOfRegistrarInvocations() {
         postProcessBeanFactory();
         
         InOrder inOrder = inOrder(
     		this.requestScopeConfigurator,
-            this.servletInfrastructureAwareConfigurer,
     		this.modelRegistrar,
         	this.dispatcherServlet);
 
         inOrder.verify(this.requestScopeConfigurator).registerRequestScope(eq(this.beanFactory));
-        inOrder.verify(this.servletInfrastructureAwareConfigurer).enableServletContextAwareness(eq(this.beanFactory));
         inOrder.verify(this.modelRegistrar).registerModels(eq(this.context), eq(this.beanFactory));
         inOrder.verify(this.dispatcherServlet).enableMvc(eq(this.beanFactory), eq(this.context));
     }

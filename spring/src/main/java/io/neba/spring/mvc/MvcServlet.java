@@ -16,13 +16,6 @@
 
 package io.neba.spring.mvc;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.ServletResolver;
@@ -32,10 +25,20 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.ServletConfigAware;
+import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.support.ServletContextAwareProcessor;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static org.springframework.beans.factory.BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
@@ -58,9 +61,6 @@ public class MvcServlet extends SlingAllMethodsServlet {
     private final Logger logger = LoggerFactory.getLogger("mvc");
 
     @Autowired
-    @Qualifier("servletConfig")
-    private ServletConfig servletConfig;
-    @Autowired
     private ServletContext servletContext;
     @Autowired
     private ServletResolver servletResolver;
@@ -79,7 +79,13 @@ public class MvcServlet extends SlingAllMethodsServlet {
             throw new IllegalArgumentException("Method argument context must not be null.");
         }
 
-        final BundleSpecificDispatcherServlet dispatcherServlet = createBundleSpecificDispatcherServlet(factory, context);
+        BundleAwareServletConfig servletConfig = new BundleAwareServletConfig(context);
+
+        factory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext, servletConfig));
+        factory.ignoreDependencyInterface(ServletContextAware.class);
+        factory.ignoreDependencyInterface(ServletConfigAware.class);
+
+        final BundleSpecificDispatcherServlet dispatcherServlet = createBundleSpecificDispatcherServlet(factory, servletConfig);
         factory.registerSingleton(generateNameFor(BundleSpecificDispatcherServlet.class), dispatcherServlet);
         this.mvcCapableBundles.put(context.getBundle(), dispatcherServlet);
     }
@@ -97,9 +103,8 @@ public class MvcServlet extends SlingAllMethodsServlet {
         this.mvcCapableBundles.remove(bundle);
     }
 
-    BundleSpecificDispatcherServlet createBundleSpecificDispatcherServlet(ConfigurableListableBeanFactory factory, BundleContext context) {
-        BundleAwareServletConfig bundleAwareServletConfig = new BundleAwareServletConfig(context);
-        return new BundleSpecificDispatcherServlet(bundleAwareServletConfig, this.servletResolver, factory);
+    BundleSpecificDispatcherServlet createBundleSpecificDispatcherServlet(ConfigurableListableBeanFactory factory, ServletConfig config) {
+        return new BundleSpecificDispatcherServlet(config, this.servletResolver, factory);
     }
 
     @Override
@@ -183,12 +188,12 @@ public class MvcServlet extends SlingAllMethodsServlet {
 
         @Override
         public String getInitParameter(String s) {
-            return servletConfig.getInitParameter(s);
+            return null;
         }
 
         @Override
-        public Enumeration getInitParameterNames() {
-            return servletConfig.getInitParameterNames();
+        public Enumeration<String> getInitParameterNames() {
+            return new Hashtable<String, String>().keys();
         }
     }
 }

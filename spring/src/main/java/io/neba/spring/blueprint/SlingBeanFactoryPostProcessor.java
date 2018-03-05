@@ -19,7 +19,6 @@ package io.neba.spring.blueprint;
 import io.neba.spring.mvc.MvcServlet;
 import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
 import io.neba.spring.web.RequestScopeConfigurator;
-import io.neba.spring.web.ServletInfrastructureAwareConfigurer;
 import org.eclipse.gemini.blueprint.extender.OsgiBeanFactoryPostProcessor;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +41,10 @@ public class SlingBeanFactoryPostProcessor implements OsgiBeanFactoryPostProcess
     private RequestScopeConfigurator requestScopeConfigurator;
     @Autowired
     private MvcServlet dispatcherServlet;
-    @Autowired
-    private ServletInfrastructureAwareConfigurer servletInfrastructureAwareConfigurer;
 
     @Override
     public void postProcessBeanFactory(BundleContext bundleContext, ConfigurableListableBeanFactory factory) {
         this.requestScopeConfigurator.registerRequestScope(factory);
-        this.servletInfrastructureAwareConfigurer.enableServletContextAwareness(factory);
         this.springModelRegistrar.registerModels(bundleContext, factory);
         this.dispatcherServlet.enableMvc(factory, bundleContext);
     }

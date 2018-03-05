@@ -17,13 +17,6 @@
 package io.neba.spring.mvc;
 
 import io.neba.spring.web.WebApplicationContextAdapter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.ServletResolver;
 import org.junit.Before;
@@ -54,6 +47,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyBoolean;
@@ -99,10 +99,14 @@ public class BundleSpecificDispatcherServletTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doThrow(new NoSuchBeanDefinitionException("THIS IS AN EXPECTED TEST EXCEPTION"))
                 .when(this.applicationContext)
                 .getBean(anyString(), isA(Class.class));
+
+        doThrow(new NoSuchBeanDefinitionException("THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(this.factory)
+                .getBean(isA(Class.class));
 
         doReturn(this.applicationContext)
                 .when(this.event)
@@ -122,40 +126,40 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHasHandlerForRequiresNonNullRequest() throws Exception {
+    public void testHasHandlerForRequiresNonNullRequest() {
         this.testee.hasHandlerFor(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFactoryInConstructor() throws Exception {
+    public void testHandlingOfNullFactoryInConstructor() {
         new BundleSpecificDispatcherServlet(mock(ServletConfig.class), this.servletResolver, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullServletConfigInConstructor() throws Exception {
+    public void testHandlingOfNullServletConfigInConstructor() {
         new BundleSpecificDispatcherServlet(null, this.servletResolver, mock(ConfigurableListableBeanFactory.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullServletResolverInConstructor() throws Exception {
+    public void testHandlingOfNullServletResolverInConstructor() {
         new BundleSpecificDispatcherServlet(mock(ServletConfig.class), null, mock(ConfigurableListableBeanFactory.class));
     }
 
     @Test
-    public void testApplicationContextIsProvidedAsWebApplicationContext() throws Exception {
+    public void testApplicationContextIsProvidedAsWebApplicationContext() {
         signalContextRefreshed();
         assertDispatcherServletIsInitializedWithWebApplicationContextAdapter();
     }
 
     @Test
-    public void testWebApplicationContextDispatchesToOriginalApplicationContext() throws Exception {
+    public void testWebApplicationContextDispatchesToOriginalApplicationContext() {
         signalContextRefreshed();
         getBeanFromWebApplicationContext("anyBean");
         verifyBeanIsFetchedFromApplicationContext("anyBean");
     }
 
     @Test
-    public void testProvisioningOfMvcInfrastructure() throws Exception {
+    public void testProvisioningOfMvcInfrastructure() {
         signalContextRefreshed();
 
         verifyMultipartResolverIsRegistered();
@@ -166,18 +170,18 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testInitializationIsIgnoredIfInfrastructureIsNotInitialized() throws Exception {
+    public void testInitializationIsIgnoredIfInfrastructureIsNotInitialized() {
         verifyApplicationContextIsNotUsed();
     }
 
     @Test
-    public void testInitializationIsPerformedWhenInfrastructureIsInitialized() throws Exception {
+    public void testInitializationIsPerformedWhenInfrastructureIsInitialized() {
         signalContextRefreshed();
         verifyContextIsAskedFor(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
     }
 
     @Test
-    public void testHandlingOfExistingMultipartResolver() throws Exception {
+    public void testHandlingOfExistingMultipartResolver() {
         withBeanAlreadyExistingInApplicationContext(MultipartResolver.class);
 
         signalContextRefreshed();
@@ -190,7 +194,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfExistingExceptionResolverButNoDefaultResolver() throws Exception {
+    public void testHandlingOfExistingExceptionResolverButNoDefaultResolver() {
         withBeanAlreadyExistingInApplicationContext(HandlerExceptionResolver.class);
 
         signalContextRefreshed();
@@ -204,7 +208,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfExistingDefaultExceptionResolver() throws Exception {
+    public void testHandlingOfExistingDefaultExceptionResolver() {
         withBeanAlreadyExistingInApplicationContext(DefaultHandlerExceptionResolver.class);
 
         signalContextRefreshed();
@@ -219,7 +223,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfExistingRequestMappingHandlerAdapter() throws Exception {
+    public void testHandlingOfExistingRequestMappingHandlerAdapter() {
         withBeanAlreadyExistingInApplicationContext(HandlerAdapter.class);
         withRequestMappingHandlerAlreadyExistingInContext();
 
@@ -234,7 +238,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfExistingHandlerAdaptersWithoutRequestMappingHandlerAdapter() throws Exception {
+    public void testHandlingOfExistingHandlerAdaptersWithoutRequestMappingHandlerAdapter() {
         withBeanAlreadyExistingInApplicationContext(HandlerAdapter.class);
 
         signalContextRefreshed();
@@ -248,7 +252,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfExistingHandlerMappings() throws Exception {
+    public void testHandlingOfExistingHandlerMappings() {
         withBeanAlreadyExistingInApplicationContext(HandlerMapping.class);
 
         signalContextRefreshed();
@@ -262,7 +266,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfExistingViewResolver() throws Exception {
+    public void testHandlingOfExistingViewResolver() {
         withBeanAlreadyExistingInApplicationContext(ViewResolver.class);
 
         signalContextRefreshed();
@@ -276,7 +280,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testRegistrationOfCustomArgumentResolvers() throws Exception {
+    public void testRegistrationOfCustomArgumentResolvers() {
         withRequestMappingHandlerCreatedOnDemand(mockRequestMappingHandler());
 
         signalContextRefreshed();
@@ -285,7 +289,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testHandlingOfUninitializedArgumentsResolvers() throws Exception {
+    public void testHandlingOfUninitializedArgumentsResolvers() {
         RequestMappingHandlerAdapter adapter = mock(RequestMappingHandlerAdapter.class);
         doReturn(null).when(adapter).getArgumentResolvers();
         withRequestMappingHandlerCreatedOnDemand(adapter);
@@ -294,7 +298,7 @@ public class BundleSpecificDispatcherServletTest {
     }
 
     @Test
-    public void testHandlingOfUnsupportedApplicationEvent() throws Exception {
+    public void testHandlingOfUnsupportedApplicationEvent() {
         sendEvent(mock(ContextClosedEvent.class));
         verifyMvcContextIgnoresEvent();
     }
