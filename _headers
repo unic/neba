@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 /*
     Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline' ajax.googleapis.com www.google-analytics.com cdn.syndication.twimg.com nebaframework.disqus.com c.disquscdn.com disqus.com; connect-src 'self' api.stackexchange.com; img-src 'self' data: *.neba.io cdn.syndication.twimg.com abs.twimg.com www.google-analytics.com pbs.twimg.com referrer.disqus.com c.disquscdn.com travis-ci.org codecov.io api.travis-ci.org; style-src 'self' 'unsafe-inline' fonts.googleapis.com c.disquscdn.com; font-src 'self' data: fonts.googleapis.com fonts.gstatic.com; frame-ancestors 'none'; object-src 'none'; frame-src 'self' disqus.com; base-uri 'none'; form-action 'none'; report-uri https://unic.report-uri.com/r/d/csp/enforce; report-to csp
+=======
+/*    
+    Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline' ajax.googleapis.com www.google-analytics.com cdn.syndication.twimg.com nebaframework.disqus.com c.disquscdn.com disqus.com; connect-src 'self' api.stackexchange.com; img-src 'self' data: *.neba.io cdn.syndication.twimg.com abs.twimg.com www.google-analytics.com pbs.twimg.com referrer.disqus.com c.disquscdn.com travis-ci.org codecov.io api.travis-ci.org; style-src 'self' 'unsafe-inline' fonts.googleapis.com c.disquscdn.com; font-src 'self' data: fonts.googleapis.com fonts.gstatic.com; frame-ancestors 'self'; object-src 'none'; frame-src 'self' disqus.com; base-uri 'none'; form-action 'none'; report-uri https://unic.report-uri.com/r/d/csp/enforce; report-to csp
+>>>>>>> f288ed77af85a8402a65884ca8a78563691547a3
     Pragma: no-cache
     Expires: 0
     X-Content-Type-Options: nosniff
