@@ -18,6 +18,7 @@ package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.util.OsgiModelSource;
 import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -30,6 +31,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -56,6 +59,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -69,7 +73,8 @@ public class ModelRegistryConsolePluginTest {
     /**
      * @author Olaf Otto
      */
-    private static class Model {}
+    private static class Model {
+    }
 
     @Mock
     private HttpServletRequest request;
@@ -87,6 +92,10 @@ public class ModelRegistryConsolePluginTest {
     private Resource pathResource;
     @Mock
     private ServletOutputStream outputStream;
+    @Mock
+    private ServletContext servletContext;
+    @Mock
+    private ServletConfig servletConfig;
     @Mock
     private Bundle bundle;
     @Mock
@@ -123,7 +132,15 @@ public class ModelRegistryConsolePluginTest {
 
         doReturn(this.resolver)
                 .when(this.factory)
-                .getAdministrativeResourceResolver(any());
+                .getResourceResolver(any());
+
+        doReturn(this.servletContext)
+                .when(this.servletConfig)
+                .getServletContext();
+
+        doReturn("")
+                .when(this.servletContext)
+                .getContextPath();
 
         doReturn(new String[]{""})
                 .when(this.resolver)
@@ -152,6 +169,12 @@ public class ModelRegistryConsolePluginTest {
         doReturn("1.0.0")
                 .when(this.version)
                 .toString();
+
+        doThrow(new LoginException("THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(this.factory)
+                .getServiceResourceResolver(any());
+
+        this.testee.init(this.servletConfig);
     }
 
     @Test
@@ -162,7 +185,7 @@ public class ModelRegistryConsolePluginTest {
 
         assertResponseContainsTableHead();
         assertResponseContainsNumberOfModelsText(1);
-        assertResponseContains("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "modelName");
+        assertResponseContainsModel("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "modelName");
     }
 
     @Test
@@ -172,7 +195,7 @@ public class ModelRegistryConsolePluginTest {
 
         renderContent();
 
-        assertResponseContains("<a href=\"/crx/de/#" +
+        assertResponseContainsModel("<a href=\"/crx/de/#" +
                 "/libs/foundation/components/primary/cq/Page\" class=\"crxdelink\">" +
                 "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "modelName");
     }
@@ -299,6 +322,63 @@ public class ModelRegistryConsolePluginTest {
         assertResponseIs("[\"io.neba.core.resourcemodels.registration.ModelRegistryConsolePluginTest$Model\"]");
     }
 
+    @Test
+    public void testUsageOfConfiguredServiceUser() throws Exception {
+        withServiceUserAmendment();
+        withIconResource("/apps/project/components/myComponent/icon.png");
+
+        get("/system/console/modelregistry/api/componenticon/apps/project/components/myComponent");
+
+        verifyServiceResourceResolverIsObtained();
+        verifyPluginResolvesResource("/apps/project/components/myComponent/icon.png");
+        verifyResponseHasContentType("image/png");
+        verifyIconResourceIsAdaptedToInputStream();
+    }
+
+    @Test
+    public void testInvalidServiceUserConfigurationIsHandledGraceful() throws Exception {
+        withFailureWhenRetrievingAdminUser();
+        withIconResource("/apps/project/components/myComponent/icon.png");
+
+        get("/system/console/modelregistry/api/componenticon/apps/project/components/myComponent");
+
+        verifyServiceResourceResolverIsObtained();
+        verifyResponseHasContentType("image/png");
+        verifyNoIconResourceIsResolved();
+        verifyDefaultComponentIconIsWritten();
+    }
+
+    @Test
+    public void testNotificationForMissingServiceUserConfiguration() throws IOException, LoginException {
+        withFailureWhenRetrievingAdminUser();
+        renderContent();
+        assertResponseContains(
+                "Warning: No amendment mapping for io.neba.neba-core:");
+    }
+
+    @Test
+    public void testNoNotificationForMissingServiceUserConfigurationWhenConfigurationIsPresent() throws IOException, LoginException {
+        withServiceUserAmendment();
+        renderContent();
+        assertResponseDoesNotContainContain("Warning: No amendment mapping for io.neba.neba-core:");
+    }
+
+    private void assertResponseDoesNotContainContain(String notExpected) {
+        assertThat(this.renderedResponse).doesNotContain(notExpected);
+    }
+
+    private void withFailureWhenRetrievingAdminUser() throws LoginException {
+        doThrow(new LoginException("THIS IS AN EXPECTED TEST EXCEPTION")).when(this.factory).getResourceResolver(any());
+    }
+
+    private void verifyServiceResourceResolverIsObtained() throws LoginException {
+        verify(this.factory).getServiceResourceResolver(any());
+    }
+
+    private void withServiceUserAmendment() throws LoginException {
+        doReturn(this.resolver).when(this.factory).getServiceResourceResolver(any());
+    }
+
     private void withPathResourceLookedUp() {
         Set<LookupResult> lookupResults = new HashSet<>();
         for (OsgiModelSource<?> source : this.modelSources) {
@@ -331,7 +411,6 @@ public class ModelRegistryConsolePluginTest {
         doReturn(this.pathResource).when(this.resolver).getResource(eq(path));
         doReturn(type).when(this.pathResource).getResourceType();
     }
-
 
     private void withParameter(String name, String value) {
         doReturn(value).when(this.request).getParameter(eq(name));
@@ -381,10 +460,14 @@ public class ModelRegistryConsolePluginTest {
         doReturn(resourcePath).when(mock).getPath();
     }
 
-    private void assertResponseContains(String typeName, Class<Model> modelType, long bundleId, String modelName) {
-        assertThat(this.renderedResponse).contains("<td>" + typeName + "</td><td>" + modelType.getName() +
-                                                   "</td><td>" + modelName + "</td><td><a href=\"bundles/" + bundleId +
-                                                   "\" title=\"JUnit test bundle 1.0.0\">" + bundleId + "</a></td>");
+    private void assertResponseContainsModel(String linkToResourceType, Class<Model> modelType, long bundleId, String modelName) {
+        assertThat(this.renderedResponse).contains("<td>" + linkToResourceType + "</td><td>" + modelType.getName() +
+                "</td><td>" + modelName + "</td><td><a href=\"bundles/" + bundleId +
+                "\" title=\"JUnit test bundle 1.0.0\">" + bundleId + "</a></td>");
+    }
+
+    private void assertResponseContains(String expected) {
+        assertThat(this.renderedResponse).contains(expected);
     }
 
     private void assertResponseContainsNumberOfModelsText(int numberOfTests) {
@@ -414,7 +497,7 @@ public class ModelRegistryConsolePluginTest {
         assertThat(this.renderedResponse).contains("<th>Source bundle</th>");
     }
 
-    private void renderContent() throws ServletException, IOException {
+    private void renderContent() throws IOException {
         this.testee.renderContent(this.request, this.response);
         // Remove platform-dependent line endings.
         getResponseAsString();
