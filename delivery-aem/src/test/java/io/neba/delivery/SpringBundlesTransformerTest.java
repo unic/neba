@@ -100,7 +100,7 @@ public class SpringBundlesTransformerTest {
         return value;
     }
 
-    private JarFile getJarFile(String fileName) throws URISyntaxException, IOException {
+    private JarFile getJarFile(String fileName) throws IOException {
         File file = new File(target, fileName);
         assertThat(file).isFile();
         return new JarFile(file);

@@ -108,10 +108,6 @@ public class SpringBundlesTransformer {
                 change = true;
             }
 
-            if (addJavaxValidationExecutableImportIfMissing(imports)) {
-                change = true;
-            }
-
             if (change) {
                 updateImportPackageDirectives(mainAttributes, imports);
                 alterSymbolicNameToReflectCustomization(mainAttributes);
@@ -139,18 +135,6 @@ public class SpringBundlesTransformer {
         attrs.put("version", "[0,2)");
         return true;
     }
-
-    private boolean addJavaxValidationExecutableImportIfMissing(Parameters imports) {
-        if (!imports.containsKey("javax.validation") ||
-             imports.containsKey("javax.validation.executable")) {
-            return false;
-        }
-        Attrs executableImportAttributes = new Attrs();
-        executableImportAttributes.put("resolution:", "optional");
-        imports.add("javax.validation.executable", executableImportAttributes);
-        return true;
-    }
-
 
     private boolean transformJacksonImportsToRequireBundle(Attributes mainAttributes, Parameters imports) {
         Set<String> jacksonImports = new HashSet<>();
