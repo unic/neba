@@ -49,9 +49,17 @@ public interface ResourceModelFactory {
         @Nonnull
         ResourceModel getResourceModel();
 
+        /**
+         * The unique name of a model. This name may be used for model resolution by name
+         * and will be displayed in the model registry console.
+         */
         @Nonnull
         String getName();
 
+        /**
+         * The type which is {@link Class#isAssignableFrom(Class) assignment-compatible} with the model implementation class. For instance,
+         * the actual model class or an interface the model implements.
+         */
         @Nonnull
         Class<?> getType();
     }

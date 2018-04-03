@@ -18,14 +18,6 @@ package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.spi.ResourceModelFactory;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
-import javax.annotation.PreDestroy;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -34,10 +26,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
+import javax.annotation.PreDestroy;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 import static org.springframework.beans.factory.BeanFactoryUtils.beanNamesForTypeIncludingAncestors;
 
 /**
@@ -90,6 +92,10 @@ public class SpringModelRegistrar {
                         .filter(Objects::nonNull)
                         .collect(toList());
 
+        Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put(SERVICE_DESCRIPTION, "Provides NEBA resource models from Spring Beans annotated with @" + ResourceModel.class.getSimpleName() + ".");
+        properties.put(SERVICE_VENDOR, "neba.io");
+
         this.bundlesWithModels.put(bundle, bundle.getBundleContext().registerService(
                 ResourceModelFactory.class.getName(),
                 new ResourceModelFactory() {
@@ -105,7 +111,7 @@ public class SpringModelRegistrar {
                         return factory.getBean(modelDefinition.getName());
                     }
                 },
-                new Hashtable<>()
+                properties
         ));
     }
 

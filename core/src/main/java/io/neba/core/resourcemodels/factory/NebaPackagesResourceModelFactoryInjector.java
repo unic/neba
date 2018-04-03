@@ -29,6 +29,8 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import java.util.Hashtable;
 
 import static org.osgi.framework.Bundle.ACTIVE;
+import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * Provides a {@link ModelFactory} service via every bundle that has a <code>Neba-Packages</code> header
@@ -47,7 +49,10 @@ public class NebaPackagesResourceModelFactoryInjector {
                 if (factory.getModelDefinitions().isEmpty()) {
                     return null;
                 }
-                return bundle.getBundleContext().registerService(ResourceModelFactory.class, factory, new Hashtable<>());
+                Hashtable<String, Object> properties = new Hashtable<>();
+                properties.put(SERVICE_DESCRIPTION, "Provides NEBA resource model POJOs from packages specified in the 'Neba-Packages' bundle header.");
+                properties.put(SERVICE_VENDOR, "neba.io");
+                return bundle.getBundleContext().registerService(ResourceModelFactory.class, factory, properties);
             }
 
             @Override
