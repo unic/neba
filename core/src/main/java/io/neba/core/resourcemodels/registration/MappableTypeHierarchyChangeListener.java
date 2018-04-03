@@ -31,6 +31,8 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
 import static org.apache.sling.api.SlingConstants.TOPIC_RESOURCE_CHANGED;
+import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 import static org.osgi.service.event.EventConstants.EVENT_FILTER;
 import static org.osgi.service.event.EventConstants.EVENT_TOPIC;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -79,8 +81,8 @@ import static org.slf4j.LoggerFactory.getLogger;
                         "  (resourceRemovedAttributes=sling:resourceSuperType)" +
                         "  (resourceRemovedAttributes=jcr:mixinTypes)" +
                         "))",
-                "service.description=An event handler invalidating cache resource type hierarchy information.",
-                "service.vendor=neba.io"
+                SERVICE_DESCRIPTION + "=An event handler invalidating cache resource type hierarchy information.",
+                SERVICE_VENDOR + "=neba.io"
         }
 )
 public class MappableTypeHierarchyChangeListener implements EventHandler {

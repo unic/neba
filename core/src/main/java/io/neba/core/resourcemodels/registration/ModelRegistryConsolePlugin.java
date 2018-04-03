@@ -67,6 +67,7 @@ import static org.apache.sling.api.resource.ResourceResolverFactory.USER;
 import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
 import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
 import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * Shows a table with all detected type -&gt; model mappings in the felix console.
@@ -78,7 +79,7 @@ import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
         property = {
                 "felix.webconsole.label=" + ModelRegistryConsolePlugin.LABEL,
                 "service.description=Provides a felix console plugin listing all registered @ResourceModel's.",
-                "service.vendor=neba.io"
+                SERVICE_VENDOR + "=neba.io"
         }
 )
 public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
@@ -279,8 +280,8 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         } catch (LoginException e) {
             logger.error(
                     "Unable to obtain a resource resolver. " +
-                    "No valid service user mapping for io.neba.neba-core:{} exists: {} " +
-                    "and authenticating with the default admin credentials has failed.", SUBSERVICE_NAME, attemptViaUserMapping, e);
+                            "No valid service user mapping for io.neba.neba-core:{} exists: {} " +
+                            "and authenticating with the default admin credentials has failed.", SUBSERVICE_NAME, attemptViaUserMapping, e);
             return empty();
         }
     }

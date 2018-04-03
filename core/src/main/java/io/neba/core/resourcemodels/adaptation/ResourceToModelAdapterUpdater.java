@@ -46,6 +46,8 @@ import static org.apache.sling.api.adapter.AdapterFactory.ADAPTABLE_CLASSES;
 import static org.apache.sling.api.adapter.AdapterFactory.ADAPTER_CLASSES;
 import static org.osgi.framework.Bundle.ACTIVE;
 import static org.osgi.framework.Bundle.STARTING;
+import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * An {@link AdapterFactory} provides the {@link AdapterFactory#ADAPTABLE_CLASSES type(s) it adapts from}
@@ -145,8 +147,8 @@ public class ResourceToModelAdapterUpdater {
         Set<String> fullyQualifiedNamesOfRegisteredModels = getAdapterTypeNames();
         properties.put(ADAPTER_CLASSES, fullyQualifiedNamesOfRegisteredModels.toArray());
         properties.put(ADAPTABLE_CLASSES, new String[] { Resource.class.getName() });
-        properties.put("service.vendor", "neba.io");
-        properties.put("service.description", "Adapts Resources to @ResourceModels.");
+        properties.put(SERVICE_VENDOR, "neba.io");
+        properties.put(SERVICE_DESCRIPTION, "Adapts Resources to @ResourceModels.");
         return properties;
     }
 

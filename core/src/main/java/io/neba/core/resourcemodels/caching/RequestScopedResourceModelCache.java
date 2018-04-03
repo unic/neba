@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -41,6 +42,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
+
 /**
  * A request-scoped {@link ResourceModelCache}. Models added to this cache may either be cached for the entire
  * request regardless of state changes (selectors, suffixes, extension, query string...)
@@ -51,9 +55,10 @@ import java.util.Map;
 @Component(
         service = {ResourceModelCache.class, Filter.class},
         property = {
-            "service.vendor=neba.io",
-            "sling.filter.scope=REQUEST",
-            "sling.filter.scope=ERROR"
+                SERVICE_VENDOR + "=neba.io",
+                "sling.filter.scope=REQUEST",
+                "sling.filter.scope=ERROR",
+                SERVICE_RANKING + ":Integer=9000"
         }
 )
 @Designate(ocd = RequestScopedResourceModelCache.Configuration.class)

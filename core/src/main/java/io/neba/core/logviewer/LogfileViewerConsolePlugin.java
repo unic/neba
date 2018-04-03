@@ -42,6 +42,7 @@ import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * A web console plugin for tailing and downloading the CQ log files placed within the sling log directory as configured in the
@@ -54,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
         property = {
                 "felix.webconsole.label=" + LogfileViewerConsolePlugin.LABEL,
                 "service.description=Provides a Felix console plugin for monitoring and downloading logfiles.",
-                "service.vendor=neba.io"
+                SERVICE_VENDOR + "=neba.io"
         }
 )
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {

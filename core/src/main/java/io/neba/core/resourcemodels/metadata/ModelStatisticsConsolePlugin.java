@@ -37,6 +37,7 @@ import static org.apache.commons.collections.CollectionUtils.find;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * Provides a RESTFul JSON API for {@link io.neba.api.annotations.ResourceModel} metadata,
@@ -48,9 +49,9 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
 @Component(
         service = Servlet.class,
         property = {
-            "felix.webconsole.label=" + ModelStatisticsConsolePlugin.LABEL,
-            "service.description=Provides a Felix console plugin visualizing resource @ResourceModel statistics.",
-            "service.vendor=neba.io"
+                "felix.webconsole.label=" + ModelStatisticsConsolePlugin.LABEL,
+                "service.description=Provides a Felix console plugin visualizing resource @ResourceModel statistics.",
+                SERVICE_VENDOR + "=neba.io"
         }
 )
 public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {

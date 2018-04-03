@@ -7,15 +7,15 @@
 	   xmlns:task="http://www.springframework.org/schema/task"
 
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+           http://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util-4.3.xsd
+           http://www.springframework.org/schema/util/spring-util.xsd
            http://www.springframework.org/schema/task
-           http://www.springframework.org/schema/task/spring-task-4.3.xsd
+           http://www.springframework.org/schema/task/spring-task.xsd
            http://www.osgi.org/xmlns/blueprint/v1.0.0
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+           http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan base-package="io.neba.spring" />
 
@@ -38,7 +38,7 @@
 		<bp:bean class="org.springframework.web.filter.RequestContextFilter" id="requestContextFilter" />
 
 		<!-- Beans exported as OSGi services -->
-		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" id="requestContextFilterService">
+		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" id="requestContextFilterService" ranking="9100">
 			<bp:service-properties>
 				<entry key="sling.filter.scope">
 					<array value-type="java.lang.String">
@@ -47,7 +47,7 @@
 					</array>
 				</entry>
 				<entry key="service.description" value="Exposes HTTP requests and their attributes via a ThreadLocal." />
-				<entry key="service.vendor" value="Spring.io" />
+				<entry key="service.vendor" value="spring.io" />
 			</bp:service-properties>
 		</bp:service>
 
