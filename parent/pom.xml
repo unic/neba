@@ -56,8 +56,8 @@
     <properties>
         <!-- Properties for artifact versions are only used if the artifact versions is
              referenced outside the POM, such as in the delivery module's package definition. -->
-        <spring.version>4.3.10.RELEASE_1</spring.version>
-        <gemini.version>2.1.0.RELEASE</gemini.version>
+        <spring.version>5.0.4.RELEASE_1</spring.version>
+        <gemini.version>3.0.0.M01</gemini.version>
         <aopalliance.version>1.0_6</aopalliance.version>
         <language.level>1.8</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
@@ -111,8 +111,8 @@
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>2.4</version>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.1.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
