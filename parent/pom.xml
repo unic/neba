@@ -54,9 +54,7 @@
     </developers>
 
     <properties>
-        <!-- Properties for artifact versions are only used if the artifact versions is
-             referenced outside the POM, such as in the delivery module's package definition. -->
-        <spring.version>5.0.4.RELEASE_1</spring.version>
+        <spring.version>5.0.5.RELEASE_1</spring.version>
         <gemini.version>3.0.0.M01</gemini.version>
         <aopalliance.version>1.0_6</aopalliance.version>
         <language.level>1.8</language.level>
