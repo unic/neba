@@ -14,7 +14,7 @@
   limitations under the License.
  */
 
-package io.neba.core.resourcemodels.tagsupport;
+package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.services.ResourceModelResolver;
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;

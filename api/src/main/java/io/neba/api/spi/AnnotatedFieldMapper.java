@@ -130,7 +130,7 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
         /**
          * @return The mapped type of the field. <em>Note: In case the field is {@link io.neba.api.resourcemodels.Lazy}, this
          * type is the component type, i.e. the type targeted by the optional field</em>. However, field mappers
-         * are not applied optional fields but to the subsequent mapping, when the {@link io.neba.api.resourcemodels.Lazy#get() lazy value is actually mapped.
+         * are not applied optional fields but to the subsequent mapping, when the {@link io.neba.api.resourcemodels.Lazy#get() lazy value is actually mapped}.
          * Never <code>null</code>.
          */
         @Nonnull
@@ -159,7 +159,7 @@ public interface AnnotatedFieldMapper<FieldType, AnnotationType extends Annotati
 
         /**
          * @return The {@link org.apache.sling.api.resource.ValueMap} representation of the {@link #getResource() resource}.
-         * This value map does support primitive types, e.g. {@link int.class}. May be <code>null</code> if the resource
+         * This value map does support primitive types, e.g. <code>int</code>. May be <code>null</code> if the resource
          * has no properties, e.g. if it is synthetic.
          */
         @CheckForNull

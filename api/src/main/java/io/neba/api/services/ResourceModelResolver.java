@@ -15,7 +15,6 @@
 */
 package io.neba.api.services;
 
-import io.neba.api.spi.ResourceModelFactory;
 import org.apache.sling.api.resource.Resource;
 
 import javax.annotation.CheckForNull;
@@ -32,7 +31,7 @@ public interface ResourceModelResolver {
      * @param name must not be <code>null</code>
      * @return the most specific model instance compatible with the
      * given resource's resource type, or <code>null</code>. The
-     * model's {@link ResourceModelFactory.ModelDefinition#getName() name} matches the given name.
+     * model's {@link io.neba.api.spi.ResourceModelFactory.ModelDefinition#getName() name} matches the given name.
      */
     @CheckForNull
     Object resolveMostSpecificModelWithName(Resource resource, String name);

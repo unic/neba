@@ -74,7 +74,7 @@ public interface Lazy<T> {
     java.util.Optional<T> asOptional();
 
     /**
-     * {@see java.util.Optional#get}
+     * @see java.util.Optional#get
      */
     @Nonnull
     default T get() {
@@ -82,21 +82,21 @@ public interface Lazy<T> {
     }
 
     /**
-     * {@see java.util.Optional#isPresent}
+     * @see java.util.Optional#isPresent
      */
     default boolean isPresent() {
         return asOptional().isPresent();
     }
 
     /**
-     * {@see java.util.Optional#ifPresent}
+     * @see java.util.Optional#ifPresent
      */
     default void ifPresent(Consumer<? super T> c) {
         asOptional().ifPresent(c);
     }
 
     /**
-     * {@see java.util.Optional#filter}
+     * @see java.util.Optional#filter
      */
     @Nonnull
     default Lazy<T> filter(Predicate<? super T> predicate) {
@@ -104,7 +104,7 @@ public interface Lazy<T> {
     }
 
     /**
-     * {@see java.util.Optional#map}
+     * @see java.util.Optional#map
      */
     @Nonnull
     default <U> Lazy<U> map(Function<? super T, ? extends U> f) {
@@ -112,7 +112,7 @@ public interface Lazy<T> {
     }
 
     /**
-     * {@see java.util.Optional#flatMap}
+     * @see java.util.Optional#flatMap
      */
     @Nonnull
     default <U> Lazy<U> flatMap(Function<? super T, Lazy<U>> f) {
@@ -125,7 +125,7 @@ public interface Lazy<T> {
     }
 
     /**
-     * {@see java.util.Optional#orElse}
+     * @see java.util.Optional#orElse
      */
     @CheckForNull
     default T orElse(T other) {
@@ -133,7 +133,7 @@ public interface Lazy<T> {
     }
 
     /**
-     * {@see java.util.Optional#orElseGet}
+     * @see java.util.Optional#orElseGet
      */
     @CheckForNull
     default T orElseGet(Supplier<? extends T> other) {
@@ -141,7 +141,7 @@ public interface Lazy<T> {
     }
 
     /**
-     * {@see java.util.Optional#orElseThrow}
+     * @see java.util.Optional#orElseThrow
      */
     @Nonnull
     default <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {

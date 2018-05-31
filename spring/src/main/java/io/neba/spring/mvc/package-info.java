@@ -16,7 +16,7 @@
 
 /**
  * Contains the integration of Spring MVC into Sling.<br />
- * Most importantly, the {@link io.neba.spring.mvc.MvcServlet} dispatches requests to {@link io.neba.spring.mvc.MvcContext bundle-specific}
- * {@link org.springframework.web.servlet.DispatcherServlet dispatcher servlets}.
+ * Most importantly, the {@link io.neba.spring.mvc.MvcServlet} dispatches requests to {@link io.neba.spring.mvc.BundleSpecificDispatcherServlet bundle-specific}
+ * {@code org.springframework.web.servlet.DispatcherServlet dispatcher servlets}.
  */
 package io.neba.spring.mvc;

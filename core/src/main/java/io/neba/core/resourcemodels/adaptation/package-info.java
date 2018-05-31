@@ -16,9 +16,6 @@
 
 /**
  * Contains generic {@link org.apache.sling.api.adapter.AdapterFactory adapter factories}
- * for adapting a resource to concrete {@link io.neba.api.annotations.ResourceModel resource models}
- * or the generic {@link io.neba.api.resourcemodels.Model} type. The generic adaptation is used by the
- * {@link io.neba.api.tags.DefineObjectsTag} to adapt to the most specific resource model
- * of a resource.
+ * for adapting a resource to resource models, i.e. classes annotated with {@link io.neba.api.annotations.ResourceModel}.
  */
 package io.neba.core.resourcemodels.adaptation;

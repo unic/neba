@@ -54,7 +54,7 @@ import static org.springframework.beans.factory.BeanFactoryUtils.GENERATED_BEAN_
  * Initializes the Spring MVC infrastructure, if required, and adds NEBA-specific customizations.
  * {@link DispatcherServlet#setPublishEvents(boolean) Disables event publication}
  * as event publication requires the presence of a {@link org.springframework.web.context.WebApplicationContext},
- * whereas an {@link org.eclipse.gemini.blueprint.context.support.OsgiBundleXmlApplicationContext} is
+ * whereas an {@code org.eclipse.gemini.blueprint.context.support.OsgiBundleXmlApplicationContext} is
  * used by gemini-blueprint.
  * </p>
  * <p>

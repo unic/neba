@@ -14,12 +14,13 @@
   limitations under the License.
  */
 
-package io.neba.core.resourcemodels.tagsupport;
+package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
+import io.neba.core.resourcemodels.registration.ResourceModelResolverImpl;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
 import java.util.HashMap;

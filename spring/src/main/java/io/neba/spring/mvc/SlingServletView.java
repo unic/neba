@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Resolves a resource path to a {@link Servlet} representing a {@link org.apache.sling.api.scripting.SlingScript}
+ * Resolves a resource path to a {@link Servlet} representing a {@code org.apache.sling.api.scripting.SlingScript}
  * and invokes the script to {@link #render(Map, HttpServletRequest, HttpServletResponse) render} the view.
  *
  * @author Olaf Otto

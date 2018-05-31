@@ -30,7 +30,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * </p>
  *
  * <pre>
- * &#064;{@link javax.inject.Inject}
+ * &#064;javax.inject.Inject
  * &#064;{@link Filter}("(&amp;(property=value)(otherProperty=otherValue))")
  * private SomeService service;
  * </pre>
