@@ -18,7 +18,6 @@ package io.neba.core.resourcemodels.mapping.testmodels;
 
 import io.neba.api.annotations.*;
 import io.neba.api.resourcemodels.Lazy;
-import io.neba.api.resourcemodels.Optional;
 import org.apache.sling.api.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -94,18 +93,10 @@ public class TestResourceModel {
     private List<Resource> childContentResourcesAsResources;
 
     @Children
-    private Optional<List<Resource>> optionalChildContentResourcesAsResources;
-
-    @Children
     private Lazy<List<Resource>> lazyChildContentResourcesAsResources;
 
     @Reference
-    private Optional<OtherTestResourceModel> optionalReferenceToOtherModel;
-
-    @Reference
     private Lazy<OtherTestResourceModel> lazyReferenceToOtherModel;
-
-    private Optional<OtherTestResourceModel> optionalReferenceToChildAsOtherModel;
 
     private Lazy<OtherTestResourceModel> lazyReferenceToChildAsOtherModel;
 

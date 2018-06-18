@@ -15,6 +15,8 @@
  */
 package io.neba.api.resourcemodels;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -60,6 +62,7 @@ import static java.util.Objects.requireNonNull;
  * reason to make them {@link Lazy}.
  * </p>
  *
+ * @since 4.3.0
  * @param <T> the type of the lazy-loaded object.
  * @author Olaf Otto
  */
@@ -67,72 +70,80 @@ public interface Lazy<T> {
     /**
      * @return a {@link java.util.Optional} representation of the lazy-loaded value, never <code>null</code>.
      */
+    @Nonnull
     java.util.Optional<T> asOptional();
 
     /**
-     * {@see java.util.Optional#get}
+     * @see java.util.Optional#get
      */
+    @Nonnull
     default T get() {
         return asOptional().get();
     }
 
     /**
-     * {@see java.util.Optional#isPresent}
+     * @see java.util.Optional#isPresent
      */
     default boolean isPresent() {
         return asOptional().isPresent();
     }
 
     /**
-     * {@see java.util.Optional#ifPresent}
+     * @see java.util.Optional#ifPresent
      */
     default void ifPresent(Consumer<? super T> c) {
         asOptional().ifPresent(c);
     }
 
     /**
-     * {@see java.util.Optional#filter}
+     * @see java.util.Optional#filter
      */
+    @Nonnull
     default Lazy<T> filter(Predicate<? super T> predicate) {
         return () -> asOptional().filter(predicate);
     }
 
     /**
-     * {@see java.util.Optional#map}
+     * @see java.util.Optional#map
      */
+    @Nonnull
     default <U> Lazy<U> map(Function<? super T, ? extends U> f) {
         return () -> asOptional().map(f);
     }
 
     /**
-     * {@see java.util.Optional#flatMap}
+     * @see java.util.Optional#flatMap
      */
+    @Nonnull
     default <U> Lazy<U> flatMap(Function<? super T, Lazy<U>> f) {
         requireNonNull(f);
-        if (!isPresent())
+        if (!isPresent()) {
             return java.util.Optional::empty;
-        else {
+        } else {
             return requireNonNull(f.apply(get()));
         }
     }
 
     /**
-     * {@see java.util.Optional#orElse}
+     * @see java.util.Optional#orElse
      */
+    @CheckForNull
     default T orElse(T other) {
         return asOptional().orElse(other);
     }
 
     /**
-     * {@see java.util.Optional#orElseGet}
+     * @see java.util.Optional#orElseGet
      */
+    @CheckForNull
     default T orElseGet(Supplier<? extends T> other) {
         return asOptional().orElseGet(other);
     }
 
     /**
-     * {@see java.util.Optional#orElseThrow}
+     * @see java.util.Optional#orElseThrow
      */
+    @Nonnull
     default <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
         return asOptional().<X>orElseThrow(exceptionSupplier);
     }

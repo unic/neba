@@ -20,15 +20,16 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 
-import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * Adapts a {@link Resource} to it's {@link io.neba.api.annotations.ResourceModel} using the
@@ -37,13 +38,13 @@ import static org.apache.commons.lang.StringUtils.join;
  * @author Olaf Otto
  * @see ResourceToModelAdapterUpdater
  */
-@Service
+@Component(service = ResourceToModelAdapter.class)
 public class ResourceToModelAdapter implements AdapterFactory {
-    @Autowired
+    @Reference
     private ModelRegistry registry;
-    @Autowired
+    @Reference
     private ResourceToModelMapper mapper;
-    @Autowired
+    @Reference
     private ResourceModelCaches caches;
 
     /**
@@ -54,7 +55,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getAdapter(Object adaptable, Class<T> target) {
+    public <T> T getAdapter(@Nonnull Object adaptable, @Nonnull Class<T> target) {
         if (!(adaptable instanceof Resource)) {
             return null;
         }
@@ -72,7 +73,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
                     resource.getPath() + " to " + target.getName() + ": " + join(models, ", ") + ".");
         }
 
-        OsgiBeanSource<?> source = models.iterator().next().getSource();
+        OsgiModelSource<?> source = models.iterator().next().getSource();
 
         T model = this.caches.lookup(resource, source);
         if (model != null) {

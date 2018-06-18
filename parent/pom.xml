@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>4.3.3-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
     <description>
-        NEBA integrates the Spring Framework into Sling. It makes available all of Spring's features to allow using
-        mature, best-practice solutions for the majority of system-level concerns common to Sling-based applications.
+        NEBA provides simple and high performance content-to-object mapping for Apache Sling.
     </description>
 
     <url>http://www.neba.io</url>
@@ -54,10 +54,8 @@
     </developers>
 
     <properties>
-        <!-- Properties for artifact versions are only used if the artifact versions is
-             referenced outside the POM, such as in the delivery module's package definition. -->
-        <spring.version>4.3.10.RELEASE_1</spring.version>
-        <gemini.version>2.1.0.RELEASE</gemini.version>
+        <spring.version>5.0.5.RELEASE_1</spring.version>
+        <gemini.version>3.0.0.M01</gemini.version>
         <aopalliance.version>1.0_6</aopalliance.version>
         <language.level>1.8</language.level>
         <sling.url>http://localhost:4502/system/console</sling.url>
@@ -69,20 +67,6 @@
         <connection>scm:git:git://github.com/unic/neba.git</connection>
         <developerConnection>scm:git:git@github.com:unic/unic.git</developerConnection>
     </scm>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>adobe-public-releases</id>
-            <name>Adobe Public Repository</name>
-            <url>https://repo.adobe.com/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <distributionManagement>
         <snapshotRepository>
@@ -125,8 +109,8 @@
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>2.4</version>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.1.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -184,12 +168,6 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.5</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
                 <version>3.2.2</version>
@@ -236,7 +214,7 @@
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
-                <version>4.2.0</version>
+                <version>6.0.0</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -333,9 +311,21 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.12.0</version>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.component.annotations</artifactId>
+                <version>1.3.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.annotation</artifactId>
+                <version>6.0.0</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.metatype.annotations</artifactId>
+                <version>1.3.0</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -361,14 +351,25 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>3.2.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-atinject_1.0_spec</artifactId>
+                <version>1.0</version>
+                <scope>provided</scope>
+            </dependency>
 
             <!-- Test dependencies -->
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-                <version>1_1</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.spring-test</artifactId>
@@ -402,15 +403,15 @@
                 <plugin>
                     <groupId>org.apache.sling</groupId>
                     <artifactId>maven-sling-plugin</artifactId>
-                    <version>2.2.0</version>
+                    <version>2.3.4</version>
                     <configuration>
                         <slingUrl>${sling.url}</slingUrl>
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>com.day.jcr.vault</groupId>
-                    <artifactId>content-package-maven-plugin</artifactId>
-                    <version>0.0.24</version>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>filevault-package-maven-plugin</artifactId>
+                    <version>1.0.1</version>
                 </plugin>
                 <plugin>
                     <groupId>com.vecna</groupId>
@@ -420,35 +421,16 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.5.0</version>
                     <extensions>true</extensions>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.24.0</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <strictMode>true</strictMode>
-                        <properties>
-                            <service.vendor>neba.io</service.vendor>
-                        </properties>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.17</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.7.0</version>
                     <configuration>
                         <source>${language.level}</source>
                         <target>${language.level}</target>
@@ -461,11 +443,11 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.0.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -503,15 +485,16 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.20</version>
+                    <version>2.20.1</version>
                     <configuration>
                         <parallel>classes</parallel>
                         <threadCount>8</threadCount>
                     </configuration>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.4</version>
+                    <version>3.0.0</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -520,7 +503,7 @@
                             </goals>
                             <configuration>
                                 <quiet>true</quiet>
-                                <additionalparam>-Xdoclint:none</additionalparam>
+                                <additionalOptions>-Xdoclint:none</additionalOptions>
                             </configuration>
                         </execution>
                     </executions>
@@ -571,7 +554,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.9</version>
+                    <version>0.8.0</version>
                     <executions>
                         <execution>
                             <id>prepare-agent</id>

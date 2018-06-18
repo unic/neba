@@ -16,15 +16,21 @@
 
 package io.neba.core.resourcemodels.caching;
 
-import io.neba.api.resourcemodels.ResourceModelCache;
+import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.util.Key;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -35,19 +41,32 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.osgi.framework.Constants.SERVICE_RANKING;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
+
 /**
  * A request-scoped {@link ResourceModelCache}. Models added to this cache may either be cached for the entire
  * request regardless of state changes (selectors, suffixes, extension, query string...)
- * during the request processing, or in a request-state sensitive manner (see {@link #setSafeMode(boolean)}).
+ * during the request processing, or in a request-state sensitive manner.
  *
  * @author Olaf Otto
  */
+@Component(
+        service = {ResourceModelCache.class, Filter.class},
+        property = {
+                SERVICE_VENDOR + "=neba.io",
+                "sling.filter.scope=REQUEST",
+                "sling.filter.scope=ERROR",
+                SERVICE_RANKING + ":Integer=9000"
+        }
+)
+@Designate(ocd = RequestScopedResourceModelCache.Configuration.class)
 public class RequestScopedResourceModelCache implements ResourceModelCache, Filter {
     private final ThreadLocal<Map<Object, Object>> cacheHolder = new ThreadLocal<>();
     private final ThreadLocal<SlingHttpServletRequest> requestHolder = new ThreadLocal<>();
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private boolean enabled = true;
-    private boolean safeMode = false;
+
+    private Configuration configuration;
 
     /**
      * Returns the key for a cacheHolder. If the key changes, the cacheHolder will be cleared.
@@ -68,6 +87,11 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
                 request.getQueryString());
     }
 
+    @Activate
+    protected void activate(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -77,7 +101,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
         if (key == null) {
             throw new IllegalStateException("Method argument key must not be null.");
         }
-        if (!this.enabled) {
+        if (!this.configuration.enabled()) {
             return null;
         }
 
@@ -96,7 +120,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
      * {@inheritDoc}
      */
     @Override
-    public <T> void put(Resource resource, T model, Object key) {
+    public <T> void put(@Nonnull Resource resource, T model, @Nonnull Object key) {
         if (resource == null) {
             throw new IllegalStateException("Method argument resource must not be null.");
         }
@@ -106,7 +130,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
         if (key == null) {
             throw new IllegalStateException("Method argument key must not be null.");
         }
-        if (this.enabled) {
+        if (this.configuration.enabled()) {
             Map<Object, Object> cache = this.cacheHolder.get();
             if (cache == null) {
                 this.logger.debug("No cache found, the cache will not be used.");
@@ -122,7 +146,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (!this.enabled) {
+        if (!this.configuration.enabled()) {
             chain.doFilter(request, response);
             return;
         }
@@ -144,7 +168,7 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         // ignore
     }
 
@@ -157,10 +181,10 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
      * The externally provided key may be wrapped to add more key elements in order
      * to restrict the cached object's scope to a specific component when safe mode is enabled.
      *
-     * @return A request-state sensitive key in {@link #safeMode}, the original key otherwise.
+     * @return A request-state sensitive key in {@link Configuration#safeMode()}, the original key otherwise.
      */
     private Object createInternalKey(Object key) {
-        if (this.safeMode) {
+        if (this.configuration.safeMode()) {
             // Create a request-state sensitive key to scope the cached model to a request with specific parameters.
             final SlingHttpServletRequest request = this.requestHolder.get();
             if (request != null) {
@@ -170,11 +194,21 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
         return key;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+    @ObjectClassDefinition(name = "NEBA request-scoped resource model cache", description = "Provides a request-scoped resource model cache")
+    public @interface Configuration {
+        @AttributeDefinition(
+                name = "Enabled",
+                description = "Activates the request-scoped cache for resource models.")
+        boolean enabled() default true;
 
-    public void setSafeMode(boolean safeMode) {
-        this.safeMode = safeMode;
+        @AttributeDefinition(
+                name = "Safemode",
+                description = "In safemode, caching is sensitive to the current page resource and request parameters " +
+                        "such as selectors, suffix, extension and the query string. Should @ResourceModels erroneously cache such state, " +
+                        "e.g. by initializing the corresponding value once in a @AfterMapping method, safemode prevents errors caused " +
+                        "when performing subsequent internal changes to the request state (e.g. during forwards and includes). Note that " +
+                        "enabling this feature is likely to a significant negative performance impact. It is highly recommended to disable " +
+                        "safemode in favor of safe-to-cache @ResourceModels.")
+        boolean safeMode() default false;
     }
 }

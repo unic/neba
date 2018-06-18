@@ -1,31 +1,37 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.metadata;
 
-import io.neba.core.resourcemodels.mapping.testmodels.*;
+import io.neba.api.annotations.Reference;
+import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
+import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
+import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidGenericFieldDeclaration;
+import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInvalidPathDeclaration;
+import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithUnsupportedCollectionTypes;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.function.Function;
 
+import static io.neba.core.util.ReflectionUtil.findField;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.util.ReflectionUtils.findField;
-import static org.springframework.util.ReflectionUtils.setField;
 
 /**
  * @author Olaf Otto
@@ -36,12 +42,12 @@ public class MappedFieldMetaDataTest {
 	private MappedFieldMetaData testee;
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullField() throws Exception {
+    public void testHandlingOfNullField() {
         createMetadataForTestModelFieldWithName("this.field.does.not.exist");
     }
 
     @Test
-	public void testPathAnnotationUsageOnPropertyField() throws Exception {
+	public void testPathAnnotationUsageOnPropertyField() {
 		createMetadataForTestModelFieldWithName("stringFieldWithRelativePathAnnotation");
 		assertFieldHasPathAnnotation();
 		assertFieldIsPropertyType();
@@ -52,7 +58,7 @@ public class MappedFieldMetaDataTest {
 	}
 
 	@Test
-	public void testPathAnnotationOnComplexReferenceField() throws Exception {
+	public void testPathAnnotationOnComplexReferenceField() {
 		createMetadataForTestModelFieldWithName("referencedResource");
 		assertFieldHasPathAnnotation();
 		assertFieldIsReference();
@@ -63,7 +69,7 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
-    public void testPathAnnotationOnComplexReferenceFieldWithMetaAnnotation() throws Exception {
+    public void testPathAnnotationOnComplexReferenceFieldWithMetaAnnotation() {
         createMetadataForTestModelFieldWithName("referencedResourceWithMetaAnnotation");
         assertFieldHasPathAnnotation();
         assertFieldIsReference();
@@ -74,40 +80,40 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
-    public void testAppendAbsolutePathOnReference() throws Exception {
+    public void testAppendAbsolutePathOnReference() {
         createMetadataForTestModelFieldWithName("referencedResourceModelWithAbsoluteAppendedReferencePath");
         assertReferenceHasAppendPath();
         assertReferenceAppendPathIs("/jcr:content");
     }
 
     @Test
-    public void testAppendRelativePathOnReference() throws Exception {
+    public void testAppendRelativePathOnReference() {
         createMetadataForTestModelFieldWithName("referencedResourceModelWithRelativeAppendedReferencePath");
         assertReferenceHasAppendPath();
         assertReferenceAppendPathIs("/jcr:content");
     }
 
     @Test
-    public void testNoAppendPathOnReference() throws Exception {
+    public void testNoAppendPathOnReference() {
         createMetadataForTestModelFieldWithName("referencedResource");
         assertNoAppendPathIsPresentOnReference();
     }
 
     @Test
-    public void testResolveBelowEveryChildOnChildren() throws Exception {
+    public void testResolveBelowEveryChildOnChildren() {
         createMetadataForTestModelFieldWithName("childContentResourcesAsResources");
         assertChildrenHasResolveBelowEveryChildPath();
         assertChildrenResolveBelowEveryChildPathIs("jcr:content");
     }
 
     @Test
-    public void testNoResolveBelowEveryChildOnChildren() throws Exception {
+    public void testNoResolveBelowEveryChildOnChildren() {
         createMetadataForTestModelFieldWithName("childrenAsResources");
         assertChildrenDoesNotHaveResolveBelowEveryChildPath();
     }
 
     @Test
-	public void testTypeParameterDetection() throws Exception {
+	public void testTypeParameterDetection() {
 		createMetadataForTestModelFieldWithName("referencedResourcesListWithSimpleTypeParameter");
 
 		assertFieldIsPropertyType();
@@ -116,7 +122,7 @@ public class MappedFieldMetaDataTest {
 	}
 
 	@Test
-	public void testThisReferenceDetection() throws Exception {
+	public void testThisReferenceDetection() {
 		createMetadataForTestModelFieldWithName("thisResource");
 		assertFieldIsThisReference();
 
@@ -127,7 +133,7 @@ public class MappedFieldMetaDataTest {
 	}
 
     @Test
-    public void testThisReferenceDetectionWithMetaAnnotation() throws Exception {
+    public void testThisReferenceDetectionWithMetaAnnotation() {
         createMetadataForTestModelFieldWithName("thisResourceWithMetaAnnotation");
         assertFieldIsThisReference();
 
@@ -138,7 +144,7 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
-	public void testPathRetrievalFromPathAnnotation() throws Exception {
+	public void testPathRetrievalFromPathAnnotation() {
 		createMetadataForTestModelFieldWithName("stringFieldWithAbsolutePathAnnotation");
 
 		assertFieldHasPathAnnotation();
@@ -146,7 +152,7 @@ public class MappedFieldMetaDataTest {
 	}
 
     @Test
-    public void testPathRetrievalFromPathMetaAnnotation() throws Exception {
+    public void testPathRetrievalFromPathMetaAnnotation() {
         createMetadataForTestModelFieldWithName("stringFieldWithPathMetaAnnotation");
 
         assertFieldHasPathAnnotation();
@@ -154,31 +160,31 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-	public void testTreatmentOfInvalidGenericsUsage() throws Exception {
+	public void testTreatmentOfInvalidGenericsUsage() {
 		withModelType(TestResourceModelWithInvalidGenericFieldDeclaration.class);
 		createMetadataForTestModelFieldWithName("readOnlyList");
 	}
 	
     @Test(expected = IllegalArgumentException.class)
-    public void testTreatmentOfInvalidPathAnnotation() throws Exception {
+    public void testTreatmentOfInvalidPathAnnotation() {
     	withModelType(TestResourceModelWithInvalidPathDeclaration.class);
     	createMetadataForTestModelFieldWithName("fieldWithInvalidPathAnnotation");
     }
 
     @Test(expected = IllegalArgumentException.class)
-	public void testTreatmentOfUnsupportedCollectionTypes() throws Exception {
+	public void testTreatmentOfUnsupportedCollectionTypes() {
     	withModelType(TestResourceModelWithUnsupportedCollectionTypes.class);
     	createMetadataForTestModelFieldWithName("hashSetField");
 	}
 
     @Test
-    public void testChildrenAsResources() throws Exception {
+    public void testChildrenAsResources() {
         createMetadataForTestModelFieldWithName("childrenAsResources");
         assertThat(this.testee.isChildrenAnnotationPresent()).isTrue();
     }
 
     @Test
-    public void testChildrenAsResourcesWithMetaAnnotation() throws Exception {
+    public void testChildrenAsResourcesWithMetaAnnotation() {
         createMetadataForTestModelFieldWithName("childrenAsResourcesWithMetaAnnotation");
         assertThat(this.testee.isChildrenAnnotationPresent()).isTrue();
     }
@@ -190,7 +196,7 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
-	public void testDetectionOfPropertyTypedFields() throws Exception {
+	public void testDetectionOfPropertyTypedFields() {
 		createMetadataForTestModelFieldWithName("stringField");
 		assertFieldIsPropertyType();
 		
@@ -220,7 +226,7 @@ public class MappedFieldMetaDataTest {
 	}
 
     @Test
-    public void testDetectionOfCollectionTypedPropertyFields() throws Exception {
+    public void testDetectionOfCollectionTypedPropertyFields() {
         createMetadataForTestModelFieldWithName("collectionOfStrings");
         assertFieldIsPropertyType();
         assertFieldIsCollectionType();
@@ -228,67 +234,45 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
-    public void testDetectionOfPathExpression() throws Exception {
+    public void testDetectionOfPathExpression() {
         createMetadataForTestModelFieldWithName("stringFieldWithPlaceholder");
-        assertFieldHasPathExpression();
+        assertFieldHasPathVariables();
     }
 
     @Test
-    public void testDetectionOfOptionalFieldWithReferenceAnnotation() throws Exception {
-        createMetadataForTestModelFieldWithName("optionalReferenceToOtherModel");
-        assertOptionalFieldIsDetected();
-        assertFieldTypeIs(OtherTestResourceModel.class);
-    }
-
-    @Test
-    public void testDetectionOfLazyFieldWithReferenceAnnotation() throws Exception {
+    public void testDetectionOfLazyFieldWithReferenceAnnotation() {
         createMetadataForTestModelFieldWithName("lazyReferenceToOtherModel");
         assertLazyFieldIsDetected();
         assertFieldTypeIs(OtherTestResourceModel.class);
     }
 
     @Test
-    public void testDetectionOfOptionalFieldWithPointingToChildResource() throws Exception {
-        createMetadataForTestModelFieldWithName("optionalReferenceToChildAsOtherModel");
-        assertOptionalFieldIsDetected();
-        assertFieldTypeIs(OtherTestResourceModel.class);
-    }
-
-    @Test
-    public void testDetectionOfLazyFieldWithPointingToChildResource() throws Exception {
+    public void testDetectionOfLazyFieldWithPointingToChildResource() {
         createMetadataForTestModelFieldWithName("lazyReferenceToChildAsOtherModel");
         assertLazyFieldIsDetected();
         assertFieldTypeIs(OtherTestResourceModel.class);
     }
 
     @Test
-    public void testProvisioningOfLazyLoadingFactoryForChildrenCollection() throws Exception {
+    public void testProvisioningOfLazyLoadingFactoryForChildrenCollection() {
         createMetadataForTestModelFieldWithName("childrenAsResources");
         assertLazyLoadingCollectionFactoryIsCreated();
     }
 
     @Test
-    public void testProvisioningOfLazyLoadingFactoryForReferenceCollection() throws Exception {
+    public void testProvisioningOfLazyLoadingFactoryForReferenceCollection() {
         createMetadataForTestModelFieldWithName("referencedResourcesListWithSimpleTypeParameter");
         assertLazyLoadingCollectionFactoryIsCreated();
     }
 
     @Test
-    public void testResolutionOfArrayComponentType() throws Exception {
+    public void testResolutionOfArrayComponentType() {
         createMetadataForTestModelFieldWithName("collectionOfStrings");
         assertArrayTypeOfComponentTypeIs(String[].class);
     }
 
     @Test
-    public void testOptionalFieldsAreTransparentlyTreatedLikeTheirTargetType() throws Exception {
-        createMetadataForTestModelFieldWithName("optionalChildContentResourcesAsResources");
-        assertFieldIsInstantiableCollectionType();
-        assertFieldTypeIs(List.class);
-        assertTypeParameterIs(Resource.class);
-    }
-
-    @Test
-    public void testLazyFieldsAreTransparentlyTreatedLikeTheirTargetType() throws Exception {
+    public void testLazyFieldsAreTransparentlyTreatedLikeTheirTargetType() {
         createMetadataForTestModelFieldWithName("lazyChildContentResourcesAsResources");
         assertFieldIsInstantiableCollectionType();
         assertFieldTypeIs(List.class);
@@ -299,8 +283,37 @@ public class MappedFieldMetaDataTest {
     public void testMetadataMakesFieldAccessible() throws Exception {
         TestResourceModel testResourceModel = new TestResourceModel();
         createMetadataForTestModelFieldWithName("stringField");
-        setField(this.testee.getField(), testResourceModel, "JunitTest");
+        this.testee.getField().set(testResourceModel, "JunitTest");
         assertThat(testResourceModel.getStringField()).isEqualTo("JunitTest");
+    }
+
+    @Test
+    public void testHashCodeAndEquals() {
+        Field field1 = findField(this.modelType, "stringField");
+        Field field2 = findField(this.modelType, "dateField");
+
+        MappedFieldMetaData one = new MappedFieldMetaData(field1, this.modelType);
+        MappedFieldMetaData two = new MappedFieldMetaData(field1, this.modelType);
+
+        assertThat(one.hashCode()).isEqualTo(two.hashCode());
+        assertThat(one).isEqualTo(two);
+        assertThat(two).isEqualTo(one);
+
+        two = new MappedFieldMetaData(field2, this.modelType);
+
+        assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
+        assertThat(one).isNotEqualTo(two);
+        assertThat(two).isNotEqualTo(one);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRetrievalOfAnnotations() {
+        createMetadataForTestModelFieldWithName("referencedResource");
+        assertThat(this.testee.getAnnotations()).isNotEmpty();
+        Function<Annotation, Class<? extends Annotation>> getType = Annotation::annotationType;
+        assertThat(this.testee.getAnnotations().stream().map(getType))
+                .contains(Reference.class);
     }
 
     private void assertFieldTypeIs(Class<?> type) {
@@ -309,10 +322,6 @@ public class MappedFieldMetaDataTest {
 
     private void assertLazyLoadingCollectionFactoryIsCreated() {
         assertThat(this.testee.getCollectionProxyFactory()).isNotNull();
-    }
-
-    private void assertOptionalFieldIsDetected() {
-        assertThat(this.testee.isOptional()).isTrue();
     }
 
     private void assertLazyFieldIsDetected() {
@@ -331,8 +340,8 @@ public class MappedFieldMetaDataTest {
         assertThat(this.testee.getResolveBelowEveryChildPathOnChildren()).isEqualTo(path);
     }
 
-    private void assertFieldHasPathExpression() {
-        assertThat(this.testee.isPathExpressionPresent()).isTrue();
+    private void assertFieldHasPathVariables() {
+        assertThat(this.testee.getPath().hasPlaceholders()).isTrue();
     }
 
     private void assertFieldIsInstantiableCollectionType() {
@@ -340,7 +349,7 @@ public class MappedFieldMetaDataTest {
     }
 
     private void assertFieldHasPath(String path) {
-		assertThat(this.testee.getPath()).isEqualTo(path);
+		assertThat(this.testee.getPath().toString()).isEqualTo(path);
 	}
 
 	private void assertFieldHasPathAnnotation() {
@@ -404,8 +413,8 @@ public class MappedFieldMetaDataTest {
 	}
 
 	private void createMetadataForTestModelFieldWithName(String fieldName) {
-		Field field = findField(this.modelType, fieldName);
-		this.testee = new MappedFieldMetaData(field, this.modelType);
+        Field field = findField(this.modelType, fieldName);
+        this.testee = new MappedFieldMetaData(field, this.modelType);
 	}
 
 	private void withModelType(Class<?> type) {

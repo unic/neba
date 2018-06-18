@@ -1,21 +1,25 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.neba.neba-delivery-aem</artifactId>
-    <name>NEBA delivery AEM</name>
+    <name>NEBA delivery</name>
     <packaging>content-package</packaging>
 
-    <description>Packages NEBA with runtime dependencies for deployment in Adobe AEM</description>
+    <description>Packages NEBA for deployment in Adobe AEM</description>
 
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>4.3.3-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <properties>
         <neba.installation.path>/apps/neba/install</neba.installation.path>
-        <spring.artifacts.workdir>${project.build.directory}/spring-artifacts</spring.artifacts.workdir>
+        <spring.artifacts.sourcedir>${project.build.directory}/spring-artifacts</spring.artifacts.sourcedir>
+        <spring.artifacts.targetdir>
+            ${project.build.directory}/filefault-work-spring/jcr_root/${neba.installation.path}/17
+        </spring.artifacts.targetdir>
     </properties>
 
     <dependencies>
@@ -28,6 +32,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>io.neba.neba-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>io.neba.neba-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -134,7 +143,7 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Omit the binary resources. They are shipped anyways. -->
+            <!-- Omit the binary resources. They are shipped separately -->
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
                 <configuration>
@@ -158,7 +167,7 @@
                             <useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>
                             <overWriteReleases>true</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
-                            <outputDirectory>${spring.artifacts.workdir}</outputDirectory>
+                            <outputDirectory>${spring.artifacts.sourcedir}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -184,8 +193,10 @@
                     <mainClass>io.neba.delivery.SpringBundlesTransformer</mainClass>
                     <!-- Spring bundles shall start after their dependencies at start level 17 -->
                     <arguments>
-                        <argument>${spring.artifacts.workdir}</argument>
-                        <argument>${project.build.directory}/vault-work/jcr_root/${neba.installation.path}/17</argument>
+                        <!-- source directory -->
+                        <argument>${spring.artifacts.sourcedir}</argument>
+                        <!-- target directory -->
+                        <argument>${spring.artifacts.targetdir}</argument>
                     </arguments>
                     <classpathScope>compile</classpathScope>
                 </configuration>
@@ -193,62 +204,134 @@
 
             <!-- Build the content package including bundles with customized manifests (those are already copied to the target/vault-work directory) -->
             <plugin>
-                <groupId>com.day.jcr.vault</groupId>
-                <artifactId>content-package-maven-plugin</artifactId>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
-                    <builtContentDirectory>${project.build.directory}/vault.work</builtContentDirectory>
+                    <showImportPackageReport>false</showImportPackageReport>
+                    <version>${project.version}</version>
                     <failOnMissingEmbed>true</failOnMissingEmbed>
-                    <embeddeds>
-                        <!-- Spring dependencies shall start first at start level 16 -->
-                        <embedded>
-                            <groupId>org.apache.servicemix.bundles</groupId>
-                            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-                            <target>${neba.installation.path}/16</target>
-                        </embedded>
-
-                        <!-- Gemini shall start after Spring has started at start level 18 -->
-                        <embedded>
-                            <groupId>org.eclipse.gemini.blueprint</groupId>
-                            <artifactId>gemini-blueprint-core</artifactId>
-                            <target>${neba.installation.path}/18</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.eclipse.gemini.blueprint</groupId>
-                            <artifactId>gemini-blueprint-io</artifactId>
-                            <target>${neba.installation.path}/18</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.eclipse.gemini.blueprint</groupId>
-                            <artifactId>gemini-blueprint-extensions</artifactId>
-                            <target>${neba.installation.path}/18</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>org.eclipse.gemini.blueprint</groupId>
-                            <artifactId>gemini-blueprint-extender</artifactId>
-                            <target>${neba.installation.path}/18</target>
-                        </embedded>
-
-                        <!-- Finally, NEBA shall start after gemini was started, but before the application
-                             bundles start, at start level 19. -->
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>io.neba.neba-api</artifactId>
-                            <target>${neba.installation.path}/19</target>
-                        </embedded>
-                        <embedded>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>io.neba.neba-core</artifactId>
-                            <target>${neba.installation.path}/19</target>
-                        </embedded>
-                    </embeddeds>
                     <filters>
                         <filter>
                             <mode>replace</mode>
                             <root>/apps/neba</root>
                         </filter>
                     </filters>
+                    <thumbnailImage>${project.build.directory}/filefault-work/META-INF/vault/definition/thumbnail.png
+                    </thumbnailImage>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <packageType>container</packageType>
+                            <finalName>${project.artifactId}-${project.version}-spring</finalName>
+                            <workDirectory>${project.build.directory}/filefault-work-spring</workDirectory>
+                            <properties>
+                                <description>Packages NEBA along with the NEBA Spring integration and the Spring Framework.</description>
+                            </properties>
+                            <embeddeds>
+                                <!-- Spring dependencies shall start first at start level 16 -->
+                                <embedded>
+                                    <groupId>org.apache.servicemix.bundles</groupId>
+                                    <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+                                    <target>${neba.installation.path}/16</target>
+                                </embedded>
+
+                                <!-- Gemini shall start after Spring has started at start level 18 -->
+                                <embedded>
+                                    <groupId>org.eclipse.gemini.blueprint</groupId>
+                                    <artifactId>gemini-blueprint-core</artifactId>
+                                    <target>${neba.installation.path}/18</target>
+                                </embedded>
+                                <embedded>
+                                    <groupId>org.eclipse.gemini.blueprint</groupId>
+                                    <artifactId>gemini-blueprint-io</artifactId>
+                                    <target>${neba.installation.path}/18</target>
+                                </embedded>
+                                <embedded>
+                                    <groupId>org.eclipse.gemini.blueprint</groupId>
+                                    <artifactId>gemini-blueprint-extensions</artifactId>
+                                    <target>${neba.installation.path}/18</target>
+                                </embedded>
+                                <embedded>
+                                    <groupId>org.eclipse.gemini.blueprint</groupId>
+                                    <artifactId>gemini-blueprint-extender</artifactId>
+                                    <target>${neba.installation.path}/18</target>
+                                </embedded>
+
+                                <!-- Finally, NEBA shall start after gemini was started, but before the application
+                                     bundles start, at start level 19. -->
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>io.neba.neba-api</artifactId>
+                                    <target>${neba.installation.path}/19</target>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>io.neba.neba-core</artifactId>
+                                    <target>${neba.installation.path}/19</target>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>io.neba.neba-spring</artifactId>
+                                    <target>${neba.installation.path}/19</target>
+                                </embedded>
+                            </embeddeds>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>create-core-aem-distribution</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <configuration>
+                            <packageType>container</packageType>
+                            <workDirectory>${project.build.directory}/filefault-work</workDirectory>
+                            <embeddeds>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>io.neba.neba-api</artifactId>
+                                    <target>${neba.installation.path}</target>
+                                </embedded>
+                                <embedded>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>io.neba.neba-core</artifactId>
+                                    <target>${neba.installation.path}</target>
+                                </embedded>
+                            </embeddeds>
+                        </configuration>
+                    </execution>
+                </executions>
                 <extensions>true</extensions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-aem-spring-package</id>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}-spring.zip</file>
+                                    <type>zip</type>
+                                    <classifier>spring</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

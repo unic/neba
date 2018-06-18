@@ -16,32 +16,33 @@
 
 package io.neba.core.logviewer;
 
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
 import static java.lang.Class.forName;
 import static java.lang.Thread.currentThread;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.springframework.util.ClassUtils.isPresent;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * A web console plugin for tailing and downloading the CQ log files placed within the sling log directory as configured in the
@@ -49,9 +50,16 @@ import static org.springframework.util.ClassUtils.isPresent;
  *
  * @author Olaf Otto
  */
-@Service
+@Component(
+        service = Servlet.class,
+        property = {
+                "felix.webconsole.label=" + LogfileViewerConsolePlugin.LABEL,
+                "service.description=Provides a Felix console plugin for monitoring and downloading logfiles.",
+                SERVICE_VENDOR + "=neba.io"
+        }
+)
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
-    private static final String LABEL = "logviewer";
+    static final String LABEL = "logviewer";
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
     private static final String DECORATED_OBJECT_FACTORY = "org.eclipse.jetty.util.DecoratedObjectFactory";
 
@@ -59,10 +67,10 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
 
     private boolean isManagingDecoratedObjectFactory = false;
 
-    @Autowired
+    @Reference
     private TailServlet tailServlet;
 
-    @Autowired
+    @Reference
     private LogFiles logFiles;
 
     @Override
@@ -111,7 +119,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
         writeScriptIncludes(res);
         writeHead(res);
     }
@@ -135,12 +143,21 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
 
     private void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         ServletContext servletContext = getServletContext();
-        if (servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isPresent(DECORATED_OBJECT_FACTORY, getClass().getClassLoader())) {
+        if (servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isDecoratedObjectFactoryAvailable()) {
             return;
         }
 
         servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
         this.isManagingDecoratedObjectFactory = true;
+    }
+
+    private boolean isDecoratedObjectFactoryAvailable() {
+        try {
+            forName(DECORATED_OBJECT_FACTORY, false, getClass().getClassLoader());
+            return true;
+        } catch (Throwable ex) {
+            return false;
+        }
     }
 
     private void removeDecoratorObjectFactoryFromServletContext() {
@@ -156,8 +173,8 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
                         .append("title=\"").append(file.getAbsolutePath()).append("\">")
                         .append(file.getParentFile().getName()).append('/').append(file.getName())
                         .append("</option>"));
-        writeFromTemplate(res, "head.html", options.toString());
-        writeFromTemplate(res, "body.html");
+        writeHeadFromTemplate(res, options.toString());
+        writeBodyFromTemplate(res);
     }
 
     /**
@@ -185,13 +202,13 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    private void writeFromTemplate(HttpServletResponse response, String templateName, Object... templateArgs) throws IOException {
-        String template = readTemplate(templateName);
+    private void writeHeadFromTemplate(HttpServletResponse response, Object... templateArgs) throws IOException {
+        String template = readTemplate("head.html");
         response.getWriter().printf(template, templateArgs);
     }
 
-    private void writeFromTemplate(HttpServletResponse response, String templateName) throws IOException {
-        String template = readTemplate(templateName);
+    private void writeBodyFromTemplate(HttpServletResponse response) throws IOException {
+        String template = readTemplate("body.html");
         response.getWriter().write(template);
     }
 

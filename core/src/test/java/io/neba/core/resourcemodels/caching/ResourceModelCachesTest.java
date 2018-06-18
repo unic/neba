@@ -16,12 +16,12 @@
 
 package io.neba.core.resourcemodels.caching;
 
-import io.neba.api.resourcemodels.ResourceModelCache;
+import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class ResourceModelCachesTest {
 	@Mock
 	private ResourceModelStatistics resourceModelStatistics;
 	@Mock
-	private OsgiBeanSource modelSource;
+	private OsgiModelSource modelSource;
 	
 	private List<ResourceModelCache> mockedCaches = new LinkedList<>();
 	private Class<Object> targetType = Object.class;
@@ -92,7 +92,7 @@ public class ResourceModelCachesTest {
 
 		doReturn(this.targetType)
 				.when(this.modelSource)
-				.getBeanType();
+				.getModelType();
 	}
 
 	@Test(expected = IllegalArgumentException.class)

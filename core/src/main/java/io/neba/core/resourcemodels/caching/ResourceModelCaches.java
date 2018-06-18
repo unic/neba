@@ -16,16 +16,18 @@
 
 package io.neba.core.resourcemodels.caching;
 
-import io.neba.api.resourcemodels.ResourceModelCache;
+import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 /**
  * Represents all currently registered {@link ResourceModelCache resource model cache services}.
@@ -35,15 +37,17 @@ import java.util.List;
  *
  * @author Olaf Otto
  */
-@Service
+
+@Component(service = ResourceModelCaches.class)
 public class ResourceModelCaches {
-    @Autowired
+    @Reference
     private ResourceModelMetaDataRegistrar metaDataRegistrar;
 
+    @Reference(policy = DYNAMIC, bind = "bind", unbind = "unbind")
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
-     * Looks up the {@link #store(Resource, OsgiBeanSource, Object)} cached model}
+     * Looks up the {@link #store(Resource, OsgiModelSource, Object)} cached model}
      * of the given type for the given resource.
      * Returns the first model found in the caches.
      *
@@ -51,7 +55,7 @@ public class ResourceModelCaches {
      * @param modelSource must not be <code>null</code>.
      * @return can be <code>null</code>.
      */
-    public <T> T lookup(Resource resource, OsgiBeanSource<?> modelSource) {
+    public <T> T lookup(Resource resource, OsgiModelSource<?> modelSource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
@@ -63,7 +67,7 @@ public class ResourceModelCaches {
             return null;
         }
 
-        final Key key = key(resource, modelSource.getBeanType());
+        final Key key = key(resource, modelSource.getModelType());
         for (ResourceModelCache cache : this.caches) {
             T model = cache.get(key);
             if (model != null) {
@@ -83,7 +87,7 @@ public class ResourceModelCaches {
      * @param modelSource must not be <code>null</code>.
      * @param model can be <code>null</code>.
      */
-    public <T> void store(Resource resource, OsgiBeanSource<?> modelSource, T model) {
+    public <T> void store(Resource resource, OsgiModelSource<?> modelSource, T model) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
@@ -98,17 +102,17 @@ public class ResourceModelCaches {
             return;
         }
 
-        final Key key = key(resource, modelSource.getBeanType());
+        final Key key = key(resource, modelSource.getModelType());
         for (ResourceModelCache cache : this.caches) {
             cache.put(resource, model, key);
         }
     }
 
-    public void bind(ResourceModelCache cache) {
+    protected void bind(ResourceModelCache cache) {
         this.caches.add(cache);
     }
 
-    public void unbind(ResourceModelCache cache) {
+    protected void unbind(ResourceModelCache cache) {
         if (cache == null) {
             return;
         }

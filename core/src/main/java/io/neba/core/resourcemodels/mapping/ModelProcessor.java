@@ -16,33 +16,33 @@
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.annotations.PostMapping;
-import io.neba.api.annotations.PreMapping;
+import io.neba.api.annotations.AfterMapping;
 import io.neba.core.resourcemodels.metadata.MethodMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static io.neba.core.util.ReflectionUtil.makeAccessible;
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
- * Invokes {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isPreMappingCallback pre-mapping methods}
- * before and the {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isPostMappingCallback post-mapping methods}
+ * Invokes the {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isAfterMappingCallback post-mapping methods}
  * after the {@link io.neba.api.annotations.ResourceModel}'s mapping is complete.
  *
  * @author Olaf Otto
  */
-@Service
+@Component(service = ModelProcessor.class)
 public class ModelProcessor {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = getLogger(getClass());
 
     /**
      * @param metaData must not be <code>null</code>.
-     * @param model must not be <code>null</code>.
+     * @param model    must not be <code>null</code>.
      */
-    public <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
+    <T> void processAfterMapping(ResourceModelMetaData metaData, T model) {
         if (metaData == null) {
             throw new IllegalArgumentException("Method argument metaData must not be null.");
         }
@@ -50,37 +50,13 @@ public class ModelProcessor {
             throw new IllegalArgumentException("Method argument model must not be null.");
         }
 
-        for (MethodMetaData methodMetaData : metaData.getPostMappingMethods()) {
+        for (MethodMetaData methodMetaData : metaData.getAfterMappingMethods()) {
             Method method = methodMetaData.getMethod();
-            method.setAccessible(true);
+            makeAccessible(method);
             try {
                 method.invoke(model);
             } catch (InvocationTargetException | SecurityException e) {
-                logger.error("Unable to invoke the @" + PostMapping.class.getSimpleName() + " method " + method + ".", e);
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
-            }
-        }
-    }
-
-    /**
-     * @param metaData must not be <code>null</code>.
-     * @param model must not be <code>null</code>.
-     */
-    public <T> void processBeforeMapping(ResourceModelMetaData metaData, T model) {
-        if (metaData == null) {
-            throw new IllegalArgumentException("Method argument metaData must not be null.");
-        }
-        if (model == null) {
-            throw new IllegalArgumentException("Method argument model must not be null.");
-        }
-        for (MethodMetaData methodMetaData : metaData.getPreMappingMethods()) {
-            Method method = methodMetaData.getMethod();
-            method.setAccessible(true);
-            try {
-                method.invoke(model);
-            } catch (InvocationTargetException | SecurityException e) {
-                logger.error("Unable to invoke the @" + PreMapping.class.getSimpleName() + " method " + method + ".", e);
+                logger.error("Unable to invoke the @" + AfterMapping.class.getSimpleName() + " method " + method + ".", e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
             }

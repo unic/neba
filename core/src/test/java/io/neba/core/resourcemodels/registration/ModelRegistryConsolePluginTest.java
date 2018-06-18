@@ -1,23 +1,24 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.commons.io.IOUtils;
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -30,21 +31,38 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.lang.System.arraycopy;
 import static org.apache.commons.io.IOUtils.toByteArray;
-import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -55,7 +73,8 @@ public class ModelRegistryConsolePluginTest {
     /**
      * @author Olaf Otto
      */
-    private static class Model {}
+    private static class Model {
+    }
 
     @Mock
     private HttpServletRequest request;
@@ -74,6 +93,10 @@ public class ModelRegistryConsolePluginTest {
     @Mock
     private ServletOutputStream outputStream;
     @Mock
+    private ServletContext servletContext;
+    @Mock
+    private ServletConfig servletConfig;
+    @Mock
     private Bundle bundle;
     @Mock
     private Version version;
@@ -81,19 +104,19 @@ public class ModelRegistryConsolePluginTest {
     private URL resourceUrl;
     private Writer internalWriter;
     private String renderedResponse;
-    private Map<String, Collection<OsgiBeanSource<?>>> typeMappings;
-    private Collection<OsgiBeanSource<?>> beanSources;
+    private Map<String, Collection<OsgiModelSource<?>>> typeMappings;
+    private Collection<OsgiModelSource<?>> modelSources;
 
     @InjectMocks
     private ModelRegistryConsolePlugin testee;
 
     @Before
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "deprecation"})
     public void setUp() throws Exception {
         this.internalWriter = new StringWriter();
         Writer writer = new PrintWriter(this.internalWriter);
         this.typeMappings = new HashMap<>();
-        this.beanSources = new ArrayList<>();
+        this.modelSources = new ArrayList<>();
 
         doReturn(writer)
                 .when(this.response)
@@ -103,13 +126,21 @@ public class ModelRegistryConsolePluginTest {
                 .when(this.modelRegistry)
                 .getTypeMappings();
 
-        doReturn(this.beanSources)
+        doReturn(this.modelSources)
                 .when(this.modelRegistry)
-                .getBeanSources();
+                .getModelSources();
 
         doReturn(this.resolver)
                 .when(this.factory)
-                .getAdministrativeResourceResolver(any());
+                .getResourceResolver(any());
+
+        doReturn(this.servletContext)
+                .when(this.servletConfig)
+                .getServletContext();
+
+        doReturn("")
+                .when(this.servletContext)
+                .getContextPath();
 
         doReturn(new String[]{""})
                 .when(this.resolver)
@@ -138,29 +169,35 @@ public class ModelRegistryConsolePluginTest {
         doReturn("1.0.0")
                 .when(this.version)
                 .toString();
+
+        doThrow(new LoginException("THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(this.factory)
+                .getServiceResourceResolver(any());
+
+        this.testee.init(this.servletConfig);
     }
 
     @Test
     public void testRenderingOfRegisteredModelsTable() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
 
         renderContent();
 
         assertResponseContainsTableHead();
         assertResponseContainsNumberOfModelsText(1);
-        assertResponseContains("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "beanName");
+        assertResponseContainsModel("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "modelName");
     }
 
     @Test
     public void testRenderingOfLinkToCrxDe() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withResolution("cq/Page", "/libs/foundation/components/primary/cq/Page");
 
         renderContent();
 
-        assertResponseContains("<a href=\"/crx/de/#" +
+        assertResponseContainsModel("<a href=\"/crx/de/#" +
                 "/libs/foundation/components/primary/cq/Page\" class=\"crxdelink\">" +
-                "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "beanName");
+                "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "modelName");
     }
 
     @Test
@@ -191,7 +228,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testModelTypesApi() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
 
         get("/system/console/modelregistry/api/modeltypes");
 
@@ -237,7 +274,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByPackageName() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withParameter("modelTypeName", "io.neba");
 
         get("/system/console/modelregistry/api/filter");
@@ -248,7 +285,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByTypeName() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withParameter("modelTypeName", "io.neba.core.resourcemodels.registration.ModelRegistryConsolePluginTest$Model");
 
         get("/system/console/modelregistry/api/filter");
@@ -259,7 +296,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByResource() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withPathResource("/junit/test", "cq:Page");
         withPathResourceLookedUp();
         withParameter("path", "/junit/test");
@@ -272,7 +309,7 @@ public class ModelRegistryConsolePluginTest {
 
     @Test
     public void testFilterModelTypesByResourceAndModelType() throws Exception {
-        withRegisteredModel("cq:Page", Model.class, 123L, "beanName");
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withPathResource("/junit/test", "cq:Page");
         withPathResourceLookedUp();
 
@@ -285,9 +322,66 @@ public class ModelRegistryConsolePluginTest {
         assertResponseIs("[\"io.neba.core.resourcemodels.registration.ModelRegistryConsolePluginTest$Model\"]");
     }
 
+    @Test
+    public void testUsageOfConfiguredServiceUser() throws Exception {
+        withServiceUserAmendment();
+        withIconResource("/apps/project/components/myComponent/icon.png");
+
+        get("/system/console/modelregistry/api/componenticon/apps/project/components/myComponent");
+
+        verifyServiceResourceResolverIsObtained();
+        verifyPluginResolvesResource("/apps/project/components/myComponent/icon.png");
+        verifyResponseHasContentType("image/png");
+        verifyIconResourceIsAdaptedToInputStream();
+    }
+
+    @Test
+    public void testInvalidServiceUserConfigurationIsHandledGraceful() throws Exception {
+        withFailureWhenRetrievingAdminUser();
+        withIconResource("/apps/project/components/myComponent/icon.png");
+
+        get("/system/console/modelregistry/api/componenticon/apps/project/components/myComponent");
+
+        verifyServiceResourceResolverIsObtained();
+        verifyResponseHasContentType("image/png");
+        verifyNoIconResourceIsResolved();
+        verifyDefaultComponentIconIsWritten();
+    }
+
+    @Test
+    public void testNotificationForMissingServiceUserConfiguration() throws IOException, LoginException {
+        withFailureWhenRetrievingAdminUser();
+        renderContent();
+        assertResponseContains(
+                "Warning: No amendment mapping for io.neba.neba-core:");
+    }
+
+    @Test
+    public void testNoNotificationForMissingServiceUserConfigurationWhenConfigurationIsPresent() throws IOException, LoginException {
+        withServiceUserAmendment();
+        renderContent();
+        assertResponseDoesNotContainContain("Warning: No amendment mapping for io.neba.neba-core:");
+    }
+
+    private void assertResponseDoesNotContainContain(String notExpected) {
+        assertThat(this.renderedResponse).doesNotContain(notExpected);
+    }
+
+    private void withFailureWhenRetrievingAdminUser() throws LoginException {
+        doThrow(new LoginException("THIS IS AN EXPECTED TEST EXCEPTION")).when(this.factory).getResourceResolver(any());
+    }
+
+    private void verifyServiceResourceResolverIsObtained() throws LoginException {
+        verify(this.factory).getServiceResourceResolver(any());
+    }
+
+    private void withServiceUserAmendment() throws LoginException {
+        doReturn(this.resolver).when(this.factory).getServiceResourceResolver(any());
+    }
+
     private void withPathResourceLookedUp() {
         Set<LookupResult> lookupResults = new HashSet<>();
-        for (OsgiBeanSource<?> source : this.beanSources) {
+        for (OsgiModelSource<?> source : this.modelSources) {
             LookupResult result = mock(LookupResult.class);
             doReturn(source).when(result).getSource();
             doReturn(pathResource.getResourceType()).when(result).getResourceType();
@@ -317,7 +411,6 @@ public class ModelRegistryConsolePluginTest {
         doReturn(this.pathResource).when(this.resolver).getResource(eq(path));
         doReturn(type).when(this.pathResource).getResourceType();
     }
-
 
     private void withParameter(String name, String value) {
         doReturn(value).when(this.request).getParameter(eq(name));
@@ -367,10 +460,14 @@ public class ModelRegistryConsolePluginTest {
         doReturn(resourcePath).when(mock).getPath();
     }
 
-    private void assertResponseContains(String typeName, Class<Model> modelType, long bundleId, String beanName) {
-        assertThat(this.renderedResponse).contains("<td>" + typeName + "</td><td>" + modelType.getName() +
-                                                   "</td><td>" + beanName + "</td><td><a href=\"bundles/" + bundleId +
-                                                   "\" title=\"JUnit test bundle 1.0.0\">" + bundleId + "</a></td>");
+    private void assertResponseContainsModel(String linkToResourceType, Class<Model> modelType, long bundleId, String modelName) {
+        assertThat(this.renderedResponse).contains("<td>" + linkToResourceType + "</td><td>" + modelType.getName() +
+                "</td><td>" + modelName + "</td><td><a href=\"bundles/" + bundleId +
+                "\" title=\"JUnit test bundle 1.0.0\">" + bundleId + "</a></td>");
+    }
+
+    private void assertResponseContains(String expected) {
+        assertThat(this.renderedResponse).contains(expected);
     }
 
     private void assertResponseContainsNumberOfModelsText(int numberOfTests) {
@@ -381,26 +478,26 @@ public class ModelRegistryConsolePluginTest {
         assertThat(this.renderedResponse).isEqualTo(expected);
     }
 
-    private void withRegisteredModel(String typeName, Class<Model> modelType, long bundleId, String beanName) {
-        List<OsgiBeanSource<?>> sources = new ArrayList<>();
-        OsgiBeanSource<?> source = mock(OsgiBeanSource.class);
-        doReturn(modelType).when(source).getBeanType();
+    private void withRegisteredModel(String typeName, Class<Model> modelType, long bundleId, String modelName) {
+        List<OsgiModelSource<?>> sources = new ArrayList<>();
+        OsgiModelSource<?> source = mock(OsgiModelSource.class);
+        doReturn(modelType).when(source).getModelType();
         doReturn(bundleId).when(source).getBundleId();
-        doReturn(beanName).when(source).getBeanName();
+        doReturn(modelName).when(source).getModelName();
         doReturn(this.bundle).when(source).getBundle();
         sources.add(source);
-        this.beanSources.add(source);
+        this.modelSources.add(source);
         this.typeMappings.put(typeName, sources);
     }
 
     private void assertResponseContainsTableHead() {
         assertThat(this.renderedResponse).contains("<th>Type</th>");
         assertThat(this.renderedResponse).contains("<th>Model type</th>");
-        assertThat(this.renderedResponse).contains("<th>Bean name</th>");
+        assertThat(this.renderedResponse).contains("<th>Model name</th>");
         assertThat(this.renderedResponse).contains("<th>Source bundle</th>");
     }
 
-    private void renderContent() throws ServletException, IOException {
+    private void renderContent() throws IOException {
         this.testee.renderContent(this.request, this.response);
         // Remove platform-dependent line endings.
         getResponseAsString();
@@ -411,7 +508,7 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void getResource(String resource) {
-        String resourcePath = "/" + ModelRegistryConsolePlugin.LABEL + "/static/" + resource;
+        String resourcePath = "/" + "modelregistry" + "/static/" + resource;
         this.resourceUrl = this.testee.getResource(resourcePath);
     }
 

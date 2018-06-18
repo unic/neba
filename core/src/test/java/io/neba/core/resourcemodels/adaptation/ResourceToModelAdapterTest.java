@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -101,11 +101,11 @@ public class ResourceToModelAdapterTest {
 
         doAnswer(storeInCache)
                 .when(this.caches)
-                .store(isA(Resource.class), isA(OsgiBeanSource.class), any());
+                .store(isA(Resource.class), isA(OsgiModelSource.class), any());
 
         doAnswer(lookupFromCache)
                 .when(this.caches)
-                .lookup(isA(Resource.class), isA(OsgiBeanSource.class));
+                .lookup(isA(Resource.class), isA(OsgiModelSource.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
     }
@@ -136,9 +136,9 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testHandlingOfNullBeanSource() throws Exception {
+    public void testHandlingOfNullModelSource() throws Exception {
         withTargetType(TestModel.class);
-        withNullReturnedAsBeanSourceFromRegistrar();
+        withNullReturnedAsModelSourceFromRegistrar();
         adapt();
         verifyAdapterObtainsSourceFromRegistrar();
         assertResourceWasNotAdaptedToModel();
@@ -189,10 +189,10 @@ public class ResourceToModelAdapterTest {
 
     @SuppressWarnings("unchecked")
     private void verifyAdapterDoesNotMapResourceToModel() {
-        verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiBeanSource.class));
+        verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiModelSource.class));
     }
 
-    private void withNullReturnedAsBeanSourceFromRegistrar() {
+    private void withNullReturnedAsModelSourceFromRegistrar() {
         when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(null);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), eq(this.targetType))).thenReturn(null);
     }
@@ -218,7 +218,7 @@ public class ResourceToModelAdapterTest {
     }
 
     private void verifyAdapterMapsResourceToModel(int i) {
-        OsgiBeanSource<?> source = this.sources.get(i).getSource();
+        OsgiModelSource<?> source = this.sources.get(i).getSource();
         verify(this.mapper).map(eq(this.resource), eq(source));
     }
 
@@ -229,12 +229,12 @@ public class ResourceToModelAdapterTest {
         when(this.registry.lookupMostSpecificModels(isA(Resource.class), isA(Class.class))).thenReturn(this.sources);
 
         for (Object model : models) {
-            OsgiBeanSource source = mock(OsgiBeanSource.class);
+            OsgiModelSource source = mock(OsgiModelSource.class);
             LookupResult result = mock(LookupResult.class);
             when(result.getSource()).thenReturn(source);
             this.sources.add(result);
-            when(source.getBeanType()).thenReturn(model.getClass());
-            when(source.getBean()).thenReturn(model);
+            when(source.getModelType()).thenReturn(model.getClass());
+            when(source.getModel()).thenReturn(model);
             when(this.mapper.map(eq(this.resource), eq(source))).thenReturn(model);
         }
     }
@@ -260,7 +260,7 @@ public class ResourceToModelAdapterTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        OsgiBeanSource<?> modelSource = (OsgiBeanSource<?>) invocation.getArguments()[1];
-        return new Key(resource.getPath(), modelSource.getBeanType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
+        OsgiModelSource<?> modelSource = (OsgiModelSource<?>) invocation.getArguments()[1];
+        return new Key(resource.getPath(), modelSource.getModelType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

@@ -1,31 +1,30 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.core.logviewer;
 
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.eclipse.gemini.blueprint.context.BundleContextAware;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ import java.util.Dictionary;
 import java.util.TreeSet;
 
 import static org.apache.commons.io.FileUtils.listFiles;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Represents both the log files in the default logfile directory (${sling.home}/logs)
@@ -42,8 +41,8 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  *
  * @author Olaf Otto
  */
-@Service
-public class LogFiles implements BundleContextAware {
+@Component(service = LogFiles.class)
+public class LogFiles {
     // Obtained from the felix console configuration for the log manager.
     private static final String LOG_FILE_PROPERTY = "org.apache.sling.commons.log.file";
     private static final String LOG_MANAGER_PID = "org.apache.sling.commons.log.LogManager";
@@ -65,14 +64,15 @@ public class LogFiles implements BundleContextAware {
         }
     };
 
-    @Autowired
+    @Reference
     private ConfigurationAdmin configurationAdmin;
 
     private BundleContext context;
     private File slingHomeDirectory;
 
-    @PostConstruct
-    public void determineSlingHomeDirectory() {
+    @Activate
+    protected void activate(BundleContext context) {
+        this.context = context;
         this.slingHomeDirectory = new File(this.context.getProperty("sling.home"));
     }
 
@@ -151,10 +151,5 @@ public class LogFiles implements BundleContextAware {
 
     private Configuration getCommonsLogConfiguration() throws IOException {
         return this.configurationAdmin.getConfiguration(LOG_MANAGER_PID);
-    }
-
-    @Override
-    public void setBundleContext(BundleContext bundleContext) {
-        this.context = bundleContext;
     }
 }

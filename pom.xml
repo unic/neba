@@ -6,20 +6,21 @@
 	<packaging>pom</packaging>
 	
 	<description>
-		NEBA - the best of Sling, powered by Spring.
+		NEBA - simple and high performance content to object mapping for Apache Sling.
 	</description>
 
 	<parent>
 		<groupId>io.neba</groupId>
 		<artifactId>io.neba.neba-parent</artifactId>
 		<relativePath>parent/pom.xml</relativePath>
-		<version>4.3.3-SNAPSHOT</version>
+		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
 	<modules>
 		<module>parent</module>
 		<module>api</module>
 		<module>core</module>
+		<module>spring</module>
         <module>delivery-aem</module>
 		<module>delivery-sling</module>
 	</modules>

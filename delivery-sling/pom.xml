@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.neba.neba-delivery-sling</artifactId>
     <name>NEBA sling delivery</name>
@@ -9,12 +10,19 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>4.3.3-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <dependencies>
         <!-- Internal dependencies -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>io.neba.neba-delivery-aem</artifactId>
+            <classifier>spring</classifier>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>io.neba.neba-delivery-aem</artifactId>
@@ -36,12 +44,28 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
+                            <outputDirectory>${project.build.directory}/delivery</outputDirectory>
                             <includeArtifactIds>io.neba.neba-delivery-aem</includeArtifactIds>
+                            <excludeClassifiers>spring</excludeClassifiers>
                             <includeTypes>zip</includeTypes>
                             <includes>
-                                **/*.jar,
-                                **/*.js,
-                                **/*.config
+                                **/*.jar
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-aem-delivery-spring-package</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/delivery-spring</outputDirectory>
+                            <includeArtifactIds>io.neba.neba-delivery-aem</includeArtifactIds>
+                            <includeClassifiers>spring</includeClassifiers>
+                            <includeTypes>zip</includeTypes>
+                            <includes>
+                                **/*.jar
                             </includes>
                         </configuration>
                     </execution>
@@ -51,17 +75,71 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Sling-Initial-Content>
-                            <!-- Provide the bundles to the JCR OSGi installer. Uninstall the bundles if the delivery bundle is uninstalled -->
-                            SLING-INF/content;overwrite:=true;ignoreImportProviders:=jar;uninstall:=true;path:=/apps/neba
-                        </Sling-Initial-Content>
-                        <Include-Resource>
-                            SLING-INF/content=${project.build.directory}/dependency/jcr_root/apps/neba
-                        </Include-Resource>
-                    </instructions>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-bundle</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}-${project.version}-spring</finalName>
+                            <instructions>
+                                <Sling-Initial-Content>
+                                    <!-- Provide the bundles to the JCR OSGi installer. Uninstall the bundles if the delivery bundle is uninstalled -->
+                                    SLING-INF/content;overwrite:=true;ignoreImportProviders:=jar;uninstall:=true;path:=/apps/neba
+                                </Sling-Initial-Content>
+                                <Include-Resource>
+                                    SLING-INF/content=${project.build.directory}/delivery-spring/jcr_root/apps/neba
+                                </Include-Resource>
+                            </instructions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bundle-core-delivery</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                        <configuration>
+                            <instructions>
+                                <Sling-Initial-Content>
+                                    <!-- Provide the bundles to the JCR OSGi installer. Uninstall the bundles if the delivery bundle is uninstalled -->
+                                    SLING-INF/content;overwrite:=true;ignoreImportProviders:=jar;uninstall:=true;path:=/apps/neba
+                                </Sling-Initial-Content>
+                                <Include-Resource>
+                                    SLING-INF/content=${project.build.directory}/delivery/jcr_root/apps/neba
+                                </Include-Resource>
+                            </instructions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-aem-spring-package</id>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>
+                                        ${project.build.directory}/${project.artifactId}-${project.version}-spring.jar
+                                    </file>
+                                    <type>jar</type>
+                                    <classifier>spring</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

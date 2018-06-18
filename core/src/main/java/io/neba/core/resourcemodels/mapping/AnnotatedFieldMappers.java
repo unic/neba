@@ -1,24 +1,25 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.AnnotatedFieldMapper;
+import io.neba.api.spi.AnnotatedFieldMapper;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
-import org.springframework.stereotype.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -28,19 +29,21 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.emptyList;
-import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
+import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 /**
- * Represents all registered {@link io.neba.api.resourcemodels.AnnotatedFieldMapper custom field mappers}
+ * Represents all registered {@link AnnotatedFieldMapper custom field mappers}
  * and provides the corresponding lookup and caching of lookup results.
  *
  * @author Olaf Otto
  */
-@Service
+@Component(service = AnnotatedFieldMappers.class)
 public class AnnotatedFieldMappers {
     /**
      * Represents the relation of an {@link java.lang.annotation.Annotation} and and a
-     * {@link io.neba.api.resourcemodels.AnnotatedFieldMapper#getAnnotationType() compatible mapper}.
+     * {@link AnnotatedFieldMapper#getAnnotationType() compatible mapper}.
      *
      * @author Olaf Otto
      */
@@ -48,7 +51,7 @@ public class AnnotatedFieldMappers {
         private final Annotation annotation;
         private final AnnotatedFieldMapper mapper;
 
-        public AnnotationMapping(Annotation annotation, AnnotatedFieldMapper mapper) {
+        AnnotationMapping(Annotation annotation, AnnotatedFieldMapper mapper) {
             this.annotation = annotation;
             this.mapper = mapper;
         }
@@ -64,13 +67,14 @@ public class AnnotatedFieldMappers {
 
     private static final Collection<AnnotationMapping> EMPTY = emptyList();
     private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache
-          = new ConcurrentDistinctMultiValueMap<>();
+            = new ConcurrentDistinctMultiValueMap<>();
     private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers
-          = new ConcurrentDistinctMultiValueMap<>();
+            = new ConcurrentDistinctMultiValueMap<>();
 
     private final AtomicInteger state = new AtomicInteger(0);
 
-    public synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
+    @Reference(cardinality = MULTIPLE, policy = DYNAMIC, unbind = "unbind")
+    protected synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
@@ -82,7 +86,7 @@ public class AnnotatedFieldMappers {
     /**
      * @param mapper must not be <code>null</code>.
      */
-    public synchronized void unbind(AnnotatedFieldMapper<?, ?> mapper) {
+    protected synchronized void unbind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             return;
         }
@@ -114,7 +118,7 @@ public class AnnotatedFieldMappers {
             if (mappersForAnnotation == null) {
                 continue; // with next element
             }
-            for (AnnotatedFieldMapper<?, ?> mapper:  mappersForAnnotation) {
+            for (AnnotatedFieldMapper<?, ?> mapper : mappersForAnnotation) {
                 // Mappers supporting boxed types shall also support the primitive equivalent,
                 // e.g. Boolean and boolean, Integer / int.
                 Class type = primitiveToWrapper(metaData.getType());

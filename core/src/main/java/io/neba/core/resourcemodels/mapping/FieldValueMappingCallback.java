@@ -16,28 +16,31 @@
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.AnnotatedFieldMapper;
 import io.neba.api.resourcemodels.Lazy;
-import io.neba.api.resourcemodels.Optional;
+import io.neba.api.spi.AnnotatedFieldMapper;
+import io.neba.api.spi.ResourceModelFactory;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
+import io.neba.core.util.ResourcePaths;
+import net.sf.cglib.proxy.LazyLoader;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.cglib.proxy.LazyLoader;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.StringUtil.append;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.springframework.util.ReflectionUtils.getField;
-import static org.springframework.util.ReflectionUtils.setField;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Attempts to load the property or resource associated with each
@@ -52,16 +55,23 @@ public class FieldValueMappingCallback {
     private final Object model;
     private final ValueMap properties;
     private final Resource resource;
-    private final ConfigurableBeanFactory beanFactory;
     private final AnnotatedFieldMappers annotatedFieldMappers;
+    private final PlaceholderVariableResolvers placeholderVariableResolvers;
 
     /**
-     * @param model    the model to be mapped. Must not be null.
-     * @param resource the source of property values for the model. Must not be null.
-     * @param factory  must not be null.
-     * @param annotatedFieldMappers  must not be null.
+     * @param model     the model to be mapped. Must not be <code>null</code>.
+     * @param resource  the source of property values for the model. Must not be <code>null</code>.
+     * @param factory   must not be <code>null</code>.
+     * @param mappers   must not be <code>null</code>.
+     * @param resolvers must not be <code>null</code>.
      */
-    public FieldValueMappingCallback(Object model, Resource resource, BeanFactory factory, AnnotatedFieldMappers annotatedFieldMappers) {
+    FieldValueMappingCallback(
+            Object model,
+            Resource resource,
+            ResourceModelFactory factory,
+            AnnotatedFieldMappers mappers,
+            PlaceholderVariableResolvers resolvers) {
+
         if (model == null) {
             throw new IllegalArgumentException("Constructor parameter model must not be null.");
         }
@@ -71,25 +81,28 @@ public class FieldValueMappingCallback {
         if (factory == null) {
             throw new IllegalArgumentException("Constructor parameter factory must not be null.");
         }
-        if (annotatedFieldMappers == null) {
-            throw new IllegalArgumentException("Method argument customFieldMappers must not be null.");
+        if (mappers == null) {
+            throw new IllegalArgumentException("Method argument mappers must not be null.");
+        }
+        if (resolvers == null) {
+            throw new IllegalArgumentException("Method argument resolvers must not be null");
         }
 
         this.model = model;
         this.properties = toValueMap(resource);
         this.resource = resource;
-        this.beanFactory = factory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) factory : null;
-        this.annotatedFieldMappers = annotatedFieldMappers;
+        this.annotatedFieldMappers = mappers;
+        this.placeholderVariableResolvers = resolvers;
     }
 
     /**
      * Invoked for each {@link io.neba.core.resourcemodels.metadata.ResourceModelMetaData#getMappableFields() mappable field}
      * of a {@link io.neba.api.annotations.ResourceModel} to map the {@link MappedFieldMetaData#getField() corresponding field's}
-     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, BeanFactory, AnnotatedFieldMappers) constructor}.
+     * value from the resource provided to the {@link #FieldValueMappingCallback(Object, Resource, ResourceModelFactory, AnnotatedFieldMappers, PlaceholderVariableResolvers) constructor}.
      *
      * @param metaData must not be <code>null</code>.
      */
-    public final void doWith(final MappedFieldMetaData metaData) {
+    final void doWith(final MappedFieldMetaData metaData) {
         if (metaData == null) {
             throw new IllegalArgumentException("Method argument metaData must not be null.");
         }
@@ -101,15 +114,8 @@ public class FieldValueMappingCallback {
 
         if (metaData.isLazy()) {
             // Lazy fields are never null, regardless of whether a value is mappable.
-            Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : LazyFieldValue.EMPTY;
-            setField(metaData.getField(), this.model, lazy);
-            return;
-        }
-
-        if (metaData.isOptional()) {
-            // Optional fields are never null, regardless of whether a value is mappable.
-            Optional<Object> optional = isMappable ? new OptionalFieldValue(fieldData, this) : new EmptyOptional(fieldData);
-            setField(metaData.getField(), this.model, optional);
+            Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : java.util.Optional::empty;
+            setField(metaData, lazy);
             return;
         }
 
@@ -122,12 +128,12 @@ public class FieldValueMappingCallback {
         value = postProcessResolvedValue(fieldData, value);
 
         if (value != null) {
-            setField(metaData.getField(), this.model, value);
+            setField(metaData, value);
         }
     }
 
     /**
-     * Resumes a mapping temporarily suspended by an {@link Optional} field, i.e.
+     * Resumes a mapping temporarily suspended by an {@link Lazy} field, i.e.
      * effectively loads a lazy-loaded field value.
      *
      * @param fieldData must not be <code>null</code>.
@@ -142,7 +148,7 @@ public class FieldValueMappingCallback {
      * {@link AnnotatedFieldMapper custom field mappers}.
      *
      * @param fieldData must not be <code>null</code>.
-     * @param value can be <code>null</code>.
+     * @param value     can be <code>null</code>.
      * @return the post-processed value, can be <code>null</code>.
      */
     private Object postProcessResolvedValue(FieldData fieldData, Object value) {
@@ -151,9 +157,8 @@ public class FieldValueMappingCallback {
         boolean preventNullCollection =
                 value == null &&
                         !fieldData.metaData.isLazy() &&
-                        !fieldData.metaData.isOptional() &&
                         fieldData.metaData.isInstantiableCollectionType() &&
-                        getField(fieldData.metaData.getField(), this.model) == null;
+                        getField(fieldData) == null;
 
         @SuppressWarnings("unchecked")
         Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) fieldData.metaData.getType()) : null;
@@ -165,7 +170,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Applies all {@link io.neba.api.resourcemodels.AnnotatedFieldMapper registered field mappers}
+     * Applies all {@link AnnotatedFieldMapper registered field mappers}
      * to the provided value and returns the result.
      */
     @SuppressWarnings("unchecked")
@@ -241,14 +246,14 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isOptional() optional},
+     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isLazy() lazy},
      * {@link #loadChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)} directly loads}
      * the children. Otherwise, provides a lazy loading collection.
      *
      * @return never <code>null</code> but rather an empty collection.
      */
     private Collection<?> createCollectionOfChildren(final FieldData field, final Resource parent) {
-        if (field.metaData.isOptional()) {
+        if (field.metaData.isLazy()) {
             // The field was already lazy-loaded - do not lazy-load again.
             return loadChildren(field, parent);
         }
@@ -318,7 +323,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isOptional() optional},
+     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isLazy() lazy},
      * {@link #loadReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[]) directly loads}
      * the references. Otherwise, provides a lazy loading collection.
      *
@@ -326,7 +331,7 @@ public class FieldValueMappingCallback {
      * @return never <code>null</code> but rather an empty collection.
      */
     private Collection<Object> createCollectionOfReferences(final FieldData field, final String[] paths) {
-        if (field.metaData.isLazy() || field.metaData.isOptional()) {
+        if (field.metaData.isLazy()) {
             // The field was already lazy-loaded - no not lazy-load again.
             return loadReferences(field, paths);
         }
@@ -472,32 +477,12 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Evaluates the {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isPathExpressionPresent() path expression}
-     * of the field (if any) using the {@link #beanFactory bean factory} of the models source bundle.
+     * Evaluates the {@link ResourcePaths.ResourcePath#hasPlaceholders() variables}
+     * in the {@link MappedFieldMetaData#getPath()} path} of the field, if any.
      */
     private String evaluateFieldPath(MappedFieldMetaData fieldMetaData) {
-        String path = fieldMetaData.getPath();
-        if (fieldMetaData.isPathExpressionPresent()) {
-            path = evaluatePathExpression(path);
-        }
-        return path;
-    }
-
-    /**
-     * Delegates the evaluation of expressions such as <code>/content/site/${language}/subpage</code>
-     * to the bean factory.
-     *
-     * @see ConfigurableBeanFactory#resolveEmbeddedValue(String)
-     */
-    private String evaluatePathExpression(String pathWithExpression) {
-        String path = pathWithExpression;
-        if (this.beanFactory != null) {
-            String evaluatedPath = this.beanFactory.resolveEmbeddedValue(pathWithExpression);
-            if (!isBlank(evaluatedPath)) {
-                path = evaluatedPath;
-            }
-        }
-        return path;
+        ResourcePaths.ResourcePath path = fieldMetaData.getPath();
+        return (path.hasPlaceholders() ? path.resolve(this.placeholderVariableResolvers::resolve) : path).getPath();
     }
 
     /**
@@ -516,7 +501,7 @@ public class FieldValueMappingCallback {
      *
      * @param resource must not be <code>null</code>.
      * @return the value map, or <code>null</code> if the resource has no properties,
-     *         e.g. if it is synthetic.
+     * e.g. if it is synthetic.
      */
     private static ValueMap toValueMap(Resource resource) {
         ValueMap propertyMap = resource.adaptTo(ValueMap.class);
@@ -524,6 +509,22 @@ public class FieldValueMappingCallback {
             propertyMap = new PrimitiveSupportingValueMap(propertyMap);
         }
         return propertyMap;
+    }
+
+    private Object getField(FieldData fieldData) {
+        try {
+            return fieldData.metaData.getField().get(this.model);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private void setField(MappedFieldMetaData metaData, Object value) {
+        try {
+            metaData.getField().set(this.model, value);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -573,107 +574,15 @@ public class FieldValueMappingCallback {
          * Determines whether the mappedFieldMetaData represents a reference to another resource.
          * This is the case IFF:
          * </p>
-         *
+         * <p>
          * <ul>
-         *   <li>it has a type that {@link MappedFieldMetaData#isPropertyType() can only be a property} or</li>
-         *   <li>it it is annotated with an absolute path or</li>
-         *   <li>it it is annotated with a relative path</li>
+         * <li>it has a type that {@link MappedFieldMetaData#isPropertyType() can only be a property} or</li>
+         * <li>it it is annotated with an absolute path or</li>
+         * <li>it it is annotated with a relative path</li>
          * </ul>.
          */
         private boolean isReferenceToOtherResource() {
             return !this.metaData.isPropertyType() || isAbsolute() || isRelative();
-        }
-    }
-
-    /**
-     * Implements explicit lazy-loading via {@link io.neba.api.resourcemodels.Optional}. Leverages the internal
-     * {@link #resolve(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData)}
-     * method and {@link io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData} for this purpose.
-     *
-     * @author Olaf Otto
-     */
-    private static class OptionalFieldValue implements Optional<Object> {
-        private static final Object NULL = new Object();
-        private final FieldData fieldData;
-        private final FieldValueMappingCallback callback;
-        private Object value = NULL;
-
-        OptionalFieldValue(FieldData fieldData, FieldValueMappingCallback callback) {
-            this.fieldData = fieldData;
-            this.callback = callback;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Object get() {
-            if (this.value == NULL) {
-                load();
-            }
-            if (this.value == null) {
-                throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
-            }
-            return this.value;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Object orElse(Object defaultValue) {
-            if (this.value == NULL) {
-                load();
-            }
-            return this.value == null ? defaultValue : this.value;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isPresent() {
-            return orElse(null) != null;
-        }
-
-        /**
-         * The semantics of the value holder must adhere to the semantics of a non-lazy-loaded field value:
-         * The value is loaded exactly once, subsequent or concurrent access to the field value means accessing the
-         * same value. Thus, the value is retained and this method is thread-safe.
-         */
-        private synchronized void load() {
-            if (this.value == NULL) {
-                this.value = this.callback.resumeMapping(this.fieldData);
-            }
-        }
-    }
-
-    /**
-     * An {@link Optional} that is empty. Represents cases where it is already clear
-     * at mapping time that the value will be null.
-     *
-     * @author Olaf Otto
-     */
-    private static class EmptyOptional implements Optional<Object> {
-        private final FieldData fieldData;
-
-        private EmptyOptional(FieldData fieldData) {
-            this.fieldData = fieldData;
-        }
-
-        @Override
-        public Object get() throws NoSuchElementException {
-            throw new NoSuchElementException("The value of " + this.fieldData.metaData.getField() + " resolved to null.");
-        }
-
-        @Override
-        public Object orElse(Object defaultValue) {
-            return defaultValue;
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false;
         }
     }
 
@@ -683,7 +592,6 @@ public class FieldValueMappingCallback {
      * @author Olaf Otto
      */
     private static class LazyFieldValue implements Lazy<Object> {
-        private static final Lazy<Object> EMPTY = java.util.Optional::empty;
         private static final Object NULL = new Object();
 
         private final FieldData fieldData;
@@ -700,11 +608,12 @@ public class FieldValueMappingCallback {
          * {@inheritDoc}
          */
         @Override
+        @Nonnull
         public java.util.Optional<Object> asOptional() {
             if (this.value == NULL) {
                 load();
             }
-            return java.util.Optional.ofNullable(this.value);
+            return ofNullable(this.value);
         }
 
         /**
@@ -722,8 +631,8 @@ public class FieldValueMappingCallback {
     /**
      * Lazy-loads collections of children.
      *
-     * @see #createCollectionOfChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)
      * @author Olaf Otto
+     * @see #createCollectionOfChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)
      */
     private static class LazyChildrenLoader implements LazyLoader {
         private final FieldData field;
@@ -737,7 +646,7 @@ public class FieldValueMappingCallback {
         }
 
         @Override
-        public Object loadObject() throws Exception {
+        public Object loadObject() {
             return this.mapper.loadChildren(field, resource);
         }
     }
@@ -745,8 +654,8 @@ public class FieldValueMappingCallback {
     /**
      * Lazy-loads collections of references.
      *
-     * @see #createCollectionOfReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[])
      * @author Olaf Otto
+     * @see #createCollectionOfReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[])
      */
     private static class LazyReferencesLoader implements LazyLoader {
         private final FieldData field;
@@ -760,7 +669,7 @@ public class FieldValueMappingCallback {
         }
 
         @Override
-        public Object loadObject() throws Exception {
+        public Object loadObject() {
             return this.callback.loadReferences(field, paths);
         }
     }
@@ -793,52 +702,62 @@ public class FieldValueMappingCallback {
             this.properties = properties;
         }
 
+        @CheckForNull
         @Override
         public Object getResolvedValue() {
             return resolvedValue;
         }
 
         @Override
+        @Nonnull
         public Object getAnnotation() {
             return mapping.getAnnotation();
         }
 
         @Override
+        @Nonnull
         public Object getModel() {
             return model;
         }
 
         @Override
+        @Nonnull
         public Field getField() {
             return metaData.getField();
         }
 
         @Override
+        @Nonnull
         public Map<Class<? extends Annotation>, Annotation> getAnnotationsOfField() {
             return metaData.getAnnotations().getAnnotations();
         }
 
         @Override
+        @Nonnull
         public Class<?> getFieldType() {
             return metaData.getType();
         }
 
         @Override
+        @CheckForNull
         public Class<?> getFieldTypeParameter() {
             return this.metaData.getTypeParameter();
         }
 
         @Override
+        @Nonnull
         public String getRepositoryPath() {
             return fieldData.path;
         }
 
         @Override
+        @Nonnull
         public Resource getResource() {
             return resource;
         }
 
         @Override
+        @Nonnull
         public ValueMap getProperties() {
             return properties;
         }

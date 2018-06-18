@@ -18,7 +18,7 @@ package io.neba.core.util;
 
 import java.util.Arrays;
 
-import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * A key based on multiple values, e.g. for use as a key

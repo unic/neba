@@ -35,7 +35,7 @@ public class Mapping<T> extends Key {
      * @param resourcePath must not be <code>null</code>.
      * @param metadata must not be <code>null</code>.
      */
-    public Mapping(String resourcePath, ResourceModelMetaData metadata) {
+    Mapping(String resourcePath, ResourceModelMetaData metadata) {
         super(resourcePath, metadata);
 
         if (resourcePath == null) {
@@ -54,11 +54,11 @@ public class Mapping<T> extends Key {
         return getClass().getSimpleName() + " [" + srcPath + " -> " + this.metadata.getTypeName() + ']';
     }
 
-    public void setMappedModel(T mappedModel) {
+    void setMappedModel(T mappedModel) {
         this.mappedModel = mappedModel;
     }
 
-    public T getMappedModel() {
+    T getMappedModel() {
         return mappedModel;
     }
 

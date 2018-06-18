@@ -16,26 +16,28 @@
 
 package io.neba.core.resourcemodels.metadata;
 
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 
 import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Math.round;
 import static org.apache.commons.collections.CollectionUtils.find;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.startsWith;
-import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * Provides a RESTFul JSON API for {@link io.neba.api.annotations.ResourceModel} metadata,
@@ -44,14 +46,21 @@ import static org.apache.commons.lang.StringUtils.substringAfter;
  *
  * @author Olaf Otto
  */
-@Service
+@Component(
+        service = Servlet.class,
+        property = {
+                "felix.webconsole.label=" + ModelStatisticsConsolePlugin.LABEL,
+                "service.description=Provides a Felix console plugin visualizing resource @ResourceModel statistics.",
+                SERVICE_VENDOR + "=neba.io"
+        }
+)
 public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
-    public static final String LABEL = "modelstatistics";
+    static final String LABEL = "modelstatistics";
     private static final long serialVersionUID = -8676958166611686979L;
     private static final String STATISTICS_API_PATH = "/api/statistics";
     private static final String RESET_API_PATH = "/api/reset";
 
-    @Autowired
+    @Reference
     private ResourceModelMetaDataRegistrar modelMetaDataRegistrar;
 
     @SuppressWarnings("unused")
@@ -157,7 +166,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
 
         int lazyFields = 0, greedyFields = 0;
         for (MappedFieldMetaData field : metaData.getMappableFields()) {
-            boolean isLazyLoadedField = field.isOptional() ||
+            boolean isLazyLoadedField = field.isLazy() ||
                     field.isChildrenAnnotationPresent() ||
                     field.isReference() && field.isInstantiableCollectionType();
             if (isLazyLoadedField) {
@@ -184,7 +193,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
         writeHeadnavigation(res);
         writeBody(res);
     }
