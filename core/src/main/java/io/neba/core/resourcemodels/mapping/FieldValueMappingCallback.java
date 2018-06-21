@@ -153,7 +153,7 @@ public class FieldValueMappingCallback {
      */
     private Object postProcessResolvedValue(FieldData fieldData, Object value) {
         // For convenience, NEBA guarantees that any mappable collection-typed field is never <code>null</code> but rather
-        // an empty collection, in case no non-<code>null</code> default value was provided and field is not Optional.
+        // an empty collection, in case no non-<code>null</code> default value was provided and the field is not Lazy.
         boolean preventNullCollection =
                 value == null &&
                         !fieldData.metaData.isLazy() &&
@@ -281,7 +281,7 @@ public class FieldValueMappingCallback {
         while (children.hasNext()) {
             Resource child = children.next();
             if (field.metaData.isResolveBelowEveryChildPathPresentOnChildren()) {
-                // @Children(resolveBelowEveryChild = "...")
+                // As specified via @Children(resolveBelowEveryChild = "...")
                 child = child.getChild(field.metaData.getResolveBelowEveryChildPathOnChildren());
                 if (child == null) {
                     continue;

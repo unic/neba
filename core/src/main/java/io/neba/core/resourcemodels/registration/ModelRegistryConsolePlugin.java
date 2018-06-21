@@ -70,7 +70,8 @@ import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
- * Shows a table with all detected type -&gt; model mappings in the felix console.
+ * Shows a table with all detected type -&gt; model mappings in the felix console and allows
+ * looking up resources adaptable to specific model types and model types adaptable to specific resources.
  *
  * @author Olaf Otto
  */

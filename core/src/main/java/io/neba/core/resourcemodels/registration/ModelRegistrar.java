@@ -38,6 +38,13 @@ import static org.apache.commons.lang3.StringUtils.join;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
+ * Coordinates available models with NEBA's internal {@link ModelRegistry} and the {@link io.neba.core.resourcemodels.adaptation.ResourceToModelAdapter resource to model adapter factory}
+ * provided by NEBA.
+ * <p>
+ * Specifically, this service tracks all {@link ResourceModelFactory resource model factory services} and {@link #registerModels(Bundle, ResourceModelFactory) registers}
+ * or {@link #unregister(Bundle) unregisters} their models using the {@link ModelRegistry}. Subsequently, it
+ * {@link ResourceToModelAdapterUpdater#refresh() refreshes} the resource to model adapter factory to reflect the changes.
+ *</p>
  * @author Olaf Otto
  */
 @Component(immediate = true)
@@ -50,11 +57,12 @@ public class ModelRegistrar {
     private ResourceToModelAdapterUpdater resourceToModelAdapterUpdater;
     @Reference
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
+
     private ServiceTracker tracker;
 
     @Activate
     protected void activate(BundleContext context) {
-       this.tracker = new ServiceTracker<>(context, ResourceModelFactory.class.getName(), new ServiceTrackerCustomizer<ResourceModelFactory, ResourceModelFactory>() {
+        this.tracker = new ServiceTracker<>(context, ResourceModelFactory.class.getName(), new ServiceTrackerCustomizer<ResourceModelFactory, ResourceModelFactory>() {
             @Override
             public ResourceModelFactory addingService(ServiceReference<ResourceModelFactory> reference) {
                 final ResourceModelFactory factory = context.getService(reference);
@@ -74,7 +82,7 @@ public class ModelRegistrar {
                 unregister(reference.getBundle());
             }
         });
-       this.tracker.open(true);
+        this.tracker.open(true);
     }
 
     @Deactivate

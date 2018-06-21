@@ -156,7 +156,7 @@ public class ModelRegistry {
      * @param modelName must not be <code>null</code>.
      * @return the resolved models, or <code>null</code> if no such models exist.
      */
-    public Collection<LookupResult> lookupMostSpecificModels(Resource resource, String modelName) {
+    Collection<LookupResult> lookupMostSpecificModels(Resource resource, String modelName) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
