@@ -51,18 +51,18 @@ import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * An {@link AdapterFactory} provides the {@link AdapterFactory#ADAPTABLE_CLASSES type(s) it adapts from}
- * and the {@link AdapterFactory#ADAPTER_CLASSES types it can adapt to} as OSGi service 
+ * and the {@link AdapterFactory#ADAPTER_CLASSES types it can adapt to} as OSGi service
  * properties. This information is used by {@link org.apache.sling.api.adapter.Adaptable} types to
  * {@link org.apache.sling.api.adapter.Adaptable#adaptTo(Class) adapt to}
  * other types, i.e. is essentially a factory pattern.
- * <br /> 
+ * <br />
  * This service registers the {@link ResourceToModelAdapter} as
  * an {@link AdapterFactory} OSGi service and dynamically updates the before mentioned
  * service properties with regard to the resource models detected by the
  * {@link io.neba.core.resourcemodels.registration.ModelRegistrar}.
  * This enables direct {@link Resource#adaptTo(Class) adaptation} to the resource
  * models without having to provide all available models as service metadata at build time.
- * 
+ *
  * @author Olaf Otto
  */
 @Component(service = ResourceToModelAdapterUpdater.class)
@@ -73,7 +73,7 @@ public class ResourceToModelAdapterUpdater {
     private ModelRegistry registry;
     @Reference
     private ResourceToModelAdapter adapter;
-    
+
     private BundleContext context = null;
     private ServiceRegistration resourceToModelAdapterRegistration = null;
     private ExecutorService executorService;
@@ -93,7 +93,7 @@ public class ResourceToModelAdapterUpdater {
     public void refresh() {
         this.executorService.execute(() -> {
             if (isModelAdapterUpdatable()) {
-                updateModeAdapter();
+                updateModelAdapter();
             }
         });
     }
@@ -103,9 +103,9 @@ public class ResourceToModelAdapterUpdater {
     }
 
     /**
-     * Depending on the bundle lifecycle, an OSGi service may not always be 
+     * Depending on the bundle lifecycle, an OSGi service may not always be
      * updatable.
-     * 
+     *
      * @return true if the {@link ResourceToModelAdapter} OSGi service may be altered.
      */
     private boolean isModelAdapterUpdatable() {
@@ -114,19 +114,19 @@ public class ResourceToModelAdapterUpdater {
     }
 
     /**
-     * Sling does not detect changes to the state of an {@link AdapterFactory} service. Their 
+     * Sling does not detect changes to the state of an {@link AdapterFactory} service. Their
      * properties are only read when the service is registered. Thus
      * the service is unregistered and re-registered when changing its properties
      * (e.g. adding new adaptable types).
      */
-    private void updateModeAdapter() {
+    private void updateModelAdapter() {
         unregisterModelAdapter();
         registerModelAdapter();
     }
 
     /**
-     * {@link BundleContext#registerService(String, Object, Dictionary) Registers} 
-     * the {@link ResourceToModelAdapter}, i.e. publishes it as an OSGi service.  
+     * {@link BundleContext#registerService(String, Object, Dictionary) Registers}
+     * the {@link ResourceToModelAdapter}, i.e. publishes it as an OSGi service.
      */
     private void registerModelAdapter() {
         Dictionary<String, Object> properties = createResourceToModelAdapterProperties();
@@ -136,7 +136,7 @@ public class ResourceToModelAdapterUpdater {
 
     private void unregisterModelAdapter() {
         try {
-            this.resourceToModelAdapterRegistration.unregister();    
+            this.resourceToModelAdapterRegistration.unregister();
         } catch (IllegalStateException e) {
             this.logger.info("The resource to model adapter was already unregistered, ignoring.", e);
         }
@@ -146,7 +146,7 @@ public class ResourceToModelAdapterUpdater {
         Dictionary<String, Object> properties = new Hashtable<>();
         Set<String> fullyQualifiedNamesOfRegisteredModels = getAdapterTypeNames();
         properties.put(ADAPTER_CLASSES, fullyQualifiedNamesOfRegisteredModels.toArray());
-        properties.put(ADAPTABLE_CLASSES, new String[] { Resource.class.getName() });
+        properties.put(ADAPTABLE_CLASSES, new String[]{Resource.class.getName()});
         properties.put(SERVICE_VENDOR, "neba.io");
         properties.put(SERVICE_DESCRIPTION, "Adapts Resources to @ResourceModels.");
         return properties;
@@ -157,9 +157,8 @@ public class ResourceToModelAdapterUpdater {
      * {@link io.neba.core.resourcemodels.registration.ModelRegistrar} and adds the {@link OsgiModelSource#getModelType()
      * model type name} as well as the type name of all of its superclasses and
      * interfaces to the set.
-     * 
+     *
      * @return never null but rather an empty set.
-     * 
      * @see org.apache.commons.lang3.ClassUtils#getAllInterfaces(Class)
      * @see org.apache.commons.lang3.ClassUtils#getAllSuperclasses(Class)
      */

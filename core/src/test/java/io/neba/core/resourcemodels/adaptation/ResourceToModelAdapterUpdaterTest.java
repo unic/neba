@@ -44,6 +44,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,11 +92,10 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         when(this.registry.getModelSources())
                 .thenReturn(this.modelSources);
 
-        when(this.context.registerService(eq(AdapterFactory.class.getName()), eq(this.adapter), isA(Dictionary.class)))
-                .thenAnswer(inv -> {
-                    updatedProperties = (Dictionary<String, Object>) inv.getArguments()[2];
-                    return registration;
-                });
+        doAnswer(inv -> {
+            updatedProperties = (Dictionary<String, Object>) inv.getArguments()[2];
+            return registration;
+        }).when(this.context).registerService(eq(AdapterFactory.class.getName()), eq(this.adapter), isA(Dictionary.class));
 
         when(this.context.getBundle())
                 .thenReturn(this.bundle);
@@ -103,13 +103,6 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         this.testee.activate(this.context);
     }
 
-    @Test
-    public void testUnregistrationOfAlreadyUnregisteredService() throws Exception {
-        signalIllegalStateWhenUnregisteringService();
-        withStartingBundle();
-        signalRegistryChange();
-        assertUpdaterUpdatesModelAdapter();
-    }
 
     @Test
     public void testUpdaterPerformsNoUpdatesWhileBundleNotReady() {
@@ -127,14 +120,27 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     public void testUpdatePerformsUpdateWhenBundleStarting() throws Exception {
         withStartingBundle();
         signalRegistryChange();
-        assertUpdaterUpdatesModelAdapter();
+
+        verifyUpdaterUnregistersModelAdapter();
+        verifyUpdaterRegistersModelAdapter();
     }
 
     @Test
     public void testUpdaterPerformsUpdateWhenBundleActive() throws Exception {
         withActiveBundle();
         signalRegistryChange();
-        assertUpdaterUpdatesModelAdapter();
+
+        verifyUpdaterUnregistersModelAdapter();
+        verifyUpdaterRegistersModelAdapter();
+    }
+
+    @Test
+    public void testUnregistrationOfAlreadyUnregisteredService() throws Exception {
+        signalIllegalStateWhenUnregisteringService();
+        withStartingBundle();
+        signalRegistryChange();
+
+        verifyUpdaterUnregistersModelAdapter();
     }
 
     @Test
@@ -143,7 +149,9 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         withModel(TestModel.class);
         withActiveBundle();
         signalRegistryChange();
-        assertUpdaterUpdatesModelAdapter();
+
+        verifyUpdaterUnregistersModelAdapter();
+        verifyUpdaterRegistersModelAdapter();
         assertAdaptersPropertyIs(TestModel.class.getName(), TestInterface.class.getName());
     }
 
@@ -153,7 +161,10 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         withModel(TestModelDerived.class);
         withActiveBundle();
         signalRegistryChange();
-        assertUpdaterUpdatesModelAdapter();
+
+        verifyUpdaterUnregistersModelAdapter();
+        verifyUpdaterRegistersModelAdapter();
+
         assertAdaptersPropertyIs(TestModelDerived.class.getName(), TestModel.class.getName(),
                 TestInterface.class.getName(), TestInterfaceExtended.class.getName());
     }
@@ -179,11 +190,17 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         assertAdaptersPropertyIs();
     }
 
-    private void assertUpdaterUpdatesModelAdapter() throws InterruptedException {
-        eventually(() -> {
-            verify(this.registration).unregister();
-            verify(this.context).registerService(anyString(), eq(this.adapter), eq(this.updatedProperties));
-        });
+    private void verifyUpdaterUnregistersModelAdapter() throws InterruptedException {
+        eventually(() -> verify(this.registration).unregister());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyUpdaterRegistersModelAdapter() throws InterruptedException {
+        // The service is always registered once during #activate(...), and once more
+        // when the service is refreshed (unregistered and re-registered)
+        eventually(() ->
+                verify(this.context, times(2))
+                        .registerService(anyString(), eq(this.adapter), isA(Dictionary.class)));
     }
 
     private void assertUpdaterDoesNotUpdateModelAdapter() {
