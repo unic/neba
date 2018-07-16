@@ -161,8 +161,7 @@ public class MvcServlet extends SlingAllMethodsServlet {
         handle(request, response);
     }
 
-
-    void handle(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    private void handle(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
         final SlingMvcServletRequest slingRequest = new SlingMvcServletRequest(request);
 
         for (BundleSpecificDispatcherServlet context : this.mvcCapableBundles.values()) {
