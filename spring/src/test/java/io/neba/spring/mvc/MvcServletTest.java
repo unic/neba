@@ -97,6 +97,9 @@ public class MvcServletTest {
         doReturn(this.dispatcherServlet)
                 .when(this.testee)
                 .createBundleSpecificDispatcherServlet(eq(this.factory), isA(ServletConfig.class));
+
+        doReturn("GET").when(request).getMethod();
+        doReturn("HTTP/1.1").when(request).getProtocol();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -125,12 +128,12 @@ public class MvcServletTest {
     public void testOnlyResponsibleContextsServiceRequests() throws Exception {
         enableMvc();
 
-        handleRequest();
+        serviceRequest();
         verifyMvcContextDoesNotServiceRequest();
 
         withMvcContextResponsible();
 
-        handleRequest();
+        serviceRequest();
         verifyMvcContextServicedRequestOnce();
     }
 
@@ -138,12 +141,12 @@ public class MvcServletTest {
     public void testRemovalOfMvcCapabilities() throws Exception {
         enableMvc();
         withMvcContextResponsible();
-        handleRequest();
+        serviceRequest();
         verifyMvcContextServicedRequestOnce();
 
         disableMvc();
 
-        handleRequest();
+        serviceRequest();
         verifyMvcContextServicedRequestOnce();
     }
 
@@ -153,6 +156,21 @@ public class MvcServletTest {
         enableMvc();
 
         assertServletNameOfBundleSpecificDispatcherServletIs("BundleSpecificDispatcherServlet for bundle symbolic-name");
+    }
+
+    @Test
+    public void testPatchMethodIsSupported() throws Exception {
+        enableMvc();
+        withMvcContextResponsible();
+        withPatchRequest();
+
+        serviceRequest();
+
+        verifyMvcContextServicedRequestOnce();
+    }
+
+    private void withPatchRequest() {
+        doReturn("PATCH").when(this.request).getMethod();
     }
 
     private void withRealDispatcherServletCreated() {
@@ -179,8 +197,8 @@ public class MvcServletTest {
         verify(this.dispatcherServlet, never()).service(isA(SlingMvcServletRequest.class), isA(SlingHttpServletResponse.class));
     }
 
-    private void handleRequest() throws ServletException, IOException {
-        this.testee.handle(this.request, this.response);
+    private void serviceRequest() throws Exception {
+        this.testee.service(this.request, this.response);
     }
 
     private void assertInjectMvcContextIsNotNull() {
