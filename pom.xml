@@ -11,6 +11,8 @@
 		NEBA - simple and high performance content to object mapping for Apache Sling.
 	</description>
 
+    <url>https://neba.io</url>
+
 	<modules>
 		<module>api</module>
 		<module>core</module>
