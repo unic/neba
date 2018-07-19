@@ -1,39 +1,27 @@
-<!DOCTYPE HTML>
-<html lang="en">
+<!doctype html>
+<html lang="en-US">
 {% include head.ext %}
-<body>
-{% include header.ext %}
-<!-- Main -->
-<div id="main">
-    <div class="container">
-        <div class="row">
 
-            <!-- Content -->
-            <div id="content" class="8u skel-cell-important">
-                {{content}}
-            </div>
+<body class="post">
 
-            <!-- Sidebar -->
-            <div id="sidebar" class="4u">
-                <section>
-                    <header>
-                        <h2>Related posts</h2>
-                    </header>
-                    <ul class="style">
-                        {% for post in site.posts %}
-                        <li>
-                            <p class="posted">{{post.date | date: "%B %d, %Y" }}</p>
-                            <p><a href="{{post.url}}">{{ post.title }}</a></p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </section>
-            </div>
-        </div>
+{% include navigation.ext %}
 
-    </div>
-</div>
+<main>
+    {{content}}
+
+    <aside class="up-to-three-columns">
+        <header><h2>Related posts</h2></header>
+        {% for post in site.posts %}
+        <section>
+            <header><h3>{{ post.title }}</h3></header>
+            <p><a href="{{post.url}}">{{post.description}}</a></p>
+        </section>
+        {% endfor %}
+    </aside>
+</main>
+
 {% include footer.ext %}
+
 <script src="/js/releasenotes.js" async="async"></script>
 </body>
 </html>

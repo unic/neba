@@ -1,11 +1,6 @@
-<div id="nav-wrapper">
-    <!-- Nav -->
-    <nav id="nav">
-        <ul>
-            <li class="home"><a href="/index.html">Home</a></li>
-            {% for item in site.mainNavItems %}
-                <li{% if page.url == item.link %} class="active"{% endif %}><a href="{{item.link}}" title="{{item.title}}">{{item.label}}</a></li>
-            {% endfor %}
-        </ul>
-    </nav>
-</div>
+<nav id="main-navigation" title="Main navigation">
+    <a href="/index.html" id="logo"><img alt="Home" src="/assets/images/logo.svg" title="home" width="30"></a>
+    <a href="/documentation.html" title="NEBA Documentation" class="active">Documentation</a>
+    <a href="/download.html" title="Download NEBA">Download</a>
+    <a href="/about.html" title="About NEBA">About</a>
+</nav>

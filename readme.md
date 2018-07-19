@@ -1,8 +1,8 @@
-# NEBA GitHub Pages
+﻿# NEBA GitHub Pages
 
 This branch contains the documentation for NEBA based on GitHub Pages using Jekyll.
 
-If you're looking for the generated documentation you can find it [here](http://neba-io.github.io/neba/).
+If you're looking for the generated documentation you can find it [here](https://neba.io).
 
 # Local Configuration
 
@@ -18,5 +18,5 @@ To build see the [GitHub and Jekyll documentation](https://help.github.com/artic
 Run this command to start the server locally
 
 
-    jekyll serve --watch --baseurl=
+    jekyll serve
 

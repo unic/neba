@@ -1,26 +1,23 @@
-(function ($) {
-    $(".issue-list").each(function () {
-        var $placeholder = $(this);
-        var milestone = $placeholder.data("milestone"),
-            labels = $placeholder.data("labels");
+(function () {
+    var issueLists = document.getElementsByClassName("issue-list");
+    Array.prototype.forEach.call(issueLists, function (element) {
+        var milestone = element.getAttribute("data-milestone");
+        var labels = element.getAttribute("data-labels");
 
-        $.ajax({
-            url: "https://api.github.com/repos/unic/neba/issues",
-            data: {
-                "state" : "closed",
-                "labels" : labels,
-                "milestone" : milestone
-            },
-            success: function(issues) {
-                if (!issues.length) {
-                    $placeholder.append("<li>None</li>")
-                    return;
-                }
-                issues.forEach(function (issue) {
-                    $placeholder.append($('<li><a href="' + issue.html_url + '">#' + issue.number + ': ' + issue.title + '</a></li>'));
-                });
-            },
-            dataType: "json"
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", function (_) {
+            var issues = JSON.parse(oReq.responseText);
+
+            if (!issues.length) {
+                element.innerHTML = "<li>None</li>";
+                return;
+            }
+            issues.forEach(function (issue) {
+                element.innerHTML += '<li><a href="' + issue.html_url + '">#' + issue.number + ': ' + issue.title + '</a></li>';
+            });
+
         });
+        oReq.open("GET", "https://api.github.com/repos/unic/neba/issues?state=closed&labels=" + labels + "&milestone=" + milestone);
+        oReq.send();
     });
-})(jQuery);
+})();

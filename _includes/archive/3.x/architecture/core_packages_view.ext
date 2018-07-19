@@ -1,8 +1,0 @@
-<section>
-    <header><h2 id="corepackages">Core packages view</h2></header>
-
-    <p>Each package of the core represents a semantically grouped amount of features. The following diagram shows the most important feature groups
-    and illustrates the overall design approach of the core</p>
-
-    <img src="images/architecture/io.neba.core.png">
-</section>

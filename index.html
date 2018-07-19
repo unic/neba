@@ -1,170 +1,148 @@
 ---
-pageTitle: NEBA - The best of Apache Sling, powered by Spring
-title: Build amazing Solutions with <strong>Sling</strong> and <strong>AEM</strong>&trade;
-subTitle:  with tools your engineers know and love
+title: NEBA - Simple and fast Content mapping for Sling and AEM&trade;
 twitterAuthor: nebaframework
 description: NEBA integrates the Spring Framework into Apache Sling - using expressive and convenient semantic annotations.
-keywords: Apache Sling,AEM,AEM6,Adobe AEM,Spring,Springframework,NEBA,CQ5
+keywords: Apache Sling,AEM,AEM6,Adobe AEM,Spring,Springframework,NEBA,CQ
 ---
-<!DOCTYPE HTML>
-<html>
+<!doctype html>
+<html lang="en-US">
 {% include head.ext %}
-<body class="homepage">
 
-{% include header.ext %}
+<body class="home">
 
-<!-- Featured -->
-<div id="featured">
-    <div class="container">
-        <header>
-            <h2>Accelerate development with tools your engineers know and love</h2>
-        </header>
+{% include navigation.ext %}
+
+<section id="introduction" class="up-to-three-columns">
+    <header>
+        <h1>Simple and fast Content mapping for Sling and AEM&trade;</h1>
         <p>
-            NEBA enables the development of clean, high-performing and easy to change solutions on Apache Sling-based applications such as Adobe AEM™. NEBA integrates the Spring Framework into Apache Sling, exclusively using the standardized reference implementation of the OSGi Compendium R4.2 specification.
-            NEBA is 100% open source and published under the Apache license 2.0. <a href="https://www.github.com/unic/neba">Fork it on Github!</a>
+            NEBA provides a <a href="documentation.html">well-documented and simple set of annotations</a> to map JCR Resources to POJOs. Developed for
+            high demand scenarios, NEBA features impeccable performance and ships with
+            the right tools to keep your Sling or AEM&trade; deployment fast.
         </p>
-        <hr />
-        <div class="row">
-            <section class="4u">
-                <span class="pennant"><span class="fa fa-rocket"></span></span>
-                <h3>Productive code, fast</h3>
-                <p>Use Spring Beans as models for JCR data. Leverage dependency Injection. Enjoy NEBA's mature, high-performance content-to-object mapping - with just a single annotation.</p>
-                <a href="documentation.html#writing_resourcemodels" class="button button-style1">Learn More</a>
-            </section>
-            <section class="4u">
-                <span class="pennant"><span class="fa fa-leaf"></span></span>
-                <h3>Leverage the power of Spring</h3>
-                <p>Build atop Spring's mature MVC framework, use dependency injection or AOP - all Spring features a supported via the OSGi Blueprint&trade; standard.</p>
-                <a href="about.html#neba_technology" class="button button-style1">Read More</a>
-            </section>
-            <section class="4u">
-                <span class="pennant"><span class="fa fa-download"></span></span>
-                <h3>Installed and ready in seconds</h3>
-                <p>Available as a single CRX package or delivery OSGi bundle, NEBA is installed in seconds without the need for any additional configuration.</p>
-                <a href="documentation.html#getting_started" class="button button-style1">Get started</a>
-            </section>
-        </div>
-    </div>
-</div>
+    </header>
+    <section>
+        <h2>Simple and fast</h2>
+        <p>Create models for resources using just a single annotation and enjoy NEBA's outstanding mapping
+            performance.</p>
+        <a href="documentation.html#working_with_resourcemodels" class="action">Learn about resource models</a>
+    </section>
+    <section>
+        <h2>Ready in seconds</h2>
+        <p>Available as a single CRX package or delivery OSGi bundle, NEBA is installed in seconds without the need
+            for any additional configuration.</p>
+        <a href="documentation.html#getting_started" class="action">Download and get started</a>
+    </section>
+    <section>
+        <h2>Open Source and free</h2>
+        <p>NEBA is free and 100% open source, licensed under the Apache License.</p>
+        <a href="https://gihub.com/unic/neba" class="action">Fork it on Github</a>
+    </section>
+</section>
 
-<div id="fromtheblog">
-    <div class="container">
+<main>
+    <section id="blog" class="up-to-three-columns">
         <header>
-            <h2>Release announcements</h2>
+            <h1>From the blog</h1>
         </header>
-        <p>
-            <a href="/2017/08/22/neba-release-4.3.2.html" class="button">Latest version: NEBA 4.3.2</a>
-        </p>
-        <div class="row">
         {% for post in site.posts limit:3 %}
-            <section class="4u">
-                <h3>{{post.title}}</h3>
-                <p>{{post.description}}</p>
-                <a href="{{ post.url }}" class="button">Read more</a>
-            </section>
+        <section>
+            <h2>{{post.title}}</h2>
+            <p>{{post.description}}</p>
+            <a href="{{ post.url }}" class="action">Read more</a>
+        </section>
         {% endfor %}
-        </div>
-    </div>
-</div>
+    </section>
 
-<!-- Main -->
-<div id="main">
-    <section id="features">
-        <div class="container">
-        <header class="feature-header">
-            <h2>Features</h2>
-            <p>With NEBA, applications built with Sling shall be modular and free of system-level concerns, resulting in more stable, changeable and high-performing applications. At the same time, using NEBA shall be like using a good DSL: Simple, expressive and fun.</p>
+    <section id="features" class="up-to-two-columns">
+        <header>
+            <h1>Features</h1>
         </header>
-        </div>
-    <div id="content" class="container">
-        <div class="row">
-            <section class="6u">
-                <header>
-                    <h2>Resource models</h2>
-                </header>
-                <p>
-                    <a href="/documentation.html#writing_resourcemodels">POJOs annotated with @ResourceModel</a> are
-                    <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/beans.html#beans-introduction">Spring Beans</a> representing
-                    specific resource types. Whenever a suitable resource is adapted to this model - or any of it's interfaces or super classes - the properties
-                    of the resource are automatically injected into the model. One can thus use the entire power of Spring and all features of Sling and the JCR - with just
-                    one annotation.
-                </p>
-{% highlight java %}
-@ResourceModel(types = "sling/resource/type")
+        <section>
+            <h2>Resource models</h2>
+            <p>
+                <a href="/documentation.html#working_with_resourcemodels">POJOs annotated with @ResourceModel</a> represent
+                specific resource types. Whenever a suitable resource is adapted to this model - or any of it's
+                interfaces or super classes - the properties
+                of the resource are automatically injected into the model.
+            </p>
+{% highlight java %}@ResourceModel(types = "sling/resource/type")
 public class MyModel {
     @Inject
-    private SomeSpringBean collaborator;
+    private SomeService service;
 
     private String slingProperty;
 }
 {% endhighlight %}
-            </section>
-            <section class="6u">
-                <header>
-                    <h2>Spring MVC</h2>
-                </header>
-                <p>
-                    All MVC features are supported - including first-class support for Sling specific request parameters
-                    such as the Resource resolver. For an in-depth documentation of the Spring MVC support, see the
-                    <a href="documentation.html#spring_mvc">documentation on Spring MVC</a> and
-                    <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring's MVC documentation</a>.
-                </p>
-{% highlight java %}
-@Controller
-public class MyController {
- @RequestMapping("/something")
- @ResponseBody
- public String handle(@RequestParam String param) {
-   return "redirect:/success.html";
- }
-{% endhighlight %}
-            </section>
-        </div>
+        </section>
+        <section>
+            <h2>Realtime model insights</h2>
+            <p>The <a href="documentation.html#tooling_modelstatistics">resource model statistics console</a> allows exploring the performance of resource models in real time,
+                directly on the system.</p>
+            <figure>
+                <img src="assets/images/modelstatistics-large.png"
+                     alt="The NEBA model statistics console allows exploring real-time performance and meta data for all models">
+            </figure>
+        </section>
+        <section>
+            <h2>
+                Lazy loading
+            </h2>
+            <p>NEBA supports <a href="documentation.html#lazy_loading">Lazy-Loading repository data</a>, transparently and simple, to allow building high speed
+                applications - regardless of the amount of repository content. </p>
+            <figure>
+                <img src="assets/images/lazy-loading-statistics.png"
 
-        <div class="row">
-            <section class="6u">
-                <header>
-                    <h2>Keeping track of your models</h2>
-                </header>
-                <p>
-                    The resource model registry allows exploring the registered models and their relation to the resource
-                    types to which they apply, as well as the types to which they can be adapted.
-                </p>
-                <a class="image full" href="documentation.html#tooling_modelregistry"><img src="images/documentation/modelregistry-large.png" alt="The NEBA model registry"/></a>
-            </section>
-            <section class="6u">
-                <header>
-                    <h2>Realtime model insights</h2>
-                </header>
-                <p>The resource model statistics console allows exploring the performance of resource models in real time, directly on the system.</p>
-                <a class="image full" href="documentation.html#tooling_modelstatistics"><img src="images/documentation/modelstatistics-large.png" /></a>
-            </section>
-        </div>
-        <div class="row">
-            <section class="6u">
-                <header>
-                    <h2>Monitoring logfiles</h2>
-                </header>
-                <p>
-                    To let engineering analyze issues quickly, NEBA includes a Sling web console extension
-                    that allows monitoring, tailing and downloading log files - including filtering and highlighting.
-                    Serial access to the machine running your instance is no longer required - authenticated
-                    access to the system does suffice.
-                </p>
-                <a class="image full" href="documentation.html#tooling_logviewer"><img src="images/documentation/logviewer-large.png" /></a>
-            </section>
-            <section class="6u">
-                <header>
-                    <h2>Lazy loading</h2>
-                </header>
-                <p>NEBA is used in environments with challenging performance requirements and designed to deliver fast - regardless of the amount of repository content. NEBA supports Lazy-Loading
-                repository data - transparently and simple, out of the box.</p>
-                <a class="image full" href="documentation.html#lazy_loading"><img src="images/documentation/lazy-loading-statistics.png" /></a>
-            </section>
-        </div>
-    </div>
+                     alt="NEBA has first-class support for lazy-loading">
+            </figure>
+        </section>
+        <section>
+            <h2>Keep track of your models</h2>
+            <p>
+                The <a href="documentation.html#tooling_modelregistry">resource model registry</a> allows exploring the registered models and their relation to the resource
+                types to which they apply, as well as the types to which they can be adapted.
+            </p>
+            <figure>
+                <img src="assets/images/modelregistry-large.png"
+                     alt="The NEBA model registry lists and links all available models">
+            </figure>
+        </section>
+        <section>
+            <h2>
+                Monitoring logfiles
+            </h2>
+            <p>
+                To let engineering analyze issues quickly, NEBA includes a <a href="documentation.html#tooling_logviewer">Sling web console extension
+                that allows viewing, tailing and downloading log files</a> - including error detection.
+                Serial access to the machine running your instance is not required - authenticated
+                access to the system does suffice.
+            </p>
+            <figure>
+                <img src="assets/images/logviewer-large.png"
+                     alt="The NEBA log viewer allows following, analyzing and downloading logfiles of AEM or Sling instances">
+            </figure>
+        </section>
+        <section>
+            <h2>Spring integration</h2>
+            <p>
+                The optional <a href="documentation.html#spring">Spring integration</a> supports all Spring MVC features - including first-class support for
+                Sling specific request parameters
+                such as the Resource resolver. For an in-depth documentation of the Spring MVC support, see
+                <a href="documentation.html#spring">how NEBA supports Spring MVC</a> and
+                <a href="http://docs.spring.io/spring/docs/4.3.x/spring-framework-reference/html/mvc.html">Spring's
+                    MVC documentation</a>.
+            </p>
+{% highlight java %}@Controller
+public class MyController {
+@RequestMapping("/something")
+@ResponseBody
+public String handle(@RequestParam String param) {
+    return "redirect:/success.html";
+}
+{% endhighlight %}
+        </section>
     </section>
-</div>
+</main>
 
 {% include footer.ext %}
 </body>

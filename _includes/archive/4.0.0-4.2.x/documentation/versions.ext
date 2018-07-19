@@ -1,7 +1,0 @@
-<ul class="versions">
-    {% for item in site.versions %}
-    <li>
-        <a {% if page.url == item.link %} class="active"{% endif %} href="{{item.link}}" title="{{item.label}}">{{item.label}}</a>
-    </li>
-    {% endfor %}
-</ul>

@@ -1,11 +1,7 @@
-github: [Repository metadata]
 markdown: kramdown
-url: http://www.neba.io
-nebaVersion: 4.3.2
-springNamespaceVersion: 4.3
-springDocumentationVersion: 4.3.x
-collections:
-  - mainNavItems
-  - versions
+url: https://www.neba.io
+nebaVersion: 5.0.0
+springDocumentationVersion: 5.0.x
 contextpath:
 include: [_headers]
+exclude: [.idea]

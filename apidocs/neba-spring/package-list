@@ -1,0 +1,6 @@
+io.neba.spring.api
+io.neba.spring.blueprint
+io.neba.spring.mvc
+io.neba.spring.resourcemodels.aop
+io.neba.spring.resourcemodels.registration
+io.neba.spring.web

@@ -1,7 +1,0 @@
-<section>
-    <header><h2 id="modules">Modules view</h2></header>
-
-    <p>NEBA consists of the following modules. Each module is represented by a single OSGi bundle and a corresponding maven module.</p>
-
-    <img src="images/architecture/project-modules-overview.png">
-</section>

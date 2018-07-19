@@ -1,105 +1,143 @@
 ---
-pageTitle: Download NEBA
 title: Download NEBA
 twitterAuthor: nebaframework
-description: Download and integrate NEBA in a maven build
+description: Download and integrate NEBA into Apache Sling or Adobe AEM
 ---
-<!DOCTYPE HTML>
-<html lang="en">
+<!doctype html>
+<html lang="en-US">
 {% include head.ext %}
-<body>
-{% include header.ext %}
-<!-- Main -->
-<div id="main">
-    <div class="container">
-        <!-- Content -->
-        <div id="content">
 
-<section>
-    <header><h3 id="installation">Installation in Adobe AEM&#8482;</h3></header>
+<body class="download">
 
-    <p>The following ZIP file is a CRX package containing both NEBA and the runtime dependencies not provided by Sling,
-    e.g. Spring and Gemini Blueprint.</p>
+{% include navigation.ext %}
 
-    <p>
-        <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-aem&v={{site.nebaVersion}}&p=zip" class="button button-style1">Download the AEM&#8482; package for NEBA {{site.nebaVersion}}</a>
-    </p>
-</section>
+<main>
+    <section>
+        <header>
+            <h1>Download NEBA</h1>
+        </header>
+        <section class="up-to-two-columns">
+            <header>
+                <h2 id="core">NEBA core</h2>
+                <p>The NEBA core contains all of NEBA's features, except for the Spring integration, which is shipped separately (see below)</p>
+            </header>
+            <section>
+                <header><h3>Core CRX delivery package for Adobe AEM&#8482;</h3></header>
 
-<section>
-    <header><h3>Installation in Apache Sling</h3></header>
+                <p>The following ZIP file is a CRX package containing the NEBA core and API bundles.</p>
 
-    <p>The following JAR file is an OSGi bundle installing both NEBA and the runtime dependencies not provided by Sling,
-        e.g. Spring and Gemini Blueprint.</p>
-    <p>
-        <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-sling&v={{site.nebaVersion}}&p=jar" class="button button-style1">Download the Sling delivery bundle for NEBA {{site.nebaVersion}}</a>
-    </p>
+                    <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-aem&v={{site.nebaVersion}}&p=zip"
+                       class="action">Download the AEM&#8482; package for NEBA core {{site.nebaVersion}}</a>
+            </section>
 
-    <p>Installing and activating this bundle installs NEBA and its runtime dependencies. Uninstalling the delivery bundle uninstalls NEBA as well.</p>
-</section>
+            <section>
+                <header><h3>Core bundle delivery package for Apache Sling</h3></header>
 
-<section>
-    <header><h3 id="integration">Using Maven</h3></header>
+                <p>The following JAR file is an OSGi bundle installing the NEBA core and API bundles. Installing and activating this bundle installs these bundles. Uninstalling the
+                    delivery bundle uninstalls NEBA as well.</p>
 
-    <p>NEBA is built using Maven. Core, API and delivery packages containing NEBA and it's runtime dependencies are available from maven central.
-        For developing with NEBA, including the API in your project is all you need to do:</p>
-<p>
-{% highlight xml %}
-<dependency>
+                    <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-sling&v={{site.nebaVersion}}&p=jar"
+                       class="action">Download the Sling delivery bundle for NEBA core {{site.nebaVersion}}</a>
+            </section>
+        </section>
+
+
+        <section class="up-to-two-columns">
+            <header>
+                <h2 id="spring-integration">NEBA Spring integration</h2>
+                <p>The NEBA spring integration contains NEBA core (see above) and includes the neba-spring module along with all of the required Spring OSGi bundles and the gemini-blueprint bundles.</p>
+            </header>
+            <section>
+                <header><h3>Spring integration CRX delivery package for Adobe AEM&#8482;</h3></header>
+
+                <p>The following ZIP file is a CRX package containing both NEBA core, NEBA Spring and the runtime dependencies not provided by
+                    Sling, e.g. Spring and Gemini Blueprint.</p>
+
+                <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-aem&v={{site.nebaVersion}}&p=zip&c=spring"
+                   class="action">Download the AEM&#8482; package for NEBA Spring {{site.nebaVersion}}</a>
+            </section>
+
+            <section>
+                <header><h3>Spring integration bundle delivery package for Apache Sling</h3></header>
+
+                <p>The following JAR file is an OSGi bundle installing both NEBA core, NEBA spring and the runtime dependencies not provided
+                    by Sling, e.g. Spring and Gemini Blueprint. Installing and activating this bundle installs NEBA and its runtime dependencies. Uninstalling the
+                    delivery bundle uninstalls NEBA as well.</p>
+
+                <a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r={%if site.nebaVersion contains 'SNAPSHOT'%}snapshots{% else %}releases{% endif %}&g=io.neba&a=io.neba.neba-delivery-sling&v={{site.nebaVersion}}&p=jar&c=spring"
+                   class="action">Download the Sling delivery bundle for NEBA Spring {{site.nebaVersion}}</a>
+            </section>
+        </section>
+
+        <section>
+            <header><h3 id="integration">Using Maven</h3></header>
+
+            <p>NEBA is built using Maven. Core, API and delivery packages containing NEBA and it's runtime dependencies
+                are available from maven central.
+                For developing with NEBA, including the API in your project is all you need to do:</p>
+            <p>
+            {% highlight xml %}<dependency>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-api</artifactId>
     <version>{{site.nebaVersion}}</version>
-</dependency>
-{% endhighlight %}
-</p>
+</dependency>{% endhighlight %}
+            </p>
 
-<p>
-    In order to use Gemini Blueprint's <a href="https://www.eclipse.org/gemini/blueprint/documentation/reference/2.1.0.RELEASE/html/service-registry.html#service-registry:annotations-vs-xml-declarations">annotation-based service injection</a>
-    available since NEBA 4.2.0, add the gemini-blueprint-extensions bundle to your dependencies:
-</p>
-<p>
-{% highlight xml %}
-<dependency>
+            <p>
+                In order to use Gemini Blueprint's <a
+                    href="https://www.eclipse.org/gemini/blueprint/documentation/reference/2.1.0.RELEASE/html/service-registry.html#service-registry:annotations-vs-xml-declarations">annotation-based
+                service injection</a>
+                available since NEBA 4.2.0, add the gemini-blueprint-extensions bundle to your dependencies:
+            </p>
+            <p>
+            {% highlight xml %}<dependency>
     <groupId>org.eclipse.gemini.blueprint</groupId>
     <artifactId>gemini-blueprint-extensions</artifactId>
     <version>2.1.0.RELEASE</version>
-</dependency>
-{% endhighlight %}
-</p>
+</dependency>{% endhighlight %}
+            </p>
 
-<p>The CRX deployment package for Adobe AEM&trade; can be referenced like so:</p>
+            <p>The CRX deployment package for Adobe AEM&trade; can be referenced like so:</p>
 
-<p>
-{% highlight xml %}
-<dependency>
+            <p>
+            {% highlight xml %}<dependency>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-delivery-aem</artifactId>
     <version>{{site.nebaVersion}}</version>
     <type>zip</type>
-</dependency>
-{% endhighlight %}
-</p>
+</dependency>{% endhighlight %}
+            </p>
 
-<p>Or the Sling deployment bundle like so:</p>
+            <p>Or the Sling deployment bundle like so:</p>
 
-<p>
-    {% highlight xml %}
-    <dependency>
-        <groupId>io.neba</groupId>
-        <artifactId>io.neba.neba-delivery-sling</artifactId>
-        <version>{{site.nebaVersion}}</version>
-    </dependency>
-    {% endhighlight %}
-</p>
+            <p>
+            {% highlight xml %}<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-delivery-sling</artifactId>
+    <version>{{site.nebaVersion}}</version>
+</dependency>{% endhighlight %}
+            </p>
 
-<p>Finally, in order to <a href="https://docs.adobe.com/docs/en/aem/6-2/develop/dev-tools/vlt-mavenplugin.html#install">install NEBA using the Content Package Maven Plugin</a> you may do:</p>
+            <p>
+                To reference the NEBA Spring artifacts, simply add the "spring" classifier to the respective dependency, e.g.:
+            {% highlight xml %}<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-delivery-sling</artifactId>
+    <classifier>spring</classifier>
+    <version>{{site.nebaVersion}}</version>
+</dependency>{% endhighlight %}
 
-<p>
-{% highlight xml %}
-<plugin>
+            </p>
+
+            <p>Finally, in order to <a
+                    href="https://docs.adobe.com/docs/en/aem/6-2/develop/dev-tools/vlt-mavenplugin.html#install">install
+                NEBA using the Content Package Maven Plugin</a> you may do:</p>
+
+            <p>
+            {% highlight xml %}<plugin>
     <groupId>com.day.jcr.vault</groupId>
     <artifactId>content-package-maven-plugin</artifactId>
-    <version>0.0.24</version>
+    <version>1.0.2</version>
     <configuration>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-delivery-aem</artifactId>
@@ -107,14 +145,13 @@ description: Download and integrate NEBA in a maven build
         <packaging>zip</packaging>
         <targetURL>http://localhost:4502/crx/packmgr/service.jsp</targetURL>
     </configuration>
-</plugin>
-{% endhighlight %}
-</p>
+</plugin>{% endhighlight %}
+            </p>
 
-</section>
-    </div>
-</div>
-    </div>
+        </section>
+    </section>
+</main>
+
 {% include footer.ext %}
 </body>
 </html>
