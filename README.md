@@ -1,9 +1,24 @@
-NEBA
+
+
+![NEBA](README/neba-logo.png "NEBA logo") 
+
+Lightning fast and simple content mapping for Apache Sling and Adobe AEM
 ====
 
-NEBA integrates the Spring Framework into Apache Sling. It makes available all of Spring's features to allow using mature, best-practice solutions for the majority of system-level concerns common to applications based on Apache SLing, such as Adobe AEM. NEBA does so in full compliance with the open core philosophy - using exclusively mature, standardized open source software - gemini blueprint - for the integration into OSGi.
+[![codecov](https://codecov.io/gh/unic/neba/branch/develop/graph/badge.svg)](https://codecov.io/gh/unic/neba) 
+[![Travis](https://api.travis-ci.org/unic/neba.svg?branch=develop)](https://travis-ci.org/unic/neba/) 
+[![Maven Central](https://img.shields.io/maven-central/v/io.neba/io.neba.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aio.neba)
 
-All Spring and Sling features are accessible to developers using a lightweight, well documented API that does not couple the domain -specific implementation code to any implementation details of Sling, Spring or NEBA.
+NEBA in a nutshell
+--------------------
+Map Content using a lightweight, [well documented API](http://neba.io/documentation.html).
+Use lazy loading and great tooling to deliver high-performance applications. Completely compatible
+with Sling Models, HTL (Sightly), JSP and any application build atop the Sling API.
+
+Optional Spring integration
+----------------------
+NEBA optionally integrates the Spring framework, making available all of Spring's features, including Spring MVC.
+Spring is integrated using [gemini blueprint](http://www.eclipse.org/gemini/blueprint/), the OSGi Blueprint specification reference implementation.  
 
 Downloading artifacts
 ----------------------
@@ -37,7 +52,7 @@ Releasing NEBA
 ### Summary
 NEBA is released using the [maven jGitFlow plugin] (https://bitbucket.org/atlassian/jgit-flow/wiki/Home). Releasing requires modification rights for the neba github repository and the ability to sign and upload the artifacts to the sonatype OSS staging repository. Finally, the release must be accompanied by a release notes blog post published via the gh-pages branch and an announcement on Twitter. 
 
-###Prerequisites
+### Prerequisites
 
 To release NEBA, credentials for the sonatype [OSS repository](https://oss.sonatype.org/content/repositories/) are required, and must be configured in the maven settings.xml, like so:
 
@@ -48,7 +63,6 @@ To release NEBA, credentials for the sonatype [OSS repository](https://oss.sonat
    <password>...</password>
  </server>
 ````
-
 
 In addition, a GPG installation executable from the [maven-gpg-plugin](https://maven.apache.org/plugins/maven-gpg-plugin/) must be installed on the local system, e.g. [GPG4Win](https://www.gpg4win.org/) on windows. As the delivery artifacts are signed, you require a valid key pair, and the public key must have been [distributed to a public key server](https://www.gnupg.org/gph/en/manual/x457.html).
  

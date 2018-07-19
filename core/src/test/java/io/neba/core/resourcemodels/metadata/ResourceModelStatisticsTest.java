@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.metadata;
 
@@ -108,15 +108,15 @@ public class ResourceModelStatisticsTest {
     @Test
     public void testMaximumMappingDurationCalculation() throws Exception {
         withDurations(0, 2, 250, 0, 5, 6, 7, 199);
-        calculatMaximumMappingDuration();
+        calculateMaximumMappingDuration();
         // The maximum is the average of the maximum interval ([128, 256))
-        asserMaximumMappingDurationIs(192);
+        assertMaximumMappingDurationIs(192);
     }
 
     @Test
     public void testMaximumMappingDurationCalculationWithoutAnyElements() throws Exception {
-        calculatMaximumMappingDuration();
-        asserMaximumMappingDurationIs(0);
+        calculateMaximumMappingDuration();
+        assertMaximumMappingDurationIs(0);
     }
 
     @Test
@@ -142,9 +142,9 @@ public class ResourceModelStatisticsTest {
     @Test
     public void testFallbackWhenMappingDurationExceedsFrequencyTableBoundaries() throws Exception {
         withDurations(1, 1, MAX_VALUE);
-        calculatMaximumMappingDuration();
+        calculateMaximumMappingDuration();
         // The average of [2^14, 2^15), the right-most interval.
-        asserMaximumMappingDurationIs(24576);
+        assertMaximumMappingDurationIs(24576);
     }
 
     @Test
@@ -229,11 +229,11 @@ public class ResourceModelStatisticsTest {
         this.minimumDuration = this.testee.getMinimumMappingDuration();
     }
 
-    private void asserMaximumMappingDurationIs(double duration) {
+    private void assertMaximumMappingDurationIs(double duration) {
         assertThat(this.maximumDuration).isEqualTo(duration);
     }
 
-    private void calculatMaximumMappingDuration() {
+    private void calculateMaximumMappingDuration() {
         this.maximumDuration = this.testee.getMaximumMappingDuration();
     }
 

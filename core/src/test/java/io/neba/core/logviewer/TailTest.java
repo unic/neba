@@ -1,30 +1,31 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.core.logviewer;
 
+import io.neba.core.Eventual;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
 
 import static java.io.File.createTempFile;
 import static java.nio.file.Files.move;
@@ -32,13 +33,15 @@ import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TailTest extends TailTests {
+public class TailTest extends TailTests implements Eventual {
     private final ExecutorService executorService = newSingleThreadExecutor();
 
     private Tail testee;
@@ -124,8 +127,8 @@ public class TailTest extends TailTests {
         eventually(() ->
                 assertSendTextContains(
                         "06.09.2013 15:03:50.719 *ERROR* error message with stacktrace\r\n" +
-                        "  at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)\r\n" +
-                        "        at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)"));
+                                "  at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)\r\n" +
+                                "        at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)"));
     }
 
     @Test

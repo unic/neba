@@ -1,23 +1,23 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.api.tags.tags;
 
 import io.neba.api.Constants;
-import io.neba.api.resourcemodels.ResourceModelProvider;
+import io.neba.api.services.ResourceModelResolver;
 import io.neba.api.tags.DefineObjectsTag;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -40,7 +40,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -58,7 +61,7 @@ public class DefineObjectsTagTest {
     @Mock
     private SlingScriptHelper sling;
     @Mock
-    private ResourceModelProvider resourceModelProvider;
+    private ResourceModelResolver resourceModelResolver;
 
     private int tagExecutionReturnCode;
     private Object model = new Object();
@@ -73,10 +76,10 @@ public class DefineObjectsTagTest {
         doReturn(this.request).when(this.context).getRequest();
         doReturn(this.sling).when(this.bindings).get(eq(SLING));
 
-        doReturn(this.resourceModelProvider).when(this.sling).getService(eq(ResourceModelProvider.class));
-        doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModel(eq(this.resource));
-        doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
-        doReturn(this.model).when(this.resourceModelProvider).resolveMostSpecificModelWithBeanName(eq(this.resource), anyString());
+        doReturn(this.resourceModelResolver).when(this.sling).getService(eq(ResourceModelResolver.class));
+        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModel(eq(this.resource));
+        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
+        doReturn(this.model).when(this.resourceModelResolver).resolveMostSpecificModelWithName(eq(this.resource), anyString());
 
         withBindings(this.bindings);
         this.testee.setPageContext(this.context);
@@ -98,30 +101,30 @@ public class DefineObjectsTagTest {
         enableBaseTypeSupport();
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModelIncludingBaseTypes();
-        verifyGenericModelIsAddedToPageContext();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test
     public void testResolutionOfGenericModelWithoutBaseTypes() throws Exception {
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModel();
-        verifyGenericModelIsAddedToPageContext();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test
-    public void testResolutionOfGenericModelWithExplicitModelBeanName() throws Exception {
+    public void testResolutionOfGenericModelWithExplicitModelModelName() throws Exception {
         withDesiredModelNamed("name");
         executeTag();
-        verifyResourceIsAdaptedToMostSpecificModelWithProvidedBeanName();
-        verifyGenericModelIsAddedToPageContext();
+        verifyResourceIsAdaptedToMostSpecificModelWithProvidedModelName();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test
-    public void testResolutionOfGenericModelWithEmptyModelBeanName() throws Exception {
+    public void testResolutionOfGenericModelWithEmptyModelModelName() throws Exception {
         withDesiredModelNamed(" ");
         executeTag();
         verifyResourceIsAdaptedToMostSpecificModel();
-        verifyGenericModelIsAddedToPageContext();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -130,12 +133,37 @@ public class DefineObjectsTagTest {
         executeTag();
     }
 
-    private void withMissingProviderService() {
-        doReturn(null).when(this.sling).getService(eq(ResourceModelProvider.class));
+    @Test
+    public void testUserDefinedVariableNameOverridesDefaultVariableName() throws Exception {
+        withUserDefinedVariableName("userDefined");
+        executeTag();
+        verifyGenericModelIsAddedToPageContextWithVariableName("userDefined");
     }
 
-    private void verifyResourceIsAdaptedToMostSpecificModelWithProvidedBeanName() {
-        verify(this.resourceModelProvider).resolveMostSpecificModelWithBeanName(eq(this.resource), eq(this.desiredModelName));
+    @Test
+    public void testFallbackToDefaultVariableNameIfUserDefinedVariableNameIsNull() throws Exception {
+        withUserDefinedVariableName(null);
+        executeTag();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
+    }
+
+    @Test
+    public void testFallbackToDefaultVariableNameIfUserDefinedVariableNameIsEmpty() throws Exception {
+        withUserDefinedVariableName("");
+        executeTag();
+        verifyGenericModelIsAddedToPageContextWithDefaultVariableName();
+    }
+
+    private void withUserDefinedVariableName(String variableName) {
+        this.testee.setVar(variableName);
+    }
+
+    private void withMissingProviderService() {
+        doReturn(null).when(this.sling).getService(eq(ResourceModelResolver.class));
+    }
+
+    private void verifyResourceIsAdaptedToMostSpecificModelWithProvidedModelName() {
+        verify(this.resourceModelResolver).resolveMostSpecificModelWithName(eq(this.resource), eq(this.desiredModelName));
     }
 
     private void withDesiredModelNamed(String name) {
@@ -144,19 +172,23 @@ public class DefineObjectsTagTest {
     }
 
     private void verifyResourceIsAdaptedToMostSpecificModelIncludingBaseTypes() {
-        verify(this.resourceModelProvider).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
+        verify(this.resourceModelResolver).resolveMostSpecificModelIncludingModelsForBaseTypes(eq(this.resource));
     }
 
     private void verifyResourceIsAdaptedToMostSpecificModel() {
-        verify(this.resourceModelProvider).resolveMostSpecificModel(eq(this.resource));
+        verify(this.resourceModelResolver).resolveMostSpecificModel(eq(this.resource));
     }
 
     private void enableBaseTypeSupport() {
         this.testee.setIncludeGenericBaseTypes(true);
     }
 
-    private void verifyGenericModelIsAddedToPageContext() {
+    private void verifyGenericModelIsAddedToPageContextWithDefaultVariableName() {
         verify(this.context).setAttribute(eq(Constants.MODEL), eq(this.model));
+    }
+
+    private void verifyGenericModelIsAddedToPageContextWithVariableName(String variableName) {
+        verify(this.context).setAttribute(eq(variableName), eq(this.model));
     }
 
     private void withBindings(SlingBindings bindings) {

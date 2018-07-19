@@ -1,14 +1,28 @@
+/*
+  Copyright 2013 the original author or authors.
+
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 package io.neba.core.resourcemodels.registration;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +30,12 @@ import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
+import static org.apache.sling.api.SlingConstants.TOPIC_RESOURCE_CHANGED;
+import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
+import static org.osgi.service.event.EventConstants.EVENT_FILTER;
+import static org.osgi.service.event.EventConstants.EVENT_TOPIC;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Listens for <em>resource property</em> changes potentially altering the resource type -&gt; model relationships. Invalidates the
@@ -31,24 +51,50 @@ import static org.apache.sling.api.SlingConstants.PROPERTY_PATH;
  * Consequently, cached type hierarchy state must be cleared when these attributes change. This is what this event handler is responsible for.
  * <p>
  * <p>
- * Only valid cases handled herein. For instance, if a resource points to a sling:resourceType or sling:resourceSuperType, and
+ * Only valid cases are handled here. For instance, if a resource points to a sling:resourceType or sling:resourceSuperType, and
  * that type or super type resource is removed at runtime, this handler does not invalidate the cache as this represents an invalid
  * content state and is thus considered a programming error.
  * </p>
  *
  * @author Olaf Otto
  */
-@Service
+@Component(
+        service = EventHandler.class,
+        property = {
+                EVENT_TOPIC + "=" + TOPIC_RESOURCE_CHANGED,
+                /*
+                 * React to changes potentially altering the cacheable resource type hierarchy, unless they are occurring
+                 * in a location known not to contain data relevant to the type hierarchy, such as /var or /content
+                 */
+                EVENT_FILTER + "=" +
+                        "(&" +
+                        " (!(path=/content/*))" +
+                        " (!(path=/var/*))" +
+                        " (!(path=/jcr:*))" +
+                        " (!(path=/oak:*))" +
+                        " (|" +
+                        "  (resourceAddedAttributes=jcr:mixinTypes)" +
+                        "  (resourceAddedAttributes=sling:resourceSuperType)" +
+                        "  (resourceChangedAttributes=jcr:mixinTypes)" +
+                        "  (resourceChangedAttributes=sling:resourceType)" +
+                        "  (resourceChangedAttributes=sling:resourceSuperType)" +
+                        "  (resourceRemovedAttributes=sling:resourceSuperType)" +
+                        "  (resourceRemovedAttributes=jcr:mixinTypes)" +
+                        "))",
+                SERVICE_DESCRIPTION + "=An event handler invalidating cache resource type hierarchy information.",
+                SERVICE_VENDOR + "=neba.io"
+        }
+)
 public class MappableTypeHierarchyChangeListener implements EventHandler {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = getLogger(getClass());
     private final ExecutorService executorService = newSingleThreadExecutor();
     private final BlockingQueue<Object> invalidationRequests = new ArrayBlockingQueue<>(1);
     private boolean isShutDown = false;
 
-    @Autowired
+    @Reference
     private ModelRegistry modelRegistry;
 
-    @PostConstruct
+    @Activate
     protected void activate() {
         executorService.execute(() -> {
             while (!isShutDown) {
@@ -69,7 +115,7 @@ public class MappableTypeHierarchyChangeListener implements EventHandler {
         });
     }
 
-    @PreDestroy
+    @Deactivate
     protected void deactivate() {
         this.isShutDown = true;
         this.executorService.shutdownNow();

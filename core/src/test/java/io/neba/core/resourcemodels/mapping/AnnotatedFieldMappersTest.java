@@ -1,21 +1,21 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.AnnotatedFieldMapper;
+import io.neba.api.spi.AnnotatedFieldMapper;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.Annotations;
 import org.apache.sling.api.resource.Resource;
@@ -79,31 +79,71 @@ public class AnnotatedFieldMappersTest {
 
     @Before
     public void setUp() throws Exception {
-        doReturn(CustomAnnotation1.class).when(this.mapper1).getAnnotationType();
-        doReturn(Collection.class).when(this.mapper1).getFieldType();
+        doReturn(CustomAnnotation1.class)
+                .when(this.mapper1)
+                .getAnnotationType();
 
-        doReturn(CustomAnnotation2.class).when(this.mapper2).getAnnotationType();
-        doReturn(Resource.class).when(this.mapper2).getFieldType();
+        doReturn(Collection.class)
+                .when(this.mapper1)
+                .getFieldType();
 
-        doReturn(CustomAnnotation2.class).when(this.mapper3).getAnnotationType();
-        doReturn(Resource.class).when(this.mapper3).getFieldType();
 
-        doReturn(this.field1).when(this.metadata1).getField();
-        doReturn(this.field1.getType()).when(this.metadata1).getType();
-        doReturn(this.field2).when(this.metadata2).getField();
-        doReturn(this.field2.getType()).when(this.metadata2).getType();
+        doReturn(CustomAnnotation2.class)
+                .when(this.mapper2)
+                .getAnnotationType();
 
-        doReturn(this.annotations1).when(this.metadata1).getAnnotations();
-        doReturn(this.annotations2).when(this.metadata2).getAnnotations();
+        doReturn(Resource.class)
+                .when(this.mapper2)
+                .getFieldType();
+
+
+        doReturn(CustomAnnotation2.class)
+                .when(this.mapper3)
+                .getAnnotationType();
+
+        doReturn(Resource.class)
+                .when(this.mapper3)
+                .getFieldType();
+
+
+        doReturn(this.field1)
+                .when(this.metadata1)
+                .getField();
+
+        doReturn(this.field1.getType())
+                .when(this.metadata1)
+                .getType();
+
+
+        doReturn(this.field2)
+                .when(this.metadata2)
+                .getField();
+
+        doReturn(this.field2.getType())
+                .when(this.metadata2)
+                .getType();
+
+
+        doReturn(this.annotations1)
+                .when(this.metadata1)
+                .getAnnotations();
+
+        doReturn(this.annotations2)
+                .when(this.metadata2)
+                .getAnnotations();
 
         final List<Annotation> ann1 = new ArrayList<>();
         ann1.add(annotation1);
-        doAnswer(invocationOnMock -> ann1.iterator()).when(this.annotations1).iterator();
+        doAnswer(invocationOnMock -> ann1.iterator())
+                .when(this.annotations1)
+                .iterator();
 
         final List<Annotation> ann2 = new ArrayList<>();
         ann2.add(annotation2);
         ann2.add(metaAnnotation1);
-        doAnswer(invocationOnMock -> ann2.iterator()).when(this.annotations2).iterator();
+        doAnswer(invocationOnMock -> ann2.iterator())
+                .when(this.annotations2)
+                .iterator();
     }
 
     @Test(expected = IllegalArgumentException.class)

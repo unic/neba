@@ -1,26 +1,29 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.logviewer;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletConfig;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,10 +35,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
+import static java.lang.Class.forName;
 import static java.lang.Thread.currentThread;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
  * A web console plugin for tailing and downloading the CQ log files placed within the sling log directory as configured in the
@@ -43,27 +50,41 @@ import static org.apache.commons.lang.StringUtils.*;
  *
  * @author Olaf Otto
  */
-@Service
+@Component(
+        service = Servlet.class,
+        property = {
+                "felix.webconsole.label=" + LogfileViewerConsolePlugin.LABEL,
+                "service.description=Provides a Felix console plugin for monitoring and downloading logfiles.",
+                SERVICE_VENDOR + "=neba.io"
+        }
+)
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
-    private static final String LABEL = "logviewer";
+    static final String LABEL = "logviewer";
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
+    private static final String DECORATED_OBJECT_FACTORY = "org.eclipse.jetty.util.DecoratedObjectFactory";
 
-    @Autowired
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private boolean isManagingDecoratedObjectFactory = false;
+
+    @Reference
     private TailServlet tailServlet;
 
-    @Autowired
+    @Reference
     private LogFiles logFiles;
 
-
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public void init() throws ServletException {
+        super.init();
         final ClassLoader ccl = currentThread().getContextClassLoader();
         try {
+            injectDecoratorObjectFactoryIntoServletContext();
             currentThread().setContextClassLoader(getClass().getClassLoader());
-            this.tailServlet.init(config);
-        } catch (RuntimeException e) {
-            throw new ServletException("Unable to initialize the tail servlet - the log viewer will not be available", e);
+            this.tailServlet.init(getServletConfig());
+        } catch (Throwable t) {
+            this.logger.error("Unable to initialize the tail servlet - the log viewer will not be available", t);
+            // We have to catch an re-throw here, as Sling tends not to log exceptions thrown in servlet's init() methods.
+            throw new ServletException("Unable to initialize the tail servlet - the log viewer will not be available", t);
         } finally {
             currentThread().setContextClassLoader(ccl);
         }
@@ -72,6 +93,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     @Override
     public void destroy() {
         super.destroy();
+        removeDecoratorObjectFactoryFromServletContext();
         this.tailServlet.destroy();
     }
 
@@ -97,20 +119,9 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     @Override
-    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
         writeScriptIncludes(res);
         writeHead(res);
-    }
-
-    private void writeHead(HttpServletResponse res) throws IOException {
-        StringBuilder options = new StringBuilder(1024);
-        this.logFiles.resolveLogFiles().forEach(file ->
-                 options.append("<option value=\"").append(file.getAbsolutePath()).append("\" ")
-                .append("title=\"").append(file.getAbsolutePath()).append("\">")
-                .append(file.getParentFile().getName()).append('/').append(file.getName())
-                .append("</option>"));
-        writeFromTemplate(res, "head.html", options.toString());
-        writeFromTemplate(res, "body.html");
     }
 
     @Override
@@ -128,6 +139,42 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         }
 
         super.doGet(req, res);
+    }
+
+    private void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        ServletContext servletContext = getServletContext();
+        if (servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isDecoratedObjectFactoryAvailable()) {
+            return;
+        }
+
+        servletContext.setAttribute(DECORATED_OBJECT_FACTORY, forName(DECORATED_OBJECT_FACTORY).newInstance());
+        this.isManagingDecoratedObjectFactory = true;
+    }
+
+    private boolean isDecoratedObjectFactoryAvailable() {
+        try {
+            forName(DECORATED_OBJECT_FACTORY, false, getClass().getClassLoader());
+            return true;
+        } catch (Throwable ex) {
+            return false;
+        }
+    }
+
+    private void removeDecoratorObjectFactoryFromServletContext() {
+        if (this.isManagingDecoratedObjectFactory) {
+            getServletContext().removeAttribute(DECORATED_OBJECT_FACTORY);
+        }
+    }
+
+    private void writeHead(HttpServletResponse res) throws IOException {
+        StringBuilder options = new StringBuilder(1024);
+        this.logFiles.resolveLogFiles().forEach(file ->
+                options.append("<option value=\"").append(file.getAbsolutePath()).append("\" ")
+                        .append("title=\"").append(file.getAbsolutePath()).append("\">")
+                        .append(file.getParentFile().getName()).append('/').append(file.getName())
+                        .append("</option>"));
+        writeHeadFromTemplate(res, options.toString());
+        writeBodyFromTemplate(res);
     }
 
     /**
@@ -155,13 +202,13 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    private void writeFromTemplate(HttpServletResponse response, String templateName, Object... templateArgs) throws IOException {
-        String template = readTemplate(templateName);
+    private void writeHeadFromTemplate(HttpServletResponse response, Object... templateArgs) throws IOException {
+        String template = readTemplate("head.html");
         response.getWriter().printf(template, templateArgs);
     }
 
-    private void writeFromTemplate(HttpServletResponse response, String templateName) throws IOException {
-        String template = readTemplate(templateName);
+    private void writeBodyFromTemplate(HttpServletResponse response) throws IOException {
+        String template = readTemplate("body.html");
         response.getWriter().write(template);
     }
 

@@ -1,21 +1,22 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.caching;
 
+import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache.Configuration;
 import io.neba.core.util.Key;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -23,20 +24,18 @@ import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
-import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletResponse;
 import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -54,20 +53,30 @@ public class RequestScopedResourceModelCacheTest {
     @Mock
     private FilterChain chain;
     @Mock
-    private Logger logger;
+    private Configuration configuration;
 
     private Object model = new Object();
     private Class<?> modelType = Object.class;
 
     private Object cachedModel;
 
-    @InjectMocks
     private RequestScopedResourceModelCache testee;
 
     @Before
-    public void setUp() throws Exception {
-        doReturn("GET").when(this.request).getMethod();
-        doReturn(this.requestPathInfo).when(this.request).getRequestPathInfo();
+    public void setUp() {
+        this.testee = new RequestScopedResourceModelCache();
+        doReturn("GET")
+                .when(this.request)
+                .getMethod();
+
+        doReturn(this.requestPathInfo)
+                .when(this.request)
+                .getRequestPathInfo();
+
+        doReturn(true).when(this.configuration).enabled();
+        doReturn(false).when(this.configuration).safeMode();
+
+        this.testee.activate(this.configuration);
     }
 
     @Test
@@ -80,7 +89,7 @@ public class RequestScopedResourceModelCacheTest {
             putModelInCache();
 
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
             return null;
         });
     }
@@ -98,7 +107,7 @@ public class RequestScopedResourceModelCacheTest {
 
             withResourcePath("/junit/test/1");
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
             return null;
         });
     }
@@ -110,12 +119,12 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withSelector("new.selector");
 
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
             return null;
         });
     }
@@ -127,12 +136,12 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withSuffix("/newSuffix");
 
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
             return null;
         });
     }
@@ -146,12 +155,12 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withPath("/new/path");
 
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
             return null;
         });
     }
@@ -163,12 +172,12 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withQueryString("new=parameter");
 
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
             return null;
         });
     }
@@ -181,7 +190,7 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withSelector("new.selector");
 
@@ -199,7 +208,7 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withSuffix("/newSuffix");
 
@@ -219,7 +228,7 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withPath("/new/path");
 
@@ -239,12 +248,12 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withPath("/a/page/jcr:content/parsys");
 
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
             return null;
         });
     }
@@ -257,7 +266,7 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelWasFoundInCache();
+            assertModelIsInCache();
 
             withQueryString("new=parameter");
 
@@ -268,86 +277,35 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     @Test
-    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheWrite() throws Exception {
-        withoutRequestAttributes();
+    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheWrite() {
         putModelInCache();
     }
 
     @Test
-    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheRead() throws Exception {
-        withoutRequestAttributes();
+    public void testCacheGracefullyHandlesMissingRequestContextDuringCacheRead() {
         lookupModelFromCache();
         assertModelIsNotInCache();
     }
 
     @Test
-    public void testStatisticsEnabledForAnyRequestUri() throws Exception {
-        enableStatistics();
-        withRequestUri("/arbitrary/request/uri.html");
-
+    public void testNoModelsAreStoredWhenCacheIsDisabled() throws Exception {
         request(() -> {
+            withDisabledCache();
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            lookupModelFromCache();
+            assertModelIsNotInCache();
+
             return null;
         });
-
-        verifyStatisticsReportLogs("Request scoped cache report for GET /arbitrary/request/uri.html:\n" +
-                "Hits: 2, misses: 0, writes: 1, total number of items: 1\n" +
-                "Key {/junit/test/1, class java.lang.Object}: misses=0, hits=2, writes=1\n");
-        verifyNothingElseIsReported();
     }
 
-    @Test
-    public void testStatisticsEnabledForSpecificRequestUri() throws Exception {
-        withStatisticsRestrictedTo("/junit/test/2");
-        withRequestUri("/junit/test/1.html");
-        enableStatistics();
-
-        request(() -> {
-            withResourcePath("/junit/test/1");
-            putModelInCache();
-            return null;
-        });
-
-        verifyNothingIsReported();
-
-        withRequestUri("/junit/test/2.html");
-        request(() -> {
-            withResourcePath("/junit/test/2");
-            putModelInCache();
-            return null;
-        });
-
-        verifyStatisticsReportLogs("Request scoped cache report for GET /junit/test/2.html:\n" +
-                "Hits: 0, misses: 0, writes: 1, total number of items: 1\n" +
-                "Key {/junit/test/2, class java.lang.Object}: misses=0, hits=0, writes=1\n");
-        verifyNothingElseIsReported();
-    }
-
-    private void verifyNothingIsReported() {
-        verify(this.logger, never()).info(anyString());
-    }
-
-    private void withStatisticsRestrictedTo(String urlFragment) {
-        this.testee.setRestrictStatisticsTo(urlFragment);
-    }
-
-    private void verifyNothingElseIsReported() {
-        verifyNoMoreInteractions(logger);
-    }
-
-    private void verifyStatisticsReportLogs(String msg) {
-        verify(logger).info(msg);
-    }
-
-    private void enableStatistics() {
-        this.testee.setEnableStatistics(true);
+    private void withDisabledCache() {
+        doReturn(false).when(this.configuration).enabled();
     }
 
     private void withSafeMode() {
-        this.testee.setSafeMode(true);
+        doReturn(true).when(this.configuration).safeMode();
     }
 
     private void withQueryString(String queryString) {
@@ -366,19 +324,19 @@ public class RequestScopedResourceModelCacheTest {
         when(this.requestPathInfo.getSelectorString()).thenReturn(selectorString);
     }
 
-    private void assertModelWasFoundInCache() {
-        assertThat(this.cachedModel).isEqualTo(this.model);
-    }
-
     private void putModelInCache() {
         testee.put(this.resource, this.model, new Key(this.resource.getPath(), this.modelType));
+    }
+
+    private void assertModelIsInCache() {
+        assertThat(this.cachedModel).isEqualTo(this.model);
     }
 
     private void assertModelIsNotInCache() {
         assertThat(this.cachedModel).isNull();
     }
 
-    private void lookupModelFromCache() throws Exception {
+    private void lookupModelFromCache() {
         cachedModel = testee.get(new Key(this.resource.getPath(), this.modelType));
     }
 
@@ -386,16 +344,8 @@ public class RequestScopedResourceModelCacheTest {
         doReturn(path).when(this.resource).getPath();
     }
 
-    private void withRequestUri(String uri) {
-        doReturn(uri).when(this.request).getRequestURI();
-    }
-
     private void request(final Callable<Object> callable) throws Exception {
         doAnswer(invocationOnMock -> callable.call()).when(this.chain).doFilter(eq(this.request), eq(this.response));
         this.testee.doFilter(this.request, this.response, this.chain);
-    }
-
-    private void withoutRequestAttributes() {
-        RequestContextHolder.setRequestAttributes(null);
     }
 }

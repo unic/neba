@@ -1,56 +1,68 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p/>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p/>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p/>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p/>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.ResourceModelPostProcessor;
-import io.neba.core.resourcemodels.metadata.*;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.api.spi.AopSupport;
+import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelPostProcessor;
+import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
+import io.neba.core.resourcemodels.metadata.MethodMetaData;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
+import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
+import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResourcePaths;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.Advised;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.NoOp;
+
+import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceToModelMapperTest {
-    /**
-     * @author Christoph Huber
-     * @author Olaf Otto
-     */
     public static class TestModel {
+    }
+
+    public static class AopTestModel extends TestModel {
+    }
+
+    public static class TestModelWithMappableField extends TestModel {
+        @SuppressWarnings("unused")
+        private String mapped;
     }
 
     @Mock
@@ -58,7 +70,7 @@ public class ResourceToModelMapperTest {
     @Mock
     private ValueMap valueMap;
     @Mock
-    private BeanFactory factory;
+    private ResourceModelFactory factory;
     @Mock
     private ModelProcessor modelProcessor;
     @Mock
@@ -66,20 +78,22 @@ public class ResourceToModelMapperTest {
     @Mock
     private NestedMappingSupport nestedMappingSupport;
     @Mock
-    private ResourceModelMetaData resourceMetaData;
+    private ResourceModelMetaData modelMetaData;
     @Mock
     private ResourceModelStatistics resourceModelStatistics;
     @Mock
     private AnnotatedFieldMappers annotatedFieldMappers;
     @Mock
+    private PlaceholderVariableResolvers placeholderVariableResolvers;
+    @Mock
     private Mapping<Object> ongoingMapping;
 
     private TestModel model;
-    private Class<?> beanType;
+    private Class<?> modelType;
     private ResourceModelPostProcessor postProcessor;
     private TestModel modelReturnedFromPostProcessor;
     private TestModel mappedModel;
-    private TargetSource targetSource;
+    private AopSupport aopSupport;
 
     @InjectMocks
     private ResourceToModelMapper testee;
@@ -87,40 +101,56 @@ public class ResourceToModelMapperTest {
     @Before
     @SuppressWarnings("unchecked")
     public void prepareMapper() {
-        when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(this.valueMap);
-        when(this.resourceModelMetaDataRegistrar.get(isA(Class.class))).thenReturn(this.resourceMetaData);
-        when(this.nestedMappingSupport.begin(isA(Mapping.class))).thenReturn(null);
-        when(this.resourceMetaData.getMappableFields()).thenReturn(new MappedFieldMetaData[]{});
-        when(this.resourceMetaData.getPostMappingMethods()).thenReturn(new MethodMetaData[]{});
-        when(this.resourceMetaData.getPreMappingMethods()).thenReturn(new MethodMetaData[]{});
-        when(this.resourceMetaData.getStatistics()).thenReturn(this.resourceModelStatistics);
+        when(this.resource.adaptTo(eq(ValueMap.class)))
+                .thenReturn(this.valueMap);
+
+        when(this.resource.getPath())
+                .thenReturn("/resource/path");
+
+        when(this.resourceModelMetaDataRegistrar.get(isA(Class.class)))
+                .thenReturn(this.modelMetaData);
+
+        when(this.nestedMappingSupport.begin(isA(Mapping.class)))
+                .thenReturn(null);
+
+        when(this.modelMetaData.getMappableFields())
+                .thenReturn(new MappedFieldMetaData[]{});
+
+        when(this.modelMetaData.getAfterMappingMethods())
+                .thenReturn(new MethodMetaData[]{});
+
+        when(this.modelMetaData.getStatistics())
+                .thenReturn(this.resourceModelStatistics);
+
         this.model = new TestModel();
-        this.beanType = TestModel.class;
+        this.modelType = TestModel.class;
     }
 
     @Test
-    public void testFieldMappingWithBeanSource() throws Exception {
+    public void testFieldMappingWithModelSource() {
         mapResourceToModel();
         assertModelReturnedFromMapperIsOriginalModel();
     }
 
     @Test
-    public void testPostProcessingWithoutChangedModel() throws Exception {
-        withPostProcessor(mock(ResourceModelPostProcessor.class));
+    public void testMapperSuccessfullyDelegatesFieldMapping() throws Exception {
+        withModelWithMappableField();
+        withResourceProperty("mapped", "value");
+
         mapResourceToModel();
-        verifyPostProcessorIsInvokedBeforeAndAfterMapping();
+
+        assertMappedModelHasProperty("mapped", "value");
     }
 
     @Test
-    public void testModelChangeInPreProcessing() throws Exception {
+    public void testPostProcessingWithoutChangedModel() {
         withPostProcessor(mock(ResourceModelPostProcessor.class));
-        withModelReturnedFromPreProcessing(new TestModel());
         mapResourceToModel();
-        assertModelReturnedFromMapperWasProvidedByPostProcessor();
+        verifyPostProcessorIsInvokedAfterMapping();
     }
 
     @Test
-    public void testModelChangeInPostProcessing() throws Exception {
+    public void testModelChangeInPostProcessing() {
         withPostProcessor(mock(ResourceModelPostProcessor.class));
         withModelReturnedFromPostProcessing(new TestModel());
         mapResourceToModel();
@@ -128,7 +158,7 @@ public class ResourceToModelMapperTest {
     }
 
     @Test
-    public void testNoModelChangeInPostProcessing() throws Exception {
+    public void testNoModelChangeInPostProcessing() {
         withPostProcessor(mock(ResourceModelPostProcessor.class));
         withModelReturnedFromPostProcessing(null);
         mapResourceToModel();
@@ -136,35 +166,25 @@ public class ResourceToModelMapperTest {
     }
 
     @Test
-    public void testNoModelChangeInPreProcessing() throws Exception {
-        withPostProcessor(mock(ResourceModelPostProcessor.class));
-        withModelReturnedFromPreProcessing(null);
+    public void testMappingPostProcessorIsInvokedOnDirectAdaptation() {
         mapResourceToModel();
-        assertModelReturnedFromMapperIsOriginalModel();
-    }
-
-    @Test
-    public void testMappingPostProcessorIsInvokedOnDirectAdaptation() throws Exception {
-        mapResourceToModel();
-        verify(this.modelProcessor).processBeforeMapping(isA(ResourceModelMetaData.class), eq(this.model));
         verify(this.modelProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
     }
 
     @Test
-    public void testMappingPostProcessorIsInvokedOnIndirectAdaptation() throws Exception {
+    public void testMappingPostProcessorIsInvokedOnIndirectAdaptation() {
         mapResourceToModel();
-        verify(this.modelProcessor).processBeforeMapping(isA(ResourceModelMetaData.class), eq(this.model));
         verify(this.modelProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
     }
 
-    @Test(expected = CycleInBeanInitializationException.class)
-    public void testHandlingOfCyclesDuringBeanInitialization() throws Exception {
+    @Test(expected = CycleInModelInitializationException.class)
+    public void testHandlingOfCyclesDuringModelInitialization() {
         withCycleCheckerReportingCycle();
         mapResourceToModel();
     }
 
     @Test
-    public void testHandlingOfCyclesDuringMappingPhase() throws Exception {
+    public void testHandlingOfCyclesDuringMappingPhase() {
         withCycleCheckerReportingCycle();
         withMappedModelReturnedFromMapping();
         mapResourceToModel();
@@ -173,46 +193,55 @@ public class ResourceToModelMapperTest {
     }
 
     @Test
-    public void testHandlingOfAdvisedModelBean() throws Exception {
-        withSpringAopProxyFor(TestModel.class);
+    public void testHandlingOfAdvisedModelModel() {
+        withAopSupportServiceReturningOriginalModel();
         mapResourceToModel();
-        verifyMapperObtainsOriginalBeanFromAdvisedProxy();
+        verifyMapperObtainsModelFromAopSupport();
         assertModelReturnedFromMapperIsOriginalModel();
     }
 
     @Test
-    public void testResourceModelInstantiationIsCountedIfMappingIsNotOngoing() throws Exception {
+    public void testRemovalOfAopSupportAtRuntime() {
+        withAopSupportServiceReturningOriginalModel();
+        unbindAopSupport();
+        mapResourceToModel();
+        verifyAopSupportIsNeverCalled();
+        assertModelReturnedFromMapperIsOriginalModel();
+    }
+
+    @Test
+    public void testResourceModelInstantiationIsCountedIfMappingIsNotOngoing() {
         mapResourceToModel();
         verifyModelInstantiationIsCounted();
     }
 
     @Test
-    public void testResourceModelInstantiationIsNotCountedIfMappingIsOngoing() throws Exception {
+    public void testResourceModelInstantiationIsNotCountedIfMappingIsOngoing() {
         withAlreadyOngoingMapping();
         mapResourceToModel();
         verifyModelInstantiationIsNotCounted();
     }
 
     @Test
-    public void testResourceModelMappingDurationIsCountedIfResourceModelIsNotAlreadyMapped() throws Exception {
+    public void testResourceModelMappingDurationIsCountedIfResourceModelIsNotAlreadyMapped() {
         mapResourceToModel();
         verifyMappingDurationIsTracked();
     }
 
     @Test
-    public void testResourceModelMappingDurationIsNotCountedIfResourceModelIsAlreadyMapped() throws Exception {
+    public void testResourceModelMappingDurationIsNotCountedIfResourceModelIsAlreadyMapped() {
         withOngoingMappingForSameResourceModel();
         mapResourceToModel();
         verifyMappingDurationIsNotTracked();
     }
 
     @Test
-    public void testRemovalOfNullPostProcessorDoesNotCauseException() throws Exception {
-        this.testee.unbind(null);
+    public void testRemovalOfNullPostProcessorDoesNotCauseException() {
+        this.testee.unbindProcessor(null);
     }
 
     private void withOngoingMappingForSameResourceModel() {
-        doReturn(true).when(this.nestedMappingSupport).hasOngoingMapping(this.resourceMetaData);
+        doReturn(true).when(this.nestedMappingSupport).hasOngoingMapping(this.modelMetaData);
     }
 
     private void verifyMappingDurationIsTracked() {
@@ -237,24 +266,23 @@ public class ResourceToModelMapperTest {
         verify(this.resourceModelStatistics, never()).countInstantiation();
     }
 
-    private void verifyMapperObtainsOriginalBeanFromAdvisedProxy() throws Exception {
-        verify(this.targetSource).getTarget();
+    private void verifyMapperObtainsModelFromAopSupport() {
+        verify(this.aopSupport).prepareForFieldInjection(this.model);
     }
 
-    private void withSpringAopProxyFor(Class<TestModel> superclass) throws Exception {
-        Enhancer enhancer = new Enhancer();
-        enhancer.setSuperclass(superclass);
-        enhancer.setCallback(NoOp.INSTANCE);
-        enhancer.setInterfaces(new Class[]{Advised.class});
-        Object enhanced = spy(enhancer.create());
-        assertThat(enhanced).isNotNull();
+    private void verifyAopSupportIsNeverCalled() {
+        verify(this.aopSupport, never()).prepareForFieldInjection(any());
+    }
 
-        this.targetSource = mock(TargetSource.class);
-        TestModel unwrappedBeanInstance = new TestModel();
-        doReturn(this.targetSource).when((Advised) enhanced).getTargetSource();
-        doReturn(unwrappedBeanInstance).when(this.targetSource).getTarget();
+    private void unbindAopSupport() {
+        this.testee.unbindAopSupport(this.aopSupport);
+    }
 
-        this.model = (TestModel) enhanced;
+    private void withAopSupportServiceReturningOriginalModel() {
+        this.model = new AopTestModel();
+        this.aopSupport = mock(AopSupport.class);
+        this.testee.bindAopSupport(this.aopSupport);
+        doReturn(new TestModel()).when(this.aopSupport).prepareForFieldInjection(this.model);
     }
 
     private void verifyCyclecheckIsNotEnded() {
@@ -280,35 +308,52 @@ public class ResourceToModelMapperTest {
         assertThat(this.mappedModel).isEqualTo(this.modelReturnedFromPostProcessor);
     }
 
+    private void assertMappedModelHasProperty(String name, String value) {
+        assertThat(this.model).hasFieldOrPropertyWithValue(name, value);
+    }
+
+    private void withResourceProperty(String key, String value) {
+        ValueMap properties = mock(ValueMap.class);
+        doReturn(value).when(properties).get(key, String.class);
+        doReturn(properties).when(this.resource).adaptTo(ValueMap.class);
+    }
+
+    private void withModelWithMappableField() throws NoSuchFieldException {
+        this.model = new TestModelWithMappableField();
+
+        ResourcePaths.ResourcePath path = mock(ResourcePaths.ResourcePath.class);
+        Field field = TestModelWithMappableField.class.getDeclaredField("mapped");
+        field.setAccessible(true);
+
+        MappedFieldMetaData mappedFieldMetaData = mock(MappedFieldMetaData.class);
+        doReturn(true).when(mappedFieldMetaData).isPropertyType();
+        doReturn("mapped").when(path).getPath();
+        doReturn(path).when(mappedFieldMetaData).getPath();
+        doReturn(String.class).when(mappedFieldMetaData).getType();
+        doReturn(field).when(mappedFieldMetaData).getField();
+
+        doReturn(new MappedFieldMetaData[]{ mappedFieldMetaData }).when(this.modelMetaData).getMappableFields();
+    }
+
     private void assertModelReturnedFromMapperIsOriginalModel() {
         assertThat(this.mappedModel).isEqualTo(this.model);
     }
 
-    private void withModelReturnedFromPreProcessing(TestModel model) {
-        this.modelReturnedFromPostProcessor = model;
-        when(this.postProcessor.processBeforeMapping(eq(this.model), eq(this.resource), eq(this.factory)))
-                .thenReturn(this.modelReturnedFromPostProcessor);
-    }
-
-    private void verifyPostProcessorIsInvokedBeforeAndAfterMapping() {
-        InOrder inOrder = inOrder(this.postProcessor, this.postProcessor);
-        inOrder.verify(this.postProcessor, times(1))
-                .processBeforeMapping(anyObject(), eq(this.resource), eq(this.factory));
-        inOrder.verify(this.postProcessor, times(1))
-                .processAfterMapping(anyObject(), eq(this.resource), eq(this.factory));
+    private void verifyPostProcessorIsInvokedAfterMapping() {
+        verify(this.postProcessor).processAfterMapping(anyObject(), eq(this.resource), eq(this.factory));
     }
 
     private void withPostProcessor(ResourceModelPostProcessor mock) {
         this.postProcessor = mock;
-        this.testee.bind(this.postProcessor);
+        this.testee.bindProcessor(this.postProcessor);
     }
 
     @SuppressWarnings("unchecked")
     private void mapResourceToModel() {
-        OsgiBeanSource<TestModel> source = mock(OsgiBeanSource.class);
-        when(source.getBean()).thenReturn(this.model);
+        OsgiModelSource<TestModel> source = mock(OsgiModelSource.class);
+        when(source.getModel()).thenReturn(this.model);
         when(source.getFactory()).thenReturn(this.factory);
-        doReturn(this.beanType).when(source).getBeanType();
+        doReturn(this.modelType).when(source).getModelType();
         this.mappedModel = this.testee.map(this.resource, source);
     }
 }

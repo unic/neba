@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.metadata;
 
@@ -36,7 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -50,7 +53,8 @@ public class ModelStatisticsConsolePluginTest {
     @Mock
     private ResourceModelMetaDataRegistrar registrar;
 
-    private List<ResourceModelMetaData> metadata;
+    private ResourceModelMetaData modelMetaData;
+    private List<ResourceModelMetaData> metadataList;
 
     private URL resourceUrl;
     private Writer internalWriter;
@@ -61,11 +65,17 @@ public class ModelStatisticsConsolePluginTest {
 
     @Before
     public void setUp() throws Exception {
-        this.metadata = new ArrayList<>();
+        this.metadataList = new ArrayList<>();
         this.internalWriter = new StringWriter();
         Writer writer = new PrintWriter(this.internalWriter);
-        doReturn(writer).when(this.response).getWriter();
-        doReturn(this.metadata).when(this.registrar).get();
+
+        doReturn(writer)
+                .when(this.response)
+                .getWriter();
+
+        doReturn(this.metadataList)
+                .when(this.registrar)
+                .get();
     }
 
     @Test
@@ -101,11 +111,11 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":100," +
-                                    "\"averageMappingDuration\":10," +
-                                    "\"totalMappingDuration\":1000," +
-                                    "\"maximumMappingDuration\":20," +
-                                    "\"minimumMappingDuration\":0," +
-                                    "\"mappingDurationMedian\":5," +
+                                    "\"averageMappingDuration\":10.0," +
+                                    "\"totalMappingDuration\":1000.0," +
+                                    "\"maximumMappingDuration\":20.0," +
+                                    "\"minimumMappingDuration\":0.0," +
+                                    "\"mappingDurationMedian\":5.0," +
                                     "\"cacheHits\":0" +
                                     "}," +
 
@@ -117,11 +127,11 @@ public class ModelStatisticsConsolePluginTest {
                                     "\"greedyFields\":0," +
                                     "\"instantiations\":0," +
                                     "\"mappings\":200," +
-                                    "\"averageMappingDuration\":20," +
-                                    "\"totalMappingDuration\":1000," +
-                                    "\"maximumMappingDuration\":40," +
-                                    "\"minimumMappingDuration\":1," +
-                                    "\"mappingDurationMedian\":10," +
+                                    "\"averageMappingDuration\":20.0," +
+                                    "\"totalMappingDuration\":1000.0," +
+                                    "\"maximumMappingDuration\":40.0," +
+                                    "\"minimumMappingDuration\":1.0," +
+                                    "\"mappingDurationMedian\":10.0," +
                                     "\"cacheHits\":0" +
                                     "}" +
                                 "]");
@@ -140,11 +150,11 @@ public class ModelStatisticsConsolePluginTest {
                         "\"greedyFields\":0," +
                         "\"instantiations\":0," +
                         "\"mappings\":100," +
-                        "\"averageMappingDuration\":10," +
-                        "\"totalMappingDuration\":1000," +
-                        "\"maximumMappingDuration\":20," +
-                        "\"minimumMappingDuration\":0," +
-                        "\"mappingDurationMedian\":5," +
+                        "\"averageMappingDuration\":10.0," +
+                        "\"totalMappingDuration\":1000.0," +
+                        "\"maximumMappingDuration\":20.0," +
+                        "\"minimumMappingDuration\":0.0," +
+                        "\"mappingDurationMedian\":5.0," +
                         "\"cacheHits\":0," +
                         "\"mappingDurationFrequencies\":{" +
                             "\"[0, 1)\":10," +
@@ -169,12 +179,82 @@ public class ModelStatisticsConsolePluginTest {
         assertStatisticsAreReset();
     }
 
+    @Test
+    public void testCalculationOfNumberOfLazyLoadingFields() throws ServletException, IOException {
+        addStatistics("junit.test.type.NameOne");
+        withRequestPath("/system/console/modelstatistics/api/statistics/junit.test.type.NameOne");
+
+        doGet();
+        assertResponseContains("\"lazyFields\":0");
+
+        withGreedyField();
+        doGet();
+        assertResponseContains("\"lazyFields\":0");
+
+        withLazyField();
+        doGet();
+        assertResponseContains("\"lazyFields\":1");
+
+        withChildrenAnnotationOnField();
+        doGet();
+        assertResponseContains("\"lazyFields\":1");
+
+        withCollectionTypedReference();
+        doGet();
+        assertResponseContains("\"lazyFields\":1");
+    }
+
+    @Test
+    public void testCalculationOfGreedyFields() throws ServletException, IOException {
+        addStatistics("junit.test.type.NameOne");
+        withRequestPath("/system/console/modelstatistics/api/statistics/junit.test.type.NameOne");
+
+        doGet();
+        assertResponseContains("\"greedyFields\":0");
+
+        withGreedyField();
+        doGet();
+        assertResponseContains("\"greedyFields\":1");
+
+        withLazyField();
+        doGet();
+        assertResponseContains("\"greedyFields\":0");
+    }
+
+    private void withGreedyField() {
+        MappedFieldMetaData mappedFieldMetaData = mock(MappedFieldMetaData.class);
+        doReturn(new MappedFieldMetaData[]{ mappedFieldMetaData }).when(this.modelMetaData).getMappableFields();
+    }
+
+    private void withCollectionTypedReference() {
+        MappedFieldMetaData mappedFieldMetaData = mock(MappedFieldMetaData.class);
+        doReturn(true).when(mappedFieldMetaData).isReference();
+        doReturn(true).when(mappedFieldMetaData).isInstantiableCollectionType();
+        doReturn(new MappedFieldMetaData[]{ mappedFieldMetaData }).when(this.modelMetaData).getMappableFields();
+    }
+
+    private void withChildrenAnnotationOnField() {
+        MappedFieldMetaData mappedFieldMetaData = mock(MappedFieldMetaData.class);
+        doReturn(true).when(mappedFieldMetaData).isChildrenAnnotationPresent();
+        doReturn(new MappedFieldMetaData[]{ mappedFieldMetaData }).when(this.modelMetaData).getMappableFields();
+    }
+
+    private void withLazyField() {
+        MappedFieldMetaData mappedFieldMetaData = mock(MappedFieldMetaData.class);
+        doReturn(true).when(mappedFieldMetaData).isLazy();
+        doReturn(new MappedFieldMetaData[]{ mappedFieldMetaData }).when(this.modelMetaData).getMappableFields();
+    }
+
     private void assertResponseContains(String responseFragment) {
         assertThat(this.renderedResponse).contains(responseFragment);
     }
 
     private void assertResponseIsEqualTo(String response) {
         assertThat(this.renderedResponse).isEqualTo(response);
+    }
+
+    private void addStatistics(String modelTypeName) {
+        addStatistics(modelTypeName, 0, 0, 0, 0, 0, 0, 0, new int[]{}, new int[]{});
     }
 
     private void addStatistics(String typeName,
@@ -205,7 +285,8 @@ public class ModelStatisticsConsolePluginTest {
         doReturn(mappingDurationIntervalBoundaries).when(statistics).getMappingDurationIntervalBoundaries();
         doReturn(mappingDurationFrequencies).when(statistics).getMappingDurationFrequencies();
 
-        this.metadata.add(metaData);
+        this.modelMetaData = metaData;
+        this.metadataList.add(metaData);
     }
 
     private void withRequestPath(String requestPath) {
@@ -220,7 +301,7 @@ public class ModelStatisticsConsolePluginTest {
     }
 
     private void assertStatisticsAreReset() {
-        for (ResourceModelMetaData metaData : this.metadata) {
+        for (ResourceModelMetaData metaData : this.metadataList) {
             verify(metaData.getStatistics()).reset();
         }
     }

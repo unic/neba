@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.metadata;
 
@@ -20,13 +20,14 @@ import io.neba.api.annotations.Children;
 import io.neba.api.annotations.Path;
 import io.neba.api.annotations.Reference;
 import io.neba.api.annotations.This;
-import io.neba.api.resourcemodels.Optional;
+import io.neba.api.resourcemodels.Lazy;
 import io.neba.core.util.Annotations;
 import io.neba.core.util.ReflectionUtil;
-import org.apache.commons.lang.ClassUtils;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.LazyLoader;
+import io.neba.core.util.ResourcePaths;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.LazyLoader;
+import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -38,9 +39,12 @@ import java.util.Date;
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
-import static org.apache.commons.lang.StringUtils.*;
+import static io.neba.core.util.ReflectionUtil.makeAccessible;
+import static io.neba.core.util.ResourcePaths.path;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
-import static org.springframework.util.ReflectionUtils.makeAccessible;
 
 /**
  * Represents meta-data of a mappable {@link io.neba.api.annotations.ResourceModel resource model} field.
@@ -49,6 +53,8 @@ import static org.springframework.util.ReflectionUtils.makeAccessible;
  * @author Olaf Otto
  */
 public class MappedFieldMetaData {
+    private boolean isLazy;
+
     /**
      * Whether a property cannot be represented by a resource but must stem
      * from a value map representing the properties of a resource.
@@ -63,20 +69,18 @@ public class MappedFieldMetaData {
 
     private final Field field;
     private final Annotations annotations;
-    private final String path;
+    private final ResourcePaths.ResourcePath path;
     private final boolean isReference;
     private final boolean isAppendPathPresentOnReference;
     private final String appendPathOnReference;
     private final boolean isThisReference;
     private final boolean isPathAnnotationPresent;
-    private final boolean isPathExpressionPresent;
     private final boolean isPropertyType;
     private final boolean isCollectionType;
     private final boolean isInstantiableCollectionType;
     private final boolean isChildrenAnnotationPresent;
     private final boolean isResolveBelowEveryChildPathPresentOnChildren;
     private final String resolveBelowEveryChildPathOnChildren;
-    private final boolean isOptional;
 
     private final Class<?> typeParameter;
     private final Class<?> arrayTypeOfComponentType;
@@ -84,7 +88,6 @@ public class MappedFieldMetaData {
     private final Class<?> fieldType;
     private final Class<?> modelType;
     private final Factory collectionProxyFactory;
-
 
     /**
      * Immediately extracts all metadata for the provided field.
@@ -102,13 +105,13 @@ public class MappedFieldMetaData {
         // Atomic initialization
         this.modelType = modelType;
         this.field = field;
-        this.isOptional = field.getType() == Optional.class;
+        this.isLazy = field.getType() == Lazy.class;
         this.annotations = annotations(field);
 
         // Treat Optional<X> fields transparently like X fields: This way, anyone operating on the metadata is not
         // forced to be aware of the lazy-loading value holder indirection but can operate on the target type directly.
-        this.genericFieldType = this.isOptional ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
-        this.fieldType = this.isOptional ? getRawType(this.genericFieldType, this.modelType) : field.getType();
+        this.genericFieldType = this.isLazy ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
+        this.fieldType = this.isLazy ? getRawType(this.genericFieldType, this.modelType) : field.getType();
         this.isCollectionType = Collection.class.isAssignableFrom(this.fieldType);
         this.isPathAnnotationPresent = this.annotations.contains(Path.class);
         this.isReference = this.annotations.contains(Reference.class);
@@ -123,7 +126,6 @@ public class MappedFieldMetaData {
         this.typeParameter = resolveTypeParameter();
         this.arrayTypeOfComponentType = resolveArrayTypeOfComponentType();
         this.path = getPathInternal();
-        this.isPathExpressionPresent = isPathExpressionPresentInternal();
         this.isPropertyType = isPropertyTypeInternal();
         this.isInstantiableCollectionType = ReflectionUtil.isInstantiableCollectionType(this.fieldType);
 
@@ -146,10 +148,10 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * Prepares a proxy instance of a collection type for use as a {@link org.springframework.cglib.proxy.Factory}.
-     * Proxy instances are always {@link org.springframework.cglib.proxy.Factory factories}.
-     * Using {@link org.springframework.cglib.proxy.Factory#newInstance(org.springframework.cglib.proxy.Callback)}
-     * is significantly more efficient than using {@link org.springframework.cglib.proxy.Enhancer#create(Class, org.springframework.cglib.proxy.Callback)}.
+     * Prepares a proxy instance of a collection type for use as a {@link Factory}.
+     * Proxy instances are always {@link Factory factories}.
+     * Using {@link Factory#newInstance(net.sf.cglib.proxy.Callback)}
+     * is significantly more efficient than using {@link Enhancer#create(Class, net.sf.cglib.proxy.Callback)}.
      */
     private Factory prepareProxyFactoryForCollectionTypes() {
         if (this.isInstantiableCollectionType) {
@@ -192,15 +194,7 @@ public class MappedFieldMetaData {
         // The path must be relative, otherwise resource#getChild will be equivalent to
         // resolver.getResource("/..."), i.e. the resolution will not be relative.
         return isResolveBelowEveryChildPathPresentOnChildren &&
-               relativePath.charAt(0) == '/' ? relativePath.substring(1) : relativePath;
-    }
-
-    /**
-     * @return Whether the path name contains an expression.
-     * An expression has the form ${value}, e.g. &#64;Path("/content/${language}/homepage").
-     */
-    private boolean isPathExpressionPresentInternal() {
-        return this.isPathAnnotationPresent && this.path.contains("$");
+                relativePath.charAt(0) == '/' ? relativePath.substring(1) : relativePath;
     }
 
     private Class<?> resolveTypeParameter() {
@@ -234,7 +228,7 @@ public class MappedFieldMetaData {
      * The path is derived from either the field name (this is the default)
      * or from an explicit {@link io.neba.api.annotations.Path} annotation.
      */
-    private String getPathInternal() {
+    private ResourcePaths.ResourcePath getPathInternal() {
         String resolvedPath;
         if (isPathAnnotationPresent()) {
             Path path = this.annotations.get(Path.class);
@@ -246,7 +240,7 @@ public class MappedFieldMetaData {
         } else {
             resolvedPath = field.getName();
         }
-        return resolvedPath;
+        return path(resolvedPath);
     }
 
     /**
@@ -259,12 +253,12 @@ public class MappedFieldMetaData {
         return
                 // References are always contained in properties of type String or String[].
                 isReference()
-                    || isPropertyType(type)
-                    || (type.isArray() || isCollectionType) && isPropertyType(getTypeParameter());
+                        || isPropertyType(type)
+                        || (type.isArray() || isCollectionType) && isPropertyType(getTypeParameter());
     }
 
     /**
-     * @return The {@link org.springframework.util.ReflectionUtils#makeAccessible(java.lang.reflect.Field) accessible}
+     * @return The {@link java.lang.reflect.Field#setAccessible(boolean) accessible}
      * {@link java.lang.reflect.Field} represented by this meta data.
      */
     public Field getField() {
@@ -306,13 +300,13 @@ public class MappedFieldMetaData {
      * @return The path from which this field's value shall be mapped; may stem
      * from the field name or a {@link io.neba.api.annotations.Path} annotation.
      */
-    public String getPath() {
+    public ResourcePaths.ResourcePath getPath() {
         return this.path;
     }
 
     /**
      * @return the type the resolved value for the field shall have, which is either the {@link java.lang.reflect.Field#getType() field type},
-     * or the generic parameter type in case of {@link #isOptional() optional} fields.
+     * or the generic parameter type in case of {@link #isLazy() lazy}} fields.
      */
     public Class<?> getType() {
         return this.fieldType;
@@ -325,14 +319,6 @@ public class MappedFieldMetaData {
         return this.isPathAnnotationPresent;
     }
 
-
-    /**
-     * @ return Whether this field has a {@link io.neba.api.annotations.Path} annotation
-     * containing an expression such as <code>${path}</code>.
-     */
-    public boolean isPathExpressionPresent() {
-        return this.isPathExpressionPresent;
-    }
 
     /**
      * Whether the type of this field can only be represented by a resource property (and not a resource).
@@ -403,10 +389,10 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * @return whether the field is of type {@link io.neba.api.resourcemodels.Optional}.
+     * @return whether the field is of type {@link io.neba.api.resourcemodels.Lazy}.
      */
-    public boolean isOptional() {
-        return isOptional;
+    public boolean isLazy() {
+        return isLazy;
     }
 
     @Override
@@ -427,4 +413,5 @@ public class MappedFieldMetaData {
     public String toString() {
         return getClass().getName() + " [" + this.field + "]";
     }
+
 }

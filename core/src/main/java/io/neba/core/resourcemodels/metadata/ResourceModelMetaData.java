@@ -1,25 +1,23 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.metadata;
 
 import io.neba.api.annotations.Unmapped;
 import io.neba.core.util.Annotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
@@ -27,53 +25,48 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.function.Consumer;
 
 import static io.neba.core.util.Annotations.annotations;
-import static org.springframework.util.ReflectionUtils.doWithFields;
-import static org.springframework.util.ReflectionUtils.doWithMethods;
+import static io.neba.core.util.ReflectionUtil.methodsOf;
+import static java.lang.reflect.Modifier.isAbstract;
+import static org.apache.commons.lang3.reflect.FieldUtils.getAllFieldsList;
 
 /**
  * Represents meta-data of a {@link io.neba.api.annotations.ResourceModel}. Used
  * to retain the result of costly reflection on resource models. Instances are model-scoped, i.e. there is exactly one
  * {@link ResourceModelMetaData} instance per detected {@link io.neba.api.annotations.ResourceModel}.
  *
- * @see ResourceModelMetaDataRegistrar
- *
  * @author Olaf Otto
+ * @see ResourceModelMetaDataRegistrar
  */
 public class ResourceModelMetaData {
     /**
      * @author Olaf Otto
      */
-    private static class MethodMetadataCreator implements ReflectionUtils.MethodCallback {
-        private final Collection<MethodMetaData> postMappingMethods = new ArrayList<>(32);
-        private final Collection<MethodMetaData> preMappingMethods = new ArrayList<>(32);
+    private static class MethodMetadataCreator implements Consumer<Method> {
+        private final Collection<MethodMetaData> afterMappingMethods = new ArrayList<>(32);
 
         @Override
-        public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+        public void accept(Method method) {
             MethodMetaData methodMetaData = new MethodMetaData(method);
-            if (methodMetaData.isPostMappingCallback()) {
-                this.postMappingMethods.add(methodMetaData);
-            }
-            if (methodMetaData.isPreMappingCallback()) {
-                this.preMappingMethods.add(methodMetaData);
+            if (methodMetaData.isAfterMappingCallback()) {
+                this.afterMappingMethods.add(methodMetaData);
             }
         }
 
-        private MethodMetaData[] getPostMappingMethods() {
-            return this.postMappingMethods.toArray(new MethodMetaData[this.postMappingMethods.size()]);
-        }
-
-        private MethodMetaData[] getPreMappingMethods() {
-            return this.preMappingMethods.toArray(new MethodMetaData[this.preMappingMethods.size()]);
+        private MethodMetaData[] getAfterMappingMethods() {
+            return this.afterMappingMethods.toArray(new MethodMetaData[this.afterMappingMethods.size()]);
         }
     }
 
     /**
      * @author Olaf Otto
      */
-    private static class FieldMetadataCreator implements ReflectionUtils.FieldCallback {
-        private final Collection<MappedFieldMetaData> mappableFields = new ArrayList<>();
+    private static class FieldMetadataCreator implements Consumer<Field> {
+        private final Deque<MappedFieldMetaData> mappableFields = new LinkedList<>();
         private final Class<?> modelType;
 
         FieldMetadataCreator(Class<?> modelType) {
@@ -84,10 +77,10 @@ public class ResourceModelMetaData {
         }
 
         @Override
-        public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+        public void accept(Field field) {
             if (isMappingCandidate(field)) {
                 MappedFieldMetaData fieldMetaData = new MappedFieldMetaData(field, this.modelType);
-                this.mappableFields.add(fieldMetaData);
+                this.mappableFields.addFirst(fieldMetaData);
             }
         }
 
@@ -102,8 +95,8 @@ public class ResourceModelMetaData {
          */
         private boolean isMappingCandidate(Field field) {
             return !isStatic(field) &&
-                   !isFinal(field) &&
-                   !isUnmapped(field);
+                    !isFinal(field) &&
+                    !isUnmapped(field);
         }
 
         private boolean isFinal(Field field) {
@@ -121,29 +114,28 @@ public class ResourceModelMetaData {
         private boolean isUnmapped(Field field) {
             final Annotations annotations = annotations(field);
             return annotations.contains(Unmapped.class) ||
-                    annotations.containsName("javax.inject.Inject") || // @Inject is an optional dependency, thus using a name constant
-                    annotations.containsName(Autowired.class.getName()) ||
+                    // @Inject and @Autowired are optional dependencies, thus using name constants
+                    annotations.containsName("javax.inject.Inject") ||
+                    annotations.containsName("org.springframework.beans.factory.annotation.Autowired") ||
                     annotations.containsName(Resource.class.getName());
         }
     }
 
     private final MappedFieldMetaData[] mappableFields;
-    private final MethodMetaData[] postMappingMethods;
-    private final MethodMetaData[] preMappingMethods;
+    private final MethodMetaData[] afterMappingMethods;
     private final String typeName;
 
     private final ResourceModelStatistics statistics = new ResourceModelStatistics();
 
     public ResourceModelMetaData(Class<?> modelType) {
         FieldMetadataCreator fc = new FieldMetadataCreator(modelType);
-        doWithFields(modelType, fc);
+        getAllFieldsList(modelType).forEach(fc);
 
         MethodMetadataCreator mc = new MethodMetadataCreator();
-        doWithMethods(modelType, mc);
+        methodsOf(modelType).stream().filter(m -> !m.getDeclaringClass().isInterface() || isAbstract(m.getModifiers())).forEach(mc);
 
         this.mappableFields = fc.getMappableFields();
-        this.preMappingMethods = mc.getPreMappingMethods();
-        this.postMappingMethods = mc.getPostMappingMethods();
+        this.afterMappingMethods = mc.getAfterMappingMethods();
         this.typeName = modelType.getName();
     }
 
@@ -152,12 +144,8 @@ public class ResourceModelMetaData {
         return mappableFields;
     }
 
-    public MethodMetaData[] getPostMappingMethods() {
-        return postMappingMethods;
-    }
-
-    public MethodMetaData[] getPreMappingMethods() {
-        return preMappingMethods;
+    public MethodMetaData[] getAfterMappingMethods() {
+        return afterMappingMethods;
     }
 
     public String getTypeName() {

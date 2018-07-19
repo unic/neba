@@ -1,33 +1,32 @@
-/**
- * Copyright 2013 the original author or authors.
- * <p>
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+/*
+  Copyright 2013 the original author or authors.
+  <p>
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.metadata;
 
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.osgi.framework.Bundle;
-import org.springframework.stereotype.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
-import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.util.ClassUtils.getUserClass;
 
 /**
  * Builds and caches {@link ResourceModelMetaData} for each {@link io.neba.api.annotations.ResourceModel}.
@@ -37,16 +36,16 @@ import static org.springframework.util.ClassUtils.getUserClass;
  *
  * @author Olaf Otto
  */
-@Service
+@Component(service = ResourceModelMetaDataRegistrar.class)
 public class ResourceModelMetaDataRegistrar {
     /**
      * @author Olaf Otto
      */
     private static class ResourceModelMetadataHolder {
-        private final OsgiBeanSource<?> source;
+        private final OsgiModelSource<?> source;
         private final ResourceModelMetaData metaData;
 
-        private ResourceModelMetadataHolder(OsgiBeanSource<?> source, ResourceModelMetaData metaData) {
+        private ResourceModelMetadataHolder(OsgiModelSource<?> source, ResourceModelMetaData metaData) {
             this.source = source;
             this.metaData = metaData;
         }
@@ -67,7 +66,7 @@ public class ResourceModelMetaDataRegistrar {
     /**
      * @param modelType must not be <code>null</code>.
      * @return the {@link ResourceModelMetaData} of the specified model. Never <code>null</code> - throws an {@link IllegalStateException}
-     *         if the model type is not known as a resource model must always be registered.
+     * if the model type is not known as a resource model must always be registered.
      */
     public ResourceModelMetaData get(Class<?> modelType) {
         if (modelType == null) {
@@ -93,25 +92,23 @@ public class ResourceModelMetaDataRegistrar {
 
     /**
      * Creates a new {@link ResourceModelMetaData} for the model represented
-     * yb the provided bean source.
+     * by the provided model source.
      *
-     * @param beanSource must not be <code>null</code>.
-     * @return the newly created meta data. Never <code>null</code>.
+     * @param modelSource must not be <code>null</code>.
      */
-    public ResourceModelMetaData register(OsgiBeanSource<?> beanSource) {
-        if (beanSource == null) {
-            throw new IllegalArgumentException("method parameter beanSource must not be null");
+    public void register(OsgiModelSource<?> modelSource) {
+        if (modelSource == null) {
+            throw new IllegalArgumentException("method parameter modelSource must not be null");
         }
 
-        Class<?> beanType = beanSource.getBeanType();
-        ResourceModelMetaData modelMetaData = new ResourceModelMetaData(beanType);
-        ResourceModelMetadataHolder holder = new ResourceModelMetadataHolder(beanSource, modelMetaData);
+        Class<?> modelType = modelSource.getModelType();
+        ResourceModelMetaData modelMetaData = new ResourceModelMetaData(modelType);
+        ResourceModelMetadataHolder holder = new ResourceModelMetadataHolder(modelSource, modelMetaData);
 
         Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
-        newCache.put(getUserClass(beanType), holder);
+        newCache.put(getUserClass(modelType), holder);
 
         this.cache = newCache;
-        return modelMetaData;
     }
 
     /**
@@ -119,7 +116,7 @@ public class ResourceModelMetaDataRegistrar {
      *
      * @param bundle must not be <code>null</code>
      */
-    public void remove(Bundle bundle) {
+    public void removeMetadataForModelsIn(Bundle bundle) {
         if (bundle == null) {
             throw new IllegalArgumentException("method parameter bundle must not be null");
         }
@@ -127,7 +124,7 @@ public class ResourceModelMetaDataRegistrar {
         Map<Class<?>, ResourceModelMetadataHolder> newCache = copyCache();
         Iterator<Map.Entry<Class<?>, ResourceModelMetadataHolder>> it = newCache.entrySet().iterator();
         while (it.hasNext()) {
-            OsgiBeanSource<?> source = it.next().getValue().source;
+            OsgiModelSource<?> source = it.next().getValue().source;
             if (source.getBundleId() == bundle.getBundleId()) {
                 it.remove();
             }
@@ -139,8 +136,18 @@ public class ResourceModelMetaDataRegistrar {
         return new HashMap<>(this.cache);
     }
 
-    @PreDestroy
-    public void tearDown() {
+    private Class<?> getUserClass(Class<?> type) {
+        if (type.getName().contains("$$")) {
+            Class<?> superclass = type.getSuperclass();
+            if (superclass != null && Object.class != superclass) {
+                return superclass;
+            }
+        }
+        return type;
+    }
+
+    @Deactivate
+    protected void deactivate() {
         this.cache.clear();
     }
 }

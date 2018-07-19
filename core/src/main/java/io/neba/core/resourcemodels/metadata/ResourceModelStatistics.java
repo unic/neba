@@ -1,20 +1,22 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.metadata;
+
+import io.neba.api.spi.ResourceModelCache;
 
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
@@ -57,7 +59,7 @@ public class ResourceModelStatistics {
     /**
      * Clears all collected statistical data.
      */
-    public void reset() {
+    void reset() {
         fill(this.mappingDurationFrequencies, 0);
         this.instantiations = 0;
         this.mappings = 0;
@@ -67,14 +69,14 @@ public class ResourceModelStatistics {
     /**
      * @return The age of these statistics in terms of {@link System#currentTimeMillis()}.
      */
-    public long getSince() {
+    long getSince() {
         return since;
     }
 
     /**
      * @return The number of times this resource model instantiated.
      */
-    public long getInstantiations() {
+    long getInstantiations() {
         return instantiations;
     }
 
@@ -99,10 +101,10 @@ public class ResourceModelStatistics {
     }
 
     /**
-     * @return The number of types a {@link io.neba.api.resourcemodels.ResourceModelCache} contained an instance
+     * @return The number of types a {@link ResourceModelCache} contained an instance
      * of the resource model.
      */
-    public long getCacheHits() {
+    long getCacheHits() {
         return cacheHits;
     }
 
@@ -120,7 +122,7 @@ public class ResourceModelStatistics {
      * @return the total number of recorded subsequent resource-to-resourcemodel mappings
      *         that occurred during the mapping of this model.
      */
-    public long getNumberOfMappings() {
+    long getNumberOfMappings() {
         return this.mappings;
     }
 
@@ -149,7 +151,7 @@ public class ResourceModelStatistics {
     /**
      * @return the average mapping duration of all {@link #countMappingDuration(int) counted mappings} in ms.
      */
-    public double getAverageMappingDuration() {
+    double getAverageMappingDuration() {
         return getTotalMappingDuration() / (double) max(getNumberOfMappingDurationSamples(), 1);
     }
 
@@ -157,7 +159,7 @@ public class ResourceModelStatistics {
      * @return the sum of all recorded mapping durations in ms,
      *         i.e. summed up averages of the mapping duration frequency table interval means.
      */
-    public double getTotalMappingDuration() {
+    double getTotalMappingDuration() {
         double totalDuration = 0L;
         double leftBoundary = 0;
         for (int i = 0; i < this.mappingDurationFrequencies.length; ++i) {
@@ -172,7 +174,7 @@ public class ResourceModelStatistics {
     /**
      * @return the median of the mapping durations based on a frequency table.
      */
-    public double getMappingDurationMedian() {
+    double getMappingDurationMedian() {
         double median;
 
         long numberOfSamples = getNumberOfMappingDurationSamples();
@@ -198,7 +200,7 @@ public class ResourceModelStatistics {
     /**
      * @return The maximum {@link #countMappingDuration(int) recorded mapping duration} of this resource model in ms.
      */
-    public double getMaximumMappingDuration() {
+    double getMaximumMappingDuration() {
         for (int i = this.mappingDurationFrequencies.length - 1; i >= 0; --i) {
             if (this.mappingDurationFrequencies[i] != 0) {
                 double leftHandBoundary = i == 0 ? 0 : this.indexBoundaries[i - 1];
@@ -212,7 +214,7 @@ public class ResourceModelStatistics {
     /**
      * @return The minimum {@link #countMappingDuration(int) recorded mapping duration} of this resource model in ms.
      */
-    public double getMinimumMappingDuration() {
+    double getMinimumMappingDuration() {
         for (int i = 0; i < this.mappingDurationFrequencies.length; ++i) {
             if (this.mappingDurationFrequencies[i] != 0) {
                 double leftHandBoundary = i == 0 ? 0 : this.indexBoundaries[i - 1];
@@ -221,6 +223,14 @@ public class ResourceModelStatistics {
             }
         }
         return 0;
+    }
+
+    int[] getMappingDurationFrequencies() {
+        return copyOf(this.mappingDurationFrequencies, this.mappingDurationFrequencies.length);
+    }
+
+    int[] getMappingDurationIntervalBoundaries() {
+        return copyOf(this.indexBoundaries, this.indexBoundaries.length);
     }
 
     /**
@@ -283,13 +293,5 @@ public class ResourceModelStatistics {
         double durationX2 = (leftHandBoundaryX2 + rightHandBoundaryX2) / 2;
 
         return new double[]{durationX1, durationX2};
-    }
-
-    public int[] getMappingDurationFrequencies() {
-        return copyOf(this.mappingDurationFrequencies, this.mappingDurationFrequencies.length);
-    }
-
-    public int[] getMappingDurationIntervalBoundaries() {
-        return copyOf(this.indexBoundaries, this.indexBoundaries.length);
     }
 }

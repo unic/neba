@@ -1,26 +1,32 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 
 package io.neba.core.resourcemodels.mapping;
 
-import io.neba.api.resourcemodels.AnnotatedFieldMapper;
-import io.neba.api.resourcemodels.Optional;
+import io.neba.api.resourcemodels.Lazy;
+import io.neba.api.spi.AnnotatedFieldMapper;
+import io.neba.api.spi.PlaceholderVariableResolver;
+import io.neba.api.spi.ResourceModelFactory;
 import io.neba.core.resourcemodels.mapping.testmodels.OtherTestResourceModel;
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
+import io.neba.core.util.Annotations;
+import io.neba.core.util.ResourcePaths;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.LazyLoader;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -31,30 +37,38 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.LazyLoader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 
-import static io.neba.api.resourcemodels.AnnotatedFieldMapper.OngoingMapping;
+import static io.neba.api.spi.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.emptyList;
-import static org.apache.commons.lang.ClassUtils.primitiveToWrapper;
-import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(MockitoJUnitRunner.class)
 public class FieldValueMappingCallbackTest {
     @Mock
@@ -62,7 +76,7 @@ public class FieldValueMappingCallbackTest {
     @Mock
     private ResourceResolver resourceResolver;
     @Mock
-    private ConfigurableBeanFactory factory;
+    private ResourceModelFactory factory;
     @Mock
     private MappedFieldMetaData mappedFieldMetadata;
     @Mock
@@ -71,6 +85,10 @@ public class FieldValueMappingCallbackTest {
     private AnnotatedFieldMappers annotatedFieldMappers;
     @Mock
     private AnnotatedFieldMapper annotatedFieldMapper;
+    @Mock
+    private PlaceholderVariableResolvers placeholderVariableResolvers;
+    @Mock
+    private ResourcePaths.ResourcePath path;
 
     private LazyLoader lazyLoadingCollectionCallback;
 
@@ -88,63 +106,60 @@ public class FieldValueMappingCallbackTest {
     private Object targetValue;
     private Object model = this;
 
-    private OngoingMapping ongoingMapping;
+    private OngoingMapping<?, ?> ongoingMapping;
 
     @Before
-    public void prepareMappedField() throws Exception {
-        withmappedField("mappedFieldOfTypeObject");
-    }
-
-    @Before
-    public void prepareTestResource() {
+    public void setUp() throws Exception {
+        withMappedField("mappedFieldOfTypeObject");
         withResource(mock(Resource.class));
-    }
 
-    @Before
-    public void mockLazyLoadingCollectionFactory() {
         Answer<Object> loadImmediately = invocationOnMock -> {
             lazyLoadingCollectionCallback = (LazyLoader) invocationOnMock.getArguments()[0];
             return lazyLoadingCollectionCallback.loadObject();
         };
-        doAnswer(loadImmediately).when(lazyLoadingCollectionFactory).newInstance(isA(LazyLoader.class));
-        doReturn(lazyLoadingCollectionFactory).when(this.mappedFieldMetadata).getCollectionProxyFactory();
-    }
+        doAnswer(loadImmediately)
+                .when(lazyLoadingCollectionFactory)
+                .newInstance(isA(LazyLoader.class));
 
-    @Before
-    public void prepareCustomFieldMappers() throws Exception {
+        doReturn(lazyLoadingCollectionFactory)
+                .when(this.mappedFieldMetadata)
+                .getCollectionProxyFactory();
+
         doReturn(emptyList()).when(this.annotatedFieldMappers).get(isA(MappedFieldMetaData.class));
+        doReturn(this.path).when(this.mappedFieldMetadata).getPath();
+        doReturn(this.path).when(this.path).resolve(any());
     }
 
     /**
      * The factory must not accept null arguments to its constructor.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullModelInConstructor() throws Exception {
-        new FieldValueMappingCallback(null, this.resource, this.factory, this.annotatedFieldMappers);
+    public void testHandlingOfNullModelInConstructor() {
+        new FieldValueMappingCallback(null, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
     /**
      * The factory must not accept null arguments to its constructor.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullResourceInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, null, this.factory, this.annotatedFieldMappers);
+    public void testHandlingOfNullResourceInConstructor() {
+        new FieldValueMappingCallback(this.model, null, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
     /**
      * The factory must not accept null arguments to its constructor.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFactoryInConstructor() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, null, this.annotatedFieldMappers);
+    public void testHandlingOfNullFactoryInConstructor() {
+        new FieldValueMappingCallback(this.model, this.resource, null, this.annotatedFieldMappers, this.placeholderVariableResolvers);
     }
 
     /**
      * The factory must not accept null arguments to its callback method.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFactoryInMapping() throws Exception {
-        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers).doWith(null);
+    public void testHandlingOfNullFactoryInMapping() {
+        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers).doWith(null);
     }
 
     /**
@@ -156,7 +171,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveBooleanField() throws Exception {
+    public void testMappingOfPrimitiveBooleanField() {
         mapPropertyField(boolean.class, true);
         assertFieldIsMapped();
     }
@@ -170,7 +185,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveIntField() throws Exception {
+    public void testMappingOfPrimitiveIntField() {
         mapPropertyField(int.class, 1);
         assertFieldIsMapped();
     }
@@ -184,7 +199,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveLongField() throws Exception {
+    public void testMappingOfPrimitiveLongField() {
         mapPropertyField(long.class, 1L);
         assertFieldIsMapped();
     }
@@ -198,7 +213,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveFloatField() throws Exception {
+    public void testMappingOfPrimitiveFloatField() {
         mapPropertyField(float.class, 1F);
         assertFieldIsMapped();
     }
@@ -212,7 +227,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveDoubleField() throws Exception {
+    public void testMappingOfPrimitiveDoubleField() {
         mapPropertyField(double.class, 1D);
         assertFieldIsMapped();
     }
@@ -226,7 +241,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfPrimitiveShortField() throws Exception {
+    public void testMappingOfPrimitiveShortField() {
         mapPropertyField(short.class, (short) 1);
         assertFieldIsMapped();
     }
@@ -240,7 +255,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingOfStringField() throws Exception {
+    public void testMappingOfStringField() {
         mapPropertyField(String.class, "test");
         assertFieldIsMapped();
     }
@@ -251,7 +266,7 @@ public class FieldValueMappingCallbackTest {
      * resource.
      */
     @Test
-    public void testMappingOfSyntheticResource() throws Exception {
+    public void testMappingOfSyntheticResource() {
         withResource(mock(SyntheticResource.class));
         withNullValueMap();
         withResourceTargetedByMapping("/absolute/path");
@@ -265,7 +280,7 @@ public class FieldValueMappingCallbackTest {
      * or an attempt to retrieve the value from a child resource.
      */
     @Test
-    public void testMappingOfFieldWithoutValue() throws Exception {
+    public void testMappingOfFieldWithoutValue() {
         mapPropertyField(String.class, null);
         assertFieldIsFetchedFromValueMap();
         assertChildResourceIsNotLoadedForField();
@@ -285,7 +300,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testValueRetrievalFromChildResource() throws Exception {
+    public void testValueRetrievalFromChildResource() {
         withResourceTargetedByMapping(child("field"));
         withResourceTargetedByMappingAdaptingTo(TestResourceModel.class, new TestResourceModel());
         mapChildResourceField(TestResourceModel.class);
@@ -305,7 +320,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testValueRetrievalFromAbsolutePath() throws Exception {
+    public void testValueRetrievalFromAbsolutePath() {
         withPropertyFieldWithPath(String.class, "/absolute/path/to/value");
         mapField();
         assertFieldIsNotFetchedFromValueMap();
@@ -324,7 +339,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testDirectMappingOfChildResourceToField() throws Exception {
+    public void testDirectMappingOfChildResourceToField() {
         withResourceTargetedByMapping(child("field"));
         mapChildResourceField(Resource.class);
         assertMappedFieldValueIs(this.resourceTargetedByMapping);
@@ -343,7 +358,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testInjectionOfResourceWithThisAnnotation() throws Exception {
+    public void testInjectionOfResourceWithThisAnnotation() {
         mapThisReference();
         assertFieldIsMapped();
     }
@@ -364,7 +379,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testReferenceResolution() throws Exception {
+    public void testReferenceResolution() {
         withResourceTargetedByMapping("/path/stored/in/property");
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
         assertMappedFieldValueIs(this.resourceTargetedByMapping);
@@ -372,7 +387,7 @@ public class FieldValueMappingCallbackTest {
 
     /**
      * A model may declare lazy 1:1 relationships to other models using the
-     * {@link io.neba.api.resourcemodels.Optional} interface. An implementation
+     * {@link io.neba.api.resourcemodels.Lazy} interface. An implementation
      * of this interface must be provided automatically and must load the
      * target value when requested. Example:
      * <p/>
@@ -380,89 +395,81 @@ public class FieldValueMappingCallbackTest {
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {
      *         &#64;{@link io.neba.api.annotations.Reference}
-     *         private {@link io.neba.api.resourcemodels.Optional}&lt;Resource&gt; link;
+     *         private {@link io.neba.api.resourcemodels.Lazy}&lt;Resource&gt; link;
      *     }
      * </pre>
      */
     @Test
-    public void testLazyLoadingReferenceResolution() throws Exception {
+    public void testLazyLoadingReferenceResolution() {
         withResourceTargetedByMapping("/path/stored/in/property");
-        withOptionalField();
+        withLazyField();
         mapSingleReferenceField(Resource.class, "/path/stored/in/property");
-        assertOptionalFieldHasValue(this.resourceTargetedByMapping);
+        assertLazyFieldIsJavaUtilOptionalWithValue(this.resourceTargetedByMapping);
     }
 
     /**
-     * When an {@link Optional} reference points to a non-existing target (i.e. a null value),
-     * invoking {@link io.neba.api.resourcemodels.Optional#get()} must result in a
-     * {@link java.util.NoSuchElementException}, as only {@link io.neba.api.resourcemodels.Optional#orElse(Object)}
-     * is null-safe.
-     */
-    @Test(expected = NoSuchElementException.class)
-    public void testHandlingOfNullWhenNullIsNotAllowedInOptionalReference() throws Exception {
-        withOptionalField();
-        mapSingleReferenceField(Resource.class, "/path/stored/in/property");
-        assertOptionalFieldHasValue(null);
-        getOptionalValue();
-    }
-
-    /**
-     * When an {@link Optional} reference points to a non-existing target (i.e. a null value),
-     * invoking {@link io.neba.api.resourcemodels.Optional#isPresent()} must yield <code>false</code>.
-     */
-    @Test
-    public void testIsPresentIsFalseWhenOptionalValueIsNull() throws Exception {
-        withTypeParameter(Resource.class);
-        withOptionalField();
-        mapSingleReferenceField(Optional.class, "/path/stored/in/property");
-        assertOptionalFieldHasValue(null);
-        assertOptionalValueIsNotPresent();
-    }
-
-    /**
-     * When an {@link Optional} reference points to an existing target,
-     * invoking {@link io.neba.api.resourcemodels.Optional#isPresent()} must yield <code>true</code>.
-     */
-    @Test
-    public void testIsPresentIsFalseWhenOptionalValueIsNotNull() throws Exception {
-        withResourceTargetedByMapping("/path/stored/in/property");
-        withOptionalField();
-        mapSingleReferenceField(Resource.class, "/path/stored/in/property");
-        assertOptionalFieldHasValue(this.resourceTargetedByMapping);
-        assertOptionalValueIsPresent();
-    }
-
-    /**
-     * A reference may be a property of a resource containing an array of paths to other resources.
-     * Such a references are automatically resolved and adapted in the presence of a
-     * {@link io.neba.api.annotations.Reference} annotation.
-     * For example, the current resource may have a String[] property called "links", containing the values
-     * "/first/path/stored/in/property", "/second/path/stored/in/property".
-     * The corresponding resources are then resolved and injected.
-     * Here, the reference is also declared {@link io.neba.api.resourcemodels.Optional}.
+     * In case a field value will always resolve to null, e.g. if a resource has no properties and the field is based
+     * on the resource properties, the filed mapper must still provide a non-null {@link io.neba.api.resourcemodels.Lazy}
+     * as, by design, {@link io.neba.api.resourcemodels.Lazy} fields
+     * must not be null. For instance, a resource without properties will never have a resource path stored in the property
+     * "link", thus the following example would always yield <code>null</code> but must still provide a non-null {@link io.neba.api.resourcemodels.Lazy}:
+     *
      * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {
      *         &#64;{@link io.neba.api.annotations.Reference}
-     *         private {@link io.neba.api.resourcemodels.Optional}&lt;Collection&lt;Resource&gt;&gt; links;
+     *         private Lazy&lt;Resource&gt; link;
      *     }
      * </pre>
      */
     @Test
-    public void testOptionalCollectionOfReferencesIsExclusivelyLazyLoadedViaOptional() throws Exception {
+    public void testLazyFieldIsNotNullEvenIfFieldIsNotMappable() {
+        withNullValueMap();
+        withField(Resource.class);
+        withLazyField();
+        withReferenceAnnotationPresent();
+
+        mapField();
+
+        assertMappedFieldValueIsLazy();
+        assertLazyFieldHasNoValue();
+    }
+
+    /**
+     * A reference may be a property of a resource containing an array of paths to other resources.
+     * Such references are automatically resolved and adapted in the presence of a
+     * {@link io.neba.api.annotations.Reference} annotation.
+     * For example, the current resource may have a String[] property called "links", containing the values
+     * "/first/path/stored/in/property", "/second/path/stored/in/property".
+     * The corresponding resources are then resolved and injected.
+     * Here, the reference is also declared {@link io.neba.api.resourcemodels.Lazy}.
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}
+     *         private {@link io.neba.api.resourcemodels.Lazy}&lt;Collection&lt;Resource&gt;&gt; links;
+     *     }
+     * </pre>
+     *
+     * In this case, lazy-loading mus exclusively occur via the provided {@link Lazy} implementation, i.e.
+     * the collection lazy-loaded via {@link Lazy} should not be a lazy-loading collection.
+     */
+    @Test
+    public void testLazyCollectionOfReferencesIsExclusivelyLazyLoadedViaLazy() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
         withMockResources(referencedResources);
-        withOptionalField();
+        withLazyField();
         mapReferenceCollectionField(Collection.class, Resource.class, referencedResources);
-        assertMappedFieldValueIsOptional();
-        loadOptionalField();
+        assertMappedFieldValueIsLazy();
+        loadLazyField();
         assertMappedFieldValueIsCollectionWithResourcesWithPaths(referencedResources);
         assertNoLazyLoadingProxyIsCreated();
     }
 
     /**
-     * Here, the above collection of references is not declared {@link io.neba.api.resourcemodels.Optional}.
+     * Here, the above collection of references is not declared {@link io.neba.api.resourcemodels.Lazy}.
      * Thus, it must be provided as a lazy loading proxy instead.
      * <p/>
      * <pre>
@@ -474,7 +481,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testCollectionOfReferencesIsLazyLoadedViaProxy() throws Exception {
+    public void testCollectionOfReferencesIsLazyLoadedViaProxy() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
         withMockResources(referencedResources);
         mapReferenceCollectionField(Collection.class, Resource.class, referencedResources);
@@ -490,14 +497,14 @@ public class FieldValueMappingCallbackTest {
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {
      *         &#64;{@link io.neba.api.annotations.Children}
-     *         private {@link io.neba.api.resourcemodels.Optional}&lt;List&lt;ModelForChild&gt;&gt; children;
+     *         private {@link io.neba.api.resourcemodels.Lazy}&lt;List&lt;ModelForChild&gt;&gt; children;
      *     }
      * </pre>
      */
     @Test
-    public void testOptionalCollectionOfChildrenIsExclusivelyLazyLoadedViaOptional() throws Exception {
+    public void testLazyCollectionOfChildrenIsExclusivelyLazyLoadedViaLazy() {
         withField(Collection.class);
-        withOptionalField();
+        withLazyField();
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
         withTypeParameter(TestResourceModel.class);
@@ -507,40 +514,40 @@ public class FieldValueMappingCallbackTest {
 
         mapField();
 
-        assertMappedFieldValueIsOptional();
-        loadOptionalField();
+        assertMappedFieldValueIsLazy();
+        loadLazyField();
         assertMappedFieldValueIsCollectionContainingTargetValue();
     }
 
     /**
      * Tests that {@link AnnotatedFieldMapper annotated field mappers} are supported on
-     * {@link Optional lazy-oding} resource model fields, i.e. that these mappers are invoked when the
+     * {@link Lazy lazy-loading} resource model fields, i.e. that these mappers are invoked when the
      * lazy loading callback is triggered in a case such as this:
      * <p />
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {
      *         &#64;MyCustomAnnotation
-     *         private {@link io.neba.api.resourcemodels.Optional}&lt;AnyType&gt; anyField;
+     *         private {@link io.neba.api.resourcemodels.Lazy}&lt;AnyType&gt; anyField;
      *     }
      * </pre>
      */
     @Test
-    public void testCustomMappersAreAppliedWhenOptionalFieldsAreLoaded() throws Exception {
+    public void testCustomMappersAreAppliedWhenLazyFieldsAreLoaded() {
         withField(Collection.class);
-        withOptionalField();
+        withLazyField();
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
         withCustomFieldMapperMappingTo(new ArrayList<>());
 
         mapField();
 
-        assertMappedFieldValueIsOptional();
+        assertMappedFieldValueIsLazy();
 
         assertCustomFieldMapperIsNotObtained();
         assertCustomFieldMapperIsNotUsedToMapField();
 
-        loadOptionalField();
+        loadLazyField();
 
         assertCustomFieldMapperIsObtained();
         assertCustomFieldMapperIsUsedToMapField();
@@ -559,7 +566,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testCollectionOfChildrenIsLazyLoadedViaProxy() throws Exception {
+    public void testCollectionOfChildrenIsLazyLoadedViaProxy() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -590,11 +597,35 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testReferenceResolutionWithAppendedRelativePath() throws Exception {
+    public void testReferenceResolutionWithAppendedRelativePath() {
         withResourceTargetedByMapping("/content/resource/child");
         withAppendReferenceAppendPath("/child");
         mapSingleReferenceField(Resource.class, "/content/resource");
         assertMappedFieldValueIs(this.resourceTargetedByMapping);
+    }
+
+    /**
+     * A {@link io.neba.api.annotations.Reference} may specify an additional
+     * {@link io.neba.api.annotations.Reference#append() relative path} that is appended to the reference path(s)
+     * prior to resolution. This way, a resource model can directly use children or parents of referenced resources
+     * without further programmatic steps, for instance like so:
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}(append = "/jcr:content")
+     *         &#64;{@link io.neba.api.annotations.Path}("pages")
+     *         private List&lt;ValueMap&gt; pageContents
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testReferenceCollectionResolutionWithAppendedRelativePath() {
+        withResourceTargetedByMapping("/content/resource/child");
+        withResourceTargetedByMappingAdaptingTo(ValueMap.class, mock(ValueMap.class));
+        withAppendReferenceAppendPath("/child");
+        mapReferenceCollectionField(List.class, ValueMap.class, "/content/resource");
+        assertMappedFieldValueIsCollectionContainingTargetValue();
     }
 
     /**
@@ -614,7 +645,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testCollectionOfReferencesResolution() throws Exception {
+    public void testCollectionOfReferencesResolution() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
 
         withMockResources(referencedResources);
@@ -628,7 +659,7 @@ public class FieldValueMappingCallbackTest {
      * of a collection of references.
      */
     @Test
-    public void testSetOfReferencesResolution() throws Exception {
+    public void testSetOfReferencesResolution() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
 
         withMockResources(referencedResources);
@@ -643,7 +674,7 @@ public class FieldValueMappingCallbackTest {
      * be stored in the injected collection of references.
      */
     @Test
-    public void testUnresolvableResourcesInListOfReferences() throws Exception {
+    public void testUnresolvableResourcesInListOfReferences() {
         String[] referencedResources = new String[]{"/first/path/stored/in/property", "/second/path/stored/in/property"};
 
         withResourceTargetedByMapping(referencedResources[0]);
@@ -654,48 +685,18 @@ public class FieldValueMappingCallbackTest {
 
     /**
      * {@link io.neba.api.annotations.Path} annotations may contain placeholders of the form
-     * <code>${variableName}</code>. Such placeholders must be resolved using the {@link org.springframework.context.ApplicationContext}
-     * of the {@link io.neba.api.annotations.ResourceModel}.
+     * <code>${variableName}</code>. Such placeholders may be resolved using a {@link PlaceholderVariableResolver}
+     * service.
      */
     @Test
-    public void testPlaceholderResolutionInPath() throws Exception {
-        withConfigurableBeanFactory();
-        withPlaceholderResolution("text-${language}", "text-de");
-        withPropertyFieldWithPath(String.class, "text-${language}");
-        withPathExpressionDetected();
+    public void testPlaceholderResolutionInPath() {
+        withResourceModelFactory();
+        withPathVariableResolution("title-de");
+        withPropertyFieldWithPath(String.class, "title-${language}");
+        withPathPlaceholdersDetected();
         mapField();
-        assertFieldMapperAttemptsToResolvePlaceholdersIn("text-${language}");
-        assertFieldMapperLoadsFromValueMap("text-de");
-    }
-
-    /**
-     * When no value for a placeholder in a path can be resolved, the original path including the placeholder
-     * shall be used.
-     *
-     * @see #testPlaceholderResolutionInPath()
-     */
-    @Test
-    public void testPlaceholderResolutionWithoutSubstitution() throws Exception {
-        withConfigurableBeanFactory();
-        withPropertyFieldWithPath(String.class, "text-${language}");
-        withPathExpressionDetected();
-        mapField();
-        assertFieldMapperAttemptsToResolvePlaceholdersIn("text-${language}");
-        assertFieldMapperLoadsFromValueMap("text-${language}");
-    }
-
-    /**
-     * Placeholders can only occur if a {@link io.neba.api.annotations.Path} annotation
-     * was used. The mapper must thus not attempt to resolve placeholders in paths
-     * resolved from the field name.
-     *
-     * @see #testPlaceholderResolutionInPath()
-     */
-    @Test
-    public void testPlaceholdersAreOnlyResolvedForPathAnnotationValues() throws Exception {
-        withConfigurableBeanFactory();
-        mapPropertyField(String.class, "someValue");
-        assertFieldMapperDoesNotAttemptToResolvePlaceholders();
+        verifyFieldMapperResolvesPath();
+        assertFieldMapperLoadsFromValueMap("title-de");
     }
 
     /**
@@ -711,7 +712,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingToOtherTestModelAsThisReference() throws Exception {
+    public void testMappingToOtherTestModelAsThisReference() {
         OtherTestResourceModel target = new OtherTestResourceModel();
         Class<OtherTestResourceModel> fieldType = OtherTestResourceModel.class;
         withResourceAdaptingTo(fieldType, target);
@@ -732,7 +733,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testMappingToOtherModelByPath() throws Exception {
+    public void testMappingToOtherModelByPath() {
         withResourceTargetedByMapping("/another/resource");
         withResourceTargetedByMappingAdaptingTo(OtherTestResourceModel.class, new OtherTestResourceModel());
         mapComplexFieldWithPath(OtherTestResourceModel.class, "/another/resource");
@@ -746,7 +747,7 @@ public class FieldValueMappingCallbackTest {
      * even if the resource's properties (value map) is null.
      */
     @Test
-    public void testChildValuesAreStillResolvedIfResourceHasNoProperties() throws Exception {
+    public void testChildValuesAreStillResolvedIfResourceHasNoProperties() {
         withNullValueMap();
         withResourceTargetedByMapping(child("field"));
         mapChildResourceField(Resource.class);
@@ -765,7 +766,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationOnListOfResources() throws Exception {
+    public void testChildrenAnnotationOnListOfResources() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -791,7 +792,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationOnListOfModels() throws Exception {
+    public void testChildrenAnnotationOnListOfModels() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -821,7 +822,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationWithPathAnnotation() throws Exception {
+    public void testChildrenAnnotationWithPathAnnotation() {
         withResourceTargetedByMapping("field/child");
         withParentOfTargetResource("field");
         withField(Collection.class);
@@ -854,7 +855,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationWithPathAndReferenceAnnotations() throws Exception {
+    public void testChildrenAnnotationWithPathAndReferenceAnnotations() {
         withResourceTargetedByMapping("/referenced/path/child");
         withParentOfTargetResource("/referenced/path");
         withField(Collection.class);
@@ -888,7 +889,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationWithReferenceAnnotation() throws Exception {
+    public void testChildrenAnnotationWithReferenceAnnotation() {
         withResourceTargetedByMapping("/referenced/path/child");
         withParentOfTargetResource("/referenced/path");
         withField(Collection.class);
@@ -911,7 +912,7 @@ public class FieldValueMappingCallbackTest {
      * Such a <code>null</code> value must not be inserted into the injected collection of children.
      */
     @Test
-    public void testChildrenWithNullValuesAsAdaptationResult() throws Exception {
+    public void testChildrenWithNullValuesAsAdaptationResult() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -925,7 +926,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * A child may not be retrieved directly, but the children colleciton may also contain children of the children
+     * A child may not be retrieved directly, but the children collection may also contain children of the children
      * in case a {@link io.neba.api.annotations.Children#resolveBelowEveryChild()} path is specified, like so:
      * <p/>
      * <p>
@@ -939,7 +940,7 @@ public class FieldValueMappingCallbackTest {
      * </p>
      */
     @Test
-    public void testChildrenWithResolveBelowEveryChildPath() throws Exception {
+    public void testChildrenWithResolveBelowEveryChildPath() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();
@@ -954,11 +955,40 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
+     * A child may not be retrieved directly, but the children collection may also contain children of the children
+     * in case a {@link io.neba.api.annotations.Children#resolveBelowEveryChild()} path is specified, like so:
+     * <p/>
+     * <p>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Children}(resolveBelowEveryChild = "/jcr:content")
+     *         private List&lt;ModelForChild&gt; link;
+     *     }
+     *  </pre>
+     * </p>
+     * This test ensures that children below which the &#64;{@link io.neba.api.annotations.Children}(resolveBelowEveryChild = "...")
+     * path is not resolved are skipped.
+     */
+    @Test
+    public void testChildrenWithResolveBelowEveryChildPathToleratesUnresolvableChildren() {
+        withField(Collection.class);
+        withCollectionTypedField();
+        withInstantiableCollectionTypedField();
+        withTypeParameter(Resource.class);
+        withChildrenAnnotationPresent();
+        withResolveBelowChildPathOnChildren("jcr:content");
+        child("child", "not_jcr:content");
+        mapField();
+        assertMappedFieldValueIsEmptyCollection();
+    }
+
+    /**
      * Properties of a resource may be arrays. In this case, one may use the corresponding collection
      * types instead of arrays, e.g. <code>List&lt;String&gt;</code> instead of <code>String[]</code>.
      */
     @Test
-    public void testMappingOfArrayPropertyToCollection() throws Exception {
+    public void testMappingOfArrayPropertyToCollection() {
         String[] propertyValues = {"first value", "second value"};
 
         withField(Collection.class);
@@ -979,7 +1009,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a property type is mapped from an absolute path
      */
     @Test
-    public void testResolutionOfPropertyWithAbsolutePath() throws Exception {
+    public void testResolutionOfPropertyWithAbsolutePath() {
         withPropertyFieldWithPath(String.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         withResourceTargetedByMappingAdaptingTo(String.class, "propertyValue");
@@ -995,7 +1025,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a non-property type is mapped, e.g. from a child resource.
      */
     @Test
-    public void testResolutionOfChildResourceOccursEvenIfResourceHasNoProperties() throws Exception {
+    public void testResolutionOfChildResourceOccursEvenIfResourceHasNoProperties() {
         withNullValueMap();
         withField(Resource.class);
         withFieldPath("field");
@@ -1012,7 +1042,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a property type is mapped from an absolute path
      */
     @Test
-    public void testResolutionOfPropertyWithAbsolutePathOccursEvenIfResourceHasNoProperties() throws Exception {
+    public void testResolutionOfPropertyWithAbsolutePathOccursEvenIfResourceHasNoProperties() {
         withNullValueMap();
         withPropertyFieldWithPath(String.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
@@ -1029,7 +1059,7 @@ public class FieldValueMappingCallbackTest {
      * Test that a property type is mapped from a relative path
      */
     @Test
-    public void testResolutionOfPropertyWithRelativePathOccursEvenIfResourceHasNoProperties() throws Exception {
+    public void testResolutionOfPropertyWithRelativePathOccursEvenIfResourceHasNoProperties() {
         withNullValueMap();
         withPropertyFieldWithPath(String.class, "../other/resource/propertyName");
         withResourceTargetedByMapping("../other/resource/propertyName");
@@ -1047,7 +1077,7 @@ public class FieldValueMappingCallbackTest {
      * occurs by retrieval of the property via the parent's {@link ValueMap} representation.
      */
     @Test
-    public void testResolutionOfPropertyWithAbsolutePathUsesValueMapToRetrieveNonStringValues() throws Exception {
+    public void testResolutionOfPropertyWithAbsolutePathUsesValueMapToRetrieveNonStringValues() {
         withPropertyFieldWithPath(Boolean.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         withParentOfTargetResource("/other/resource");
@@ -1064,7 +1094,7 @@ public class FieldValueMappingCallbackTest {
      * occurs by retrieval of the property via the parent's {@link ValueMap} representation.
      */
     @Test
-    public void testResolutionOfPropertyWithRelativePathUsesValueMapToRetrieveNonStringValues() throws Exception {
+    public void testResolutionOfPropertyWithRelativePathUsesValueMapToRetrieveNonStringValues() {
         withPropertyFieldWithPath(Boolean.class, "../other/resource/propertyName");
         withResourceTargetedByMapping("../other/resource/propertyName");
         withParentOfTargetResource("../other/resource");
@@ -1080,7 +1110,7 @@ public class FieldValueMappingCallbackTest {
      * Test that the mapping tolerates if the parent of a mapped property does not exist (e.g., mapping to root nodes)
      */
     @Test
-    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullParent() throws Exception {
+    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullParent() {
         withPropertyFieldWithPath(Boolean.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         mapField();
@@ -1095,7 +1125,7 @@ public class FieldValueMappingCallbackTest {
      * (e.g. in case of a synthetic resource).
      */
     @Test
-    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullValueMap() throws Exception {
+    public void testResolutionOfNonStringPropertyFromForeignResourceToleratesNullValueMap() {
         withNullValueMap();
         withPropertyFieldWithPath(Boolean.class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
@@ -1113,7 +1143,7 @@ public class FieldValueMappingCallbackTest {
      * property resource.
      */
     @Test
-    public void testResolutionOfArrayStringPropertyFromForeignResource() throws Exception {
+    public void testResolutionOfArrayStringPropertyFromForeignResource() {
         withPropertyFieldWithPath(String[].class, "/other/resource/propertyName");
         withResourceTargetedByMapping("/other/resource/propertyName");
         withParentOfTargetResource("/other/resource");
@@ -1133,7 +1163,7 @@ public class FieldValueMappingCallbackTest {
      * In this case, the value must not be mapped.
      */
     @Test
-    public void testMappingOfPropertyToUnsupportedType() throws Exception {
+    public void testMappingOfPropertyToUnsupportedType() {
         withField(Vector.class);
         withTypeParameter(String.class);
         withPropertyTypedField();
@@ -1149,7 +1179,7 @@ public class FieldValueMappingCallbackTest {
      * shall hold true regardless of the field semantics.
      */
     @Test
-    public void testPreventionOfNullValuesInReferenceCollectionFieldWithoutDefaultValue() throws Exception {
+    public void testPreventionOfNullValuesInReferenceCollectionFieldWithoutDefaultValue() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withReferenceAnnotationPresent();
@@ -1164,7 +1194,7 @@ public class FieldValueMappingCallbackTest {
      * shall hold true regardless of the field semantics.
      */
     @Test
-    public void testPreventionOfNullValuesInMappableCollectionFieldWithoutDefaultValue() throws Exception {
+    public void testPreventionOfNullValuesInMappableCollectionFieldWithoutDefaultValue() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
 
@@ -1175,26 +1205,26 @@ public class FieldValueMappingCallbackTest {
 
     /**
      * NEBA guarantees that Collection-typed mappable fields are not null. This shall not hold true for
-     * {@link Optional} collection-typed fields, as those have an explicit {@link Optional#isPresent() empty state}. For example.
+     * {@link Lazy} collection-typed fields, as those may explicitly  yield {@link Lazy#asOptional()} null}. For example.
      * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {
      *         &#64;some.Annotation
-     *         private Optional&lt;List&lt;SomeModel&lt;&lt; optionalList;
+     *         private Lazy&lt;List&lt;SomeModel&lt;&lt; lazyList;
      *     }
      * </pre>
      */
     @Test
-    public void testNullValuesAreNotPreventedInOptionalCollectionTypedFields() throws Exception {
+    public void testNullValuesAreNotPreventedInLazyCollectionTypedFields() {
         withField(Collection.class);
-        withOptionalField();
+        withLazyField();
         withInstantiableCollectionTypedField();
 
         mapField();
 
-        assertMappedFieldValueIsOptional();
-        assertOptionalValueIsNotPresent();
+        assertMappedFieldValueIsLazy();
+        assertLazyFieldHasNoValue();
     }
 
     /**
@@ -1202,7 +1232,7 @@ public class FieldValueMappingCallbackTest {
      * shall hold true regardless of the field semantics.
      */
     @Test
-    public void testPreventionOfNullValuesInMappableCollectionFieldOfSyntheticResource() throws Exception {
+    public void testPreventionOfNullValuesInMappableCollectionFieldOfSyntheticResource() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withNullValueMap();
@@ -1218,7 +1248,7 @@ public class FieldValueMappingCallbackTest {
      * value, this value must not be overwritten.
      */
     @Test
-    public void testDefaultValueOfMappableCollectionTypedFieldIsNotOverwritten() throws Exception {
+    public void testDefaultValueOfMappableCollectionTypedFieldIsNotOverwritten() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
 
@@ -1236,7 +1266,7 @@ public class FieldValueMappingCallbackTest {
      * value, this value must not be overwritten.
      */
     @Test
-    public void testDefaultValueOfMappableCollectionTypedReferenceFieldIsNotOverwritten() throws Exception {
+    public void testDefaultValueOfMappableCollectionTypedReferenceFieldIsNotOverwritten() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withReferenceAnnotationPresent();
@@ -1250,13 +1280,13 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * {@link io.neba.api.resourcemodels.AnnotatedFieldMapper Field mappers}
+     * {@link AnnotatedFieldMapper Field mappers}
      * are applied to all field mappings after the field value was resolved by NEBA,
      * i.e. they may override the resolved value. This test scenario verifies that
      * a field mapper is applied and can override an already resolved value.
      */
     @Test
-    public void testApplicationOfFieldMappersToResoledFieldValue() throws Exception {
+    public void testApplicationOfFieldMappersToResoledFieldValue() {
         withCustomFieldMapperMappingTo("CustomMappedValue");
 
         mapPropertyField(String.class, "PropertyValue");
@@ -1265,12 +1295,12 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * {@link io.neba.api.resourcemodels.AnnotatedFieldMapper Field mappers} receive extensive
+     * {@link AnnotatedFieldMapper Field mappers} receive extensive
      * contextual mapping data, such as the current field, the value that was resolved for it,
      * the model, resource and so forth. This test verifies that this contextual data is correct.
      */
     @Test
-    public void testOngoingMappingContainsAccurateMappingData() throws Exception {
+    public void testOngoingMappingContainsAccurateMappingData() {
         withCustomFieldMapperMappingTo("CustomMappedValue");
 
         mapPropertyField(String.class, "PropertyValue");
@@ -1281,12 +1311,12 @@ public class FieldValueMappingCallbackTest {
     /**
      * To prevent implementations of field mappers from having to worry about instantiating
      * suitable collection types for collection-typed fields, NEBA extends its guarantee (mappable collection-typed
-     * members are never null) to the {@link io.neba.api.resourcemodels.AnnotatedFieldMapper field mappers}.
+     * members are never null) to the {@link AnnotatedFieldMapper field mappers}.
      * This test verifies that field mappers do not receive null for such a collection, even if no value could be resolved.
      * Instead, they should receive an empty default value.
      */
     @Test
-    public void testNullCollectionValuesAreSetToDefaultValueBeforeInvokingFieldMappers() throws Exception {
+    public void testNullCollectionValuesAreSetToDefaultValueBeforeInvokingFieldMappers() {
         withField(Collection.class);
         withInstantiableCollectionTypedField();
         withPropertyTypedField();
@@ -1301,17 +1331,17 @@ public class FieldValueMappingCallbackTest {
     /**
      * While NEBA guarantees non-null collections, no such guarantee exists for any other
      * field types. This test verifies that null values for non-collection typed fields
-     * are passed to the {@link io.neba.api.resourcemodels.AnnotatedFieldMapper field mappers}.
+     * are passed to the {@link AnnotatedFieldMapper field mappers}.
      */
     @Test
-    public void testNullNonCollectionValuesAreNullWhenInvokingFieldMappers() throws Exception {
+    public void testNullNonCollectionValuesAreNullWhenInvokingFieldMappers() {
         withCustomFieldMapperMappingTo("CustomMappedValue");
         mapPropertyField(String.class, null);
         assertOngoingMappingsResolvedValueIsNull();
     }
 
     /**
-     * A {@link io.neba.api.resourcemodels.AnnotatedFieldMapper} implementation must take
+     * A {@link AnnotatedFieldMapper} implementation must take
      * care to return an assignment-compatible value as a mapping result. However,
      * there are no enforce this at compile time. This test verifies that a suitable exception
      * is thrown in case a field mapper returns an incompatible value at runtime.
@@ -1319,7 +1349,7 @@ public class FieldValueMappingCallbackTest {
     @Test
     public void testHandlingOfIncompatibleReturnValueFromCustomFieldMapper() throws Exception {
         withCustomFieldMapperMappingTo(new ArrayList<String>());
-        withmappedField("mappedFieldOfTypeString");
+        withMappedField("mappedFieldOfTypeString");
 
         Exception e = null;
         try {
@@ -1352,6 +1382,7 @@ public class FieldValueMappingCallbackTest {
         assertThat(this.ongoingMapping.getResolvedValue()).isEqualTo(this.targetValue);
         assertThat(this.ongoingMapping.getResource()).isSameAs(this.resource);
         assertThat(this.ongoingMapping.getFieldTypeParameter()).isSameAs(this.mappedFieldMetadata.getTypeParameter());
+        assertThat(this.ongoingMapping.getAnnotationsOfField()).isSameAs(this.mappedFieldMetadata.getAnnotations().getAnnotations());
     }
 
     @SuppressWarnings("unchecked")
@@ -1371,7 +1402,7 @@ public class FieldValueMappingCallbackTest {
         doAnswer(retainMappingContext).when(this.annotatedFieldMapper).map(isA(OngoingMapping.class));
     }
 
-    private void withmappedField(String fieldName) throws NoSuchFieldException {
+    private void withMappedField(String fieldName) throws NoSuchFieldException {
         this.mappedField = getClass().getDeclaredField(fieldName);
     }
 
@@ -1414,13 +1445,13 @@ public class FieldValueMappingCallbackTest {
         doReturn(path).when(this.mappedFieldMetadata).getResolveBelowEveryChildPathOnChildren();
     }
 
-    private void mapPropertyField(Class<?> fieldType, Object propertyValue) throws NoSuchFieldException {
+    private void mapPropertyField(Class<?> fieldType, Object propertyValue) {
         withPropertyField(fieldType, propertyValue);
         mapField();
         this.targetValue = propertyValue;
     }
 
-    private void mapSingleReferenceField(Class<?> fieldType, String referencePath) throws NoSuchFieldException {
+    private void mapSingleReferenceField(Class<?> fieldType, String referencePath) {
         withPropertyField(fieldType, referencePath);
         withReferenceAnnotationPresent();
         mapField();
@@ -1428,8 +1459,7 @@ public class FieldValueMappingCallbackTest {
 
     private void mapReferenceCollectionField(
     		@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType,
-    		Class<?> componentType, String[] referencePaths)
-    				throws NoSuchFieldException {
+    		Class<?> componentType, String... referencePaths) {
         withPropertyField(collectionType, referencePaths);
         withTypeParameter(componentType);
         withReferenceAnnotationPresent();
@@ -1438,33 +1468,29 @@ public class FieldValueMappingCallbackTest {
         mapField();
     }
 
-    private void mapComplexFieldWithPath(Class<?> fieldType, String fieldPath) throws NoSuchFieldException {
+    private void mapComplexFieldWithPath(Class<?> fieldType, String fieldPath) {
         withField(fieldType);
         withFieldPath(fieldPath);
         mapField();
     }
 
-    private void withPropertyFieldWithPath(Class<?> fieldType, String fieldPath) throws NoSuchFieldException {
+    private void withPropertyFieldWithPath(Class<?> fieldType, String fieldPath) {
         withField(fieldType);
         withFieldPath(fieldPath);
         withPathAnnotationPresent();
         withPropertyTypedField();
     }
 
-    private void withPathExpressionDetected() {
-        when(this.mappedFieldMetadata.isPathExpressionPresent()).thenReturn(true);
-    }
-
-    private void mapChildResourceField(Class<?> fieldType) throws NoSuchFieldException {
+    private void mapChildResourceField(Class<?> fieldType) {
         withField(fieldType);
         mapField();
     }
 
-    private void mapThisReference() throws NoSuchFieldException {
+    private void mapThisReference() {
         mapThisReference(Resource.class, this.resource);
     }
 
-    private <T> void mapThisReference(Class<T> fieldType, T targetValue) throws NoSuchFieldException {
+    private <T> void mapThisReference(Class<T> fieldType, T targetValue) {
         withField(fieldType);
         withThisReferenceTypedField();
         this.targetValue = targetValue;
@@ -1486,12 +1512,14 @@ public class FieldValueMappingCallbackTest {
         this.targetValue = target;
     }
 
-    private void withPlaceholderResolution(String key, String value) {
-        when(this.factory.resolveEmbeddedValue(key)).thenReturn(value);
+    private void withPathVariableResolution(String to) {
+        ResourcePaths.ResourcePath resolvedPath = mock(ResourcePaths.ResourcePath.class);
+        doReturn(to).when(resolvedPath).getPath();
+        doReturn(resolvedPath).when(this.path).resolve(any());
     }
 
-    private void withConfigurableBeanFactory() {
-        this.factory = mock(ConfigurableBeanFactory.class);
+    private void withResourceModelFactory() {
+        this.factory = mock(ResourceModelFactory.class);
     }
 
     private <T> void withResourceTargetedByMappingAdaptingTo(Class<T> type, T value) {
@@ -1525,8 +1553,8 @@ public class FieldValueMappingCallbackTest {
         return currentParent;
     }
 
-    private void withOptionalField() {
-        doReturn(true).when(this.mappedFieldMetadata).isOptional();
+    private void withLazyField() {
+        doReturn(true).when(this.mappedFieldMetadata).isLazy();
     }
 
     /**
@@ -1558,7 +1586,7 @@ public class FieldValueMappingCallbackTest {
         when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(null);
     }
 
-    private void withPropertyField(Class<?> fieldType, Object propertyValue) throws NoSuchFieldException {
+    private void withPropertyField(Class<?> fieldType, Object propertyValue) {
         withField(fieldType);
         withPropertyTypedField();
         withPropertyValue(propertyValue);
@@ -1578,7 +1606,11 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void withFieldPath(String path) {
-        doReturn(path).when(this.mappedFieldMetadata).getPath();
+        doReturn(path).when(this.path).getPath();
+    }
+
+    private void withPathPlaceholdersDetected() {
+        doReturn(true).when(this.path).hasPlaceholders();
     }
 
     private void withReferenceAnnotationPresent() {
@@ -1602,15 +1634,19 @@ public class FieldValueMappingCallbackTest {
         doReturn(value).when(this.valueMap).get(eq("field"), eq(retrievedType));
     }
 
-    private <T> void withField(Class<T> fieldType) throws NoSuchFieldException {
+    private <T> void withField(Class<T> fieldType) {
         mappedField.setAccessible(true);
         doReturn(mappedField).when(this.mappedFieldMetadata).getField();
-        doReturn("field").when(this.mappedFieldMetadata).getPath();
+        doReturn("field").when(this.path).getPath();
         doReturn(fieldType).when(this.mappedFieldMetadata).getType();
+
+        Annotations annotations = mock(Annotations.class);
+        doReturn(new HashMap<>()).when(annotations).getAnnotations();
+        doReturn(annotations).when(this.mappedFieldMetadata).getAnnotations();
     }
 
     private void mapField() {
-        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers)
+        new FieldValueMappingCallback(this.model, this.resource, this.factory, this.annotatedFieldMappers, this.placeholderVariableResolvers)
                 .doWith(this.mappedFieldMetadata);
     }
 
@@ -1618,12 +1654,12 @@ public class FieldValueMappingCallbackTest {
         doReturn(true).when(this.mappedFieldMetadata).isThisReference();
     }
 
-    private void loadOptionalField() {
-        this.mappedFieldOfTypeObject = ((Optional<?>) this.mappedFieldOfTypeObject).orElse(null);
+    private void loadLazyField() {
+        this.mappedFieldOfTypeObject = ((Lazy<?>) this.mappedFieldOfTypeObject).asOptional().orElse(null);
     }
 
-    private void assertMappedFieldValueIsOptional() {
-        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
+    private void assertMappedFieldValueIsLazy() {
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Lazy.class);
     }
 
     private void assertNoLazyLoadingProxyIsCreated() {
@@ -1634,22 +1670,16 @@ public class FieldValueMappingCallbackTest {
         verify(this.lazyLoadingCollectionFactory).newInstance(isA(LazyLoader.class));
     }
 
-    private void assertOptionalFieldHasValue(Object expected) {
-        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
-        assertThat(((Optional<?>) this.mappedFieldOfTypeObject).orElse(null)).isEqualTo(expected);
+    @SuppressWarnings("unchecked")
+    private void assertLazyFieldIsJavaUtilOptionalWithValue(Object value) {
+        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Lazy.class);
+        assertThat(((Lazy) this.mappedFieldOfTypeObject).asOptional()).hasValue(value);
     }
 
-    private void assertOptionalValueIsPresent() {
-        assertThat(((Optional<?>) this.mappedFieldOfTypeObject).isPresent()).describedAs("the optional field is present").isTrue();
-    }
-
-    private void assertOptionalValueIsNotPresent() {
-        assertThat(((Optional<?>) this.mappedFieldOfTypeObject).isPresent()).describedAs("the optional field is present").isFalse();
-    }
-
-    private void getOptionalValue() {
-        assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Optional.class);
-        ((Optional<?>) this.mappedFieldOfTypeObject).get();
+    @SuppressWarnings("unchecked")
+    private void assertLazyFieldHasNoValue() {
+        assertThat(((Lazy<Object>) this.mappedFieldOfTypeObject).asOptional())
+                .describedAs("The value returned when invoking asOptional() of the lazy field").isEmpty();
     }
 
     private void assertMappedFieldValueIsCollectionWithResourcesWithPaths(String... referencedResources) {
@@ -1666,10 +1696,6 @@ public class FieldValueMappingCallbackTest {
             assertThat(array[i]).isNotNull();
             assertThat(array[i].getPath()).isEqualTo(resourcePaths[i]);
         }
-    }
-
-    private void assertFieldMapperDoesNotAttemptToResolvePlaceholders() {
-        verify(this.factory, never()).resolveEmbeddedValue(anyString());
     }
 
     private void assertChildResourceIsNotLoadedForField() {
@@ -1689,17 +1715,17 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertFieldIsFetchedFromValueMap() {
-        String fieldPath = this.mappedFieldMetadata.getPath();
+        String fieldPath = this.mappedFieldMetadata.getPath().getPath();
         verify(this.valueMap).get(eq(fieldPath), eq(String.class));
     }
 
     private void assertFieldIsNotFetchedFromValueMap() {
-        String fieldPath = this.mappedFieldMetadata.getPath();
+        String fieldPath = this.mappedFieldMetadata.getPath().getPath();
         verify(this.valueMap, never()).get(eq(fieldPath), eq(String.class));
     }
 
     private void assertFieldIsFetchedFromValueMapAs(Class<?> expectedPropertyType) {
-        String fieldPath = this.mappedFieldMetadata.getPath();
+        String fieldPath = this.mappedFieldMetadata.getPath().getPath();
         verify(this.valueMap).get(fieldPath, expectedPropertyType);
     }
 
@@ -1707,13 +1733,14 @@ public class FieldValueMappingCallbackTest {
         verify(this.valueMap).get(eq(key), eq(String.class));
     }
 
-    private void assertFieldMapperAttemptsToResolvePlaceholdersIn(String placeholder) {
-        verify(this.factory).resolveEmbeddedValue(eq(placeholder));
+    private void verifyFieldMapperResolvesPath() {
+        verify(this.path).resolve(any());
     }
 
+    @SuppressWarnings("unchecked")
     private void assertMappedFieldValueIsCollectionContainingTargetValue() {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
-        assertThat((Collection<?>) this.mappedFieldOfTypeObject).containsOnly(this.targetValue);
+        assertThat((Collection<Object>) this.mappedFieldOfTypeObject).containsOnly(this.targetValue);
     }
 
     private void assertMappedFieldValueIsEmptyCollection() {
@@ -1721,9 +1748,10 @@ public class FieldValueMappingCallbackTest {
         assertThat((Collection<?>) this.mappedFieldOfTypeObject).isEmpty();
     }
 
+    @SuppressWarnings("unchecked")
     private void assertMappedFieldValueIsCollectionWithEntries(Object... entries) {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
-        assertThat((Collection<?>) this.mappedFieldOfTypeObject).containsOnly(entries);
+        assertThat((Collection<Object>) this.mappedFieldOfTypeObject).containsOnly(entries);
     }
 
     @SuppressWarnings("unchecked")

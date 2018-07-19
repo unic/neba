@@ -1,22 +1,22 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.api.tags;
 
-import io.neba.api.resourcemodels.ResourceModelProvider;
+import io.neba.api.services.ResourceModelResolver;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
@@ -24,11 +24,11 @@ import org.apache.sling.api.scripting.SlingScriptHelper;
 import tldgen.Tag;
 import tldgen.TagAttribute;
 
-import javax.servlet.jsp.JspException;
+import javax.annotation.CheckForNull;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import static io.neba.api.Constants.MODEL;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 /**
@@ -40,10 +40,11 @@ public final class DefineObjectsTag extends TagSupport {
     private static final long serialVersionUID = 3746304163438347809L;
 
     private boolean includeGenericBaseTypes = false;
-    private String modelBeanName;
+    private String modelName;
+    private String var;
 
     @Override
-    public int doEndTag() throws JspException {
+    public int doEndTag() {
         provideMostSpecificResourceModel();
         return EVAL_PAGE;
     }
@@ -52,36 +53,43 @@ public final class DefineObjectsTag extends TagSupport {
             "generic base types such as \"nt:unstructured\" or " +
             "\"nt:base\". Defaults to false. Has no effect if a " +
             "modelName is provided.",
-            required = false, runtimeValueAllowed = true)
+            runtimeValueAllowed = true)
     public void setIncludeGenericBaseTypes(boolean includeGenericBaseTypes) {
         this.includeGenericBaseTypes = includeGenericBaseTypes;
     }
 
-    @TagAttribute(description = "The explicit bean name of the resource model that shall " +
+    @TagAttribute(description = "The explicit model name of the resource model that shall " +
             "be provided for the resource. The targeted resource model must still be " +
             "declared for a resource type compatible with the resource's type. The searched " +
             "models will always include generic base models, regardless of whether " +
             "includeGenericBaseTypes is false.",
-            required = false, runtimeValueAllowed = true)
-    public void setUseModelNamed(String name) {
-        this.modelBeanName = name;
+            runtimeValueAllowed = true)
+    public void setUseModelNamed(@CheckForNull String name) {
+        this.modelName = name;
+    }
+
+    @TagAttribute(description = "The variable name to publish the model under. " +
+            "Defaults to the default model name 'm' if not defined, null or empty."  ,
+            runtimeValueAllowed = true)
+    public void setVar(@CheckForNull String var) {
+        this.var = var;
     }
 
     private void provideMostSpecificResourceModel() {
         SlingScriptHelper scriptHelper = getScriptHelper();
-        ResourceModelProvider modelProvider = scriptHelper.getService(ResourceModelProvider.class);
+        ResourceModelResolver modelProvider = scriptHelper.getService(ResourceModelResolver.class);
 
         if (modelProvider == null) {
             // Can be the case if called before / after provider lifetime, e.g.
             // when the application context is stopped. Fail fast.
-            throw new IllegalStateException("The " + ResourceModelProvider.class.getSimpleName() + " must not be null." +
+            throw new IllegalStateException("The " + ResourceModelResolver.class.getSimpleName() + " must not be null." +
                                             " Is this tag used while the NEBA core is not started?");
         }
 
         Resource resource = getResource();
         Object model;
-        if (!isBlank(this.modelBeanName)) {
-            model = modelProvider.resolveMostSpecificModelWithBeanName(resource, this.modelBeanName);
+        if (!isBlank(this.modelName)) {
+            model = modelProvider.resolveMostSpecificModelWithName(resource, this.modelName);
         } else if (this.includeGenericBaseTypes) {
             model = modelProvider.resolveMostSpecificModelIncludingModelsForBaseTypes(resource);
         } else {
@@ -89,7 +97,8 @@ public final class DefineObjectsTag extends TagSupport {
         }
 
         if (model != null) {
-            this.pageContext.setAttribute(MODEL, model);
+            String variableName = isBlank(this.var) ? MODEL : this.var;
+            this.pageContext.setAttribute(variableName, model);
         }
     }
 
@@ -98,11 +107,11 @@ public final class DefineObjectsTag extends TagSupport {
         return slingRequest.getResource();
     }
 
-    protected SlingBindings getBindings() {
+    private SlingBindings getBindings() {
         return (SlingBindings) this.pageContext.getRequest().getAttribute(SlingBindings.class.getName());
     }
 
-    protected SlingScriptHelper getScriptHelper() {
+    private SlingScriptHelper getScriptHelper() {
         SlingBindings bindings = getBindings();
 
         if (bindings == null) {

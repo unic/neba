@@ -1,18 +1,18 @@
-/**
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
 package io.neba.core.util;
 
 import org.junit.Before;
@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Arrays.asList;
@@ -56,7 +57,7 @@ public class AnnotationsTest {
     private Annotations testee = new Annotations(TestType.class);
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         this.allAnnotations = new HashSet<>();
         this.allAnnotations.addAll(asList(TestType.class.getAnnotations()));
         this.allAnnotations.addAll(asList(TestAnnotation.class.getAnnotations()));
@@ -66,53 +67,59 @@ public class AnnotationsTest {
     }
 
     @Test
-    public void testDetectionOfDirectAnnotation() throws Exception {
+    public void testDetectionOfDirectAnnotation() {
         assertAnnotationIsPresent(TestAnnotation.class);
         assertAnnotationInstanceCanBeObtained(TestAnnotation.class);
     }
 
     @Test
-    public void testDetectionOfMetaAnnotations() throws Exception {
+    public void testDetectionOfMetaAnnotations() {
         assertAnnotationIsPresent(MetaAnnotation.class);
         assertAnnotationInstanceCanBeObtained(MetaAnnotation.class);
     }
 
     @Test
-    public void testDetectionOfCyclicMetaAnnotation() throws Exception {
+    public void testDetectionOfCyclicMetaAnnotation() {
         assertAnnotationIsPresent(CyclicAnnotation.class);
         assertAnnotationInstanceCanBeObtained(CyclicAnnotation.class);
     }
 
     @Test
-    public void testContainsAnnotationWithName() throws Exception {
+    public void testContainsAnnotationWithName() {
         assertAnnotationWithNameIsNotPresent("does.no.Exist");
         assertAnnotationWithNameIsPresent(TestAnnotation.class.getName());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullElementArgumentForLookup() throws Exception {
+    public void testHandlingOfNullElementArgumentForLookup() {
         this.testee.get(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullElementArgumentForExistenceTest() throws Exception {
+    public void testHandlingOfNullElementArgumentForExistenceTest() {
         this.testee.contains(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullTypeArgumentForConstructor() throws Exception {
+    public void testHandlingOfNullTypeArgumentForConstructor() {
         new Annotations(null);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetAnnotations() throws Exception {
+    public void testGetAnnotations() {
         assertAnnotationsAre(MetaAnnotation.class, CyclicAnnotation.class);
     }
 
     @Test
-    public void testIteratorProvidesExpectedAnnotations() throws Exception {
+    public void testIteratorProvidesExpectedAnnotations() {
         assertThat(this.testee.iterator()).containsOnly(this.allAnnotations.toArray(new Annotation[]{}));
+    }
+
+    @Test
+    public void testStream() {
+        Function<Annotation, Class<?>> getType = Annotation::annotationType;
+        assertThat(this.testee.stream().map(getType)).contains(MetaAnnotation.class, TestAnnotation.class);
     }
 
     @SafeVarargs

@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
@@ -41,7 +42,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
@@ -85,18 +92,27 @@ public class ResourceToModelAdapterTest {
     @Before
     public void setUp() throws Exception {
         Answer storeInCache = invocation -> {
-            testCache.put((Key) invocation.getArguments()[2], invocation.getArguments()[1]);
+            Object model = invocation.getArguments()[2];
+            testCache.put(buildCacheInvocationKey(invocation), model);
             return null;
         },
-        lookupFromCache = invocation -> {
-            Key key = (Key) invocation.getArguments()[0];
-            return testCache.get(key);
-        };
 
-        doAnswer(storeInCache).when(this.caches).store(isA(Resource.class), any(), isA(Key.class));
-        doAnswer(lookupFromCache).when(this.caches).lookup(isA(Key.class));
+        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+
+        doAnswer(storeInCache)
+                .when(this.caches)
+                .store(isA(Resource.class), isA(OsgiModelSource.class), any());
+
+        doAnswer(lookupFromCache)
+                .when(this.caches)
+                .lookup(isA(Resource.class), isA(OsgiModelSource.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
+    }
+
+    @Test
+    public void testAdaptablesOtherThanResourceYieldNull() throws Exception {
+        assertThat(this.testee.getAdapter(new Object(), Object.class)).isNull();
     }
 
     @Test
@@ -120,9 +136,9 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testHandlingOfNullBeanSource() throws Exception {
+    public void testHandlingOfNullModelSource() throws Exception {
         withTargetType(TestModel.class);
-        withNullReturnedAsBeanSourceFromRegistrar();
+        withNullReturnedAsModelSourceFromRegistrar();
         adapt();
         verifyAdapterObtainsSourceFromRegistrar();
         assertResourceWasNotAdaptedToModel();
@@ -171,40 +187,12 @@ public class ResourceToModelAdapterTest {
         assertResourceWasAdaptedToModel();
     }
 
-    @Test
-    public void testAdapterUsesResourceResolverIdentityForCacheKey() throws Exception {
-        withResourceType("resource/type/one");
-        withResourcePath("/resource/path");
-        withTargetType(TestModel.class);
-        withAvailableModels(new TestModel());
-
-        adapt();
-        verifyModelIsMappedOnlyOnce();
-
-        withDifferentResourceResolverForSameResource();
-
-        adapt();
-        verifyModelIsMappedAgain();
-    }
-
-    private void verifyModelIsMappedAgain() {
-        verify(this.mapper, times(2)).map(eq(this.resource), isA(OsgiBeanSource.class));
-    }
-
-    private void withDifferentResourceResolverForSameResource() {
-        doReturn(mock(ResourceResolver.class)).when(this.resource).getResourceResolver();
-    }
-
-    private void verifyModelIsMappedOnlyOnce() {
-        verify(this.mapper, times(1)).map(eq(this.resource), isA(OsgiBeanSource.class));
-    }
-
     @SuppressWarnings("unchecked")
     private void verifyAdapterDoesNotMapResourceToModel() {
-        verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiBeanSource.class));
+        verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiModelSource.class));
     }
 
-    private void withNullReturnedAsBeanSourceFromRegistrar() {
+    private void withNullReturnedAsModelSourceFromRegistrar() {
         when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(null);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), eq(this.targetType))).thenReturn(null);
     }
@@ -230,7 +218,7 @@ public class ResourceToModelAdapterTest {
     }
 
     private void verifyAdapterMapsResourceToModel(int i) {
-        OsgiBeanSource<?> source = this.sources.get(i).getSource();
+        OsgiModelSource<?> source = this.sources.get(i).getSource();
         verify(this.mapper).map(eq(this.resource), eq(source));
     }
 
@@ -241,12 +229,12 @@ public class ResourceToModelAdapterTest {
         when(this.registry.lookupMostSpecificModels(isA(Resource.class), isA(Class.class))).thenReturn(this.sources);
 
         for (Object model : models) {
-            OsgiBeanSource source = mock(OsgiBeanSource.class);
+            OsgiModelSource source = mock(OsgiModelSource.class);
             LookupResult result = mock(LookupResult.class);
             when(result.getSource()).thenReturn(source);
             this.sources.add(result);
-            when(source.getBeanType()).thenReturn((Class) model.getClass());
-            when(source.getBean()).thenReturn(model);
+            when(source.getModelType()).thenReturn(model.getClass());
+            when(source.getModel()).thenReturn(model);
             when(this.mapper.map(eq(this.resource), eq(source))).thenReturn(model);
         }
     }
@@ -265,5 +253,14 @@ public class ResourceToModelAdapterTest {
 
     private void withResourceType(String type) {
         doReturn(type).when(this.resource).getResourceType();
+    }
+
+    /**
+     * Simulates the key calculation used by the ResourceModelCaches implementation.
+     */
+    private Key buildCacheInvocationKey(InvocationOnMock invocation) {
+        Resource resource = (Resource) invocation.getArguments()[0];
+        OsgiModelSource<?> modelSource = (OsgiModelSource<?>) invocation.getArguments()[1];
+        return new Key(resource.getPath(), modelSource.getModelType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

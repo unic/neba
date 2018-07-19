@@ -1,87 +1,112 @@
-/**
- * Copyright 2013 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 the "License";
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
+/*
+  Copyright 2013 the original author or authors.
 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-**/
+  Licensed under the Apache License, Version 2.0 the "License";
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.api.annotations.ResourceModel;
+import io.neba.api.spi.ResourceModelFactory;
 import io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
-import io.neba.core.util.OsgiBeanSource;
+import io.neba.core.util.OsgiModelSource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.stereotype.Service;
+
+import java.util.Collection;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
-import static org.apache.commons.lang.StringUtils.join;
-import static org.springframework.beans.factory.BeanFactoryUtils.beanNamesForTypeIncludingAncestors;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Whenever a {@link org.springframework.beans.factory.BeanFactory} is initialized, this registrar
- * {@link #registerModels(BundleContext, ConfigurableListableBeanFactory)
- * searches} the factory's bean definitions for beans annotated with
- * {@link ResourceModel}. The corresponding mappings {type -&gt; model} are then
- * added to the {@link ModelRegistry}, providing models for resources. This
- * registrar also signals changes of the {@link ModelRegistry} to the
- * {@link io.neba.core.resourcemodels.adaptation.ResourceToModelAdapter}.
- *
+ * Coordinates available models with NEBA's internal {@link ModelRegistry} and the {@link io.neba.core.resourcemodels.adaptation.ResourceToModelAdapter resource to model adapter factory}
+ * provided by NEBA.
+ * <p>
+ * Specifically, this service tracks all {@link ResourceModelFactory resource model factory services} and {@link #registerModels(Bundle, ResourceModelFactory) registers}
+ * or {@link #unregister(Bundle) unregisters} their models using the {@link ModelRegistry}. Subsequently, it
+ * {@link ResourceToModelAdapterUpdater#refresh() refreshes} the resource to model adapter factory to reflect the changes.
+ *</p>
  * @author Olaf Otto
- * @see io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater
- * @see io.neba.core.blueprint.SlingBeanFactoryPostProcessor
  */
-@Service
+@Component(immediate = true)
 public class ModelRegistrar {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    @Autowired
+    private final Logger logger = getLogger(getClass());
+
+    @Reference
     private ModelRegistry registry;
-    @Autowired
+    @Reference
     private ResourceToModelAdapterUpdater resourceToModelAdapterUpdater;
-    @Autowired
+    @Reference
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
-    private void discoverResourceModels(ConfigurableListableBeanFactory factory, Bundle bundle) {
-        logger.info("Discovering resource models in bundle: " + displayNameOf(bundle) + " ...");
-        String[] beanNames = beanNamesForTypeIncludingAncestors(factory, Object.class);
-        int numberOfDiscoveredModels = 0;
-        for (String beanName : beanNames) {
-            ResourceModel resourceModel = factory.findAnnotationOnBean(beanName, ResourceModel.class);
-            if (resourceModel != null) {
-                ++numberOfDiscoveredModels;
-                OsgiBeanSource<Object> source = new OsgiBeanSource<>(beanName, factory, bundle);
-                this.resourceModelMetaDataRegistrar.register(source);
-                this.registry.add(resourceModel.types(), source);
-                logger.debug("Registered bean " + beanName + " as a model for the resource types "
-                            + join(resourceModel.types(), ", ") + ".");
+    private ServiceTracker tracker;
+
+    @Activate
+    protected void activate(BundleContext context) {
+        this.tracker = new ServiceTracker<>(context, ResourceModelFactory.class.getName(), new ServiceTrackerCustomizer<ResourceModelFactory, ResourceModelFactory>() {
+            @Override
+            public ResourceModelFactory addingService(ServiceReference<ResourceModelFactory> reference) {
+                final ResourceModelFactory factory = context.getService(reference);
+                registerModels(reference.getBundle(), factory);
+                return context.getService(reference);
             }
-        }
-        logger.info("Discovered " + numberOfDiscoveredModels + " resource model(s) in bundle: "
-                + displayNameOf(bundle) + ".");
+
+            @Override
+            public void modifiedService(ServiceReference<ResourceModelFactory> reference, ResourceModelFactory service) {
+                final ResourceModelFactory factory = context.getService(reference);
+                unregister(reference.getBundle());
+                registerModels(reference.getBundle(), factory);
+            }
+
+            @Override
+            public void removedService(ServiceReference reference, ResourceModelFactory service) {
+                unregister(reference.getBundle());
+            }
+        });
+        this.tracker.open(true);
     }
 
-    public void registerModels(BundleContext bundleContext, ConfigurableListableBeanFactory beanFactory) {
-        discoverResourceModels(beanFactory, bundleContext.getBundle());
+    @Deactivate
+    protected void deactivate() {
+        this.tracker.close();
+    }
+
+    private void registerModels(Bundle bundle, ResourceModelFactory factory) {
+        final Collection<ResourceModelFactory.ModelDefinition> modelDefinitions = factory.getModelDefinitions();
+
+        logger.info("Registering {} resource models from bundle: " + displayNameOf(bundle) + " ...", modelDefinitions.size());
+        modelDefinitions.forEach(d -> {
+            final OsgiModelSource<Object> source = new OsgiModelSource<>(d, factory, bundle);
+            this.resourceModelMetaDataRegistrar.register(source);
+            this.registry.add(d.getResourceModel().types(), source);
+            logger.debug("Registered model {} as a model for the resource types {}.", d.getName(), join(d.getResourceModel().types(), ","));
+        });
+
         this.resourceToModelAdapterUpdater.refresh();
     }
 
-    public void unregister(Bundle bundle) {
+    private void unregister(Bundle bundle) {
         this.registry.removeResourceModels(bundle);
-        this.resourceModelMetaDataRegistrar.remove(bundle);
+        this.resourceModelMetaDataRegistrar.removeMetadataForModelsIn(bundle);
         this.resourceToModelAdapterUpdater.refresh();
     }
 }
