@@ -1,5 +1,5 @@
 /*
-    Content-Security-Policy: default-src 'none'; script-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'none'; frame-src 'none'; connect-src https://api.github.com
+    Content-Security-Policy: default-src 'none'; script-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'none'; frame-src 'none'; font-src 'self'; connect-src https://api.github.com
     Cache-Control: public, max-age=3600
     X-Content-Type-Options: nosniff
     X-Frame-Options: DENY
