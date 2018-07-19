@@ -35,16 +35,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
@@ -56,17 +48,9 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.startsWith;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
-import static org.apache.sling.api.resource.ResourceResolverFactory.PASSWORD;
-import static org.apache.sling.api.resource.ResourceResolverFactory.SUBSERVICE;
-import static org.apache.sling.api.resource.ResourceResolverFactory.USER;
-import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
-import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
-import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
+import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.sling.api.resource.ResourceResolverFactory.*;
+import static org.apache.sling.api.resource.ResourceUtil.*;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
@@ -375,16 +359,18 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private void spoolComponentIcon(HttpServletResponse response, String suffix) throws IOException {
-        Optional<ResourceResolver> resolver = getResourceResolver();
         response.setContentType("image/png");
         String iconPath = suffix.substring(API_COMPONENTICON.length());
-        if (!resolver.isPresent() || iconPath.isEmpty()) {
-            InputStream in = getClass().getResourceAsStream("/META-INF/consoleplugin/modelregistry/static/noicon.png");
-            try {
-                copy(in, response.getOutputStream());
-            } finally {
-                closeQuietly(in);
-            }
+
+        if (iconPath.isEmpty()) {
+            streamDefaultIcon(response);
+            return;
+        }
+
+        Optional<ResourceResolver> resolver = getResourceResolver();
+
+        if (!resolver.isPresent()) {
+            streamDefaultIcon(response);
             return;
         }
 
@@ -405,5 +391,14 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 closeQuietly(in);
             }
         });
+    }
+
+    private void streamDefaultIcon(HttpServletResponse response) throws IOException {
+        InputStream in = getClass().getResourceAsStream("/META-INF/consoleplugin/modelregistry/static/noicon.png");
+        try {
+            copy(in, response.getOutputStream());
+        } finally {
+            closeQuietly(in);
+        }
     }
 }
