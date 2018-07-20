@@ -7,7 +7,7 @@ Lightning fast and simple content mapping for Apache Sling and Adobe AEM
 
 [![codecov](https://codecov.io/gh/unic/neba/branch/develop/graph/badge.svg)](https://codecov.io/gh/unic/neba) 
 [![Travis](https://api.travis-ci.org/unic/neba.svg?branch=develop)](https://travis-ci.org/unic/neba/) 
-[![Maven Central](https://img.shields.io/maven-central/v/io.neba/io.neba.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aio.neba)
+[![Maven Central](https://img.shields.io/maven-central/v/io.neba/io.neba.neba-parent.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aio.neba.neba-parent)
 
 NEBA in a nutshell
 --------------------
