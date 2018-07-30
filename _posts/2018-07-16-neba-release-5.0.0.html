@@ -34,7 +34,7 @@ description: NEBA 5.0.0 introduces a flyweight kernel, an optional Spring 5 inte
             and the features gained by the integration became smaller.
         </p>
         <p>
-            Here, we choose to provide NEBA's core functionality with two lightweight bundles and make the Spring integration optional. Without using Spring, all it takes is a model annotated with <a href="/apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a> and the <a href="http://localhost:4000/documentation.html#add_neba_packages_header">OSGi bundle header
+            Here, we choose to provide NEBA's core functionality with two lightweight bundles and make the Spring integration optional. Without using Spring, all it takes is a model annotated with <a href="/apidocs/neba-api/io/neba/api/annotations/RceModel.html">@ResourceModel</a> and the <a href="/documentation.html#add_neba_packages_header">OSGi bundle header
             <code>Neba-Packages</code></a> to point to the respective package.
         </p>
         <p>
@@ -184,7 +184,7 @@ public class MyModel {
         <section>
             <header><h3>io.neba.api.resourcemodels.Optional is removed and replaced with io.neba.api.resourcemodels.Lazy</h3></header>
             <p>
-                In 5.0.0, NEBA's deprecated <code>Optional</code> interface for zaly-loading 1:1 relationships has been removed. Users of NEBA's <code>Optional</code> interface must use <a href="/documentation.html#the_lazy_interface">Lazy</a> instead.
+                In 5.0.0, NEBA's deprecated <code>Optional</code> interface for lazy-loading 1:1 relationships has been removed. Users of NEBA's <code>Optional</code> interface must use <a href="/documentation.html#the_lazy_interface">Lazy</a> instead.
             </p>
         </section>
         <section>
