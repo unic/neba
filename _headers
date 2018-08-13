@@ -1,5 +1,5 @@
 /*
-    Content-Security-Policy: default-src 'none'; script-src 'self' https://*.cloudfront.net; object-src 'none'; style-src 'self' 'unsafe-inline' https://*.cloudfront.net; img-src 'self' https://*.cloudfront.net https://travis-ci.org https://codecov.io https://api.travis-ci.org; media-src 'none'; frame-src 'none'; font-src 'self'; connect-src https://api.github.com
+    Content-Security-Policy: default-src 'none'; script-src 'self' https://*.cloudfront.net; object-src 'none'; style-src 'self' 'unsafe-inline' https://*.cloudfront.net; img-src 'self' https://*.cloudfront.net https://travis-ci.org https://codecov.io https://api.travis-ci.org; media-src 'none'; frame-src 'none'; font-src 'self' https://*.cloudfront.net; connect-src https://api.github.com
     Cache-Control: public, max-age=3600
     X-Content-Type-Options: nosniff
     X-Frame-Options: DENY
