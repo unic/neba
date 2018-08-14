@@ -93,7 +93,7 @@ description: Download and integrate NEBA into Apache Sling or Adobe AEM
             {% highlight xml %}<dependency>
     <groupId>org.eclipse.gemini.blueprint</groupId>
     <artifactId>gemini-blueprint-extensions</artifactId>
-    <version>2.1.0.RELEASE</version>
+    <version>3.0.0.M01</version>
 </dependency>{% endhighlight %}
             </p>
 
@@ -122,12 +122,20 @@ description: Download and integrate NEBA into Apache Sling or Adobe AEM
                 To reference the NEBA Spring artifacts, simply add the "spring" classifier to the respective dependency, e.g.:
             {% highlight xml %}<dependency>
     <groupId>io.neba</groupId>
-    <artifactId>io.neba.neba-delivery-sling</artifactId>
+    <artifactId>io.neba.neba-delivery-aem</artifactId>
     <classifier>spring</classifier>
     <version>{{site.nebaVersion}}</version>
 </dependency>{% endhighlight %}
 
             </p>
+
+            or for Apache Sling:
+            {% highlight xml %}<dependency>
+    <groupId>io.neba</groupId>
+    <artifactId>io.neba.neba-delivery-sling</artifactId>
+    <classifier>spring</classifier>
+    <version>{{site.nebaVersion}}</version>
+</dependency>{% endhighlight %}
 
             <p>Finally, in order to <a
                     href="https://docs.adobe.com/docs/en/aem/6-2/develop/dev-tools/vlt-mavenplugin.html#install">install
