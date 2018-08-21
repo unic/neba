@@ -94,7 +94,7 @@ class ModelInstantiator<T> {
             ServiceDependency serviceDependency = new ServiceDependency(serviceType, modelType, filter);
             serviceSetters.add(new ModelServiceSetter(serviceDependency, method));
         }
-        return serviceSetters.toArray(new ModelServiceSetter[serviceSetters.size()]);
+        return serviceSetters.toArray(new ModelServiceSetter[0]);
     }
 
     @Nonnull
@@ -122,7 +122,7 @@ class ModelInstantiator<T> {
     }
 
     /**
-     * @return either the default or a @Inject constructor, if present. Fails if neither a public default constructor nor a public  @Inject constructor is
+     * @return either the default or an @Inject constructor, if present. Fails if neither a public default constructor nor a public @Inject constructor is
      * present, of if multiple @Inject constructors exist.
      */
     @SuppressWarnings("unchecked")

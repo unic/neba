@@ -58,7 +58,7 @@ class ServiceDependency {
         if (rawType == null) {
             throw new InvalidModelException(
                     "Unable to resolve the service dependency from  '" + modelType + "' to '" + serviceType + "'," +
-                            " resolving the actual class of the model returned null.");
+                            " resolving the raw class of '" + serviceType +  "' returned null.");
         }
 
         if (filter != null && rawType.isAssignableFrom(List.class)) {
@@ -81,7 +81,7 @@ class ServiceDependency {
         if (actualServiceType == null) {
             throw new InvalidModelException(
                     "Unable to resolve the service dependency from  '" + modelType + "' to '" + serviceType + "'," +
-                            " resolving the actual class of the service type returned null.");
+                            " resolving the raw class of the service type returned null.");
         }
 
         if (filter != null && isNotBlank(filter.value())) {
