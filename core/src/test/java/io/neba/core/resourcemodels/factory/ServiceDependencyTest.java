@@ -113,11 +113,21 @@ public class ServiceDependencyTest {
     }
 
     @Test
-    public void testResolutionOfListOfServiceInterface() throws InvalidSyntaxException {
+    public void testResolutionOfListOfServiceInterfaceWithFilter() throws InvalidSyntaxException {
         withDependencyTo(parameterOf("setDependencyList"));
         withFilter(filterOf("setDependencyList"));
 
         withExistingService(ServiceInterface.class, "(property=name)");
+
+        createDependency();
+        resolveService();
+        assertDependenciesAreProvidedInList();
+    }
+
+    @Test
+    public void testResolutionOfListOfServiceInterface() throws InvalidSyntaxException {
+        withDependencyTo(parameterOf("setDependencyList"));
+        withExistingService(ServiceInterface.class, null);
 
         createDependency();
         resolveService();
@@ -191,8 +201,12 @@ public class ServiceDependencyTest {
 
     @SuppressWarnings("unchecked")
     private void assertDependenciesAreProvidedInList() {
-        assertThat(this.resolvedDependency).isInstanceOf(List.class);
-        assertThat((List) this.resolvedDependency).containsExactly(this.expectedDependency);
+        assertThat(this.resolvedDependency)
+                .describedAs("The resolved service dependencies must be a non-null list")
+                .isInstanceOf(List.class);
+        assertThat((List) this.resolvedDependency)
+                .describedAs("The list of service dependencies must contain the expected dependency")
+                .containsExactly(this.expectedDependency);
     }
 
     @SuppressWarnings("unchecked")
