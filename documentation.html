@@ -33,6 +33,7 @@ description: A comprehensive guide to using the NEBA features
                 </header>
                 <ul>
                     <li><a href="#what_is_a_resource_model">What is a resource model?</a></li>
+                    <li><a href="#dependency_injection">Dependency injection and content-to-object mapping</a></li>
                     <li><a href="#about_resource_models">Resources, resource types and resource models</a></li>
                     <li><a href="#using_models_in_views">Using models in views</a></li>
                     <li><a href="#mapping_resources_to_models">Mapping properties and resources to models</a></li>
@@ -108,7 +109,7 @@ description: A comprehensive guide to using the NEBA features
                 </header>
                 <ul>
                     <li>
-                        <a href="/assets/documents/NEBA-4.3.0-documentation.pdf" title="NEBA 4.3.x">NEBA 4.3.x Documentation (PDF)</a>
+                        <a href="/assets/documents/NEBA-4.3.0-Documentation.pdf" title="NEBA 4.3.x">NEBA 4.3.x Documentation (PDF)</a>
                     </li>
                 </ul>
             </section>
@@ -178,20 +179,37 @@ description: A comprehensive guide to using the NEBA features
 
         <h4 id="the_filter_annotation">Injecting OSGi services with NEBA core</h4>
         <p>
-            When the model does not stem from a Spring application context, NEBA exclusively injects OSGi services into fields annotated with <code>@Inject</code>.
+            When the model does not stem from a Spring application context, NEBA exclusively injects OSGi services into fields or a constructor annotated with <code>@Inject</code>.
             These services can be filtered using the <a href="/apidocs/neba-api/io/neba/api/annotations/Filter.html">@Filter</a> annotation.
         </p>
 
-        <figure class="listing" id="listing:filter-annotation">
+        <figure class="listing" id="listing:field-injection">
         {% highlight java %}@ResourceModel(types = "my/resource/type")
 public class SomeModelClass {
     @Inject
     @Filter("(zone=eu)")
     private DataSource dataSource;
-}{% endhighlight %}<figcaption>Using the @Filter annotation to selectively inject OSGi services</figcaption></figure>
+}{% endhighlight %}<figcaption>Using @Inject and @Filter to inject OSGi services into fields</figcaption></figure>
 
         The @Filter annotation <em>cannot be used by models managed in a Spring Application Context</em>. Here, <a href="https://www.eclipse.org/gemini/blueprint/documentation/reference/3.0.0.M01/html-single/index.html#service-registry:annotations-vs-xml-declarations">OSGi services can be injected by importing them into the application context using blueprint
-            or by using the gemini blueprint @ServiceReference annotation</a>
+            or by using the gemini blueprint @ServiceReference annotation</a>.
+
+        <p>
+        NEBA also supports constructor injection in the same fashion:
+        </p>
+
+        <figure class="listing" id="listing:constructor-injection">
+        {% highlight java %}@ResourceModel(types = "my/resource/type")
+public class SomeModelClass {
+    public SomeModelClass(@Inject @Filter("(zone=eu)") DataSource ds) {
+        this.dataSource = ds;
+    }
+}{% endhighlight %}<figcaption>Using @Inject and @Filter to inject OSGi services into constructors</figcaption></figure>
+
+        <p>
+        For resource models that do not stem from a Spring Application Context, NEBA supports either the default constructor or exactly one constructor annotated with @Inject,
+        with the @Inject constructor taking precedence.
+        </p>
 
         <h3 id="about_resource_models">Resources, resource types and resource models</h3>
 
@@ -253,7 +271,7 @@ public class Carousel {
         <h4>Background: The @ResourceModel annotation</h4>
         <p>
             Classes annotated with <a href="">@ResourceModel</a> are automatically detected by NEBA if their package is listed in the "Neba-Packages" bundle header.
-            For each detected model, NEBA registeres the defined resource types and node types supported by the model and
+            For each detected model, NEBA registers the defined resource types and node types supported by the model and
             automatically registers an <a href="https://sling.apache.org/documentation/the-sling-engine/adapters.html#adapterfactory">Adapter Factory</a> supporting the adaptation of resources to the model.
         </p>
     </section>
@@ -273,11 +291,11 @@ public class Carousel {
 <neba:defineObjects />{% endhighlight %}<figcaption>Importing the NEBA taglib namespace</figcaption></figure>
 
     <p>Both are looking up the most specific model for the current resource.
-       By default, neba.js and neba:defineObjects publishe the model into the scripting context under the key &quot;m&quot;.
+       By default, neba.js and neba:defineObjects publish the model into the scripting context under the key &quot;m&quot;.
         In both examples above, one can access the model like so:</p>
 
     <figure class="listing" id="listing:accessing-the-neba-model">
-        {% highlight java %}${m}{% endhighlight %}<figcaption>Acessing the NEBA model in HTL (Sightly) or JSP</figcaption></figure>
+        {% highlight java %}${m}{% endhighlight %}<figcaption>Accessing the NEBA model in HTL (Sightly) or JSP</figcaption></figure>
 
     <p>
         The <em>most specific model</em> is the one who's <em>type</em> attribute points to the most specific type within a resource's type
@@ -425,7 +443,7 @@ private List<PageContent> pageContents;{% endhighlight %}
     <figure class="listing" id="listing:neba-children-annotation">
     {% highlight java %}@Children
 private List<Resource> children;{% endhighlight %}
-    <figcaption>Using the @Children annotation to retreive the children of the current resource</figcaption></figure>
+    <figcaption>Using the @Children annotation to retrieve the children of the current resource</figcaption></figure>
 
     <p>Of course, NEBA will also automatically adapt the children to the generic type of the list - for instance,
         you could write:</p>
@@ -475,7 +493,7 @@ private List<PageContent> childPageContents;{% endhighlight %}
     {% highlight java %}private Date lastModified;{% endhighlight %}
     </figure>
 
-    <p>This will not yet work - NEBA mapps the properties by <em>name</em>, in this case the name contains
+    <p>This will not yet work - NEBA maps the properties by <em>name</em>, in this case the name contains
         characters (&quot;jcr:&quot;) unsuitable for a field name.  In this case, use the @Path annotation to specify
         the property from which the field's value shall be obtained:</p>
 
@@ -1069,7 +1087,7 @@ public class MyType {
 <h3 id="cache_extension">Caching and cache extension</h3>
 <p>
 NEBA's central and most performance critical feature is the adaptation of Resources resource models.
-There, resource and model resolution, content-to-object mapping and datatype conversion occurs.
+There, resource and model resolution, content-to-object mapping and data type conversion occurs.
 This core functionality features an extensible caching
 interface. Any OSGi service implementing the NEBA API interface <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelCache.html">ResourceModelCache</a> will automatically be
 registered and used to cache the result of the resource to model adaptation.</p><p>NEBA ships with a safe and
@@ -1110,7 +1128,7 @@ This cache can be disabled via the Felix console (configuration tab). For furthe
     to the core bundle. It is designed to rarely change and to be the exclusive interface between code using NEBA and the NEBA implementation, thus completely
     separating application code from NEBA's implementation concerns.</p>
 
-    <img src="assets/images/neba-core.png" alt="NEBA is composed of a core and api bundle. The core bundle uses the Slign and the JCR API.">
+    <img src="assets/images/neba-core.png" alt="NEBA is composed of a core and api bundle. The core bundle uses the Sling and the JCR API.">
 
     <p>
         In addition, NEBA provides a Spring integration bundle. This bundle enables using Spring Beans as Models for Resources and Spring MVC within Apache Sling.
