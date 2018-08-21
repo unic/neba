@@ -211,6 +211,39 @@ public class SomeModelClass {
         with the @Inject constructor taking precedence.
         </p>
 
+        <h4 id="optional_dependency_injection">Optional dependencies</h4>
+        <p>
+            By default, service dependencies via @Inject are mandatory. Obtaining a resource model will thus fail if the respective OSGi service is unavailable.
+            Optional Service dependencies can be declared using <code>java.util.Optional</code>. This is supported for both field and constructor injection:
+        </p>
+
+        <figure class="listing" id="listing:optional-injection">
+        {% highlight java %}@ResourceModel(types = "my/resource/type")
+public class SomeModelClass {
+    @Inject
+    private Optional<OtherService> otherService;
+
+    public SomeModelClass(@Inject @Filter("(zone=eu)") Optional<DataSource> ds) {
+        this.dataSource = ds;
+    }
+}{% endhighlight %}<figcaption>Using java.util.Optional for optional service dependencies</figcaption></figure>
+
+        <h4 id="multiple_service_dependencies">Injecting multiple instances of the same service</h4>
+        <p>NEBA allows injecting multiple instances of the same service if a @Filter annotation is present (<a href="https://github.com/unic/neba/issues/256">shortly, this will also be supported without a @Filter annotation</a>). The respective
+        @Filter annotation may also specify an empty filter in this context.</p>
+
+        <figure class="listing" id="listing:multiple-injection">
+        {% highlight java %}@ResourceModel(types = "my/resource/type")
+public class SomeModelClass {
+    @Inject
+    @Filter("")
+    private List<OtherService> otherServices;
+
+    public SomeModelClass(@Inject @Filter("(some=filter)") List<DataSource> dataSources) {
+        this.dataSources = dataSources;
+    }
+}{% endhighlight %}<figcaption>Injecting multiple instances of the same OSGi service</figcaption></figure>
+
         <h3 id="about_resource_models">Resources, resource types and resource models</h3>
 
     <section class="info">
@@ -382,9 +415,20 @@ Pages: ["/content/geometrixx/en/events/techsummit", ...]{% endhighlight %}
     <h3 id="resource_model_annotations">Annotations for resource to model mapping</h3>
 
     <section class="info">
+        <header>
+            <h4>Background: How NEBA supports meta-annotations</h4>
+        </header>
         <p>
             The following annotations are also supported as meta-annotations, i.e. a custom annotation annotated with any of the annotations provided
-            by NEBA is treated as if the corresponding NEBA annotations were used directly.</p>
+            by NEBA is treated as if the corresponding NEBA annotations were used directly. For example, a custom <code>@Siblings</code> annotation may
+            combine NEBA's <a href="#the_path_annotation">@Path</a> and
+            <a href="#the_children_annotation">@Children</a> to retrieve the siblings (same-level resources) of a resource:</p>
+    <figure class="listing" id="listing:meta-annotations">
+        {% highlight java %}@Target({TYPE, ANNOTATION_TYPE})
+@Retention(RUNTIME)
+@Path("..")
+@Children
+public @interface Siblings{}{% endhighlight %}<figcaption>Using NEBA annotations as meta annotations</figcaption></figure>
     </section>
 
     <h4 id="the_reference_annotation">Resolving references with the @Reference annotation</h4>
