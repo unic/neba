@@ -58,11 +58,11 @@ class ServiceDependency {
         if (rawType == null) {
             throw new InvalidModelException(
                     "Unable to resolve the service dependency from  '" + modelType + "' to '" + serviceType + "'," +
-                            " resolving the actual class of the model returned null.");
+                            " resolving the raw class of '" + serviceType +  "' returned null.");
         }
 
-        if (filter != null && rawType.isAssignableFrom(List.class)) {
-            // If a filter annotation is present, the service type may be a List<X> of services.
+        if (rawType.isAssignableFrom(List.class)) {
+            // The service type may be a List<X> of services.
             // In this case, the service type is X.
             actualServiceType = getRawType(getLowerBoundOfSingleTypeParameterOrFail(serviceType), modelType);
             this.isList = true;
@@ -81,7 +81,7 @@ class ServiceDependency {
         if (actualServiceType == null) {
             throw new InvalidModelException(
                     "Unable to resolve the service dependency from  '" + modelType + "' to '" + serviceType + "'," +
-                            " resolving the actual class of the service type returned null.");
+                            " resolving the raw class of the service type returned null.");
         }
 
         if (filter != null && isNotBlank(filter.value())) {
@@ -106,10 +106,10 @@ class ServiceDependency {
     public Object resolve(@Nonnull BundleContext context) {
         Object resolved = null;
 
-        if (this.hasFilter) {
+        if (this.hasFilter || this.isList) {
             Collection<? extends ServiceReference<?>> serviceReferences;
             try {
-                serviceReferences = context.getServiceReferences(this.serviceType, this.filter.value());
+                serviceReferences = context.getServiceReferences(this.serviceType, this.hasFilter ? this.filter.value() : null);
             } catch (InvalidSyntaxException e) {
                 // This should not happen as the filter syntax is checked during meta data construction.
                 throw new IllegalStateException("Unable to retrieve service references of type '" + this.serviceType + "'.", e);

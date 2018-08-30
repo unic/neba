@@ -58,20 +58,20 @@ public class SpringBundlesTransformerTest {
 
         assertImportDirectiveDoesNotContain("jar.with-jackson.jar", "com.fasterxml.jackson");
         assertBundleRequiresBundles("jar.with-jackson.jar",
-                "com.fasterxml.jackson.core.jackson-core;bundle-version=\"[2,3)\";resolution:=optional",
-                "com.fasterxml.jackson.core.jackson-databind;bundle-version=\"[2,3)\";resolution:=optional",
-                "com.fasterxml.jackson.core.jackson-annotations;bundle-version=\"[2,3)\";resolution:=optional");
+                "com.fasterxml.jackson.core.jackson-core;bundle-version=\"[2.9,3)\";resolution:=optional",
+                "com.fasterxml.jackson.core.jackson-databind;bundle-version=\"[2.9,3)\";resolution:=optional",
+                "com.fasterxml.jackson.core.jackson-annotations;bundle-version=\"[2.9,3)\";resolution:=optional");
         assertSymbolicNameIs("jar.with-jackson.jar", "io.neba.spring-webmvc");
     }
 
-    private void assertSymbolicNameIs(String fileName, String symbolicName) throws IOException, URISyntaxException {
+    private void assertSymbolicNameIs(String fileName, String symbolicName) throws IOException {
         JarFile jarFile = getJarFile(fileName);
         String value = jarFile.getManifest().getMainAttributes().getValue("Bundle-SymbolicName");
         jarFile.close();
         assertThat(value).isEqualTo(symbolicName);
     }
 
-    private void assertBundleRequiresBundles(String fileName, String... expectedDirectives) throws IOException, URISyntaxException {
+    private void assertBundleRequiresBundles(String fileName, String... expectedDirectives) throws IOException {
         JarFile jarFile = getJarFile(fileName);
         String requireBundleHeader = jarFile.getManifest().getMainAttributes().getValue("Require-Bundle");
         jarFile.close();
@@ -84,15 +84,15 @@ public class SpringBundlesTransformerTest {
                 .containsExactlyInAnyOrder(expectedDirectives);
     }
 
-    private void assertImportDirectiveDoesNotContain(String fileName, String expected) throws IOException, URISyntaxException {
+    private void assertImportDirectiveDoesNotContain(String fileName, String expected) throws IOException {
         assertThat(getImportDirectiveOfBundle(fileName)).doesNotContain(expected);
     }
 
-    private void assertImportDirectiveContains(String fileName, String expected) throws URISyntaxException, IOException {
+    private void assertImportDirectiveContains(String fileName, String expected) throws IOException {
         assertThat(getImportDirectiveOfBundle(fileName)).contains(expected);
     }
 
-    private String getImportDirectiveOfBundle(String fileName) throws URISyntaxException, IOException {
+    private String getImportDirectiveOfBundle(String fileName) throws IOException {
         JarFile jarFile = getJarFile(fileName);
         String value = jarFile.getManifest().getMainAttributes().getValue("Import-Package");
         jarFile.close();

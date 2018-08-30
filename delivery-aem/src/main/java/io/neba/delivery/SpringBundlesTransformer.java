@@ -84,7 +84,7 @@ public class SpringBundlesTransformer {
         this.repackToDirectory = repackToDir;
     }
 
-    public void run() throws IOException {
+    void run() throws IOException {
         for (File dir : listFiles(this.unpackedArtifactsDir)) {
             logger.info("Transforming manifest in " + dir + " ...");
 
@@ -152,9 +152,9 @@ public class SpringBundlesTransformer {
 
         mainAttributes.putValue(
                 "Require-Bundle",
-                        "com.fasterxml.jackson.core.jackson-core; bundle-version=\"[2,3)\"; resolution:=optional," +
-                        "com.fasterxml.jackson.core.jackson-databind; bundle-version=\"[2,3)\"; resolution:=optional," +
-                        "com.fasterxml.jackson.core.jackson-annotations; bundle-version=\"[2,3)\"; resolution:=optional");
+                        "com.fasterxml.jackson.core.jackson-core; bundle-version=\"[2.9,3)\"; resolution:=optional," +
+                        "com.fasterxml.jackson.core.jackson-databind; bundle-version=\"[2.9,3)\"; resolution:=optional," +
+                        "com.fasterxml.jackson.core.jackson-annotations; bundle-version=\"[2.9,3)\"; resolution:=optional");
         return true;
     }
 
