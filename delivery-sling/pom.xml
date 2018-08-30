@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>5.0.2-SNAPSHOT</version>
+        <version>5.0.1</version>
     </parent>
 
     <dependencies>
