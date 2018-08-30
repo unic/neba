@@ -1,6 +1,6 @@
 markdown: kramdown
 url: https://www.neba.io
-nebaVersion: 5.0.0
+nebaVersion: 5.0.1
 springDocumentationVersion: 5.0.x
 contextpath:
 include: [_headers]
