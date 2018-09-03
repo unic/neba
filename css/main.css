@@ -135,7 +135,8 @@ html, body {
         font-size: 250%;
     }
 
-    .up-to-three-columns section, .up-to-two-columns section  {
+    body section.up-to-three-columns section, body section.up-to-two-columns section,
+    body nav.up-to-three-columns section, body nav.up-to-two-columns section{
         position: relative;
         padding-bottom: 3em;
     }
