@@ -5,28 +5,28 @@
 Lightning fast and simple content mapping for Apache Sling and Adobe AEM
 ====
 
-[![codecov](https://codecov.io/gh/unic/neba/branch/develop/graph/badge.svg)](https://codecov.io/gh/unic/neba) 
+[![codecov](https://codecov.io/gh/unic/neba/branch/develop/graph/badge.svg)](https://codecov.io/gh/unic/neba/) 
 [![Travis](https://api.travis-ci.org/unic/neba.svg?branch=develop)](https://travis-ci.org/unic/neba/) 
-[![Maven Central](https://img.shields.io/maven-central/v/io.neba/io.neba.neba-parent.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aio.neba.neba-parent)
+[![Maven Central](https://img.shields.io/maven-central/v/io.neba/io.neba.neba-parent.svg)](https://search.maven.org/search?q=a:io.neba.neba-parent)
 
 NEBA in a nutshell
 --------------------
-Map Content using a lightweight, [well documented API](http://neba.io/documentation.html).
+Map Content using a lightweight, [well documented API](https://neba.io/documentation.html).
 Use lazy loading and great tooling to deliver high-performance applications. Completely compatible
 with Sling Models, HTL (Sightly), JSP and any application build atop the Sling API.
 
 Optional Spring integration
 ----------------------
 NEBA optionally integrates the Spring framework, making available all of Spring's features, including Spring MVC.
-Spring is integrated using [gemini blueprint](http://www.eclipse.org/gemini/blueprint/), the OSGi Blueprint specification reference implementation.  
+Spring is integrated using [gemini blueprint](https://www.eclipse.org/gemini/blueprint/), the OSGi Blueprint specification reference implementation.  
 
 Downloading artifacts
 ----------------------
-NEBA releases are published to maven central. The configuration as well as further information are available at [http://neba.io/download.html](http://neba.io/download.html).
+NEBA releases are published to maven central. The configuration as well as further information are available at [https://neba.io/download.html](https://neba.io/download.html).
 
 Documentation
 --------------------
-The project documentation resides at [http://neba.io/](http://neba.io/).
+The project documentation resides at [https://neba.io/](https://neba.io/).
 
 License and included licenses
 --------------------
@@ -35,15 +35,15 @@ see [NOTICE](NOTICE.txt)
 
 Getting support
 --------------------
-Consult the documentation or ask a question in the site comments at [http://neba.io](http://neba.io), Tweet to [@nebaframework](https://www.twitter.com/nebaframework) ask a question at [Stack overflow](http://stackoverflow.com/) or drop us a mail at neba at unic.com.
+Consult the documentation or ask a question in the site comments at [https://neba.io](https://neba.io), Tweet to [@nebaframework](https://www.twitter.com/nebaframework) ask a question at [Stack overflow](https://stackoverflow.com/search?q=neba) or drop us a mail at neba at unic.com.
 
 Building from source
 --------------------
-NEBA uses a [Maven](http://maven.apache.org/) based build. invoking
+NEBA uses a [Maven](https://maven.apache.org/) based build. invoking
 
     mvn clean install
     
-In the project's root directory will build and install NEBA. We are using [git flow](http://nvie.com/posts/a-successful-git-branching-model/),
+In the project's root directory will build and install NEBA. We are using [git flow](https://nvie.com/posts/a-successful-git-branching-model/),
 yo you might want to do so on the "develop" branch.
 
 Releasing NEBA
@@ -69,7 +69,7 @@ In addition, a GPG installation executable from the [maven-gpg-plugin](https://m
 Furthermore, JDK 1.8 is required for building and releasing NEBA.
  
 ### Write a release post for the neba.io site
-In a separate clone of the neba.io git repo, checkout the gh-pages branch and write a release post, such as https://github.com/unic/neba/blob/gh-pages/_posts/2016-01-22-neba-release-3.9.0.html. Testing the site locally requires running Jekyll including pygments for and Python 2.x for code highlighting, see http://jekyllrb.com/docs/installation/.
+In a separate clone of the neba.io git repo, checkout the gh-pages branch and write a release post, such as https://github.com/unic/neba/blob/gh-pages/_posts/2016-01-22-neba-release-3.9.0.html. Testing the site locally requires running Jekyll including pygments for and Python 2.x for code highlighting, see https://jekyllrb.com/docs/installation/.
 
 ### Perform the release
 Invoke
