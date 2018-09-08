@@ -647,7 +647,7 @@ public class MyModel {
 
     <p>
     The contents of these collection are loaded as soon as a collection method - such as get, size, isEmpty, iterator - is called.
-    The lazy-loading behavior for collections is thus completely transparent.
+    The lazy-loading behaviour for collections is thus completely transparent.
     </p>
 
     <h4 id="the_lazy_interface">Declaring lazy-loading relationships using the Lazy&lt;T&gt; interface</h4>
@@ -764,7 +764,7 @@ public class MyModel {
         <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/DispatcherServlet.html">Dispatcher Servlet</a>. To avoid conflict with resource resolution and servlet mappings, <a
             href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC</a>
         is integrated into Sling using a Servlet with the fixed URL &quot;/bin/mvc&quot; (Resource Resolver
-        mappings can be used to change change this path). Since each distinct path in sling maps to a different resource (servlets are
+        mappings can be used to change this path). Since each distinct path in sling maps to a different resource (servlets are
         resources, too), the path /bin/mvc/url would not point to the /bin/mvc/ servlet. Thus, to have a request handled by
         the MVC servlet, the pseudo-extension&quot;.do&quot; is used. A spring controller with the URL /my/controller/path
         is thus always addressed using /bin/mvc.do/my/controller/path. One may also use an extension and selectors (e.g.
@@ -1090,9 +1090,9 @@ public class MyType {
 
     <h3 id="tooling_logviewer">The  log viewer</h3>
     <p>
-        Developers do not always have serial access to a system in order to analyze log files - however, being able to investigate the log files of a Sling instance
-        is often key to finding and resolving issues timely. Here, NEBA provides the log viewer Felix console plugin - a safe way to view analyze and obtain the configured
-        log files of a Sling instance for authenticated uses ot the Felix console.
+        Developers do not always have serial access to a system in order to analyse log files - however, being able to investigate the log files of a Sling instance
+        is often key to finding and resolving issues timely. Here, NEBA provides the log viewer Felix console plugin - a safe way to view analyse and obtain the configured
+        log files of a Sling instance for authenticated users of the Felix console.
     </p>
     <p>
         The log viewer automatically detects errors in the current log file excerpt of an error.log and allows tailing logfiles in real-time. It also allows downloading
@@ -1116,33 +1116,30 @@ public class MyType {
     <a href="apidocs/neba-api/io/neba/api/spi/AnnotatedFieldMapper.html">AnnotatedFieldMapper interface</a>.
     Implementations may map any non-transient annotated field, including
     fields directly or indirectly (meta-annotations) annotated with any of NEBA's standard annotations. Thus, AnnotatedFieldMappers can not only be used to support custom annotations, but are
-    allowed to augment NEBA's standard annotation-based mapping behavior.
+    allowed to augment NEBA's standard annotation-based mapping behaviour.
 </p>
 
 <h3 id="lifecycle_callbacks">Lifecycle callbacks</h3>
 
 <p>After creation and dependency injection, a resource model is injected with the properties of the resource which is adapted to the model.
     For programmatic extensibility, the NEBA API contains the lifecycle callback interface <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelPostProcessor.html">ResourceModelPostProcessor</a>.
-    <br/>
     Providing an OSGi service with this interface allows customizing and even overriding a ResourceModel after the resource properties are mapped to it.
 </p>
 
 <h3 id="cache_extension">Caching and cache extension</h3>
 <p>
-NEBA's central and most performance critical feature is the adaptation of Resources resource models.
-There, resource and model resolution, content-to-object mapping and data type conversion occurs.
-This core functionality features an extensible caching
-interface. Any OSGi service implementing the NEBA API interface <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelCache.html">ResourceModelCache</a> will automatically be
+NEBA's central and most performance critical feature is the adaptation of resource models. There, resource and model resolution, content-to-object mapping and data type conversion occurs.
+This core functionality features an extensible caching interface. Any OSGi service implementing the NEBA API interface <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelCache.html">ResourceModelCache</a> will automatically be
 registered and used to cache the result of the resource to model adaptation.</p><p>NEBA ships with a safe and
 sensible default implementation of this interface contained in the core, the <em>request-scoped resource model
 cache.</em>
 This cache can be disabled via the Felix console (configuration tab). For further information, consult the Javadoc of the <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelCache.html">ResourceModelCache</a>.</p>
 
-<h3 id="custom_models">Providing custom resource models</h3>
+<h3 id="custom_models">Providing custom resource model factories</h3>
 
 <p>
     NEBA automatically registers models provided by <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelFactory.html">ResourceModelFactory OSGi services</a>.
-    Thus, custom resource models can be provided by publishing a ResourceModelFactory OSGI service. NEBA core, for instance, publishes such a
+    Thus, resource model factories can be provided by publishing a ResourceModelFactory OSGI service. NEBA core, for instance, publishes such a
     factory for resource models declared using the <a href="#add_neba_packages_header">Neba-Packages</a> header.
 </p>
 
@@ -1153,7 +1150,7 @@ This cache can be disabled via the Felix console (configuration tab). For furthe
     maps resource data or injects collaborators, NEBA may no longer be able to do so since the required fields or bean properties are no longer accessible.
     Here, one can publish an <a href="apidocs/neba-api/io/neba/api/spi/AopSupport.html">AopSupport</a> service. This service is asked to prepare a (potentially
     AOP-enhanced) model instance for injection. For instance, this service may return the underlying target of an AOP proxy instance, or the
-    original object if it is not enhanced. NEBA's spring integration module, for instance, published an AopSupport service for CGlib proxies.
+    original object if it is not enhanced. NEBA's spring integration module, for instance, publishes an <a href="/apidocs/neba-spring/io/neba/spring/resourcemodels/aop/AopSupportImpl.html">AopSupport service for CGlib proxies</a>.
 </p>
 </section>
 
@@ -1167,7 +1164,7 @@ This cache can be disabled via the Felix console (configuration tab). For furthe
 
     <h3 id="architecture_bundles">Bundles</h3>
 
-    <p>NEBA's main functionality is delivered by two bundles, API and core. The API exclusively contains Annotations, Interfaces adn Tag Libraries and has no dependency
+    <p>NEBA's main functionality is delivered by two bundles, API and core. The API exclusively contains annotations, interfaces and tag libraries and has no dependency
     to the core bundle. It is designed to rarely change and to be the exclusive interface between code using NEBA and the NEBA implementation, thus completely
     separating application code from NEBA's implementation concerns.</p>
 
