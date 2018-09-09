@@ -115,10 +115,12 @@ description: NEBA 5.0.0 introduces a flyweight kernel, an optional Spring 5 inte
             <p>
                 NEBA 5.0.0 now offers a choice between just using the flyweight neba core or using the neba core along with the neba spring integration.
                 If you are heavily relying on <a href="/documentation.html#spring_mvc">NEBA's Spring MVC integration</a>, you might want to continue using NEBA with Spring.
-                In this case, simply <a href="/download.html#spring-integration">use the NEBA delivery package containing the Spring integration</a> and continue using NEBA as before.
+                In this case, simply <a href="/download.html#spring-integration">use the NEBA delivery package containing the Spring integration</a> and continue using NEBA with minor adaptations.
+                Most prominently, the annotation @ResourceModel is no longer annotated with @Component. This means that in order to detect your @ResourceModel classes as Spring beans, you must annotate
+                them with @Component and @Scope (see <a href="#listing:spring-based-model">A Spring-Bean based Resource Model" below</a>).
             </p>
             <p>
-                However, if you are mainly using resource models or only a few MVC features, consider switching to just using NEBA core. In this case, Spring @Service beans should become OSGi Services (e.g. using the <code>@Component</code> annotation) and
+                If you are exclusively using resource models or only a few MVC features, consider switching to just using NEBA core. In this case, Spring @Service beans should become OSGi Services (e.g. using the <code>@Component</code> annotation) and
                 resource models should use @Inject and, if necessary, <a href="/documentation.html#the_filter_annotation">the @Filter annotation</a> to wire these service dependencies.
             </p>
             <div class="up-to-two-columns">
