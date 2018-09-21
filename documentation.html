@@ -413,29 +413,16 @@ Pages: ["/content/geometrixx/en/events/techsummit", ...]{% endhighlight %}
 
     <h3 id="resource_model_annotations">Annotations for resource to model mapping</h3>
 
-    <section class="info">
-        <header>
-            <h4>Background: How NEBA supports meta-annotations</h4>
-        </header>
-        <p>
-            The following annotations are also supported as meta-annotations, i.e. a custom annotation annotated with any of the annotations provided
-            by NEBA is treated as if the corresponding NEBA annotations were used directly. For example, a custom <code>@Siblings</code> annotation may
-            combine NEBA's <a href="#the_path_annotation">@Path</a> and
-            <a href="#the_children_annotation">@Children</a> to retrieve the siblings (same-level resources) of a resource:</p>
-    <figure class="listing" id="listing:meta-annotations">
-        {% highlight java %}@Target({TYPE, ANNOTATION_TYPE})
-@Retention(RUNTIME)
-@Path("..")
-@Children
-public @interface Siblings{}{% endhighlight %}<figcaption>Using NEBA annotations as meta annotations</figcaption></figure>
-    </section>
+    <p>
+        By default, NEBA will map all fields of a model from the properties or child resources of the adapted resource, unless the fields are static, final,
+        annotated with <a href="/apidocs/neba-api/io/neba/api/annotations/Unmapped.html">@Unmapped</a>, @Inject or @Autowired. The following annotations are thus only needed
+        if a simple property-to-field mapping is not enough.
+    </p>
 
     <h4 id="the_reference_annotation">Resolving references with the @Reference annotation</h4>
 
-        <p> In the <a href="#listing:sample-content-repeat">above example</a>, playSpeed and transTime are Strings, whereas one would
-        expect them to be integers. This is simply because these values are defined to be Strings in the repository.
-        Had they been defined as integers, we could also retrieve them as integers. Also, &quot;pages&quot;
-        is an array of Strings and not the actual resources the "pages" property is referring to. Here,
+        <p>In the <a href="#listing:sample-content-repeat">above example</a>, &quot;pages&quot;
+        is an array of strings and not the actual resources the "pages" property is referring to. If you want to resolve and / or adapt the referenced resources,
         NEBA provides the <a href="apidocs/neba-api/io/neba/api/annotations/Reference.html">@Reference</a> annotation to declare that a
         field contains one ore more <em>references</em> to other Resources:</p>
 
@@ -443,15 +430,9 @@ public @interface Siblings{}{% endhighlight %}<figcaption>Using NEBA annotations
         {% highlight java %}@Reference
 private List<Resource> pages;{% endhighlight %}<figcaption>Using the @Reference annotation</figcaption></figure>
 
-    <p>Now, the expression <code>${m.pages}</code> yields:</p>
-
-    <figure class="listing">
-    {% highlight java %}Pages: [JcrNodeResource, type=cq:Page, superType=null, path=/content/geometrixx/en/events/techsummit, JcrNodeResource, type=cq:Page, superType=null, path=/content/geometrixx/en/events/userconf]{% endhighlight %}
-    </figure>
-
-    <p>When NEBA detects a @Reference annotation, it assumes that the <em>value</em> of the corresponding property
-        (here: &quot;pages&quot;) is one or more resource paths. It obtains the corresponding resources and provides them as
-        a Collection (or a single resource, if the annotated field is not a collection type). However, you are not limited
+    <p>When NEBA detects a @Reference annotation, it assumes that the <em>value</em> of the corresponding property is one
+        or more resource paths. It obtains the corresponding resources and provides them as a Collection
+        (or a single resource, if the annotated field is not a collection type). However, you are not limited
         to using &quot;Resource&quot; for your reference. The following also works, provided there is a &quot;Page&quot;
         model the referenced resources can be adapted to:</p>
 
@@ -471,7 +452,8 @@ private List<PageContent> pageContents;{% endhighlight %}
     <figcaption>Appending paths to the resources resolved via the @Reference annotation</figcaption></figure>
 
     <p>
-    Here, instead of resolving and adapting the paths in the property "pages" directly, "/jcr:content" is appended to all of the paths prior to resolution.
+        Here, instead of resolving and adapting the paths in the property "pages" directly, "/jcr:content" is appended to all of the paths prior to resolution. Note also
+        the use of the <a href="#the_path_annotation">@Path annotation</a> to define the property name.
     </p>
 
     <h4 id="the_children_annotation">Resolving children with the @Children annotation</h4>
@@ -518,9 +500,8 @@ private List<Page> link;{% endhighlight %}
     <figcaption>Combining @Children, @Reference and @Path</figcaption></figure>
 
     <p>
-        Furthermore, one may specify a relative path to be resolved below every child using the property "resolveBelowEveryChild"
-        instead of returning the direct children of the designated resource.
-        For example, one could obtain all nodes called "jcr:content" underneath all children of the current resource, like so:
+        Furthermore, one may specify a relative path to be resolved below every child using the property "resolveBelowEveryChild".
+        For example, one could obtain all resources named "jcr:content" underneath all children of the current resource, like so:
     </p>
 
     <figure class="listing" id="listing:neba-children-annotation-with-resolvebeloweverychild">
@@ -537,15 +518,14 @@ private List<PageContent> childPageContents;{% endhighlight %}
     </figure>
 
     <p>This will not yet work - NEBA maps the properties by <em>name</em>, in this case the name contains
-        characters (&quot;jcr:&quot;) unsuitable for a field name.  In this case, use the @Path annotation to specify
+        characters (&quot;jcr:&quot;) unsuitable for a field name. In such cases, use the @Path annotation to specify
         the property from which the field's value shall be obtained:</p>
 
     <figure class="listing" id="listing:neba-path-annotation">
         {% highlight java %}@Path("jcr:lastModified")
 private Date lastModified;{% endhighlight %}<figcaption>Using the @Path annotation</figcaption></figure>
 
-    <p>Now the property is mapped!  @Path has even more interesting features, for instance allowing absolute and
-        relative paths:</p>
+    <p>@Path is not limited to property names, but allows specifying absolute and relative paths:</p>
 
     <figure class="listing" id="listing:neba-path-annotation-with-absolute-paths">
         {% highlight java %}@Path("/content/geometrixx/en")
@@ -564,7 +544,7 @@ private Resource homepage;{% endhighlight %}
     <p>To resolve the ${language} placeholder, provide an OSGi service implementing the
         <a href="/apidocs/neba-api/io/neba/api/spi/PlaceholderVariableResolver.html">PlaceholderVariableResolver interface</a>.
         Such services will be asked to resolve the value for a placeholder key, i.e. &quot;language&quot;
-        in the above example. A hardcoded example:</p>
+        in the above example. The first service to resolve a nun-null value for the placeholder will win. A hardcoded example:</p>
 
     <figure class="listing" id="listing:neba-placeholder-variable-resolver">
     {% highlight java %}public class MyVariableResolver implements PlaceholderVariableResolver {
@@ -616,9 +596,12 @@ public class AccessRestricted {
     <p>Finally, one can adapt to this model (e.g., in a view or filter) to determine whether the
         corresponding resource has restricted access, and what the restrictions are.</p>
 
-    <p>Further reading: <a href="http://www.day.com/specs/jcr/2.0/3_Repository_Model.html">JCR repository
-        spec</a>, <a href="http://dev.day.com/docs/en/crx/current/using_crx/nodetype_administration.html">administering
-        node types</a>.</p>
+    <p>You can either use the
+        <a href="https://helpx.adobe.com/experience-manager/6-4/sites/developing/using/custom-nodetypes.html">existing nodes types in AEM and Sling</a> or
+        add your own, e.g. by <a href="http://www.tothenew.com/blog/custom-node-type-in-aem/">creating and deploying CND (JCR node type definition) files</a>. There
+        is even an <a href="https://plugins.jetbrains.com/plugin/9221-cnd-language--jahia-framework">IntelliJ IDEA plugin for CND files</a> offering some syntax support.
+        You may also want to read up on the <a href="http://jackrabbit.apache.org/jcr/node-types.html">Jackrabbit Oak documentation of JCR node types</a> and the
+        <a href="https://docs.adobe.com/docs/en/spec/jcr/2.0/3_Repository_Model.html">JCR repository spec</a>.</p>
 
     <h3 id="lazy_loading">Lazy loading</h3>
 
@@ -632,7 +615,7 @@ public class AccessRestricted {
     <h4>Lazy loading collections of references</h4>
 
     <p>
-    All collection-typed references are automatically provided as lazy-loading proxies, for example in case of
+    All collection-typed references are automatically provided as lazy-loading proxies, for example
     <a href="#the_children_annotation">@Children</a> and <a href="#the_reference_annotation">@Reference</a> collections:
     </p>
 
@@ -646,7 +629,7 @@ public class MyModel {
 }{% endhighlight %}<figcaption>Automatic lazy-loading of collection-type instance in NEBA</figcaption></figure>
 
     <p>
-    The contents of these collection are loaded as soon as a collection method - such as get, size, isEmpty, iterator - is called.
+    The contents of these collections are loaded as soon as a collection method - such as get, size, isEmpty, iterator - is called.
     The lazy-loading behaviour for collections is thus completely transparent.
     </p>
 
@@ -766,9 +749,8 @@ public class MyModel {
         is integrated into Sling using a Servlet with the fixed URL &quot;/bin/mvc&quot; (Resource Resolver
         mappings can be used to change this path). Since each distinct path in sling maps to a different resource (servlets are
         resources, too), the path /bin/mvc/url would not point to the /bin/mvc/ servlet. Thus, to have a request handled by
-        the MVC servlet, the pseudo-extension&quot;.do&quot; is used. A spring controller with the URL /my/controller/path
-        is thus always addressed using /bin/mvc.do/my/controller/path. One may also use an extension and selectors (e.g.
-        /bin/mvc.do/my/controller/path.selector1.selector2.xml).
+        the MVC servlet, the pseudo-extension&quot;.do&quot; is used. A spring controller for the path /my/controller/path
+        is thus always addressed using /bin/mvc.do/my/controller/path. One may also use an extension and selectors (e.g. /bin/mvc.do/my/controller/path.selector1.selector2.xml).
     </p>
 </section>
 
@@ -778,10 +760,10 @@ public class MyModel {
     </header>
     <p>
         First, the NEBA Spring Module and the Spring OSGI bundles must be deployed to the OSGi container along with the NEBA API and core bundles.
-        The <a href="download.html">Downloads</a> contain convenience packages providing all of these bundles for installation in Adobe AEM&trade; and Apache Sling.
+        The <a href="/download.html#spring-integration">Downloads contain convenience packages</a> providing all of these bundles for installation in Adobe AEM&trade; and Apache Sling.
     </p>
     <p>
-        Following, create a Spring application context XML file in the OSGI-INF/blueprint folder of your bundle. See the
+        Then, create a Spring application context XML file in the OSGI-INF/blueprint folder of your bundle. See the
         <a href="https://github.com/unic/neba-sample-project/tree/master/src/main/resources/OSGI-INF/blueprint">NEBA sample project</a> or use the following snippet:
     </p>
     <figure class="listing" id="listing:spring-setup">
@@ -814,7 +796,7 @@ public class MyModel {
     </figure>
 
     <p>
-        That's it - the bundle is now Blueprint enabled. When starting the bundle, The gemini-blueprint-extender bundle will <a href="https://www.eclipse.org/gemini/blueprint/documentation/reference/3.0.0.M01/html-single/index.html#bnd-app-ctx">automatically the declared
+        That's it - the bundle is now Blueprint enabled. When starting the bundle, The gemini-blueprint-extender bundle will <a href="https://www.eclipse.org/gemini/blueprint/documentation/reference/3.0.0.M01/html-single/index.html#bnd-app-ctx">automatically detect the declared
         XML contexts and create the Spring application context on behalf of the bundle</a>.
     </p>
 </section>
@@ -945,12 +927,12 @@ public class DemoController {
     @RequestMapping("/myMethod")
     public String echo(@ResourceParam Page page) {
        // do something
-       return "app/controllerViews/myView"
+       return "myApp/controllerViews/myView"
     }
 }
 {% endhighlight %}<figcaption>Calling Sling Views from Spring @Controllers</figcaption></figure>
 <p>
-    Here, NEBA's view resolver will resolve "app/controllerViews/myView" to the corresponding resource, e.g. "/apps/app/controllerViews/myView". It will then
+    Here, NEBA's view resolver will resolve "myApp/controllerViews/myView" to the corresponding resource, e.g. "/apps/myApp/controllerViews/myView". It will then
     look for a suitable default script for the type, e.g. "myView.html" for a HTL (Sightly) template or "myView.jsp" for a JSP view. If no such script is found,
     the view resolver will re-attempt to resolve the default view for the <em>super type</em> of the view resource. This enables inheritance and
     overriding - just like for regular Sling resource views.
@@ -999,7 +981,7 @@ public class DemoController {
 <p>Here, a request parameter &quot;page&quot; is expected to contain a path to a resource. This resource is
     resolved and adapted to the parameter type in case the parameter type is not &quot;Resource&quot;.
     A <a href="apidocs/neba-spring/io/neba/spring/api/ResourceParam.html">@ResourceParam</a> can be optional or required.
-    In addition, they can have a default value (a default resource path) that will be used in case the parameter is not present or empty:
+    In addition, it can have a default value (a default resource path) that will be used in case the parameter is not present or empty:
 </p>
 
 <figure class="listing" id="listing:controller-resourceparam-defaultvalue">{% highlight java %}@Controller
@@ -1012,10 +994,10 @@ public class DemoController {
 }
 {% endhighlight %}<figcaption>Using a default value for the @ResourceParam annotation</figcaption></figure>
 
-<p>Here, "page" is implicitly considered optional (since there is a default value)</p>
+<p>Here, "page" is implicitly considered optional since there is a default value.</p>
 
 <p>
-    Furthermore, the content paths resolved by the <a href="apidocs/neba-spring/io/neba/spring/api/ResourceParam.html">@ResourceParam</a> annotations can be altered by appending an arbitrary sub-path:
+    Furthermore, the paths resolved by the <a href="apidocs/neba-spring/io/neba/spring/api/ResourceParam.html">@ResourceParam</a> annotations can be altered by appending an arbitrary sub-path:
 </p>
 
 <figure class="listing" id="listing:controller-resourceparam-append">{% highlight java %}@Controller
@@ -1045,7 +1027,7 @@ public class MyType {
 
 <p>Note that while the request scope is enabled, the session scope is not. Using session-scoped beans will lead to a lot of issues such as lack of scalability
     due to the need of session stickiness to an instance, high memory usage and serialisation issues as bundles may be refreshed, which gives classes
-    a new identity. Bottom line, using the session is discouraged in Apache Sling.</p>
+    a new identity. The bottom line is: Using the session is discouraged in Apache Sling.</p>
 </section>
 
 </section>
