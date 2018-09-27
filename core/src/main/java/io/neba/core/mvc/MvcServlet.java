@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -101,6 +102,24 @@ public class MvcServlet extends SlingAllMethodsServlet {
     protected BundleSpecificDispatcherServlet createBundleSpecificDispatcherServlet(ConfigurableListableBeanFactory factory, BundleContext context) {
         BundleAwareServletConfig bundleAwareServletConfig = new BundleAwareServletConfig(context);
         return new BundleSpecificDispatcherServlet(bundleAwareServletConfig, this.servletResolver, factory);
+    }
+
+    @Override
+    protected boolean mayService(@Nonnull SlingHttpServletRequest request, @Nonnull SlingHttpServletResponse response) throws ServletException, IOException {
+        if (super.mayService(request, response)) {
+            return true;
+        }
+
+        if ("PATCH".equals(request.getMethod())) {
+            doPatch(request, response);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void doPatch(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+        handle(request, response);
     }
 
     @Override

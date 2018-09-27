@@ -73,7 +73,7 @@ public class MvcServletTest {
     private MvcServlet testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doAnswer(invocation -> {
             injectedDispatcherServlet = (BundleSpecificDispatcherServlet) invocation.getArguments()[1];
             return null;
@@ -94,25 +94,28 @@ public class MvcServletTest {
         doReturn(this.dispatcherServlet)
                 .when(this.testee)
                 .createBundleSpecificDispatcherServlet(factory, context);
+
+        doReturn("GET").when(request).getMethod();
+        doReturn("HTTP/1.1").when(request).getProtocol();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testEnableMvcRequiresNonNullFactory() throws Exception {
+    public void testEnableMvcRequiresNonNullFactory() {
         this.testee.enableMvc(null, this.context);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testEnableMvcRequiresNonNullContext() throws Exception {
+    public void testEnableMvcRequiresNonNullContext() {
         this.testee.enableMvc(this.factory, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testDisableMvcRequiresNonNullBundle() throws Exception {
+    public void testDisableMvcRequiresNonNullBundle() {
         this.testee.disableMvc(null);
     }
 
     @Test
-    public void testEnableMvc() throws Exception {
+    public void testEnableMvc() {
         enableMvc();
         verifyMvcContextIsInjectedIntoFactory();
         assertInjectMvcContextIsNotNull();
@@ -122,12 +125,12 @@ public class MvcServletTest {
     public void testOnlyResponsibleContextsServiceRequests() throws Exception {
         enableMvc();
 
-        handleRequest();
+        serviceRequest();
         verifyMvcContextDoesNotServiceRequest();
 
         withMvcContextResponsible();
 
-        handleRequest();
+        serviceRequest();
         verifyMvcContextServicedRequestOnce();
     }
 
@@ -135,21 +138,36 @@ public class MvcServletTest {
     public void testRemovalOfMvcCapabilities() throws Exception {
         enableMvc();
         withMvcContextResponsible();
-        handleRequest();
+        serviceRequest();
         verifyMvcContextServicedRequestOnce();
 
         disableMvc();
 
-        handleRequest();
+        serviceRequest();
         verifyMvcContextServicedRequestOnce();
     }
 
     @Test
-    public void testServletConfigurationProvidedToBundleSpecificDispatcherServletHasSensibleServletName() throws Exception {
+    public void testServletConfigurationProvidedToBundleSpecificDispatcherServletHasSensibleServletName() {
         withRealDispatcherServletCreated();
         enableMvc();
 
         assertServletNameOfBundleSpecificDispatcherServletIs("BundleSpecificDispatcherServlet for bundle symbolic-name 1.2.3");
+    }
+
+    @Test
+    public void testPatchMethodIsSupported() throws Exception {
+        enableMvc();
+        withMvcContextResponsible();
+        withPatchRequest();
+
+        serviceRequest();
+
+        verifyMvcContextServicedRequestOnce();
+    }
+
+    private void withPatchRequest() {
+        doReturn("PATCH").when(this.request).getMethod();
     }
 
     private void withRealDispatcherServletCreated() {
@@ -176,8 +194,8 @@ public class MvcServletTest {
         verify(this.dispatcherServlet, never()).service(isA(SlingMvcServletRequest.class), isA(SlingHttpServletResponse.class));
     }
 
-    private void handleRequest() throws ServletException, IOException {
-        this.testee.handle(this.request, this.response);
+    private void serviceRequest() throws Exception {
+        this.testee.service(this.request, this.response);
     }
 
     private void assertInjectMvcContextIsNotNull() {
