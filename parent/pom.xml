@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.neba</groupId>
     <artifactId>io.neba.neba-parent</artifactId>
-    <version>4.3.3</version>
+    <version>4.3.4-SNAPSHOT</version>
     <name>NEBA parent POM</name>
     <packaging>pom</packaging>
 
@@ -68,7 +68,7 @@
         <url>https://github.com/unic/neba</url>
         <connection>scm:git:git://github.com/unic/neba.git</connection>
         <developerConnection>scm:git:git@github.com:unic/unic.git</developerConnection>
-      <tag>4.3.3</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <pluginRepositories>
