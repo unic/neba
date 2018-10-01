@@ -166,7 +166,7 @@ description: A comprehensive guide to using the NEBA features
             types and the data of the corresponding resources.
         </p>
         <p>
-            Resource models are not useful for simply exposing the properties of the current resource in a view - here, simply using Sling's generic <code>${properties}</code> or
+            Resource models are not useful for simply exposing the properties of the current resource in a view - here, using Sling's generic <code>${properties}</code> or
             <code>${resource}</code> representation is recommended.
         </p>
 
@@ -179,7 +179,7 @@ description: A comprehensive guide to using the NEBA features
 
         <h4 id="the_filter_annotation">Injecting OSGi services with NEBA core</h4>
         <p>
-            When the model does not stem from a Spring application context, NEBA exclusively injects OSGi services into fields or a constructor annotated with <code>@Inject</code>.
+            Unless the model is a Spring bean, NEBA exclusively injects OSGi services into fields or a constructor annotated with <code>@Inject</code>.
             These services can be filtered using the <a href="/apidocs/neba-api/io/neba/api/annotations/Filter.html">@Filter</a> annotation.
         </p>
 
@@ -356,7 +356,7 @@ public class Carousel {
 
     <p>
         <span id="the_unmapped_annotation">NEBA automatically maps the properties of a Resource to fields named like the properties, unless the field is
-            annotated with <a href="apidocs/neba-api/io/neba/api/annotations/Unmapped.html">@Unmapped</a>, is static or final.</span> Additional semantics, such as mapping referenced resource, children or specific paths are
+            annotated with <a href="apidocs/neba-api/io/neba/api/annotations/Unmapped.html">@Unmapped</a>, <code>@Inject</code>, is static or final.</span> Additional semantics, such as mapping referenced resource, children or specific paths are
         supported by a an <a href="#custom_annotations">extensible</a> set of <a href="#resource_model_annotations">annotations</a>.
         Following, we will map the properties of the following resource:
     </p>
