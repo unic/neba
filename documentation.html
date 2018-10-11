@@ -909,7 +909,7 @@ public class DemoController {
     /some/path, returning forward:/some/path will forward the request to /some/path, see also
     <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-redirecting">MVC redirecting</a>.</p>
     <p>You may also directly work with the response. For this, provide your own
-org.springframework.web.servlet.View in the org.springframework.web.servlet.ModelAndView provided by the controller;
+View in the ModelAndView provided by the controller;
 this way, your View's render method is used to render the response. Alternatively, you may also simply write to the
 response and either let the controller method return &quot;null&quot; or make it void. This is however bad practice
 and thus discouraged.</p>
