@@ -20,14 +20,14 @@ package io.neba.core.util;
  */
 public class StringUtil {
     /**
-     * Appends the given String to the given array of Strings.
+     * Appends the given String to all elements of the given array.
      *
      * @param append must not be <code>null</code>.
      * @param appendTo must not be <code>null</code>.
      *
-     * @return a new array representing the concatenation.
+     * @return a new array with all elements of the old array concatenated with the given string.
      */
-    public static String[] append(String append, String[] appendTo) {
+    public static String[] appendToAll(String append, String[] appendTo) {
         if (append == null) {
             throw new IllegalArgumentException("Method argument append must not be null.");
         }
