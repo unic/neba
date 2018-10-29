@@ -806,6 +806,34 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIsCollectionContainingTargetValue();
     }
 
+    /**
+     * Tests that the resolved children default to an empty list if the parent
+     * resource cannot ne resolved, e.g. when the field is a reference
+     * pointing to a nonexistent resource.
+     *
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}
+     *         &#64;{@link io.neba.api.annotations.Children}
+     *         private List&lt;ModelForChild&gt; children;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testChildrenAnnotationWithUnresolveableParentYieldsEmptyCollection() {
+        withField(Collection.class);
+        withCollectionTypedField();
+        withInstantiableCollectionTypedField();
+        withTypeParameter(TestResourceModel.class);
+        withChildrenAnnotationPresent();
+        withReferenceAnnotationPresent();
+
+        mapField();
+
+        assertMappedFieldValueIsEmptyCollection();
+    }
 
     /**
      * Test the retrieval of the children of the resource targeted by the
