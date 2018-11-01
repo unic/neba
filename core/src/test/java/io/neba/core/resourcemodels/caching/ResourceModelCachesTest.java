@@ -21,7 +21,6 @@ import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -36,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -63,9 +63,7 @@ public class ResourceModelCachesTest {
 	private ResourceModelMetaData resourceModelMetaData;
 	@Mock
 	private ResourceModelStatistics resourceModelStatistics;
-	@Mock
-	private OsgiModelSource modelSource;
-	
+
 	private List<ResourceModelCache> mockedCaches = new LinkedList<>();
 	private Class<Object> targetType = Object.class;
     private Object model = new Object();
@@ -89,15 +87,11 @@ public class ResourceModelCachesTest {
 		doReturn(this.resourceResolver)
 				.when(this.resource)
 				.getResourceResolver();
-
-		doReturn(this.targetType)
-				.when(this.modelSource)
-				.getModelType();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullResourceIsNotAllowedForCacheLookup() {
-		this.testee.lookup(null, this.modelSource);
+		this.testee.lookup(null, key(this.targetType));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -107,7 +101,7 @@ public class ResourceModelCachesTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullResourceIsNotAllowedForCacheWrite() {
-		this.testee.store(null, this.modelSource, new Object());
+		this.testee.store(null, key(this.targetType), new Object());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -117,7 +111,7 @@ public class ResourceModelCachesTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullModelIsNotAllowedForCacheWrite() {
-		this.testee.store(mock(Resource.class), this.modelSource, null);
+		this.testee.store(mock(Resource.class), key(this.targetType), null);
 	}
 
 	@Test
@@ -160,7 +154,7 @@ public class ResourceModelCachesTest {
 	}
 
 	@Test
-	public void testUnsuccessulLookupIsNotCountedAsCacheHit() {
+	public void testUnsuccessfulLookupIsNotCountedAsCacheHit() {
 		bindCache();
 		lookup();
 		verifyResourceModelStatisticsAreNotUsed();
@@ -195,7 +189,7 @@ public class ResourceModelCachesTest {
     }
 
     private void storeModel() {
-        this.testee.store(this.resource, this.modelSource, this.model);
+        this.testee.store(this.resource, key(this.targetType), this.model);
     }
 
     private void verifyNoCacheIsUsed() {
@@ -239,7 +233,7 @@ public class ResourceModelCachesTest {
 	}
 
 	private void lookup() {
-		this.lookupResult = this.testee.lookup(this.resource, this.modelSource);
+		this.lookupResult = this.testee.lookup(this.resource, key(this.targetType));
 	}
 
 	private void assertModelWasFoundInCache() {
