@@ -20,6 +20,7 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
+import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -29,6 +30,7 @@ import org.osgi.service.component.annotations.Reference;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
+import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
@@ -61,6 +63,12 @@ public class ResourceToModelAdapter implements AdapterFactory {
         }
 
         Resource resource = (Resource) adaptable;
+        final Key key = key(target);
+
+        T model = this.caches.lookup(resource, key);
+        if (model != null) {
+            return model;
+        }
 
         Collection<LookupResult> models = this.registry.lookupMostSpecificModels(resource, target);
 
@@ -75,14 +83,9 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
         OsgiModelSource<?> source = models.iterator().next().getSource();
 
-        T model = this.caches.lookup(resource, source);
-        if (model != null) {
-            return model;
-        }
-
         model = (T) this.mapper.map(resource, source);
 
-        this.caches.store(resource, source, model);
+        this.caches.store(resource, key, model);
 
         return model;
     }

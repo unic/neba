@@ -256,11 +256,11 @@ public class AnnotatedFieldMappersTest {
     }
 
     private void assertMetadataHasMappers(MappedFieldMetaData metadata, AnnotatedFieldMapper... mappers) {
-        assertThat(this.testee.get(metadata)).extracting("mapper").containsOnly(mappers);
+        assertThat(this.testee.get(metadata)).extracting("mapper").containsOnly((Object[]) mappers);
     }
 
     private void assertMetadataHasAnnotations(MappedFieldMetaData metadata, Annotation... annotations) {
-        assertThat(this.testee.get(metadata)).extracting("annotation").containsOnly(annotations);
+        assertThat(this.testee.get(metadata)).extracting("annotation").containsOnly((Object[]) annotations);
     }
 
     private void bind(AnnotatedFieldMapper mapper) {

@@ -19,16 +19,18 @@ package io.neba.core.resourcemodels.registration;
 import io.neba.api.services.ResourceModelResolver;
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
-import io.neba.core.resourcemodels.registration.LookupResult;
-import io.neba.core.resourcemodels.registration.ModelRegistry;
+import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
+import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
 
 /**
  * Resolves a {@link Resource} to a {@link io.neba.api.annotations.ResourceModel}
@@ -84,8 +86,14 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
         return resolveMostSpecificModelForResource(resource, true, null);
     }
 
-    private <T> T resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String modelName) {
-        T model = null;
+    private <T> T resolveMostSpecificModelForResource(@Nonnull Resource resource, boolean includeBaseTypes, @Nullable String modelName) {
+        final Key key = key(includeBaseTypes, modelName);
+
+        T model = this.caches.lookup(resource, key);
+        if (model != null) {
+            return model;
+        }
+
         Collection<LookupResult> models = (modelName == null) ?
                 this.registry.lookupMostSpecificModels(resource) :
                 this.registry.lookupMostSpecificModels(resource, modelName);
@@ -97,13 +105,8 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
                 @SuppressWarnings("unchecked")
                 OsgiModelSource<T> source = (OsgiModelSource<T>) lookupResult.getSource();
 
-                model = this.caches.lookup(resource, source);
-                if (model != null) {
-                    return model;
-                }
-
                 model = this.mapper.map(resource, source);
-                this.caches.store(resource, source, model);
+                this.caches.store(resource, key, model);
             }
         }
 

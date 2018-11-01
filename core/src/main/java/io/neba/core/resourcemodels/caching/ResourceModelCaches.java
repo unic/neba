@@ -19,11 +19,11 @@ package io.neba.core.resourcemodels.caching;
 import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,29 +47,29 @@ public class ResourceModelCaches {
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
-     * Looks up the {@link #store(Resource, OsgiModelSource, Object)} cached model}
+     * Looks up the {@link #store(Resource, Key, Object)} cached model}
      * of the given type for the given resource.
      * Returns the first model found in the caches.
      *
      * @param resource must not be <code>null</code>.
-     * @param modelSource must not be <code>null</code>.
+     * @param key must not be <code>null</code>.
      * @return can be <code>null</code>.
      */
-    public <T> T lookup(Resource resource, OsgiModelSource<?> modelSource) {
+    public <T> T lookup(@Nonnull Resource resource, @Nonnull Key key) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
-        if (modelSource == null) {
-            throw new IllegalArgumentException("Method argument modelSource must not be null");
+        if (key == null) {
+            throw new IllegalArgumentException("Method argument key must not be null");
         }
 
         if (this.caches.isEmpty()) {
             return null;
         }
 
-        final Key key = key(resource, modelSource.getModelType());
+        final Key lookupKey = key(resource, key);
         for (ResourceModelCache cache : this.caches) {
-            T model = cache.get(key);
+            T model = cache.get(lookupKey);
             if (model != null) {
                 metaDataRegistrar.get(model.getClass()).getStatistics().countCacheHit();
                 return model;
@@ -84,15 +84,15 @@ public class ResourceModelCaches {
      * to the given target type.
      *
      * @param resource must not be <code>null</code>.
-     * @param modelSource must not be <code>null</code>.
+     * @param key must not be <code>null</code>.
      * @param model can be <code>null</code>.
      */
-    public <T> void store(Resource resource, OsgiModelSource<?> modelSource, T model) {
+    public <T> void store(@Nonnull Resource resource, @Nonnull Key key, @Nonnull T model) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
-        if (modelSource == null) {
-            throw new IllegalArgumentException("Method argument modelSource must not be null");
+        if (key == null) {
+            throw new IllegalArgumentException("Method argument key must not be null");
         }
         if (model == null) {
             throw new IllegalArgumentException("Method argument model must not be null");
@@ -102,9 +102,9 @@ public class ResourceModelCaches {
             return;
         }
 
-        final Key key = key(resource, modelSource.getModelType());
+        final Key lookupKey = key(resource, key);
         for (ResourceModelCache cache : this.caches) {
-            cache.put(resource, model, key);
+            cache.put(resource, model, lookupKey);
         }
     }
 
@@ -119,7 +119,11 @@ public class ResourceModelCaches {
         this.caches.remove(cache);
     }
 
-    private <T> Key key(Resource resource, Class<T> modelType) {
-        return new Key(resource.getPath(), modelType, resource.getResourceType(), resource.getResourceResolver().hashCode());
+    private <T> Key key(Resource resource, Key key) {
+        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
+    }
+
+    public static Key key(Object... contents) {
+        return new Key(contents);
     }
 }

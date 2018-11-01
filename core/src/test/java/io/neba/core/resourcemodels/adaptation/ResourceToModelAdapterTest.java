@@ -101,11 +101,11 @@ public class ResourceToModelAdapterTest {
 
         doAnswer(storeInCache)
                 .when(this.caches)
-                .store(isA(Resource.class), isA(OsgiModelSource.class), any());
+                .store(isA(Resource.class), isA(Key.class), any());
 
         doAnswer(lookupFromCache)
                 .when(this.caches)
-                .lookup(isA(Resource.class), isA(OsgiModelSource.class));
+                .lookup(isA(Resource.class), isA(Key.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
     }
@@ -260,7 +260,7 @@ public class ResourceToModelAdapterTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        OsgiModelSource<?> modelSource = (OsgiModelSource<?>) invocation.getArguments()[1];
-        return new Key(resource.getPath(), modelSource.getModelType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
+        Key key = (Key) invocation.getArguments()[1];
+        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }
