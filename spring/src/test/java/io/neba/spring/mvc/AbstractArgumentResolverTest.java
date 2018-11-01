@@ -42,13 +42,13 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
     private Object argument;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn(ResourceResolver.class).when(this.parameter).getParameterType();
         doReturn(this.request).when(this.nativeWebRequest).getNativeRequest();
     }
 
     @Test
-    public void testUnsupportedArgumentType() throws Exception {
+    public void testUnsupportedArgumentType() {
         withUnsupportedParameterType();
         assertParameterIsUnsupported();
     }

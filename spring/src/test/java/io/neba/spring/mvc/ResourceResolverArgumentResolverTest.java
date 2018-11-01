@@ -38,7 +38,7 @@ public class ResourceResolverArgumentResolverTest extends AbstractArgumentResolv
     private ResourceResolverArgumentResolver testee;
 
     @Before
-    public void mockResourceResolver() throws Exception {
+    public void mockResourceResolver() {
         doReturn(this.resourceResolver)
                 .when(getRequest())
                 .getResourceResolver();
@@ -51,7 +51,7 @@ public class ResourceResolverArgumentResolverTest extends AbstractArgumentResolv
     }
 
     @Test
-    public void testResourceResolverIsSupported() throws Exception {
+    public void testResourceResolverIsSupported() {
         assertResolverSupports(ResourceResolver.class);
     }
 

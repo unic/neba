@@ -42,7 +42,7 @@ public class BackgroundServletRequestWrapperTest {
     private BackgroundServletRequestWrapper testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         testee = new BackgroundServletRequestWrapper(request);
 
         doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION"))
@@ -55,18 +55,18 @@ public class BackgroundServletRequestWrapperTest {
     }
 
     @Test
-    public void testRetrievalOfExistingSessionYieldsNull() throws Exception {
+    public void testRetrievalOfExistingSessionYieldsNull() {
         getExistingSession();
         assertRetrievedSessionIsNull();
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testPotentialCreationOfSessionYieldsException() throws Exception {
+    public void testPotentialCreationOfSessionYieldsException() {
         testee.getSession();
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testExplicitCreationOfSessionYieldsException() throws Exception {
+    public void testExplicitCreationOfSessionYieldsException() {
         testee.getSession(true);
     }
 

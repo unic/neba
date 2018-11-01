@@ -57,7 +57,7 @@ public class NebaViewResolver implements ViewResolver, Ordered {
      * @param viewName must not be <code>null</code>.
      */
     @Override
-    public View resolveViewName(String viewName, Locale locale) throws Exception {
+    public View resolveViewName(String viewName, Locale locale) {
         if (viewName == null) {
             throw new IllegalArgumentException("Method argument viewName must not be null.");
         }

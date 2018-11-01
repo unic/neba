@@ -64,20 +64,20 @@ public class SlingOsgiBundleShutdownHandlerTest {
     }
     
     @Test
-    public void testDispatching() throws Exception {
+    public void testDispatching() {
         sendBundleStoppedEvent();
         verifyDispatcherServletReceivesEvent();
         verifyModelRegistrarReceivesEvent();
     }
 
     @Test
-    public void testRegistrationAtBundleContext() throws Exception {
+    public void testRegistrationAtBundleContext() {
         startListening();
         verifyShutdownHandlerIsRegisteredAsBundleListener();
     }
 
     @Test
-    public void testRemovalFromBundleContext() throws Exception {
+    public void testRemovalFromBundleContext() {
         stopListening();
         verifyShutdownHandlerIsRemovedAsBundleListener();
     }
@@ -88,7 +88,7 @@ public class SlingOsgiBundleShutdownHandlerTest {
         verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier();
     }
 
-    private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
+    private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() {
         InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);
         inOrder.verify(this.dispatcherServlet).disableMvc(this.bundle);

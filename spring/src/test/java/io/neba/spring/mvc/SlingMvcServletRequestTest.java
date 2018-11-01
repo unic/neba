@@ -43,7 +43,7 @@ public class SlingMvcServletRequestTest {
     private SlingMvcServletRequest testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn(this.requestPathInfo)
                 .when(this.request)
                 .getRequestPathInfo();
@@ -64,7 +64,7 @@ public class SlingMvcServletRequestTest {
     }
 
     @Test
-    public void testMvcRequestProvidesServletResourcePathAndExtensionAsServletPath() throws Exception {
+    public void testMvcRequestProvidesServletResourcePathAndExtensionAsServletPath() {
         assertThat(this.testee.getServletPath()).isEqualTo("/bin/mvc.do");
     }
 
@@ -79,7 +79,7 @@ public class SlingMvcServletRequestTest {
      * &lt;sling:include path="/bin/mvc.do/controller"&gt;
      */
     @Test
-    public void testIncludeServletPathIsSameAsServletPath() throws Exception {
+    public void testIncludeServletPathIsSameAsServletPath() {
         assertThat(this.testee.getAttribute(INCLUDE_SERVLET_PATH_ATTRIBUTE))
                 .isEqualTo("/bin/mvc.do");
     }
@@ -95,13 +95,13 @@ public class SlingMvcServletRequestTest {
      * &lt;sling:include path="/bin/mvc.do/controller"&gt;
      */
     @Test
-    public void testIncludeContextPathIsSameAsServletPath() throws Exception {
+    public void testIncludeContextPathIsSameAsServletPath() {
         assertThat(this.testee.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE))
                 .isEqualTo("/bin/mvc.do/controllerPath");
     }
 
     @Test
-    public void testOtherAttributesAreFetchedFromTheOriginalRequest() throws Exception {
+    public void testOtherAttributesAreFetchedFromTheOriginalRequest() {
         this.testee.getAttribute("other.attribute");
         verify(this.request).getAttribute("other.attribute");
     }

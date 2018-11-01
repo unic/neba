@@ -105,13 +105,13 @@ public class NebaRequestContextFilterTest {
     }
 
     @After
-    public void assertThreadLocalesAreRemoved() throws Exception {
+    public void assertThreadLocalesAreRemoved() {
         assertThat(getRequestAttributes()).isNull();
         assertThat(getLocaleContext()).isNull();
     }
 
     @After
-    public void verifyServletAttributesAreCompleted() throws Exception {
+    public void verifyServletAttributesAreCompleted() {
         verify(destructionCallback).run();
     }
 

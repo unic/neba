@@ -82,17 +82,17 @@ public class SlingServletViewTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         SlingAdaptable.unsetAdapterManager(this.adapterManager);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorRequireNonNullResourceType() throws Exception {
+    public void testConstructorRequireNonNullResourceType() {
         new SlingServletView(null, this.script);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorRequireNonNullServlet() throws Exception {
+    public void testConstructorRequireNonNullServlet() {
         new SlingServletView("some/resource/type", null);
     }
 
@@ -103,7 +103,7 @@ public class SlingServletViewTest {
     }
 
     @Test
-    public void testViewDoesNotDefineContentTypeInAdvance() throws Exception {
+    public void testViewDoesNotDefineContentTypeInAdvance() {
         assertThat(this.testee.getContentType()).isNull();
     }
 

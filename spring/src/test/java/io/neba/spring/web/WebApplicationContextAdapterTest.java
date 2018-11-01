@@ -47,7 +47,7 @@ public class WebApplicationContextAdapterTest {
     private WebApplicationContextAdapter testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ApplicationContext applicationContext = mock(ApplicationContext.class, (Answer) inv -> {
             lastInvocationOnWrappedContext = inv;
             return null;
@@ -68,7 +68,7 @@ public class WebApplicationContextAdapterTest {
     }
 
     @Test
-    public void testServletContextRetrieval() throws Exception {
+    public void testServletContextRetrieval() {
         assertThat(this.testee.getServletContext()).isSameAs(this.servletContext);
     }
 

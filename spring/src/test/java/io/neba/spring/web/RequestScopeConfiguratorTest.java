@@ -42,7 +42,7 @@ public class RequestScopeConfiguratorTest {
     private RequestScopeConfigurator testee;
 
     @Test
-    public void testConfigurationOfBeanFactoryWithRequestScope() throws Exception {
+    public void testConfigurationOfBeanFactoryWithRequestScope() {
         configure();
         verifyRequestScopeIsConfigured();
     }

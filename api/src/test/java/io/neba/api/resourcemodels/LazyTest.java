@@ -31,13 +31,13 @@ public class LazyTest {
     private Lazy<Object> testee;
 
     @Test(expected = NoSuchElementException.class)
-    public void testGetIsDelegatedToOptional() throws Exception {
+    public void testGetIsDelegatedToOptional() {
         withoutValue();
         this.testee.get();
     }
 
     @Test
-    public void testIsPresent() throws Exception {
+    public void testIsPresent() {
         withoutValue();
         assertThat(this.testee.isPresent()).describedAs("Expected the Lazy value to be present").isFalse();
 
@@ -46,7 +46,7 @@ public class LazyTest {
     }
 
     @Test
-    public void testIfPresent() throws Exception {
+    public void testIfPresent() {
         withoutValue();
         this.testee.ifPresent(t -> fail("The value must not be present"));
 
@@ -60,7 +60,7 @@ public class LazyTest {
     }
 
     @Test
-    public void testFilter() throws Exception {
+    public void testFilter() {
         withoutValue();
         this.testee.filter(t -> {
             fail("The value should not be filtered");
@@ -81,7 +81,7 @@ public class LazyTest {
     }
 
     @Test
-    public void testMap() throws Exception {
+    public void testMap() {
         withoutValue();
         this.testee.map(t -> {
             fail("The value should not be mapped");
@@ -97,7 +97,7 @@ public class LazyTest {
     }
 
     @Test
-    public void testFlatMap() throws Exception {
+    public void testFlatMap() {
         withoutValue();
         this.testee.flatMap(t -> {
             fail("The value should not be mapped");
@@ -113,7 +113,7 @@ public class LazyTest {
     }
 
     @Test
-    public void testOrElse() throws Exception {
+    public void testOrElse() {
         withoutValue();
         assertThat(this.testee.orElse("defaultValue")).isEqualTo("defaultValue");
 
@@ -122,7 +122,7 @@ public class LazyTest {
     }
 
     @Test
-    public void testOrElseGet() throws Exception {
+    public void testOrElseGet() {
         withoutValue();
         assertThat(this.testee.orElseGet(() -> "defaultValue")).isEqualTo("defaultValue");
 
@@ -131,13 +131,13 @@ public class LazyTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testOrElseThrowWithoutValue() throws Exception {
+    public void testOrElseThrowWithoutValue() {
         withoutValue();
         this.testee.orElseThrow(() -> new IllegalStateException("THIS IS AN EXPECTED TEST EXCEPTION"));
     }
 
     @Test
-    public void testOrElseThrowWithValue() throws Exception {
+    public void testOrElseThrowWithValue() {
         withValue();
         assertThat(this.testee.orElseThrow(
                 () -> new IllegalStateException("THIS IS AN EXPECTED TEST EXCEPTION"))

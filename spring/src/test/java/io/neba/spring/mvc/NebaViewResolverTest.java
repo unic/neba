@@ -79,7 +79,7 @@ public class NebaViewResolverTest {
     private NebaViewResolver testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn("")
                 .when(this.request)
                 .getContextPath();
@@ -105,12 +105,12 @@ public class NebaViewResolverTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         resetRequestAttributes();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorRequiresNonNullServletResolver() throws Exception {
+    public void testConstructorRequiresNonNullServletResolver() {
         new NebaViewResolver(null);
     }
 
@@ -203,7 +203,7 @@ public class NebaViewResolverTest {
      * view resolvers.
      */
     @Test
-    public void testNebaViewResolverOrderIsDirectlyAboveSpringsDefaultResolverOrder() throws Exception {
+    public void testNebaViewResolverOrderIsDirectlyAboveSpringsDefaultResolverOrder() {
         assertThat(this.testee.getOrder()).isEqualTo(new InternalResourceViewResolver().getOrder() - 1);
     }
 

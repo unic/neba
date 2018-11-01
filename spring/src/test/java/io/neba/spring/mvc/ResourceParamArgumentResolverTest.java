@@ -75,7 +75,7 @@ public class ResourceParamArgumentResolverTest {
     private ResourceParamArgumentResolver testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn(this.resourceParam)
                 .when(this.methodParameter)
                 .getParameterAnnotation(eq(ResourceParam.class));
@@ -118,7 +118,7 @@ public class ResourceParamArgumentResolverTest {
     }
 
     @Test
-    public void testResourceParamAnnotationIsSupported() throws Exception {
+    public void testResourceParamAnnotationIsSupported() {
         assertThat(this.testee.supportsParameter(this.methodParameter)).isTrue();
     }
 

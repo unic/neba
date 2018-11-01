@@ -205,7 +205,7 @@ public class DefineObjectsTagTest {
         }
     }
 
-    private void executeTag() throws JspException {
+    private void executeTag() {
         this.tagExecutionReturnCode = this.testee.doEndTag();
     }
 

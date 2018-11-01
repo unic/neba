@@ -48,7 +48,7 @@ public class ResourceResolverArgumentResolver implements HandlerMethodArgumentRe
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                 NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+                                 NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Object request = webRequest.getNativeRequest();
         if (request instanceof SlingHttpServletRequest) {
             return ((SlingHttpServletRequest) request).getResourceResolver();

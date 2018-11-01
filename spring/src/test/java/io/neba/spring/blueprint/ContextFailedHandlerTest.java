@@ -62,7 +62,7 @@ public class ContextFailedHandlerTest {
     private ContextFailedHandler testee;
 
     @Test
-    public void testHandlerOnlyHandlesContextFailedEvents() throws Exception {
+    public void testHandlerOnlyHandlesContextFailedEvents() {
         withContextRefreshedEvent();
         handleEvent();
 
@@ -74,7 +74,7 @@ public class ContextFailedHandlerTest {
     }
 
     @Test
-    public void testHandlerUnregistersInfrastructureInRightOrder() throws Exception {
+    public void testHandlerUnregistersInfrastructureInRightOrder() {
         withContextFailedEvent();
         handleEvent();
         verifyInfrastructureIsUnregisteredInCorrectOrder();
@@ -119,7 +119,7 @@ public class ContextFailedHandlerTest {
         verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier();
     }
 
-    private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
+    private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() {
         InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);
         inOrder.verify(this.dispatcherServlet).disableMvc(this.bundle);

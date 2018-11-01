@@ -77,7 +77,7 @@ public class SpringModelRegistrarTest {
     }
 
     @Test
-    public void testModelRegistration() throws Exception {
+    public void testModelRegistration() {
         withBeanFactory();
         withResourceModelsInApplicationContext("bean1", "bean2");
         registerResourceModels();
@@ -86,7 +86,7 @@ public class SpringModelRegistrarTest {
     }
 
     @Test
-    public void testRegistrarUnregistersModelFactoryWhenBundleStops() throws Exception {
+    public void testRegistrarUnregistersModelFactoryWhenBundleStops() {
         withBeanFactory();
         withResourceModelsInApplicationContext("bean1", "bean2");
         registerResourceModels();
@@ -97,7 +97,7 @@ public class SpringModelRegistrarTest {
     }
 
     @Test
-    public void testRegistrarUnregistersAllFactoriesWhenRegistrarStops() throws Exception {
+    public void testRegistrarUnregistersAllFactoriesWhenRegistrarStops() {
         withBeanFactory();
         withResourceModelsInApplicationContext("bean1", "bean2");
         registerResourceModels();
