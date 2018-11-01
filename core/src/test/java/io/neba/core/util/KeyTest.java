@@ -28,28 +28,28 @@ public class KeyTest {
 	private Key key2;
 
 	@Test
-	public void testEqualKeys() throws Exception {
+	public void testEqualKeys() {
 		withFirstKey("one", 2, "three");
 		withSecondKey("one", 2, "three");
 		assertKeysAreEqual();
 	}
 	
 	@Test
-	public void testUnequalKeys() throws Exception {
+	public void testUnequalKeys() {
 		withFirstKey("one", 2, 3);
 		withSecondKey("one", 2, "three");
 		assertKeysAreNotEqual();
 	}
 
     @Test
-    public void testNullValuesInKeysAreNotIgnored() throws Exception {
+    public void testNullValuesInKeysAreNotIgnored() {
         withFirstKey("one", 2, null);
         withSecondKey("one", 2);
         assertKeysAreNotEqual();
     }
 
     @Test
-    public void testHandlingOfNullKeys() throws Exception {
+    public void testHandlingOfNullKeys() {
         withFirstKey((Object) null);
         withSecondKey((Object) null);
         assertKeysAreEqual();
@@ -60,7 +60,7 @@ public class KeyTest {
     }
 
     @Test
-    public void testStringRepresentation() throws Exception {
+    public void testStringRepresentation() {
         withFirstKey("one", 2, null);
         assertStringRepresentationIs("Key {one, 2, }");
     }

@@ -18,13 +18,6 @@ package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.core.util.OsgiModelSource;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.nodetype.NodeType;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -35,6 +28,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.nodetype.NodeType;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -66,7 +65,7 @@ public class ModelRegistryTest {
     private ModelRegistry testee;
 
     @Before
-    public void setUp() throws LoginException {
+    public void setUp() {
         this.resourceModelAnnotations = new HashSet<>();
     	withBundleId(12345L);
     }
@@ -83,7 +82,7 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testUnregistrationOfModelsWhenSourceBundleIsRemoved() throws Exception {
+    public void testUnregistrationOfModelsWhenSourceBundleIsRemoved() {
         withModelSources(2);
 
         assertRegistryHasModels(2);
@@ -94,7 +93,7 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testModelSourceLookupByResourceType() throws Exception {
+    public void testModelSourceLookupByResourceType() {
         withModelSources(10);
 
         assertRegistryHasModels(10);
@@ -106,7 +105,7 @@ public class ModelRegistryTest {
      * is used if same lookup occurs more than once. 
      */
     @Test
-    public void testRepeatedModelSourceLookupByResourceType() throws Exception {
+    public void testRepeatedModelSourceLookupByResourceType() {
         withModelSources(10);
 
         assertRegistryHasModels(10);
@@ -115,7 +114,7 @@ public class ModelRegistryTest {
     }
     
     @Test
-    public void testModelSourceLookupByResourceSuperType() throws Exception {
+    public void testModelSourceLookupByResourceSuperType() {
         withModelSources(10);
 
         assertRegistryHasModels(10);
@@ -123,7 +122,7 @@ public class ModelRegistryTest {
     }
     
     @Test
-    public void testModelSourceLookupForMostSpecificMapping() throws Exception {
+    public void testModelSourceLookupForMostSpecificMapping() {
         withResourceModel("some/resourcetype");
         withResourceModel("some/resourcetype/supertype");
 
@@ -140,7 +139,7 @@ public class ModelRegistryTest {
      * is used if same lookup occurs more than once. 
      */
     @Test
-    public void testRepeatedModelSourceLookupForMostSpecificMapping() throws Exception {
+    public void testRepeatedModelSourceLookupForMostSpecificMapping() {
         withResourceModel("some/resourcetype");
         withResourceModel("some/resourcetype/supertype");
 
@@ -158,7 +157,7 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testMultipleMappingsToSameResourceType() throws Exception {
+    public void testMultipleMappingsToSameResourceType() {
         withResourceModel("some/resourcetype");
         withResourceModel("some/resourcetype");
         withModelSourcesForAllResourceModels();
@@ -167,7 +166,7 @@ public class ModelRegistryTest {
     }
     
     @Test
-    public void testRemovalOfBundleWithModelforSameResourceType() throws Exception {
+    public void testRemovalOfBundleWithModelForSameResourceType() {
         withResourceModel("some/resourcetype");
         withBundleId(1);
         withModelForType("some/resourcetype", TargetType1.class);
@@ -188,7 +187,7 @@ public class ModelRegistryTest {
     }
     
     @Test
-    public void testNoMappingsToResourceType() throws Exception {
+    public void testNoMappingsToResourceType() {
         withModelSourcesForAllResourceModels();
 
         lookupMostSpecificModelSources(mockResourceWithResourceType("some/resourcetype"));
@@ -197,7 +196,7 @@ public class ModelRegistryTest {
     }
     
     @Test
-    public void testLookupOfModelSourceForSpecificTypeWithSingleMapping() throws Exception {
+    public void testLookupOfModelSourceForSpecificTypeWithSingleMapping() {
         withModelForType("some/resourcetype", TargetType1.class);
 
         Resource resource = mockResourceWithResourceType("some/resourcetype");
@@ -209,7 +208,7 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testLookupOfModelSourceForSpecificTypeWithMultipleCompatibleModels() throws Exception {
+    public void testLookupOfModelSourceForSpecificTypeWithMultipleCompatibleModels() {
         withModelForType("some/resourcetype/parent", TargetType1.class);
         withModelForType("some/resourcetype", ExtendedTargetType1.class);
 
@@ -222,7 +221,7 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testlookupOfModelSourceForSpecificTypeWithoutModel() throws Exception {
+    public void testLookupOfModelSourceForSpecificTypeWithoutModel() {
         Resource resource = mockResourceWithResourceType("some/resourcetype");
 
         lookupModelSourcesForType(TargetType1.class, resource);
@@ -236,7 +235,7 @@ public class ModelRegistryTest {
      * must be provided by the registry.
      */
     @Test
-    public void testLookupOfModelSourceForTypeWithMultipleIncompatibleModels() throws Exception {
+    public void testLookupOfModelSourceForTypeWithMultipleIncompatibleModels() {
         withModelForType("some/resourcetype", TargetType1.class);
         withModelForType("some/resourcetype", TargetType2.class);
 
@@ -254,7 +253,7 @@ public class ModelRegistryTest {
      * mapping information was cached.
      */
     @Test
-    public void testRepeatedLookupOfModelWithTargetType() throws Exception {
+    public void testRepeatedLookupOfModelWithTargetType() {
         withModelForType("some/resourcetype", TargetType1.class);
         withModelForType("some/resourcetype", TargetType2.class);
         withModelForType("some/resourcetype", TargetType3.class);
@@ -288,7 +287,7 @@ public class ModelRegistryTest {
      * models must be provided by the registry.
      */
     @Test
-    public void testLookupOfModelSourceForTypeWithMultipleCompatibleModels() throws Exception {
+    public void testLookupOfModelSourceForTypeWithMultipleCompatibleModels() {
         withModelForType("some/resourcetype", TargetType1.class);
         withModelForType("some/resourcetype", ExtendedTargetType1.class);
 
@@ -304,7 +303,7 @@ public class ModelRegistryTest {
      * If a model with the specific name exists, the registry must return it.
      */
     @Test
-    public void testLookupOfModelWithSpecificModelName() throws Exception {
+    public void testLookupOfModelWithSpecificModelName() {
         withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
         withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
@@ -319,7 +318,7 @@ public class ModelRegistryTest {
      * must be still consistent when the result is fetched from the cache.
      */
     @Test
-    public void testCachedLookupOfModelWithSpecificModelName() throws Exception {
+    public void testCachedLookupOfModelWithSpecificModelName() {
         withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
         withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
@@ -333,7 +332,7 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testLookupOfModelWithSpecificModelNameProvidesMostSpecificModel() throws Exception {
+    public void testLookupOfModelWithSpecificModelNameProvidesMostSpecificModel() {
         withModelForType("some/resourcetype", TargetType1.class, "junitModel");
         withModelForType("some/resource/supertype", ExtendedTargetType1.class, "junitModel");
 
@@ -349,7 +348,7 @@ public class ModelRegistryTest {
      * If no model with the specific name exists, the registry must return no model.
      */
     @Test
-    public void testLookupOfModelWithSpecificNonexistentModelName() throws Exception {
+    public void testLookupOfModelWithSpecificNonexistentModelName() {
         withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
         withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
@@ -365,7 +364,7 @@ public class ModelRegistryTest {
      * must be still consistent when the result is fetched from the cache.
      */
     @Test
-    public void testCachedLookupOfModelWithSpecificNonexistentModelName() throws Exception {
+    public void testCachedLookupOfModelWithSpecificNonexistentModelName() {
         withModelForType("some/resourcetype", TargetType1.class, "junitModelOne");
         withModelForType("some/resourcetype", ExtendedTargetType1.class, "junitModelTwo");
 
@@ -379,7 +378,7 @@ public class ModelRegistryTest {
     }
 
     @Test
-    public void testLookupOfAllModelsForResource() throws Exception {
+    public void testLookupOfAllModelsForResource() {
         withModelForType("some/resourcetype/parent", TargetType1.class);
         withModelForType("some/resourcetype", TargetType2.class);
 
@@ -477,14 +476,14 @@ public class ModelRegistryTest {
     }
 
     /**
-     * Requires the {@link Node} to have been mocked before hand, e.g. usig {@link #withPrimaryType(Resource, String)}.
+     * Requires the {@link Node} to have been mocked before hand, e.g. using {@link #withPrimaryType(Resource, String)}.
      */
-    private void withMixinTypes(Resource resource, String... mixins) throws RepositoryException {
+    private void withMixinTypes(Resource resource, String... types) throws RepositoryException {
         Node node = resource.adaptTo(Node.class);
-        NodeType[] mixinTypes = new NodeType[mixins.length];
-        for (int i = 0; i < mixins.length; ++i) {
+        NodeType[] mixinTypes = new NodeType[types.length];
+        for (int i = 0; i < types.length; ++i) {
             mixinTypes[i] = mock(NodeType.class);
-            when(mixinTypes[i].getName()).thenReturn(mixins[i]);
+            when(mixinTypes[i].getName()).thenReturn(types[i]);
         }
         if (node != null) {
             when(node.getMixinNodeTypes()).thenReturn(mixinTypes);

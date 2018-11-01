@@ -58,7 +58,7 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     @Test
-    public void testHandlingOfSyntheticResources() throws Exception {
+    public void testHandlingOfSyntheticResources() {
         withSyntheticResource();
         withResourceType("virtual/resource/type");
         createIterator();
@@ -75,7 +75,7 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     @Test
-    public void testResolutionOfTypeHierarchy() throws Exception {
+    public void testResolutionOfTypeHierarchy() {
         withResourceType("junit/test1");
         withResourceSupertype("junit/test1", "junit/test2");
         withResourceSupertype("junit/test2", "junit/test3");
@@ -87,7 +87,7 @@ public class ResourceTypeHierarchyIteratorTest {
 
 
     @Test(expected = NoSuchElementException.class)
-    public void testNextInvocationWithoutNextElement() throws Exception {
+    public void testNextInvocationWithoutNextElement() {
         withResourceType("/junit/test1");
         createIterator();
         getNextElement();
@@ -95,12 +95,12 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResourceMustNotBeNull() throws Exception {
+    public void testResourceMustNotBeNull() {
         new ResourceTypeHierarchyIterator(null);
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIteratorIsReadOnly() throws Exception {
+    public void testIteratorIsReadOnly() {
         withResourceType("junit/test1");
         createIterator();
         removeElement();

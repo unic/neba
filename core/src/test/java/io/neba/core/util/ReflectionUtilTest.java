@@ -152,28 +152,28 @@ public class ReflectionUtilTest {
     private Class<?> type = getClass();
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolutionOfRawCollectionType() throws Exception {
+    public void testResolutionOfRawCollectionType() {
         getGenericTypeParameterOf("rawCollection");
     }
 
     @Test
-    public void testResolutionOfSimpleCollectionType() throws Exception {
+    public void testResolutionOfSimpleCollectionType() {
         getGenericTypeParameterOf("stringCollection");
         assertTypeParameterIs(String.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolutionOfReadOnlyCollectionType() throws Exception {
+    public void testResolutionOfReadOnlyCollectionType() {
         getGenericTypeParameterOf("readOnlyCollection");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolutionOfUnknownCollectionType() throws Exception {
+    public void testResolutionOfUnknownCollectionType() {
         getGenericTypeParameterOf("unknownCollection");
     }
 
     @Test
-    public void testResolutionOfBoundCollectionType() throws Exception {
+    public void testResolutionOfBoundCollectionType() {
         getGenericTypeParameterOf("boundCollection");
         assertTypeParameterIs(ReflectionUtilTest.class);
     }
@@ -215,21 +215,21 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testResolutionOfTypeParameterWithTypeVariableInParent() throws Exception {
+    public void testResolutionOfTypeParameterWithTypeVariableInParent() {
         this.type = GenericModelImpl.class;
         getGenericTypeParameterOf("genericModelList");
         assertTypeParameterIs(Boolean.class);
     }
 
     @Test
-    public void testResolutionOfTypeParameterWithTypeVariableInParentsParent() throws Exception {
+    public void testResolutionOfTypeParameterWithTypeVariableInParentsParent() {
         this.type = GenericModelImpl.class;
         getGenericTypeParameterOf("rootList");
         assertTypeParameterIs(Integer.class);
     }
 
     @Test
-    public void testResolutionOfTypeParameterWithTypeVariableInDeclaringClass() throws Exception {
+    public void testResolutionOfTypeParameterWithTypeVariableInDeclaringClass() {
         this.type = GenericModelImpl.class;
         getGenericTypeParameterOf("booleans");
         assertTypeParameterIs(Boolean.class);

@@ -81,7 +81,7 @@ public class ModelRegistrarTest {
     }
 
     @Test
-    public void testNoModelRegistrationOccursWhenNoModelFactoriesAreAvailable() throws Exception {
+    public void testNoModelRegistrationOccursWhenNoModelFactoriesAreAvailable() {
         activate();
 
         verifyNoResourceModelIsRegistered();

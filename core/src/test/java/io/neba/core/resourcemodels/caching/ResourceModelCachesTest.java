@@ -96,32 +96,32 @@ public class ResourceModelCachesTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testNullResourceIsNotAllowedForCacheLookup() throws Exception {
+	public void testNullResourceIsNotAllowedForCacheLookup() {
 		this.testee.lookup(null, this.modelSource);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testNullClassIsNotAllowedForCacheLookup() throws Exception {
+	public void testNullClassIsNotAllowedForCacheLookup() {
 		this.testee.lookup(mock(Resource.class), null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testNullResourceIsNotAllowedForCacheWrite() throws Exception {
+	public void testNullResourceIsNotAllowedForCacheWrite() {
 		this.testee.store(null, this.modelSource, new Object());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testNullClassIsNotAllowedForCacheWrite() throws Exception {
+	public void testNullClassIsNotAllowedForCacheWrite() {
 		this.testee.store(mock(Resource.class), null, new Object());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testNullModelIsNotAllowedForCacheWrite() throws Exception {
+	public void testNullModelIsNotAllowedForCacheWrite() {
 		this.testee.store(mock(Resource.class), this.modelSource, null);
 	}
 
 	@Test
-	public void testCacheUsesResourceResolverIdentityForCacheKey() throws Exception {
+	public void testCacheUsesResourceResolverIdentityForCacheKey() {
 		bindCache();
     	storeModel();
     	lookup();
@@ -135,7 +135,7 @@ public class ResourceModelCachesTest {
 	}
 
 	@Test
-	public void testUnsuccessfulLookup() throws Exception {
+	public void testUnsuccessfulLookup() {
 		bindCache();
 		bindCache();
 		lookup();
@@ -143,7 +143,7 @@ public class ResourceModelCachesTest {
 	}
 	
 	@Test
-	public void testSuccessfulLookup() throws Exception {
+	public void testSuccessfulLookup() {
 		bindCache();
 		bindCache();
 		withCachedObjectIn(0);
@@ -152,7 +152,7 @@ public class ResourceModelCachesTest {
 	}
 
 	@Test
-	public void testSuccessfulLookupIsCountedAsCacheHitInResourceModelMetaData() throws Exception {
+	public void testSuccessfulLookupIsCountedAsCacheHitInResourceModelMetaData() {
 		bindCache();
 		withCachedObjectIn(0);
 		lookup();
@@ -160,14 +160,14 @@ public class ResourceModelCachesTest {
 	}
 
 	@Test
-	public void testUnsuccessulLookupIsNotCountedAsCacheHit() throws Exception {
+	public void testUnsuccessulLookupIsNotCountedAsCacheHit() {
 		bindCache();
 		lookup();
 		verifyResourceModelStatisticsAreNotUsed();
 	}
 
 	@Test
-	public void testRemovalOfCaches() throws Exception {
+	public void testRemovalOfCaches() {
 		bindCache();
 		bindCache();
 		unbindAllCaches();
@@ -176,7 +176,7 @@ public class ResourceModelCachesTest {
 	}
 
     @Test
-    public void testStorage() throws Exception {
+    public void testStorage() {
         bindCache();
         bindCache();
         storeModel();
@@ -184,7 +184,7 @@ public class ResourceModelCachesTest {
     }
 
 	@Test
-	public void testRemovalOfNullCacheDoesNotCauseException() throws Exception {
+	public void testRemovalOfNullCacheDoesNotCauseException() {
 		this.testee.unbind(null);
 	}
 

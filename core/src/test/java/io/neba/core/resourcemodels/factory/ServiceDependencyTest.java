@@ -78,6 +78,7 @@ public class ServiceDependencyTest {
 
         createDependency();
         resolveService();
+        assertDependencyWasResolved();
     }
 
     @Test

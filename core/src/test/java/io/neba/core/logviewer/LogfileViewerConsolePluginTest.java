@@ -164,7 +164,7 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
-    public void testGetResources() throws Exception {
+    public void testGetResources() {
         URL resource = this.testee.getResource("/logviewer/static/testresource.txt");
         assertThat(resource).isNotNull();
     }
@@ -190,7 +190,7 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
-    public void testDestroy() throws Exception {
+    public void testDestroy() {
         destroy();
         verifyTailServletIsDestroyed();
     }
@@ -279,7 +279,7 @@ public class LogfileViewerConsolePluginTest {
         method.invoke(servlet);
     }
 
-    private void injectTailServlet(Object o) throws InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    private void injectTailServlet(Object o) throws IllegalAccessException {
         Field field = findField(o.getClass(), "tailServlet");
         field.setAccessible(true);
         field.set(o, this.tailServlet);
@@ -351,7 +351,7 @@ public class LogfileViewerConsolePluginTest {
         assertThat(this.htmlResponse).contains(expected);
     }
 
-    private void renderContent() throws ServletException, IOException {
+    private void renderContent() throws IOException {
         this.testee.renderContent(this.request, this.response);
         this.htmlResponse = this.internalWriter.getBuffer().toString();
     }

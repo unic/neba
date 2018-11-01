@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
@@ -62,7 +63,7 @@ public abstract class TailTests {
             ByteBuffer buffer = (ByteBuffer) invocation.getArguments()[0];
             byte[] contents = new byte[buffer.limit()];
             buffer.get(contents, 0, contents.length);
-            receivedText.append(new String(contents, "UTF-8"));
+            receivedText.append(new String(contents, StandardCharsets.UTF_8));
             return null;
         };
 

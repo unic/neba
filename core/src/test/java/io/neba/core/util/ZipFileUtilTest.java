@@ -35,24 +35,24 @@ public class ZipFileUtilTest {
     private File file;
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullArgumentsAreNotTolerated() throws Exception {
+    public void testNullArgumentsAreNotTolerated() {
         toZipFileEntryName(null);
     }
 
     @Test
-    public void testNormalizedPathsAreNotChanged() throws Exception {
+    public void testNormalizedPathsAreNotChanged() {
         withFilePath("/some/path");
         assertZipFileEntryNameIs("some/path");
     }
 
     @Test
-    public void testNetworkIdentifiersAreRemoved() throws Exception {
+    public void testNetworkIdentifiersAreRemoved() {
         withFilePath("//share/some/path");
         assertZipFileEntryNameIs("share/some/path");
     }
 
     @Test
-    public void testWindowsFilePathsAreRepresentedAsUnixPaths() throws Exception {
+    public void testWindowsFilePathsAreRepresentedAsUnixPaths() {
         withFilePath("D:\\share\\windows\\path");
         assertZipFileEntryNameIs("D/share/windows/path");
     }

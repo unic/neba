@@ -20,7 +20,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.neba.core.util.ConcurrentMultivalueMapAssert.assertThat;
+import static io.neba.core.util.ConcurrentMultiValueMapAssert.assertThat;
 
 /**
  * @author Olaf Otto
@@ -34,21 +34,21 @@ public class ConcurrentDistinctMultiValueMapTest {
 	}
 	
 	@Test
-	public void testDistinctValuesAreGuaranteed() throws Exception {
+	public void testDistinctValuesAreGuaranteed() {
 		put("test", "test1");
 		put("test", "test1");
 		assertOnlyOneValueFor("test");
 	}
 
 	@Test
-	public void testDifferentValuesAreAccepted() throws Exception {
+	public void testDifferentValuesAreAccepted() {
 		put("test", "test1");
 		put("test", "test2");
 		assertMapContains("test", "test1", "test2");
 	}
 	
 	@Test
-	public void testRemoveKey() throws Exception {
+	public void testRemoveKey() {
 		put("test", "test1");
 		put("test", "test2");
 
@@ -58,7 +58,7 @@ public class ConcurrentDistinctMultiValueMapTest {
 	}
 
 	@Test
-	public void testRemoveValue() throws Exception {
+	public void testRemoveValue() {
 		put("test", "test1");
 		put("test", "test2");
 
@@ -70,7 +70,7 @@ public class ConcurrentDistinctMultiValueMapTest {
 	}
 
 	@Test
-    public void testIsEmpty() throws Exception {
+    public void testIsEmpty() {
         Assertions.assertThat(this.testee.isEmpty()).isTrue();
         put("test", "test1");
         Assertions.assertThat(this.testee.isEmpty()).isFalse();
@@ -88,15 +88,15 @@ public class ConcurrentDistinctMultiValueMapTest {
 		this.testee.removeValue(value);
 	}
 
-	private ConcurrentMultivalueMapAssert assertMapContains(String key, Object... value) {
+	private ConcurrentMultiValueMapAssert assertMapContains(String key, Object... value) {
 		return assertThat(this.testee).contains(key, value);
 	}
 
-	private ConcurrentMultivalueMapAssert assertMapContainsOnly(String key, Object... value) {
+	private ConcurrentMultiValueMapAssert assertMapContainsOnly(String key, Object... value) {
 		return assertThat(this.testee).containsOnly(key, value);
 	}
 
-	private ConcurrentMultivalueMapAssert assertOnlyOneValueFor(String key) {
+	private ConcurrentMultiValueMapAssert assertOnlyOneValueFor(String key) {
 		return assertThat(this.testee).containsExactlyOneValueFor(key);
 	}
 

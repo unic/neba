@@ -69,7 +69,7 @@ public class NodeTypeHierarchyIteratorTest {
     }
     
     @Test(expected = UnsupportedOperationException.class)
-    public void testIteratorModification() throws Exception {
+    public void testIteratorModification() {
         NodeTypeHierarchyIterator it = typeHierarchyOf(this.node);
         it.remove();
     }

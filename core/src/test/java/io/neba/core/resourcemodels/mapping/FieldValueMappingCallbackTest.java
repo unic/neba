@@ -669,7 +669,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * Resources targeted by references may be unresolvable, i.e. their resolution or adaptaion results
+     * Resources targeted by references may be unresolvable, i.e. their resolution or adaptation results
      * in a <code>null</code> value. In this case, the <code>null</code> value must not
      * be stored in the injected collection of references.
      */
@@ -822,7 +822,7 @@ public class FieldValueMappingCallbackTest {
      * </pre>
      */
     @Test
-    public void testChildrenAnnotationWithUnresolveableParentYieldsEmptyCollection() {
+    public void testChildrenAnnotationWithUnresolvableParentYieldsEmptyCollection() {
         withField(Collection.class);
         withCollectionTypedField();
         withInstantiableCollectionTypedField();

@@ -71,7 +71,7 @@ public class MappableTypeHierarchyTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullResource() throws Exception {
+    public void testHandlingOfNullResource() {
         withNullResource();
         iterateOnceWithMappableTypeHierarchy();
     }

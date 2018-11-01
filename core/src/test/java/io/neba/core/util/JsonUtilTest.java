@@ -33,17 +33,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class JsonUtilTest {
     @Test(expected = IllegalArgumentException.class)
-    public void testNullCollectionIsNotTolerated() throws Exception {
+    public void testNullCollectionIsNotTolerated() {
         toJson((Collection<?>) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullMapIsNotTolerated() throws Exception {
+    public void testNullMapIsNotTolerated() {
         toJson((Map) null);
     }
 
     @Test
-    public void testJsonGeneration() throws Exception {
+    public void testJsonGeneration() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("first", null);
         map.put("second", 1);
@@ -76,7 +76,7 @@ public class JsonUtilTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfUnknownValue() throws Exception {
+    public void testHandlingOfUnknownValue() {
         List<Long[]> l = new ArrayList<>();
         l.add(new Long[]{1L, 2L, 3L});
         toJson(l);

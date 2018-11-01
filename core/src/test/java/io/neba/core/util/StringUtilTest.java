@@ -27,23 +27,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StringUtilTest {
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullValueForAppend() throws Exception {
+    public void testNullValueForAppend() {
         appendToAll(null, new String[]{});
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullValueForAppendTo() throws Exception {
+    public void testNullValueForAppendTo() {
         appendToAll("", null);
     }
 
     @Test
-    public void testNullValuesInAppendToRemainNull() throws Exception {
+    public void testNullValuesInAppendToRemainNull() {
         assertThat(appendToAll("", new String[]{null, null}))
                    .containsOnly(null, null);
     }
 
     @Test
-    public void testAppending() throws Exception {
+    public void testAppending() {
         assertThat(appendToAll("/test", new String[]{"/one", "", "/two"}))
                 .isEqualTo(new String[]{"/one/test", "/test", "/two/test"});
 

@@ -188,7 +188,7 @@ public class ResourceToModelMapperTest {
         withCycleCheckerReportingCycle();
         withMappedModelReturnedFromMapping();
         mapResourceToModel();
-        verifyCyclecheckIsNotEnded();
+        verifyCycleCheckIsNotEnded();
         assertModelReturnedFromMapperIsOriginalModel();
     }
 
@@ -285,7 +285,7 @@ public class ResourceToModelMapperTest {
         doReturn(new TestModel()).when(this.aopSupport).prepareForFieldInjection(this.model);
     }
 
-    private void verifyCyclecheckIsNotEnded() {
+    private void verifyCycleCheckIsNotEnded() {
         verify(this.nestedMappingSupport, never()).end(isA(Mapping.class));
     }
 

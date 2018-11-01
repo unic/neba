@@ -74,25 +74,25 @@ public class OsgiModelSourceTest {
     }
 
     @Test
-    public void testToStringRepresentation() throws Exception {
+    public void testToStringRepresentation() {
         modelSourceToString();
         assertModelSourceAsStringIs("Model \"testModel\" from bundle with id 123");
     }
 
     @Test
-    public void testModelRetrievalFromFactory() throws Exception {
+    public void testModelRetrievalFromFactory() {
         getModel();
         verifyModelSourceGetsModelFromModelFactory();
     }
 
     @Test
-    public void testModelTypeRetrievalFromFactory() throws Exception {
+    public void testModelTypeRetrievalFromFactory() {
         getModelType();
         verifyModelSourceModelTypeFromModelDefinitision();
     }
 
     @Test
-    public void testHashCodeAndEquals() throws Exception {
+    public void testHashCodeAndEquals() {
         OsgiModelSource<?> one = new OsgiModelSource<>(modelDefinition("one"), mock(ResourceModelFactory.class), this.bundleOne);
         OsgiModelSource<?> two = new OsgiModelSource<>(modelDefinition("one"), mock(ResourceModelFactory.class), this.bundleOne);
 

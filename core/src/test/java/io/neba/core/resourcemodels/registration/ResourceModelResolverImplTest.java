@@ -18,14 +18,8 @@ package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
-import io.neba.core.resourcemodels.registration.LookupResult;
-import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.resourcemodels.registration.ResourceModelResolverImpl;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -37,6 +31,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -131,55 +128,55 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelWithModelNameRequiresResource() throws Exception {
+    public void testResolveMostSpecificModelWithModelNameRequiresResource() {
         this.testee.resolveMostSpecificModelWithName(null, "modelName");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelWithModelNameRequiresModelName() throws Exception {
+    public void testResolveMostSpecificModelWithModelNameRequiresModelName() {
         this.testee.resolveMostSpecificModelWithName(mock(Resource.class), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelRequiresResource() throws Exception {
+    public void testResolveMostSpecificModelRequiresResource() {
         this.testee.resolveMostSpecificModel(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelsIncludingBaseTypesRequiresResource() throws Exception {
+    public void testResolveMostSpecificModelsIncludingBaseTypesRequiresResource() {
         this.testee.resolveMostSpecificModelIncludingModelsForBaseTypes(null);
     }
 
     @Test
-    public void testResolutionOfSpecificModelIncludingBaseTypes() throws Exception {
+    public void testResolutionOfSpecificModelIncludingBaseTypes() {
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
 
     @Test
-    public void testResolutionOfSpecificModelWithModelForNtUnstructured() throws Exception {
+    public void testResolutionOfSpecificModelWithModelForNtUnstructured() {
         withModelFoundForResourceType("nt:unstructured");
         provideMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
-    public void testResolutionOfSpecificModelWithModelForNtBase() throws Exception {
+    public void testResolutionOfSpecificModelWithModelForNtBase() {
         withModelFoundForResourceType("nt:base");
         provideMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
-    public void testResolutionOfSpecificModelWithModelForSyntheticResourceRoot() throws Exception {
+    public void testResolutionOfSpecificModelWithModelForSyntheticResourceRoot() {
         withModelFoundForResourceType(SYNTHETIC_RESOURCETYPE_ROOT);
         provideMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
-    public void testResolutionOfAnyModelWithModelForNtUnstructured() throws Exception {
+    public void testResolutionOfAnyModelWithModelForNtUnstructured() {
         withModelFoundForResourceType("nt:unstructured");
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
@@ -187,7 +184,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithModelForNtBase() throws Exception {
+    public void testResolutionOfAnyModelWithModelForNtBase() {
         withModelFoundForResourceType("nt:base");
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
@@ -195,7 +192,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithModelForSyntheticResourceRoot() throws Exception {
+    public void testResolutionOfAnyModelWithModelForSyntheticResourceRoot() {
         withModelFoundForResourceType(SYNTHETIC_RESOURCETYPE_ROOT);
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
@@ -203,7 +200,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithSpecificModelName() throws Exception {
+    public void testResolutionOfAnyModelWithSpecificModelName() {
         provideMostSpecificModelWithModelName("unitTestModel");
         verifyRegistryIsQueriedWithModelName();
         verifyResourceIsMappedToModel();
@@ -211,7 +208,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithSpecificModelNameDisregardsBasicTypes() throws Exception {
+    public void testResolutionOfAnyModelWithSpecificModelNameDisregardsBasicTypes() {
         withModelFoundForResourceType("nt:base");
         provideMostSpecificModelWithModelName("unitTestModel");
         verifyRegistryIsQueriedWithModelName();
@@ -220,7 +217,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testSubsequentResolutionOfSameResourceWithDifferentResourceTypeIsNotServedFromCache() throws Exception {
+    public void testSubsequentResolutionOfSameResourceWithDifferentResourceTypeIsNotServedFromCache() {
         withResourcePath("/resource/path");
         withResourceType("resource/type/one");
 
@@ -233,7 +230,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testSubsequentResolutionOfSameResourceWithSameResourceTypeIsServedFromCache() throws Exception {
+    public void testSubsequentResolutionOfSameResourceWithSameResourceTypeIsServedFromCache() {
         withResourcePath("/resource/path");
 
         withResourceType("resource/type/one");

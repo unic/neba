@@ -37,7 +37,7 @@ public class LookupResultTest {
     private LookupResult testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         this.testee = new LookupResult(this.modelSource, "junit/test/type");
 
         doReturn(123L)
@@ -50,27 +50,27 @@ public class LookupResultTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorArgumentSourceMustNotBeNull() throws Exception {
+    public void testConstructorArgumentSourceMustNotBeNull() {
         new LookupResult(null, "some/resource/type");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorArgumentResourceTypeMustNotBeNull() throws Exception {
+    public void testConstructorArgumentResourceTypeMustNotBeNull() {
         new LookupResult(this.modelSource, null);
     }
 
     @Test
-    public void testEqualsNull() throws Exception {
+    public void testEqualsNull() {
         assertLookupResultIsNotEqualTo(null);
     }
 
     @Test
-    public void testEqualToOtherType() throws Exception {
+    public void testEqualToOtherType() {
         assertLookupResultIsNotEqualTo(new Object());
     }
 
     @Test
-    public void testEqualsToResultForOtherSource() throws Exception {
+    public void testEqualsToResultForOtherSource() {
         OsgiModelSource<?> modelSource = mock(OsgiModelSource.class);
         LookupResult other = new LookupResult(modelSource, "junit/test/type");
 
@@ -78,17 +78,17 @@ public class LookupResultTest {
     }
 
     @Test
-    public void testEqualsToResultForDifferentResourceType() throws Exception {
+    public void testEqualsToResultForDifferentResourceType() {
         assertLookupResultIsNotEqualTo(new LookupResult(this.modelSource, "junit/other/type"));
     }
 
     @Test
-    public void testEqualsToResultForSameSourceAndResourceType() throws Exception {
+    public void testEqualsToResultForSameSourceAndResourceType() {
         assertThat(this.testee).isEqualTo(new LookupResult(this.modelSource, "junit/test/type"));
     }
 
     @Test
-    public void testStringRepresentation() throws Exception {
+    public void testStringRepresentation() {
         assertThat(this.testee.toString()).isEqualTo("junit/test/type -> [modelSource]");
     }
 

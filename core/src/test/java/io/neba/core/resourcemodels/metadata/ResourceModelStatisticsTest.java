@@ -35,12 +35,12 @@ public class ResourceModelStatisticsTest {
     private long numberOfMappings;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         this.testee = new ResourceModelStatistics();
     }
 
     @Test
-    public void testMedianCalculationWithEvenMappingCountAndNormalDistribution() throws Exception {
+    public void testMedianCalculationWithEvenMappingCountAndNormalDistribution() {
         withDurations(1, 1,   // Interval [1, 2)
                       2, 2,   // Interval [2, 4) -> mean is 3
                       3, 3);  // Interval [2, 4)
@@ -50,7 +50,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testMedianCalculationWithEvenMappingCountAndUnevenDistribution() throws Exception {
+    public void testMedianCalculationWithEvenMappingCountAndUnevenDistribution() {
         withDurations(1, 1,               // Interval [1, 2)
                       2, 2, 3, 3,         // Interval [2, 4) -> mean 3
                       108, 108, 109, 109, // Interval [64, 128) -> mean 96
@@ -62,7 +62,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testMedianCalculationWithUnEvenMappingCountAndNormalDistribution() throws Exception {
+    public void testMedianCalculationWithUnEvenMappingCountAndNormalDistribution() {
         withDurations(1,         // Interval [1, 2)
                       2, 3,      // Interval [2, 4)
                       4, 5, 6, 7 // Interval [4, 8) -> mean 6
@@ -73,7 +73,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testMedianCalculationWithUnevenMappingCountAndUnevenDistribution() throws Exception {
+    public void testMedianCalculationWithUnevenMappingCountAndUnevenDistribution() {
         withDurations(1, 1, 1, 1, 1,   // Interval [1, 2)
                       2, 3,            // Interval [2, 4) -> mean 3
                       4, 5, 6, 7       // Interval [4, 8)
@@ -84,7 +84,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testAverageCalculation() throws Exception {
+    public void testAverageCalculation() {
         withDurations(1,          // interval [1, 2) -> average 1.5
                       2, 3,       // interval [2, 4) -> average 3
                       4, 5, 6, 7  // interval [4, 8) -> average 6
@@ -95,7 +95,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testAverageCalculationWithZeroDuration() throws Exception {
+    public void testAverageCalculationWithZeroDuration() {
         withDurations(0, 0, // interval [0, 1) -> average .5
                 1, 1,       // interval [1, 2) -> average 1.5
                 4, 5, 6, 7  // interval [4, 8) -> average 6
@@ -106,7 +106,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testMaximumMappingDurationCalculation() throws Exception {
+    public void testMaximumMappingDurationCalculation() {
         withDurations(0, 2, 250, 0, 5, 6, 7, 199);
         calculateMaximumMappingDuration();
         // The maximum is the average of the maximum interval ([128, 256))
@@ -114,33 +114,33 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testMaximumMappingDurationCalculationWithoutAnyElements() throws Exception {
+    public void testMaximumMappingDurationCalculationWithoutAnyElements() {
         calculateMaximumMappingDuration();
         assertMaximumMappingDurationIs(0);
     }
 
     @Test
-    public void testMinimumMappingDurationCalculation() throws Exception {
+    public void testMinimumMappingDurationCalculation() {
         withDurations(1, 2, 3, 4, 250, 6, 7, 1);
         calculateMinimumMappingDuration();
         assertMinimumMappingDurationIs(1.5);
     }
 
     @Test
-    public void testMinimumMappingDurationCalculationWithoutAnyElements() throws Exception {
+    public void testMinimumMappingDurationCalculationWithoutAnyElements() {
         calculateMinimumMappingDuration();
         assertMinimumMappingDurationIs(0);
     }
 
     @Test
-    public void testMappingCount() throws Exception {
+    public void testMappingCount() {
         withMappings(114);
         calculateNumberOfMappings();
         assertNumberOfMappingsIs(114);
     }
 
     @Test
-    public void testFallbackWhenMappingDurationExceedsFrequencyTableBoundaries() throws Exception {
+    public void testFallbackWhenMappingDurationExceedsFrequencyTableBoundaries() {
         withDurations(1, 1, MAX_VALUE);
         calculateMaximumMappingDuration();
         // The average of [2^14, 2^15), the right-most interval.
@@ -148,7 +148,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testInstantiationCount() throws Exception {
+    public void testInstantiationCount() {
         assertNumberOfInstantiationsIs(0);
 
         countInstantiation();
@@ -159,7 +159,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testCacheHitCount() throws Exception {
+    public void testCacheHitCount() {
         assertNumberOfCacheHitsIs(0);
 
         countCacheHit();
@@ -172,7 +172,7 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
-    public void testReset() throws Exception {
+    public void testReset() {
         countCacheHit();
         countInstantiation();
         withDurations(1, 1);

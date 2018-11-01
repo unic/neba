@@ -90,7 +90,7 @@ public class ResourceToModelAdapterTest {
     private ResourceToModelAdapter testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Answer storeInCache = invocation -> {
             Object model = invocation.getArguments()[2];
             testCache.put(buildCacheInvocationKey(invocation), model);
@@ -111,12 +111,12 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testAdaptablesOtherThanResourceYieldNull() throws Exception {
+    public void testAdaptablesOtherThanResourceYieldNull() {
         assertThat(this.testee.getAdapter(new Object(), Object.class)).isNull();
     }
 
     @Test
-    public void testAdaptationToExactModelType() throws Exception {
+    public void testAdaptationToExactModelType() {
         withTargetType(TestModel.class);
         withAvailableModels(new TestModel());
         adapt();
@@ -126,7 +126,7 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testAdaptationToDerivedModelType() throws Exception {
+    public void testAdaptationToDerivedModelType() {
         withTargetType(TestModel.class);
         withAvailableModels(new TestModelDerived());
         adapt();
@@ -136,7 +136,7 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testHandlingOfNullModelSource() throws Exception {
+    public void testHandlingOfNullModelSource() {
         withTargetType(TestModel.class);
         withNullReturnedAsModelSourceFromRegistrar();
         adapt();
@@ -146,14 +146,14 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test(expected = AmbiguousModelAssociationException.class)
-    public void testAdaptationToTypeWithMultipleMappings() throws Exception {
+    public void testAdaptationToTypeWithMultipleMappings() {
         withTargetType(TestModel.class);
         withAvailableModels(new TestModel(), new TestModelDerived());
         adapt();
     }
 
     @Test
-    public void testAdaptationOfSameResourceWithDifferentResourceTypeYieldsDifferentModel() throws Exception {
+    public void testAdaptationOfSameResourceWithDifferentResourceTypeYieldsDifferentModel() {
         withResourceType("resource/type/one");
         withResourcePath("/resource/path");
         withTargetType(TestModel.class);
@@ -170,7 +170,7 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testSubsequentAdaptationOfSameResourceWithSameResourceTypeIsServedFromCache() throws Exception {
+    public void testSubsequentAdaptationOfSameResourceWithSameResourceTypeIsServedFromCache() {
         withResourceType("resource/type/one");
         withResourcePath("/resource/path");
         withTargetType(TestModel.class);

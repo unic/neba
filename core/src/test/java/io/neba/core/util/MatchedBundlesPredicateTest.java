@@ -49,13 +49,13 @@ public class MatchedBundlesPredicateTest {
 	}
 
 	@Test
-	public void testPredicateReturnsFalseForMatchedBundles() throws Exception {
+	public void testPredicateReturnsFalseForMatchedBundles() {
 		withSourceReferencingCurrentBundle();
 		assertPredicateSignalsThatReferenceIsInvalid();
 	}
 
 	@Test
-	public void testPredicateReturnsTrueForUnmatchedBundles() throws Exception {
+	public void testPredicateReturnsTrueForUnmatchedBundles() {
 		withSourceReferencingOtherBundle();
 		assertPredicateSignalsThatReferenceIsValid();
 	}

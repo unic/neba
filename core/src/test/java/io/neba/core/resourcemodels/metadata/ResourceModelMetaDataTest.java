@@ -77,13 +77,13 @@ public class ResourceModelMetaDataTest {
     }
 
     @Test
-    public void testMappableFieldsAreInherited() throws Exception {
+    public void testMappableFieldsAreInherited() {
         createMetadataFor(ExtendedTestResourceModel.class);
         assertMetadataEqualsMetadataOf(TestResourceModel.class);
     }
 
     @Test
-    public void testToStringRepresentation() throws Exception {
+    public void testToStringRepresentation() {
         assertThat(this.testee.toString()).isEqualTo("ResourceModelMetaData[" + TestResourceModel.class.getName() + "]");
     }
 

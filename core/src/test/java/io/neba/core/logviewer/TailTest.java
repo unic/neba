@@ -47,7 +47,7 @@ public class TailTest extends TailTests implements Eventual {
     private Tail testee;
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (this.testee != null) {
             this.testee.stop();
         }
@@ -142,12 +142,12 @@ public class TailTest extends TailTests implements Eventual {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFileArgument() throws Exception {
+    public void testHandlingOfNullFileArgument() {
         new Tail(mock(RemoteEndpoint.class), null, 1000);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullRemoteArgument() throws Exception {
+    public void testHandlingOfNullRemoteArgument() {
         new Tail(null, mock(File.class), 1000);
     }
 
