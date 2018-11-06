@@ -1,6 +1,6 @@
 <nav id="main-navigation" title="Main navigation">
-    <a href="/index.html" id="logo"><img alt="Home" src="/assets/images/logo.svg" title="home" width="30"></a>
-    <a href="/documentation.html" title="NEBA Documentation" class="active">Documentation</a>
-    <a href="/download.html" title="Download NEBA">Download</a>
-    <a href="/about.html" title="About NEBA">About</a>
+    <a href="/" id="logo"><img alt="Home" src="/assets/images/logo.svg" title="home" width="30"></a>
+    <a href="/documentation.html" title="NEBA Documentation"  {% if page.url == '/documentation.html' %}class="active"{% endif %}>Documentation</a>
+    <a href="/download.html" title="Download NEBA" {% if page.url == '/download.html' %}class="active"{% endif %}>Download</a>
+    <a href="/about.html" title="About NEBA" {% if page.url == '/about.html' %}class="active"{% endif %}>About</a>
 </nav>

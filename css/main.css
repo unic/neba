@@ -295,8 +295,8 @@ img {
     border-right: 1px solid #000;
 }
 
-#main-navigation a:hover {
-    color: rgba(40, 176, 255, 0.81)
+#main-navigation a:hover, #main-navigation a.active {
+    color: rgba(0, 112, 159, 0.81);
 }
 
 #main-navigation #logo {
