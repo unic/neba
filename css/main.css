@@ -303,6 +303,11 @@ img {
     border: none;
 }
 
+#main-navigation #logo img {
+    position: relative;
+    top: .12em;
+}
+
 section > a:hover {
     border-bottom: .2em solid rgba(40, 176, 255, 0.81);
 }
