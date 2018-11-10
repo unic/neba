@@ -18,6 +18,7 @@ package io.neba.spring.web;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -159,6 +160,16 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     @Override
     public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
         return wrapped.getBean(requiredType, args);
+    }
+
+    @Override
+    public <T> ObjectProvider<T> getBeanProvider(Class<T> aClass) {
+        return wrapped.getBeanProvider(aClass);
+    }
+
+    @Override
+    public <T> ObjectProvider<T> getBeanProvider(ResolvableType resolvableType) {
+        return wrapped.getBeanProvider(resolvableType);
     }
 
     @Override
