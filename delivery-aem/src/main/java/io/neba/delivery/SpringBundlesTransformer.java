@@ -3,6 +3,7 @@ package io.neba.delivery;
 import aQute.bnd.header.Attrs;
 import aQute.bnd.header.Parameters;
 import aQute.bnd.osgi.Analyzer;
+import aQute.bnd.version.Version;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -22,6 +23,7 @@ import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
 import static aQute.bnd.osgi.Constants.BUNDLE_SYMBOLICNAME;
+import static aQute.bnd.osgi.Constants.BUNDLE_VERSION;
 import static aQute.bnd.osgi.Constants.IMPORT_PACKAGE;
 import static aQute.bnd.osgi.Processor.printClauses;
 
@@ -108,6 +110,10 @@ public class SpringBundlesTransformer {
                 change = true;
             }
 
+            if (addMissingImportForSM3855(mainAttributes, imports)) {
+                change = true;
+            }
+
             if (change) {
                 updateImportPackageDirectives(mainAttributes, imports);
                 alterSymbolicNameToReflectCustomization(mainAttributes);
@@ -116,6 +122,30 @@ public class SpringBundlesTransformer {
             write(dir, manifest);
             repackageArtifact(dir);
         }
+    }
+
+    private boolean addMissingImportForSM3855(Attributes mainAttributes, Parameters imports) {
+        if (!("org.apache.servicemix.bundles.spring-context".equalsIgnoreCase(mainAttributes.getValue(BUNDLE_SYMBOLICNAME)) ||
+              "org.apache.servicemix.bundles.spring-aop".equalsIgnoreCase(mainAttributes.getValue(BUNDLE_SYMBOLICNAME)))) {
+            return false;
+        }
+
+        Attrs attrs = imports.get("org.springframework.util.function");
+        if (attrs != null) {
+            return false;
+        }
+
+        Attrs versionRange = new Attrs();
+        Version from = Version.parseVersion(mainAttributes.getValue(BUNDLE_VERSION));
+        Version to = new Version(from.getMajor(), from.getMinor() + 1);
+        // E.g. [5.1.1.RELEASE,5.2)
+        versionRange.put("version",
+                "[" + from.getMajor() + "." + from.getMinor() + "." + from.getMicro() + ".RELEASE," +
+                      to.getMajor() + "." + to.getMinor() + ")" );
+
+        imports.add("org.springframework.util.function", versionRange);
+
+        return true;
     }
 
     private void alterSymbolicNameToReflectCustomization(Attributes mainAttributes) {
@@ -200,7 +230,7 @@ public class SpringBundlesTransformer {
             }
         } else {
             if (JarFile.MANIFEST_NAME.equals(name)) {
-                // Skip manifest: It is provided as the first entry via the jar ouput stream.
+                // Skip manifest: It is provided as the first entry via the jar output stream.
                 return;
             }
             JarEntry entry = new JarEntry(name);
