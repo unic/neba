@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.jar.JarFile;
@@ -42,6 +41,27 @@ public class SpringBundlesTransformerTest {
     public void tearDown() throws Exception {
         deleteDirectory(this.source);
         deleteDirectory(this.target);
+    }
+
+    /**
+     * Tests that a patch for SM-3855 (missing function import) is added.
+     */
+    @Test
+    public void testOrgSpringframeworkUtilFunctionIsAddedToSpringContextAndAopBundles() throws Exception {
+        transformUnpackedArtifacts();
+
+        assertImportDirectiveContains("jar.spring-context.jar", "org.springframework.util.function;version=\"[5.1.1.RELEASE,5.2)\"");
+        assertImportDirectiveContains("jar.spring-aop.jar", "org.springframework.util.function;version=\"[5.1.1.RELEASE,5.2)\"");
+    }
+
+    /**
+     * Tests that a patch for SM-3856 (missing commons logging impl import) is added.
+     */
+    @Test
+    public void testCommonsLoggingImportIsAddedToSpringCoreBundle() throws Exception {
+        transformUnpackedArtifacts();
+
+        assertImportDirectiveContains("jar.spring-core.jar", "org.apache.commons.logging.impl;version=\"[1.1.1,2)\"");
     }
 
     @Test
