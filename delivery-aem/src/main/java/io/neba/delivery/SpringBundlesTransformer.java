@@ -110,7 +110,11 @@ public class SpringBundlesTransformer {
                 change = true;
             }
 
-            if (addMissingImportForSM3855(mainAttributes, imports)) {
+            if (addMissingImportsForSpringFunction(mainAttributes, imports)) {
+                change = true;
+            }
+
+            if (addMissingImportForCommonsLoggingImpl(mainAttributes, imports)) {
                 change = true;
             }
 
@@ -124,7 +128,7 @@ public class SpringBundlesTransformer {
         }
     }
 
-    private boolean addMissingImportForSM3855(Attributes mainAttributes, Parameters imports) {
+    private boolean addMissingImportsForSpringFunction(Attributes mainAttributes, Parameters imports) {
         if (!("org.apache.servicemix.bundles.spring-context".equalsIgnoreCase(mainAttributes.getValue(BUNDLE_SYMBOLICNAME)) ||
               "org.apache.servicemix.bundles.spring-aop".equalsIgnoreCase(mainAttributes.getValue(BUNDLE_SYMBOLICNAME)))) {
             return false;
@@ -144,6 +148,26 @@ public class SpringBundlesTransformer {
                       to.getMajor() + "." + to.getMinor() + ")" );
 
         imports.add("org.springframework.util.function", versionRange);
+
+        return true;
+    }
+
+    private boolean addMissingImportForCommonsLoggingImpl(Attributes mainAttributes, Parameters imports) {
+        if (!("org.apache.servicemix.bundles.spring-core".equalsIgnoreCase(mainAttributes.getValue(BUNDLE_SYMBOLICNAME)))) {
+            return false;
+        }
+
+        Attrs attrs = imports.get("org.apache.commons.logging.impl");
+        if (attrs != null) {
+            return false;
+        }
+
+        Attrs commonsLogging = imports.get("org.apache.commons.logging");
+        if (commonsLogging == null) {
+            return false;
+        }
+
+        imports.add("org.apache.commons.logging.impl", commonsLogging);
 
         return true;
     }
