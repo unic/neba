@@ -28,9 +28,12 @@ import org.osgi.service.component.annotations.Reference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Optional;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * Resolves a {@link Resource} to a {@link io.neba.api.annotations.ResourceModel}
@@ -89,27 +92,33 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
     private <T> T resolveMostSpecificModelForResource(@Nonnull Resource resource, boolean includeBaseTypes, @Nullable String modelName) {
         final Key key = key(includeBaseTypes, modelName);
 
-        T model = this.caches.lookup(resource, key);
-        if (model != null) {
-            return model;
+        Optional<T> cachedModel = this.caches.lookup(resource, key);
+        if (cachedModel == empty()) {
+            return null;
+        }
+
+        if (cachedModel != null) {
+            return cachedModel.get();
         }
 
         Collection<LookupResult> models = (modelName == null) ?
                 this.registry.lookupMostSpecificModels(resource) :
                 this.registry.lookupMostSpecificModels(resource, modelName);
 
-        if (models != null && models.size() == 1) {
-            LookupResult lookupResult = models.iterator().next();
-            if (includeBaseTypes || !isMappedFromGenericBaseType(lookupResult)) {
-
-                @SuppressWarnings("unchecked")
-                OsgiModelSource<T> source = (OsgiModelSource<T>) lookupResult.getSource();
-
-                model = this.mapper.map(resource, source);
-                this.caches.store(resource, key, model);
-            }
+        if (models == null || models.size() != 1) {
+            return null;
         }
 
+        LookupResult lookupResult = models.iterator().next();
+        if (!includeBaseTypes && isMappedFromGenericBaseType(lookupResult)) {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        OsgiModelSource<T> source = (OsgiModelSource<T>) lookupResult.getSource();
+
+        T model = this.mapper.map(resource, source);
+        this.caches.store(resource, key, of(model));
         return model;
     }
 
