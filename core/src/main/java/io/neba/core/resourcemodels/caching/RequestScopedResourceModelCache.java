@@ -18,7 +18,6 @@ package io.neba.core.resourcemodels.caching;
 
 import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.util.Key;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -30,6 +29,7 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 import static org.osgi.framework.Constants.SERVICE_RANKING;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
@@ -68,25 +69,6 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
 
     private Configuration configuration;
 
-    /**
-     * Returns the key for a cacheHolder. If the key changes, the cacheHolder will be cleared.
-     * The key consists of:
-     * <ul><li>The current resources page</li>
-     * <li>the selector string</li>
-     * <li>the extension</li>
-     * <li>the suffix</li>
-     * <li>the query string</li>
-     * </ul>
-     */
-    private static Key toKey(SlingHttpServletRequest request) {
-        final RequestPathInfo requestPathInfo = request.getRequestPathInfo();
-        return new Key(StringUtils.substringBefore(requestPathInfo.getResourcePath(), "/jcr:content"),
-                requestPathInfo.getSelectorString(),
-                requestPathInfo.getExtension(),
-                requestPathInfo.getSuffix(),
-                request.getQueryString());
-    }
-
     @Activate
     protected void activate(Configuration configuration) {
         this.configuration = configuration;
@@ -99,46 +81,58 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
     @SuppressWarnings("unchecked")
     public <T> T get(Object key) {
         if (key == null) {
-            throw new IllegalStateException("Method argument key must not be null.");
+            throw new IllegalArgumentException("Method argument key must not be null.");
         }
         if (!this.configuration.enabled()) {
             return null;
         }
 
-        T model = null;
         Map<Object, T> cache = (Map<Object, T>) this.cacheHolder.get();
         if (cache == null) {
             this.logger.debug("No cache found, the cache will not be used.");
-        } else {
-            Object internalKey = createInternalKey(key);
-            model = cache.get(internalKey);
+            return null;
         }
-        return model;
+
+        if (this.configuration.safeMode()) {
+            return cache.get(createSafeModeKey(key));
+        }
+
+        return cache.get(key);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> void put(@Nonnull Resource resource, T model, @Nonnull Object key) {
+    public <T> void put(@Nonnull Resource resource, @CheckForNull T model, @Nonnull Object key) {
         if (resource == null) {
-            throw new IllegalStateException("Method argument resource must not be null.");
+            throw new IllegalArgumentException("Method argument resource must not be null.");
         }
-        if (model == null) {
-            throw new IllegalStateException("Method argument model must not be null.");
-        }
+
         if (key == null) {
-            throw new IllegalStateException("Method argument key must not be null.");
+            throw new IllegalArgumentException("Method argument key must not be null.");
         }
-        if (this.configuration.enabled()) {
-            Map<Object, Object> cache = this.cacheHolder.get();
-            if (cache == null) {
-                this.logger.debug("No cache found, the cache will not be used.");
-            } else {
-                Object internalKey = createInternalKey(key);
-                cache.put(internalKey, model);
-            }
+
+        if (model == null) {
+            return;
         }
+
+        if (!this.configuration.enabled()) {
+            return;
+        }
+
+        Map<Object, Object> cache = this.cacheHolder.get();
+        if (cache == null) {
+            this.logger.debug("No cache found, the cache will not be used.");
+            return;
+        }
+
+        if (this.configuration.safeMode()) {
+            cache.put(createSafeModeKey(key), model);
+            return;
+        }
+
+        cache.put(key, model);
     }
 
     /**
@@ -154,8 +148,8 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
         if (!(request instanceof SlingHttpServletRequest)) {
             throw new IllegalStateException("Expected a " + SlingHttpServletRequest.class.getName() + ", but got: " + request + ".");
         }
-        final SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) request;
 
+        final SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) request;
         this.requestHolder.set(slingHttpServletRequest);
         this.cacheHolder.set(new HashMap<>(1024));
 
@@ -183,15 +177,20 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
      *
      * @return A request-state sensitive key in {@link Configuration#safeMode()}, the original key otherwise.
      */
-    private Object createInternalKey(Object key) {
-        if (this.configuration.safeMode()) {
-            // Create a request-state sensitive key to scope the cached model to a request with specific parameters.
-            final SlingHttpServletRequest request = this.requestHolder.get();
-            if (request != null) {
-                return new Key(key, toKey(request));
-            }
+    private Object createSafeModeKey(Object key) {
+        // Create a request-state sensitive key to scope the cached model to a request with specific parameters.
+        final SlingHttpServletRequest request = this.requestHolder.get();
+
+        if (request == null) {
+            return key;
         }
-        return key;
+
+        final RequestPathInfo requestPathInfo = request.getRequestPathInfo();
+        return new Key(key, new Key(substringBefore(requestPathInfo.getResourcePath(), "/jcr:content"),
+                requestPathInfo.getSelectorString(),
+                requestPathInfo.getExtension(),
+                requestPathInfo.getSuffix(),
+                request.getQueryString()));
     }
 
     @ObjectClassDefinition(name = "NEBA request-scoped resource model cache", description = "Provides a request-scoped resource model cache")
