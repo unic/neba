@@ -34,8 +34,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -53,134 +56,155 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceModelCachesTest {
-	@Mock
-	private Resource resource;
-	@Mock
-	private ResourceResolver resourceResolver;
-	@Mock
-	private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
-	@Mock
-	private ResourceModelMetaData resourceModelMetaData;
-	@Mock
-	private ResourceModelStatistics resourceModelStatistics;
+    @Mock
+    private Resource resource;
+    @Mock
+    private ResourceResolver resourceResolver;
+    @Mock
+    private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
+    @Mock
+    private ResourceModelMetaData resourceModelMetaData;
+    @Mock
+    private ResourceModelStatistics resourceModelStatistics;
 
-	private List<ResourceModelCache> mockedCaches = new LinkedList<>();
-	private Class<Object> targetType = Object.class;
-    private Object model = new Object();
-	private Object lookupResult;
+    private List<ResourceModelCache> mockedCaches = new LinkedList<>();
+    private Class<Object> targetType = Object.class;
+    private Optional<?> model = of(new TestModel());
+    private Optional<?> lookupResult;
 
     @InjectMocks
-	private ResourceModelCaches testee;
+    private ResourceModelCaches testee;
 
-	@Before
-	public void prepareTest() {
-		this.mockedCaches.clear();
+    @Before
+    public void prepareTest() {
+        this.mockedCaches.clear();
 
-		doReturn(this.resourceModelMetaData)
-				.when(this.resourceModelMetaDataRegistrar)
-				.get(any());
+        doReturn(this.resourceModelMetaData)
+                .when(this.resourceModelMetaDataRegistrar)
+                .get(TestModel.class);
 
-		doReturn(this.resourceModelStatistics)
-				.when(this.resourceModelMetaData)
-				.getStatistics();
+        doReturn(this.resourceModelStatistics)
+                .when(this.resourceModelMetaData)
+                .getStatistics();
 
-		doReturn(this.resourceResolver)
-				.when(this.resource)
-				.getResourceResolver();
-	}
+        doReturn(this.resourceResolver)
+                .when(this.resource)
+                .getResourceResolver();
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testNullResourceIsNotAllowedForCacheLookup() {
-		this.testee.lookup(null, key(this.targetType));
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullResourceIsNotAllowedForCacheLookup() {
+        this.testee.lookup(null, key(this.targetType));
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testNullClassIsNotAllowedForCacheLookup() {
-		this.testee.lookup(mock(Resource.class), null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullClassIsNotAllowedForCacheLookup() {
+        this.testee.lookup(mock(Resource.class), null);
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testNullResourceIsNotAllowedForCacheWrite() {
-		this.testee.store(null, key(this.targetType), new Object());
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullResourceIsNotAllowedForCacheWrite() {
+        this.testee.store(null, key(this.targetType), empty());
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testNullClassIsNotAllowedForCacheWrite() {
-		this.testee.store(mock(Resource.class), null, new Object());
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullClassIsNotAllowedForCacheWrite() {
+        this.testee.store(mock(Resource.class), null, empty());
+    }
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testNullModelIsNotAllowedForCacheWrite() {
-		this.testee.store(mock(Resource.class), key(this.targetType), null);
-	}
-
-	@Test
-	public void testCacheUsesResourceResolverIdentityForCacheKey() {
-		bindCache();
-    	storeModel();
-    	lookup();
-
-    	assertModelWasFoundInCache();
-
-		withDifferentResourceResolverForSameResource();
-		lookup();
-
-		assertModelWasNotFoundInCache();
-	}
-
-	@Test
-	public void testUnsuccessfulLookup() {
-		bindCache();
-		bindCache();
-		lookup();
-		verifyEachCacheIsUsedForLookup();
-	}
-	
-	@Test
-	public void testSuccessfulLookup() {
-		bindCache();
-		bindCache();
-		withCachedObjectIn(0);
-		lookup();
-		verifyCacheReturnsOnFirstHit();
-	}
-
-	@Test
-	public void testSuccessfulLookupIsCountedAsCacheHitInResourceModelMetaData() {
-		bindCache();
-		withCachedObjectIn(0);
-		lookup();
-		verifyCacheHitIsCounted();
-	}
-
-	@Test
-	public void testUnsuccessfulLookupIsNotCountedAsCacheHit() {
-		bindCache();
-		lookup();
-		verifyResourceModelStatisticsAreNotUsed();
-	}
-
-	@Test
-	public void testRemovalOfCaches() {
-		bindCache();
-		bindCache();
-		unbindAllCaches();
-		lookup();
-		verifyNoCacheIsUsed();
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullModelIsNotAllowedForCacheWrite() {
+        this.testee.store(mock(Resource.class), key(this.targetType), null);
+    }
 
     @Test
-    public void testStorage() {
+    public void testCacheUsesResourceResolverIdentityForCacheKey() {
+        bindCache();
+        store();
+        lookup();
+
+        assertModelWasFoundInCache();
+
+        withDifferentResourceResolverForSameResource();
+        lookup();
+
+        assertModelIsNotKnownToCache();
+    }
+
+    @Test
+    public void testUnsuccessfulLookup() {
         bindCache();
         bindCache();
-        storeModel();
+        lookup();
+        verifyEachCacheIsUsedForLookup();
+    }
+
+    @Test
+    public void testSuccessfulLookup() {
+        bindCache();
+        bindCache();
+        withCachedObjectIn(0);
+        lookup();
+        verifyCacheReturnsOnFirstHit();
+    }
+
+    @Test
+    public void testSuccessfulLookupIsCountedAsCacheHitInResourceModelMetaData() {
+        bindCache();
+        withCachedObjectIn(0);
+        lookup();
+        verifyCacheHitIsCounted();
+    }
+
+    @Test
+    public void testUnsuccessfulLookupIsNotCountedAsCacheHit() {
+        bindCache();
+        lookup();
+        verifyResourceModelStatisticsAreNotUsed();
+    }
+
+    @Test
+    public void testRemovalOfCaches() {
+        bindCache();
+        bindCache();
+        unbindAllCaches();
+        lookup();
+        verifyNoCacheIsUsed();
+    }
+
+    @Test
+    public void testModelIsStoredInAllAvailableCaches() {
+        bindCache();
+        bindCache();
+        store();
         verifyModelIsStoredInAllCaches();
     }
 
-	@Test
-	public void testRemovalOfNullCacheDoesNotCauseException() {
-		this.testee.unbind(null);
-	}
+    @Test
+    public void testRemovalOfNullCacheDoesNotCauseException() {
+        this.testee.unbind(null);
+    }
+
+    @Test
+    public void testCachesAlwaysReturnNullWhenNoCacheIsAvailable() {
+        lookup();
+        verifyNoCacheIsUsed();
+        assertModelIsNotKnownToCache();
+    }
+
+    @Test
+    public void testEmptyModelsAreNotTrackedByResourceModelStatistics() {
+        bindCache();
+        withEmptyModel();
+        store();
+
+        lookup();
+        verifyResourceModelStatisticsAreNotUsed();
+    }
+
+    private void withEmptyModel() {
+        this.model = empty();
+    }
 
     private void verifyModelIsStoredInAllCaches() {
         for (ResourceModelCache cache : this.mockedCaches) {
@@ -188,73 +212,76 @@ public class ResourceModelCachesTest {
         }
     }
 
-    private void storeModel() {
+    private void store() {
         this.testee.store(this.resource, key(this.targetType), this.model);
     }
 
     private void verifyNoCacheIsUsed() {
-		for (ResourceModelCache cache : this.mockedCaches) {
-			verify(cache, never()).get(isA(Key.class));
-		}
-	}
+        for (ResourceModelCache cache : this.mockedCaches) {
+            verify(cache, never()).get(isA(Key.class));
+        }
+    }
 
-	private void unbindAllCaches() {
-		for (ResourceModelCache cache : this.mockedCaches) {
-			this.testee.unbind(cache);
-		}
-	}
+    private void unbindAllCaches() {
+        for (ResourceModelCache cache : this.mockedCaches) {
+            this.testee.unbind(cache);
+        }
+    }
 
-	private void verifyCacheReturnsOnFirstHit() {
-		ResourceModelCache cache = this.mockedCaches.get(0);
-		verify(cache, times(1)).get(isA(Key.class));
-		for (int i = 1; i < this.mockedCaches.size(); ++i) {
-			cache = this.mockedCaches.get(i);
-			verify(cache, never()).get(isA(Key.class));
-		}
-	}
+    private void verifyCacheReturnsOnFirstHit() {
+        ResourceModelCache cache = this.mockedCaches.get(0);
+        verify(cache, times(1)).get(isA(Key.class));
+        for (int i = 1; i < this.mockedCaches.size(); ++i) {
+            cache = this.mockedCaches.get(i);
+            verify(cache, never()).get(isA(Key.class));
+        }
+    }
 
-	private void withCachedObjectIn(int index) {
-		ResourceModelCache cache = this.mockedCaches.get(index);
-		when(cache.get(isA(Key.class))).thenReturn(this.model);
-	}
+    private void withCachedObjectIn(int index) {
+        ResourceModelCache cache = this.mockedCaches.get(index);
+        when(cache.get(isA(Key.class))).thenReturn(this.model);
+    }
 
     private void verifyEachCacheIsUsedForLookup() {
-		for (ResourceModelCache cache : this.mockedCaches) {
-			verify(cache, times(1)).get(isA(Key.class));
-		}
-	}
+        for (ResourceModelCache cache : this.mockedCaches) {
+            verify(cache, times(1)).get(isA(Key.class));
+        }
+    }
 
-	private void verifyCacheHitIsCounted() {
-		verify(this.resourceModelStatistics).countCacheHit();
-	}
+    private void verifyCacheHitIsCounted() {
+        verify(this.resourceModelStatistics).countCacheHit();
+    }
 
-	private void verifyResourceModelStatisticsAreNotUsed() {
-		verify(this.resourceModelMetaDataRegistrar, never()).get(any());
-	}
+    private void verifyResourceModelStatisticsAreNotUsed() {
+        verify(this.resourceModelMetaDataRegistrar, never()).get(any());
+    }
 
-	private void lookup() {
-		this.lookupResult = this.testee.lookup(this.resource, key(this.targetType));
-	}
+    private void lookup() {
+        this.lookupResult = this.testee.lookup(this.resource, key(this.targetType));
+    }
 
-	private void assertModelWasFoundInCache() {
-		assertThat(this.lookupResult).isSameAs(this.model);
-	}
+    private void assertModelWasFoundInCache() {
+        assertThat(this.lookupResult).isSameAs(this.model);
+    }
 
-	private void assertModelWasNotFoundInCache() {
-		assertThat(this.lookupResult).isNull();
-	}
+    private void assertModelIsNotKnownToCache() {
+        assertThat(this.lookupResult).isNull();
+    }
 
-	private void withDifferentResourceResolverForSameResource() {
-		doReturn(mock(ResourceResolver.class)).when(this.resource).getResourceResolver();
-	}
+    private void withDifferentResourceResolverForSameResource() {
+        doReturn(mock(ResourceResolver.class)).when(this.resource).getResourceResolver();
+    }
 
-	private void bindCache() {
-		ResourceModelCache cache = mock(ResourceModelCache.class);
-		Map<Object, Object> cacheData = new HashMap<>();
-		doAnswer(i -> cacheData.get(i.getArguments()[0])).when(cache).get(isA(Key.class));
-		doAnswer(i -> cacheData.put(i.getArguments()[2], i.getArguments()[1])).when(cache).put(isA(Resource.class), any(), isA(Key.class));
+    private void bindCache() {
+        ResourceModelCache cache = mock(ResourceModelCache.class);
+        Map<Object, Object> cacheData = new HashMap<>();
+        doAnswer(i -> cacheData.get(i.getArguments()[0])).when(cache).get(isA(Key.class));
+        doAnswer(i -> cacheData.put(i.getArguments()[2], i.getArguments()[1])).when(cache).put(isA(Resource.class), any(), isA(Key.class));
 
-		this.mockedCaches.add(cache);
-		this.testee.bind(cache);
-	}
+        this.mockedCaches.add(cache);
+        this.testee.bind(cache);
+    }
+
+    private static class TestModel {
+    }
 }

@@ -29,8 +29,11 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Optional;
 
 import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
@@ -65,14 +68,21 @@ public class ResourceToModelAdapter implements AdapterFactory {
         Resource resource = (Resource) adaptable;
         final Key key = key(target);
 
-        T model = this.caches.lookup(resource, key);
-        if (model != null) {
-            return model;
+        Optional<T> cachedModel = this.caches.lookup(resource, key);
+        if (cachedModel == empty()) {
+            // The model cannot be resolved, i.e. adapdation results in null and has been cached before.
+            return null;
+        }
+
+        if (cachedModel != null) {
+            return cachedModel.get();
         }
 
         Collection<LookupResult> models = this.registry.lookupMostSpecificModels(resource, target);
 
         if (models == null || models.isEmpty()) {
+            // Cache the lookup failure
+            this.caches.store(resource, key, empty());
             return null;
         }
 
@@ -83,9 +93,9 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
         OsgiModelSource<?> source = models.iterator().next().getSource();
 
-        model = (T) this.mapper.map(resource, source);
+        T model = (T) this.mapper.map(resource, source);
 
-        this.caches.store(resource, key, model);
+        this.caches.store(resource, key, of(model));
 
         return model;
     }

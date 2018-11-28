@@ -187,6 +187,21 @@ public class ResourceToModelAdapterTest {
         assertResourceWasAdaptedToModel();
     }
 
+    @Test
+    public void testAdaptationsResultingInNullAreCached() {
+        withTargetType(TestModel.class);
+        adapt();
+
+        verifyAdapterObtainsSourceFromRegistrar();
+        assertResourceWasNotAdaptedToModel();
+
+        adapt();
+        // This asserts that the source was still obtained exactly once
+        // during the entire test execution, i.e. lookup was not re-attempted during the
+        // second adapt() invocation.
+        verifyAdapterObtainsSourceFromRegistrar();
+    }
+
     @SuppressWarnings("unchecked")
     private void verifyAdapterDoesNotMapResourceToModel() {
         verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiModelSource.class));
