@@ -106,11 +106,13 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
                 this.registry.lookupMostSpecificModels(resource, modelName);
 
         if (models == null || models.size() != 1) {
+            this.caches.store(resource, key, empty());
             return null;
         }
 
         LookupResult lookupResult = models.iterator().next();
         if (!includeBaseTypes && isMappedFromGenericBaseType(lookupResult)) {
+            this.caches.store(resource, key, empty());
             return null;
         }
 
@@ -119,6 +121,7 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
 
         T model = this.mapper.map(resource, source);
         this.caches.store(resource, key, of(model));
+
         return model;
     }
 

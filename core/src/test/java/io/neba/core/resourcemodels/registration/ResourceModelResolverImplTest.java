@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -83,7 +84,7 @@ public class ResourceModelResolverImplTest {
             return null;
         },
 
-        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+                lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
                 .when(this.caches)
@@ -157,21 +158,21 @@ public class ResourceModelResolverImplTest {
     @Test
     public void testResolutionOfSpecificModelWithModelForNtUnstructured() {
         withModelFoundForResourceType("nt:unstructured");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
     public void testResolutionOfSpecificModelWithModelForNtBase() {
         withModelFoundForResourceType("nt:base");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
     public void testResolutionOfSpecificModelWithModelForSyntheticResourceRoot() {
         withModelFoundForResourceType(SYNTHETIC_RESOURCETYPE_ROOT);
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
@@ -202,7 +203,7 @@ public class ResourceModelResolverImplTest {
     @Test
     public void testResolutionOfAnyModelWithSpecificModelName() {
         provideMostSpecificModelWithModelName("unitTestModel");
-        verifyRegistryIsQueriedWithModelName();
+        verifyRegistryWasQueriedOnceWithModelName();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
@@ -211,7 +212,7 @@ public class ResourceModelResolverImplTest {
     public void testResolutionOfAnyModelWithSpecificModelNameDisregardsBasicTypes() {
         withModelFoundForResourceType("nt:base");
         provideMostSpecificModelWithModelName("unitTestModel");
-        verifyRegistryIsQueriedWithModelName();
+        verifyRegistryWasQueriedOnceWithModelName();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
@@ -221,11 +222,11 @@ public class ResourceModelResolverImplTest {
         withResourcePath("/resource/path");
         withResourceType("resource/type/one");
 
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModel();
 
         withResourceType("resource/type/two");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModelAgain();
     }
 
@@ -235,12 +236,44 @@ public class ResourceModelResolverImplTest {
 
         withResourceType("resource/type/one");
 
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModel();
 
         withResourceType("resource/type/one");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModel();
+    }
+
+    @Test
+    public void testNoModelIsResolvedIfNoModelIsAvailable() {
+        withoutAnyModelInRegistry();
+        resolveMostSpecificModel();
+        assertResolvedModelIsNull();
+    }
+
+    @Test
+    public void testNoModelIsResolvedIfMoreThanOneModelIsAvailable() {
+        withTwoResolvedModels();
+        resolveMostSpecificModel();
+        assertResolvedModelIsNull();
+    }
+
+    @Test
+    public void testRegistryIsNotQueriedWhenLookupFailureIsCached() {
+        withoutAnyModelInRegistry();
+        resolveMostSpecificModel();
+        verifyRegistryWasQueriedOnceWithoutModelName();
+
+        resolveMostSpecificModel();
+        verifyRegistryWasQueriedOnceWithoutModelName();
+    }
+
+    private void withTwoResolvedModels() {
+        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(asList(mock(LookupResult.class), mock(LookupResult.class)));
+    }
+
+    private void withoutAnyModelInRegistry() {
+        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(null);
     }
 
     private void withResourceType(String type) {
@@ -251,8 +284,12 @@ public class ResourceModelResolverImplTest {
         doReturn(path).when(this.resource).getPath();
     }
 
-    private void verifyRegistryIsQueriedWithModelName() {
+    private void verifyRegistryWasQueriedOnceWithModelName() {
         verify(this.registry).lookupMostSpecificModels(eq(this.resource), anyString());
+    }
+
+    private void verifyRegistryWasQueriedOnceWithoutModelName() {
+        verify(this.registry).lookupMostSpecificModels(eq(this.resource));
     }
 
     private void provideMostSpecificModelWithModelName(String name) {
@@ -263,7 +300,7 @@ public class ResourceModelResolverImplTest {
         this.resolutionResult = this.testee.resolveMostSpecificModelIncludingModelsForBaseTypes(this.resource);
     }
 
-    private void provideMostSpecificModel() {
+    private void resolveMostSpecificModel() {
         this.resolutionResult = this.testee.resolveMostSpecificModel(this.resource);
     }
 
