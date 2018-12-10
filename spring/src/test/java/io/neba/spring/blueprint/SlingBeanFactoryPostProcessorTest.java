@@ -19,55 +19,45 @@ package io.neba.spring.blueprint;
 import io.neba.spring.mvc.MvcServlet;
 import io.neba.spring.resourcemodels.registration.SpringModelRegistrar;
 import io.neba.spring.web.RequestScopeConfigurator;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.Bundle;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SlingBeanFactoryPostProcessorTest {
-	@Mock
+    @Mock
     private BundleContext context;
-	@Mock
+    @Mock
     private ConfigurableListableBeanFactory beanFactory;
     @Mock
     private SpringModelRegistrar modelRegistrar;
     @Mock
     private RequestScopeConfigurator requestScopeConfigurator;
     @Mock
-    private Bundle bundle;
-    @Mock
     private MvcServlet dispatcherServlet;
 
     @InjectMocks
     private SlingBeanFactoryPostProcessor testee;
 
-    @Before
-    public void prepareBundleContext() {
-        when(this.context.getBundle()).thenReturn(this.bundle);
-    }
-
     @Test
     public void testOrderOfRegistrarInvocations() {
         postProcessBeanFactory();
-        
+
         InOrder inOrder = inOrder(
-    		this.requestScopeConfigurator,
-    		this.modelRegistrar,
-        	this.dispatcherServlet);
+                this.requestScopeConfigurator,
+                this.modelRegistrar,
+                this.dispatcherServlet);
 
         inOrder.verify(this.requestScopeConfigurator).registerRequestScope(eq(this.beanFactory));
         inOrder.verify(this.modelRegistrar).registerModels(eq(this.context), eq(this.beanFactory));

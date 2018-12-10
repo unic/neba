@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +41,8 @@ import java.util.stream.Collectors;
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
 import static io.neba.core.util.BundleUtil.displayNameOf;
+import static io.neba.core.util.NodeUtil.geMixinTypes;
+import static io.neba.core.util.NodeUtil.getPrimaryType;
 import static java.util.Collections.unmodifiableCollection;
 
 /**
@@ -76,8 +77,8 @@ public class ModelRegistry {
                 key = new Key(
                         resource.getResourceType(),
                         resource.getResourceSuperType(),
-                        node.getPrimaryNodeType().getName(),
-                        Arrays.toString(node.getMixinNodeTypes()),
+                        getPrimaryType(node),
+                        geMixinTypes(node),
                         furtherElementsKey);
             } catch (RepositoryException e) {
                 throw new RuntimeException("Unable to retrieve the primary type of " + resource + ".", e);
@@ -119,7 +120,7 @@ public class ModelRegistry {
     }
 
     /**
-     * @param sources  can be <code>null</code>.
+     * @param sources   can be <code>null</code>.
      * @param modelName can be <code>null</code>.
      * @return the original collection if sources or modelName are
      * <code>null</code>, or a collection representing the models
@@ -152,7 +153,7 @@ public class ModelRegistry {
      * Finds the most specific models for the given {@link Resource}. The model's model
      * name must match the provided model name.
      *
-     * @param resource must not be <code>null</code>.
+     * @param resource  must not be <code>null</code>.
      * @param modelName must not be <code>null</code>.
      * @return the resolved models, or <code>null</code> if no such models exist.
      */
@@ -194,7 +195,7 @@ public class ModelRegistry {
      * @param resource must not be <code>null</code>.
      * @return the model sources, or <code>null</code> if no models exist for the resource.
      */
-    public Collection<LookupResult> lookupMostSpecificModels(Resource resource) {
+    Collection<LookupResult> lookupMostSpecificModels(Resource resource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
@@ -420,7 +421,7 @@ public class ModelRegistry {
      * {@link Resource} who's {@link OsgiModelSource#getModelName() model name}
      * matches the given model name.
      *
-     * @param resource must not be <code>null</code>.
+     * @param resource  must not be <code>null</code>.
      * @param modelName can be <code>null</code>.
      * @return never <code>null</code> but rather an empty collection.
      */

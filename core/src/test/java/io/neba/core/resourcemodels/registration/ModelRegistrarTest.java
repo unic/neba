@@ -13,7 +13,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -25,9 +25,9 @@ import org.osgi.framework.Version;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -180,7 +180,6 @@ public class ModelRegistrarTest {
         ResourceModel resourceModel = mock(ResourceModel.class);
         ModelDefinition modelDefinition = mock(ModelDefinition.class);
 
-        doReturn(factory).when(this.context).getService(this.referenceToModelFactory);
         doReturn(this.modelResourceTypes).when(resourceModel).types();
         doReturn(resourceModel).when(modelDefinition).getResourceModel();
         doReturn(bundle).when(referenceToModelFactory).getBundle();

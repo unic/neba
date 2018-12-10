@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -56,12 +56,12 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -529,14 +529,8 @@ public class BundleSpecificDispatcherServletTest {
         Map<String, Object> matchingBeans = new HashMap<>();
         matchingBeans.put("name", bean);
 
-        ArgumentMatcher<Class<?>> isAssignableFromBeanType = new ArgumentMatcher<Class<?>>() {
-            @Override
-            public boolean matches(Object argument) {
-                return ((Class<?>) argument).isAssignableFrom(beanType);
-            }
-        };
+        ArgumentMatcher<Class<?>> isAssignableFromBeanType = argument -> argument.isAssignableFrom(beanType);
 
-        doReturn(matchingBeans).when(applicationContext).getBeansOfType(argThat(isAssignableFromBeanType));
         doReturn(matchingBeans).when(applicationContext).getBeansOfType(argThat(isAssignableFromBeanType), anyBoolean(), anyBoolean());
         doReturn(bean).when(applicationContext).getBean(anyString(), argThat(isAssignableFromBeanType));
 

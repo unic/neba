@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
 import javax.jcr.Node;
@@ -475,6 +475,14 @@ public class ModelRegistryTest {
         assertLookedUpModelSourcesAreNull();
     }
 
+    private void withPrimaryType(Resource resource, String nodeTypeName) throws RepositoryException {
+        Node node = mock(Node.class);
+        NodeType nodeType = mock(NodeType.class);
+        when(node.getPrimaryNodeType()).thenReturn(nodeType);
+        when(nodeType.getName()).thenReturn(nodeTypeName);
+        when(resource.adaptTo(Node.class)).thenReturn(node);
+    }
+
     /**
      * Requires the {@link Node} to have been mocked before hand, e.g. using {@link #withPrimaryType(Resource, String)}.
      */
@@ -493,14 +501,6 @@ public class ModelRegistryTest {
     private void withBundleId(final long withBundleId) {
         this.bundleId = withBundleId;
         when(this.bundle.getBundleId()).thenReturn(bundleId);
-    }
-
-    private void withPrimaryType(Resource resource, String nodeTypeName) throws RepositoryException {
-        Node node = mock(Node.class);
-        NodeType nodeType = mock(NodeType.class);
-        when(node.getPrimaryNodeType()).thenReturn(nodeType);
-        when(nodeType.getName()).thenReturn(nodeTypeName);
-        when(resource.adaptTo(Node.class)).thenReturn(node);
     }
 
     private void lookupAllModelSourcesFor(Resource resource) {

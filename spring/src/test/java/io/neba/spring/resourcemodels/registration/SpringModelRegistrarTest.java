@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -34,8 +34,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -61,7 +61,6 @@ public class SpringModelRegistrarTest {
     @Before
     @SuppressWarnings("unchecked")
     public void mockBundleContext() {
-        when(this.bundle.getBundleId()).thenReturn(12345L);
         when(this.context.getBundle()).thenReturn(this.bundle);
         when(this.bundle.getBundleContext()).thenReturn(this.context);
 
@@ -138,16 +137,9 @@ public class SpringModelRegistrarTest {
     }
 
     private void mockResourceModelWithBeanName(String name) {
-        ResourceModel type = mockResourceModelAnnotation(name);
+        ResourceModel type = mock(ResourceModel.class);
         when(this.factory.findAnnotationOnBean(eq(name), eq(ResourceModel.class))).thenReturn(type);
         this.beanNamesInApplicationContext.add(name);
-        when(this.factory.getBean(eq(name))).thenReturn(name);
-    }
-
-    private ResourceModel mockResourceModelAnnotation(String name) {
-        ResourceModel type = mock(ResourceModel.class);
-        when(type.types()).thenReturn(new String[] {"/junit/test/" + name});
-        return type;
     }
 
     private void registerResourceModels() {

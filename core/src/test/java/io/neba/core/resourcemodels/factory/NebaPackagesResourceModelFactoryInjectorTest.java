@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -35,9 +35,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -68,7 +68,6 @@ public class NebaPackagesResourceModelFactoryInjectorTest {
 
         doReturn(headers).when(bundle).getHeaders();
         doReturn(bundleContext).when(componentContext).getBundleContext();
-        doReturn(bundle).when(bundleContext).getBundle();
         doReturn(bundleContext).when(bundle).getBundleContext();
         doReturn(ACTIVE).when(bundle).getState();
         doReturn("test-bundle").when(bundle).getSymbolicName();
