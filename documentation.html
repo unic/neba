@@ -805,7 +805,7 @@ public class MyModel {
     <header><h3 id="spring_beans_as_resource_models">Using Spring Beans as Resource Models</h3></header>
 
     <p>
-        Spring beans annotated with <a href="apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a> are automatically
+        Spring beans (beans <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/core.html#beans-stereotype-annotations">annotated with a spring stereotype such as @Component</a>) with a <a href="apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a> annotation are automatically
         registered as resource models by the NEBA Spring module when the application context starts. Such models <em>must</em> not be singletons,
         but rather have prototype scope as they are instantiated concurrently and represent a user-specific view on a Sling resource resolved
         during a HTTP request.
