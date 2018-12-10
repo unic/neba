@@ -179,8 +179,8 @@ description: A comprehensive guide to using the NEBA features
 
         <h4 id="the_filter_annotation">Injecting OSGi services with NEBA core</h4>
         <p>
-            Unless the model is a Spring bean, NEBA exclusively injects OSGi services into fields or a constructor annotated with <code>@Inject</code>.
-            These services can be filtered using the <a href="/apidocs/neba-api/io/neba/api/annotations/Filter.html">@Filter</a> annotation.
+            Unless the model is a Spring bean, NEBA exclusively injects OSGi services into a constructor, field or setter annotated with <code>@Inject</code>.
+            The injected services can be filtered using the <a href="/apidocs/neba-api/io/neba/api/annotations/Filter.html">@Filter</a> annotation.
         </p>
 
         <figure class="listing" id="listing:field-injection">
@@ -323,7 +323,7 @@ public class Carousel {
 <neba:defineObjects />{% endhighlight %}<figcaption>Importing the NEBA taglib namespace</figcaption></figure>
 
     <p>Both are looking up the most specific model for the current resource.
-       By default, neba.js and neba:defineObjects publish the model into the scripting context under the key &quot;m&quot;.
+        By default, the neba:defineObjects tag publish the model into the scripting context under the key &quot;m&quot;.
         In both examples above, one can access the model like so:</p>
 
     <figure class="listing" id="listing:accessing-the-neba-model">
