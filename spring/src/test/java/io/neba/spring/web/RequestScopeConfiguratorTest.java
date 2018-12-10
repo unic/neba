@@ -20,14 +20,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestScope;
 
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 
 /**

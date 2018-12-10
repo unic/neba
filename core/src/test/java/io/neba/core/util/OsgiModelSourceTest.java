@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
 
@@ -52,14 +52,6 @@ public class OsgiModelSourceTest {
 
     @Before
     public void prepareModelSource() {
-        doReturn(ACTIVE)
-                .when(this.bundleOne)
-                .getState();
-
-        doReturn(ACTIVE)
-                .when(this.bundleTwo)
-                .getState();
-
         doReturn(123L)
                 .when(this.bundleOne)
                 .getBundleId();

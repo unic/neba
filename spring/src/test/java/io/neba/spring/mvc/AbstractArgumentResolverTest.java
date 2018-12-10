@@ -17,7 +17,6 @@
 package io.neba.spring.mvc;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -43,7 +42,6 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
 
     @Before
     public void setUp() {
-        doReturn(ResourceResolver.class).when(this.parameter).getParameterType();
         doReturn(this.request).when(this.nativeWebRequest).getNativeRequest();
     }
 

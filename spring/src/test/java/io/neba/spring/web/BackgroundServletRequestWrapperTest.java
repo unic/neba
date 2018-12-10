@@ -16,17 +16,16 @@
 package io.neba.spring.web;
 
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
 
 /**
@@ -48,10 +47,6 @@ public class BackgroundServletRequestWrapperTest {
         doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION"))
                 .when(request)
                 .getSession();
-
-        doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION"))
-                .when(request)
-                .getSession(anyBoolean());
     }
 
     @Test

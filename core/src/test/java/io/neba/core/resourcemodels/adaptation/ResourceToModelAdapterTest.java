@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
@@ -39,9 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -208,7 +208,6 @@ public class ResourceToModelAdapterTest {
     }
 
     private void withNullReturnedAsModelSourceFromRegistrar() {
-        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(null);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), eq(this.targetType))).thenReturn(null);
     }
 
@@ -248,8 +247,6 @@ public class ResourceToModelAdapterTest {
             LookupResult result = mock(LookupResult.class);
             when(result.getSource()).thenReturn(source);
             this.sources.add(result);
-            when(source.getModelType()).thenReturn(model.getClass());
-            when(source.getModel()).thenReturn(model);
             when(this.mapper.map(eq(this.resource), eq(source))).thenReturn(model);
         }
     }

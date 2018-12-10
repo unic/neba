@@ -21,10 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -39,14 +38,6 @@ public class LookupResultTest {
     @Before
     public void setUp() {
         this.testee = new LookupResult(this.modelSource, "junit/test/type");
-
-        doReturn(123L)
-                .when(this.modelSource)
-                .getBundleId();
-
-        doReturn(Object.class)
-                .when(this.modelSource)
-                .getModelType();
     }
 
     @Test(expected = IllegalArgumentException.class)

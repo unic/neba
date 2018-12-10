@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -55,8 +55,8 @@ import static java.lang.System.arraycopy;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -297,7 +297,7 @@ public class ModelRegistryConsolePluginTest {
     @Test
     public void testFilterModelTypesByResource() throws Exception {
         withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
-        withPathResource("/junit/test", "cq:Page");
+        withPathResource("/junit/test");
         withPathResourceLookedUp();
         withParameter("path", "/junit/test");
 
@@ -310,7 +310,7 @@ public class ModelRegistryConsolePluginTest {
     @Test
     public void testFilterModelTypesByResourceAndModelType() throws Exception {
         withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
-        withPathResource("/junit/test", "cq:Page");
+        withPathResource("/junit/test");
         withPathResourceLookedUp();
 
         withParameter("path", "/junit/test");
@@ -384,7 +384,6 @@ public class ModelRegistryConsolePluginTest {
         for (OsgiModelSource<?> source : this.modelSources) {
             LookupResult result = mock(LookupResult.class);
             doReturn(source).when(result).getSource();
-            doReturn(pathResource.getResourceType()).when(result).getResourceType();
             lookupResults.add(result);
         }
         doReturn(lookupResults).when(this.modelRegistry).lookupAllModels(eq(this.pathResource));
@@ -403,13 +402,7 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withPathResource(String path) {
-        withPathResource(path, null);
-    }
-
-    private void withPathResource(String path, String type) {
-        doReturn(path).when(this.pathResource).getPath();
         doReturn(this.pathResource).when(this.resolver).getResource(eq(path));
-        doReturn(type).when(this.pathResource).getResourceType();
     }
 
     private void withParameter(String name, String value) {

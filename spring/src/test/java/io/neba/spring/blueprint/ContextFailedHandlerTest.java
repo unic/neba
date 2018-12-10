@@ -26,12 +26,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
@@ -169,7 +168,6 @@ public class ContextFailedHandlerTest {
 
     private void withContextRefreshedEvent() {
         this.event = mock(OsgiBundleContextRefreshedEvent.class);
-        when(this.event.getBundle()).thenReturn(this.bundle);
     }
 
     private void withContextFailedEvent() {

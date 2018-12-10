@@ -33,15 +33,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -115,9 +115,6 @@ public class ResourceToModelMapperTest {
 
         when(this.modelMetaData.getMappableFields())
                 .thenReturn(new MappedFieldMetaData[]{});
-
-        when(this.modelMetaData.getAfterMappingMethods())
-                .thenReturn(new MethodMetaData[]{});
 
         when(this.modelMetaData.getStatistics())
                 .thenReturn(this.resourceModelStatistics);

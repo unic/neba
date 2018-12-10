@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -36,7 +36,9 @@ import java.util.List;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apache.commons.lang3.reflect.FieldUtils.getDeclaredField;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -195,10 +197,6 @@ public class AnnotatedFieldMappersTest {
 
         doReturn(Boolean.class).when(this.mapper1).getFieldType();
         doReturn(boolean.class).when(this.metadata1).getType();
-        assertMetadataHasMappers(this.metadata1, this.mapper1);
-
-        doReturn(Integer.class).when(this.mapper1).getFieldType();
-        doReturn(int.class).when(this.metadata1).getType();
         assertMetadataHasMappers(this.metadata1, this.mapper1);
     }
 

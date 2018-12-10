@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
 

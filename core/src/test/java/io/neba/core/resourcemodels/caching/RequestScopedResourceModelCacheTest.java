@@ -25,14 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletResponse;
 
 import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -65,9 +65,6 @@ public class RequestScopedResourceModelCacheTest {
     @Before
     public void setUp() {
         this.testee = new RequestScopedResourceModelCache();
-        doReturn("GET")
-                .when(this.request)
-                .getMethod();
 
         doReturn(this.requestPathInfo)
                 .when(this.request)

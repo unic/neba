@@ -25,10 +25,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Version;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import javax.servlet.ServletConfig;
@@ -36,9 +35,9 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
@@ -90,16 +89,11 @@ public class MvcServletTest {
                 .when(this.bundle)
                 .getSymbolicName();
 
-        doReturn(new Version(1, 2, 3))
-                .when(this.bundle)
-                .getVersion();
-
         doReturn(this.dispatcherServlet)
                 .when(this.testee)
                 .createBundleSpecificDispatcherServlet(eq(this.factory), isA(ServletConfig.class));
 
         doReturn("GET").when(request).getMethod();
-        doReturn("HTTP/1.1").when(request).getProtocol();
     }
 
     @Test(expected = IllegalArgumentException.class)
