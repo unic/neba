@@ -14,6 +14,20 @@
  * limitations under the License.
  **/
 $(function () {
+    /**
+     * Polyfills
+     */
+    (function(){
+        if (!String.prototype.endsWith) {
+            String.prototype.endsWith = function(search, this_len) {
+                if (this_len === undefined || this_len > this.length) {
+                    this_len = this.length;
+                }
+                return this.substring(this_len - search.length, this_len) === search;
+            };
+        }
+    })();
+
     var KEY_ENTER = 13,
         KEY_A = 65,
         NEWLINE = /\r?\n/,
@@ -147,11 +161,11 @@ $(function () {
             }
 
             function requestStartPattern() {
-                return /(.* )\[([0-9]+)]( \-> (GET|POST|PUT|HEAD|DELETE) .*)/g;
+                return /(.* )\[([0-9]+)]( -> (GET|POST|PUT|HEAD|DELETE) .*)/g;
             }
 
             function requestEndPattern() {
-                return /(.* )\[([0-9]+)]( <\- [0-9]+ .*)/g;
+                return /(.* )\[([0-9]+)]( <- [0-9]+ .*)/g;
             }
 
             var lines = (this.buffer + text).split(NEWLINE);
@@ -168,7 +182,7 @@ $(function () {
                  */
                 var textNode = document.createTextNode(lines[i]);
 
-                if (this.logType === Tail.LogType.ERROR || this.logType == undefined) {
+                if (this.logType === Tail.LogType.ERROR || this.logType === undefined) {
 
                     // An error statement was detected before and is not yet finished
                     if (this.errorSection) {
@@ -205,7 +219,7 @@ $(function () {
                     }
                 }
 
-                if (this.logType === Tail.LogType.REQUEST || this.logType == undefined) {
+                if (this.logType === Tail.LogType.REQUEST || this.logType === undefined) {
                     var match = requestStartPattern().exec(textNode.nodeValue);
                     if (match != null) {
                         this.logType = Tail.LogType.REQUEST;
@@ -323,7 +337,7 @@ $(function () {
     });
 
     adjustViewsToScreenHeight();
-    toggleRotatedLogfiles();
+    filterLogFiles();
     restrictCopyAllToLogView();
 
     try {
@@ -367,7 +381,7 @@ $(function () {
         });
 
         $hideRotated.change(function () {
-            toggleRotatedLogfiles();
+            filterLogFiles();
             return false;
         });
 
@@ -452,7 +466,7 @@ $(function () {
 
         var opts = {};
 
-        var requestParameterPattern = /(\?|&)([^=]+)=([^&\?]*)/g;
+        var requestParameterPattern = /([?&])([^=]+)=([^&?]*)/g;
         while ((match = requestParameterPattern.exec(queryString)) !== null) {
             opts[match[2]] = match[3];
         }
@@ -505,7 +519,7 @@ $(function () {
     }
 
     /**
-     * Finds the option with the given value in the logfiles dropdown and sets it to selected.
+     * Finds the option with the given value in the logfile dropdown and sets it to selected.
      * @returns {boolean} whether the log file was found.
      */
     function selectLogFile(file) {
@@ -538,10 +552,19 @@ $(function () {
         focusedViewDomNode.style.height = tailDomNode.style.height;
     }
 
-    function toggleRotatedLogfiles() {
+    function filterLogFiles() {
+        // E.g. 2029-01-01.log
+        var currentDateSuffix = new Date().toISOString().slice(0,10) + ".log";
+        // E.g. some-log-2020-01-01.log
+        var logFileWithDateSuffix = /^.+-[0-9]{4}-[0-9]{2}-[0-9]{2}\.log$/;
+
         $logfile.children().remove();
+
         $logfile.append(
-            $hideRotated.is(":checked") ? $logfiles.filter("[value$='\\.log'],[value='']") : $logfiles
+            $hideRotated.is(":checked") ? $logfiles.filter("[value$='\\.log'],[value='']").filter(function(idx, elem) {
+                return !logFileWithDateSuffix.test(elem.value) ||
+                        elem.value.endsWith(currentDateSuffix)
+            }) : $logfiles
         );
     }
 
