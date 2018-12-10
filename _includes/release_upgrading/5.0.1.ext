@@ -1,0 +1,1 @@
+Users of 5.0.0 do not need to make any changes. However, if you <a href="/documentation.html#spring">are using NEBA's Spring integration</a>, we recommend upgrading from Spring 5.0.7 to Spring 5.0.8.

@@ -44,14 +44,16 @@ keywords: Apache Sling,AEM,AEM6,Adobe AEM,Spring,Springframework,NEBA,CQ
 <main>
     <section id="blog" class="up-to-three-columns">
         <header>
-            <h1>From the blog</h1>
+            <h1>Releases</h1>
         </header>
         {% for post in site.posts limit:3 %}
-        <section>
-            <h2>{{post.title}}</h2>
-            <p>{{post.description}}</p>
-            <a href="{{ post.url }}" class="action">Read more</a>
-        </section>
+            {% if post.tags contains "release"%}
+                <section>
+                    <h2>{{post.title}} {% if post.tags contains "current" %}<sup title="This is the most recent version of NEBA">current</sup>{% endif %}</h2>
+                    <p>{{post.description}}</p>
+                    <a href="{{ post.url }}" class="action">Read more</a>
+                </section>
+            {% endif %}
         {% endfor %}
     </section>
 

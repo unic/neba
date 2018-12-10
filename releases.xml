@@ -1,0 +1,20 @@
+---
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<releases>
+{% assign posts = site.posts | where_exp:"item", "item.tags contains 'release'" | sort: "release.version"
+%}{% for post in posts
+%}{% assign versionComponents = post.release.version | split: "." %}
+    <release>
+        <url>{{ post.url }}</url>
+        <version>
+            <name>{{ post.release.version }}</name>
+            <major>{{ versionComponents[0] }}</major>
+            <minor>{{ versionComponents[1] }}</minor>
+            <micro>{{ versionComponents[2] }}</micro>
+        </version>
+        <requiresChange>{{ post.release.requiresChange }}</requiresChange>
+        <changeDescription><![CDATA[{% include release_upgrading/{{ post.release.version }}.ext %}]]></changeDescription>
+    </release>
+{% endfor %}
+</releases>

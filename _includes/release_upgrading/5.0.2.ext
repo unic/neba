@@ -1,0 +1,1 @@
+Users of 5.0.1 do not need to make any changes. However, if you <a href="/documentation.html#spring">are using NEBA's Spring integration</a>, we recommend upgrading to <a href="https://search.maven.org/search?q=g:org.apache.servicemix.bundles%20v:5.1.3.RELEASE_1">Spring 5.0.8</a>.

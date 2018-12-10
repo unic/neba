@@ -1,0 +1,14 @@
+<section>
+    <header><h3 id="upgrading">Upgrading from {{page.release.previousVersion}}</h3></header>
+
+    {% unless page.release.requiresChange %}
+    <p>
+        Users of {{page.release.previousVersion}} can upgrade to {{page.release.version}} without code changes.
+    </p>
+    {% endunless %}
+    {% if page.release.requiresChange %}
+        Users of {{page.release.previousVersion}} need to follow the following steps to upgrade their application.
+    {% endif %}
+
+    {% include release_upgrading/{{ page.release.version }}.ext %}
+</section>

@@ -9,6 +9,8 @@
 <main>
     {{content}}
 
+    {% include upgrading.ext %}
+
     <aside class="up-to-three-columns">
         <header><h2>Related posts</h2></header>
         {% for post in site.posts %}
