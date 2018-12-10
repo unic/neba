@@ -38,7 +38,7 @@ public class ConcurrentMultiValueMapTest {
     }
     
     @Test
-    public void testShallowCopyContents() throws Exception {
+    public void testShallowCopyContents() {
         withEntry("a", "v1");
         withEntry("a", "v2");
         withEntry("b", "v1");
@@ -54,7 +54,7 @@ public class ConcurrentMultiValueMapTest {
     }
     
     @Test
-    public void testShallowCopyModificationsAreIndependent() throws Exception {
+    public void testShallowCopyModificationsAreIndependent() {
         withEntry("a", "v1");
         withEntry("a", "v2");
         withEntry("b", "v1");

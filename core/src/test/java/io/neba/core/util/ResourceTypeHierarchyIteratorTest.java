@@ -16,25 +16,24 @@
 
 package io.neba.core.util;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import javax.jcr.Node;
-import javax.jcr.nodetype.NodeType;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
-import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.jcr.Node;
+import javax.jcr.nodetype.NodeType;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,7 +57,7 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     @Test
-    public void testHandlingOfSyntheticResources() throws Exception {
+    public void testHandlingOfSyntheticResources() {
         withSyntheticResource();
         withResourceType("virtual/resource/type");
         createIterator();
@@ -75,7 +74,7 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     @Test
-    public void testResolutionOfTypeHierarchy() throws Exception {
+    public void testResolutionOfTypeHierarchy() {
         withResourceType("junit/test1");
         withResourceSupertype("junit/test1", "junit/test2");
         withResourceSupertype("junit/test2", "junit/test3");
@@ -87,7 +86,7 @@ public class ResourceTypeHierarchyIteratorTest {
 
 
     @Test(expected = NoSuchElementException.class)
-    public void testNextInvocationWithoutNextElement() throws Exception {
+    public void testNextInvocationWithoutNextElement() {
         withResourceType("/junit/test1");
         createIterator();
         getNextElement();
@@ -95,12 +94,12 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResourceMustNotBeNull() throws Exception {
+    public void testResourceMustNotBeNull() {
         new ResourceTypeHierarchyIterator(null);
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIteratorIsReadOnly() throws Exception {
+    public void testIteratorIsReadOnly() {
         withResourceType("junit/test1");
         createIterator();
         removeElement();
@@ -115,17 +114,12 @@ public class ResourceTypeHierarchyIteratorTest {
     }
 
     private void withSyntheticResource() {
-        withoutValueMap();
         withResource(mock(SyntheticResource.class));
     }
 
     private void withResource(final Resource mock) {
         this.resource = mock;
         doReturn(this.resolver).when(this.resource).getResourceResolver();
-    }
-
-    private void withoutValueMap() {
-        when(this.resource.adaptTo(eq(ValueMap.class))).thenReturn(null);
     }
 
     private void withPrimaryType(String primaryType) throws Exception {

@@ -24,7 +24,7 @@ import net.sf.cglib.proxy.NoOp;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
 
@@ -48,59 +48,59 @@ public class ResourceModelMetaDataRegistrarTest {
     private ResourceModelMetaDataRegistrar testee;
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullTypeArgument() throws Exception {
+    public void testHandlingOfNullTypeArgument() {
         getMetaDataFor(null);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testRetrievalOfNonRegisteredResourceModel() throws Exception {
+    public void testRetrievalOfNonRegisteredResourceModel() {
         getMetaDataFor(getClass());
     }
 
     @Test
-    public void testRetrievalOfRegisteredModelTypes() throws Exception {
+    public void testRetrievalOfRegisteredModelTypes() {
         addModelType(TestResourceModel.class);
         getMetaDataFor(TestResourceModel.class);
         assertMetadataIsNotNull();
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testCacheIsEmptyUponShutdown() throws Exception {
+    public void testCacheIsEmptyUponShutdown() {
         addModelType(TestResourceModel.class);
         tearDown();
         getMetaDataFor(TestResourceModel.class);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testModelMetadataIsGoneAfterRemovalOfBundle() throws Exception {
+    public void testModelMetadataIsGoneAfterRemovalOfBundle() {
         addModelType(TestResourceModel.class);
         removeBundle();
         getMetaDataFor(TestResourceModel.class);
     }
 
     @Test
-    public void testAdditionAsCglibProxyTypeAndRetrievalAsUserType() throws Exception {
+    public void testAdditionAsCglibProxyTypeAndRetrievalAsUserType() {
         addModelType(createCglibProxy(TestResourceModel.class));
         getMetaDataFor(TestResourceModel.class);
         assertMetadataIsNotNull();
     }
 
     @Test
-    public void testAdditionAsUserTypeAndRetrievalAsCglibProxyType() throws Exception {
+    public void testAdditionAsUserTypeAndRetrievalAsCglibProxyType() {
         addModelType(TestResourceModel.class);
         getMetaDataFor(createCglibProxy(TestResourceModel.class));
         assertMetadataIsNotNull();
     }
 
     @Test
-    public void testAdditionAndRetrievalAsCglibProxyType() throws Exception {
+    public void testAdditionAndRetrievalAsCglibProxyType() {
         addModelType(createCglibProxy(TestResourceModel.class));
         getMetaDataFor(createCglibProxy(TestResourceModel.class));
         assertMetadataIsNotNull();
     }
 
     @Test
-    public void testRetrievalOfAllRegisteredMetaData() throws Exception {
+    public void testRetrievalOfAllRegisteredMetaData() {
         addModelType(TestResourceModel.class);
         addModelType(OtherTestResourceModel.class);
         getAllMetadata();
@@ -109,7 +109,7 @@ public class ResourceModelMetaDataRegistrarTest {
     }
 
     @Test
-    public void testRetrievalOfAllRegisteredMetaDataIsShallowCopy() throws Exception {
+    public void testRetrievalOfAllRegisteredMetaDataIsShallowCopy() {
         addModelType(TestResourceModel.class);
         addModelType(OtherTestResourceModel.class);
 
@@ -121,12 +121,12 @@ public class ResourceModelMetaDataRegistrarTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullValuesAreNotToleratedForBundleDeRegistration() throws Exception {
+    public void testNullValuesAreNotToleratedForBundleDeRegistration() {
         this.testee.removeMetadataForModelsIn(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullValuesAreNotToleratedForModelRegistration() throws Exception {
+    public void testNullValuesAreNotToleratedForModelRegistration() {
         this.testee.register(null);
     }
 

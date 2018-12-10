@@ -71,7 +71,7 @@ public class SlingMultipartFile implements MultipartFile {
 	}
 
 	@Override
-	public byte[] getBytes() throws IOException {
+	public byte[] getBytes() {
 		return this.source.get();
 	}
 

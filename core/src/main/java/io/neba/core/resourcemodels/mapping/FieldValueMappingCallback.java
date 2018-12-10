@@ -38,7 +38,7 @@ import java.util.Map;
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
-import static io.neba.core.util.StringUtil.append;
+import static io.neba.core.util.StringUtil.appendToAll;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -133,7 +133,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Resumes a mapping temporarily suspended by an {@link Lazy} field, i.e.
+     * Resumes a mapping temporarily suspended by a {@link Lazy} field, i.e.
      * effectively loads a lazy-loaded field value.
      *
      * @param fieldData must not be <code>null</code>.
@@ -144,7 +144,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Implements the field NEBA contracts (such as non-null collection-typed fields) and applies
+     * Implements the NEBA contracts for fields, for instance guarantees that collection-typed fields are never <code>null</code>. Applies
      * {@link AnnotatedFieldMapper custom field mappers}.
      *
      * @param fieldData must not be <code>null</code>.
@@ -224,9 +224,32 @@ public class FieldValueMappingCallback {
      * </ul>
      */
     private Collection<?> resolveChildren(FieldData field) {
-        Resource parent = null;
-        Collection<?> children = null;
+        if (field.metaData.isLazy()) {
+            // The field is explicitly lazy, e.g. @Children Lazy<List<Page>> children. Thus, we are asked to load the children at this point since
+            // the lazy field is trying to access the children.
+            return loadChildren(field);
+        } else {
+            // Create a lazy loading proxy for the collection
+            return (Collection<?>) field.metaData.getCollectionProxyFactory().newInstance(new LazyChildrenLoader(field, this));
+        }
+    }
 
+    /**
+     * Loads the children fo a field annotated with {@link io.neba.api.annotations.Children}.
+     * Resolves the parent who's children are to be loaded (this might e.g. be a {@link io.neba.api.annotations.Reference referenced} resource).
+     * Loads all children of the respective parent resource, {@link #convert(org.apache.sling.api.resource.Resource, Class) adapts}
+     * them if required, and adds them to a newly create collection compatible to the
+     * {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#getType() field type}, if the adaptation result is not
+     * <code>null</code>.
+     *
+     * @return never null but rather an empty collection.
+     */
+    @SuppressWarnings("unchecked")
+    private Collection<Object> loadChildren(FieldData field) {
+        final Class<Collection<Object>> collectionType = (Class<Collection<Object>>) field.metaData.getType();
+        final Collection<Object> values = instantiateCollectionType(collectionType);
+
+        Resource parent = null;
         if (field.metaData.isReference()) {
             String referencedPath = resolvePropertyTypedValue(field, String.class);
             if (!isBlank(referencedPath)) {
@@ -238,42 +261,9 @@ public class FieldValueMappingCallback {
             parent = this.resource;
         }
 
-        if (parent != null) {
-            children = createCollectionOfChildren(field, parent);
+        if (parent == null) {
+            return values;
         }
-
-        return children;
-    }
-
-    /**
-     * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isLazy() lazy},
-     * {@link #loadChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)} directly loads}
-     * the children. Otherwise, provides a lazy loading collection.
-     *
-     * @return never <code>null</code> but rather an empty collection.
-     */
-    private Collection<?> createCollectionOfChildren(final FieldData field, final Resource parent) {
-        if (field.metaData.isLazy()) {
-            // The field was already lazy-loaded - do not lazy-load again.
-            return loadChildren(field, parent);
-        }
-
-        // Create a lazy loading proxy for the collection
-        return (Collection<?>) field.metaData.getCollectionProxyFactory().newInstance(new LazyChildrenLoader(field, parent, this));
-    }
-
-    /**
-     * Loads all children of the given resource, {@link #convert(org.apache.sling.api.resource.Resource, Class) adapts}
-     * them if required, and adds them to a newly create collection compatible to the
-     * {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#getType() field type}, if the adaptation result is not
-     * <code>null</code>.
-     *
-     * @return never null but rather an empty collection.
-     */
-    @SuppressWarnings("unchecked")
-    private Collection<Object> loadChildren(FieldData field, Resource parent) {
-        final Class<Collection<Object>> collectionType = (Class<Collection<Object>>) field.metaData.getType();
-        final Collection<Object> values = instantiateCollectionType(collectionType);
 
         final Class<?> targetType = field.metaData.getTypeParameter();
         Iterator<Resource> children = parent.listChildren();
@@ -297,8 +287,8 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Resolves the String path(s) stored in the current field to the respective resources and adapts
-     * them, if necessary. May provide a single adapted value or a collection of references,
+     * Resolves the String path(s) stored in the resource property designated by the given field to respective resources and adapts
+     * them if necessary. May provide a single adapted value or a collection of references,
      * with regard to the field's meta data.
      */
     private Object resolveReferenceValueOfField(FieldData field) {
@@ -324,7 +314,7 @@ public class FieldValueMappingCallback {
 
     /**
      * If the field is already {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#isLazy() lazy},
-     * {@link #loadReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[]) directly loads}
+     * {@link #loadReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[]) load}
      * the references. Otherwise, provides a lazy loading collection.
      *
      * @param paths relative or absolute paths to resources.
@@ -332,7 +322,8 @@ public class FieldValueMappingCallback {
      */
     private Collection<Object> createCollectionOfReferences(final FieldData field, final String[] paths) {
         if (field.metaData.isLazy()) {
-            // The field was already lazy-loaded - no not lazy-load again.
+            // The field is explicitly lazy, e.g. Lazy<List<Resource>>.
+            // Here, the lazy value tries to load the actual value, thus resolve it.
             return loadReferences(field, paths);
         }
         // Create a lazy loading proxy for the collection
@@ -342,7 +333,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Resolves and converts all references of the given array of paths. <br />
+     * Resolves and converts all resources defined in the given array of resource paths.<br />
      * Afterwards, the resulting instances are stored in a {@link java.util.Collection} compatible to the
      * collection type of the given {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#getType()}.
      *
@@ -356,7 +347,7 @@ public class FieldValueMappingCallback {
         String[] resourcePaths = paths;
         if (field.metaData.isAppendPathPresentOnReference()) {
             // @Reference(append = "...")
-            resourcePaths = append(field.metaData.getAppendPathOnReference(), paths);
+            resourcePaths = appendToAll(field.metaData.getAppendPathOnReference(), paths);
         }
 
         final Class<?> componentClass = field.metaData.getTypeParameter();
@@ -386,11 +377,11 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Resolves a field's value using the field's {@link FieldValueMappingCallback.FieldData#path}. If the
-     * resource does not have any properties, the field path is absolute
-     * (see {@link #isMappable(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData)}),
-     * in which case the property is resolved via the resource resolver, i.e. the path is an absolute reference
-     * to the property of another resource.
+     * Resolves a field's value using the field's {@link FieldValueMappingCallback.FieldData#path}.
+     * {@link FieldData#isRelative() relative} or {@link  FieldData#isAbsolute() absolute} paths
+     * are interpreted as references to the properties of another resource and are resolved
+     * via {@link #resolvePropertyTypedValueFromForeignResource(FieldData, Class)}.
+     *
      * <br />
      * Ignores all {@link FieldValueMappingCallback.FieldData#metaData meta data}
      * except for the field path as the desired return type is explicitly specified.
@@ -424,8 +415,8 @@ public class FieldValueMappingCallback {
 
     /**
      * Resolves a property via a property {@link Resource}. This is used to retrieve relative or absolute references to
-     * the properties of resources other than the current resource. Such references cannot be reliably retrieved from the current
-     * resource's {@link ValueMap} as the value map may be <code>null</code> and does not support access to properties from parent resources.
+     * the properties of resources other than the current resource. Such references cannot be reliably retrieved using a
+     * resource's {@link ValueMap} as the value map may be <code>null</code> and does not support access to properties of parent resources.
      *
      * @return the resolved value, or <code>null</code>.
      */
@@ -486,8 +477,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Determines whether a given field's value
-     * can be mapped from either the current resource properties
+     * Determines whether a given field's value can be mapped from either the current resource properties
      * or another (e.g. referenced) resource.
      */
     private boolean isMappable(FieldData field) {
@@ -632,22 +622,20 @@ public class FieldValueMappingCallback {
      * Lazy-loads collections of children.
      *
      * @author Olaf Otto
-     * @see #createCollectionOfChildren(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, org.apache.sling.api.resource.Resource)
+     * @see #resolveChildren(FieldData)
      */
     private static class LazyChildrenLoader implements LazyLoader {
         private final FieldData field;
-        private final Resource resource;
         private final FieldValueMappingCallback mapper;
 
-        LazyChildrenLoader(FieldData field, Resource resource, FieldValueMappingCallback callback) {
+        LazyChildrenLoader(FieldData field, FieldValueMappingCallback callback) {
             this.field = field;
-            this.resource = resource;
             this.mapper = callback;
         }
 
         @Override
         public Object loadObject() {
-            return this.mapper.loadChildren(field, resource);
+            return this.mapper.loadChildren(field);
         }
     }
 

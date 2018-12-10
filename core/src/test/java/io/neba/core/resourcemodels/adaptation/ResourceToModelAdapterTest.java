@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
@@ -39,9 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -90,7 +90,7 @@ public class ResourceToModelAdapterTest {
     private ResourceToModelAdapter testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Answer storeInCache = invocation -> {
             Object model = invocation.getArguments()[2];
             testCache.put(buildCacheInvocationKey(invocation), model);
@@ -101,22 +101,22 @@ public class ResourceToModelAdapterTest {
 
         doAnswer(storeInCache)
                 .when(this.caches)
-                .store(isA(Resource.class), isA(OsgiModelSource.class), any());
+                .store(isA(Resource.class), isA(Key.class), any());
 
         doAnswer(lookupFromCache)
                 .when(this.caches)
-                .lookup(isA(Resource.class), isA(OsgiModelSource.class));
+                .lookup(isA(Resource.class), isA(Key.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
     }
 
     @Test
-    public void testAdaptablesOtherThanResourceYieldNull() throws Exception {
+    public void testAdaptablesOtherThanResourceYieldNull() {
         assertThat(this.testee.getAdapter(new Object(), Object.class)).isNull();
     }
 
     @Test
-    public void testAdaptationToExactModelType() throws Exception {
+    public void testAdaptationToExactModelType() {
         withTargetType(TestModel.class);
         withAvailableModels(new TestModel());
         adapt();
@@ -126,7 +126,7 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testAdaptationToDerivedModelType() throws Exception {
+    public void testAdaptationToDerivedModelType() {
         withTargetType(TestModel.class);
         withAvailableModels(new TestModelDerived());
         adapt();
@@ -136,7 +136,7 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testHandlingOfNullModelSource() throws Exception {
+    public void testHandlingOfNullModelSource() {
         withTargetType(TestModel.class);
         withNullReturnedAsModelSourceFromRegistrar();
         adapt();
@@ -146,14 +146,14 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test(expected = AmbiguousModelAssociationException.class)
-    public void testAdaptationToTypeWithMultipleMappings() throws Exception {
+    public void testAdaptationToTypeWithMultipleMappings() {
         withTargetType(TestModel.class);
         withAvailableModels(new TestModel(), new TestModelDerived());
         adapt();
     }
 
     @Test
-    public void testAdaptationOfSameResourceWithDifferentResourceTypeYieldsDifferentModel() throws Exception {
+    public void testAdaptationOfSameResourceWithDifferentResourceTypeYieldsDifferentModel() {
         withResourceType("resource/type/one");
         withResourcePath("/resource/path");
         withTargetType(TestModel.class);
@@ -170,7 +170,7 @@ public class ResourceToModelAdapterTest {
     }
 
     @Test
-    public void testSubsequentAdaptationOfSameResourceWithSameResourceTypeIsServedFromCache() throws Exception {
+    public void testSubsequentAdaptationOfSameResourceWithSameResourceTypeIsServedFromCache() {
         withResourceType("resource/type/one");
         withResourcePath("/resource/path");
         withTargetType(TestModel.class);
@@ -187,13 +187,27 @@ public class ResourceToModelAdapterTest {
         assertResourceWasAdaptedToModel();
     }
 
+    @Test
+    public void testAdaptationsResultingInNullAreCached() {
+        withTargetType(TestModel.class);
+        adapt();
+
+        verifyAdapterObtainsSourceFromRegistrar();
+        assertResourceWasNotAdaptedToModel();
+
+        adapt();
+        // This asserts that the source was still obtained exactly once
+        // during the entire test execution, i.e. lookup was not re-attempted during the
+        // second adapt() invocation.
+        verifyAdapterObtainsSourceFromRegistrar();
+    }
+
     @SuppressWarnings("unchecked")
     private void verifyAdapterDoesNotMapResourceToModel() {
         verify(this.mapper, never()).map(isA(Resource.class), isA(OsgiModelSource.class));
     }
 
     private void withNullReturnedAsModelSourceFromRegistrar() {
-        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(null);
         when(this.registry.lookupMostSpecificModels(eq(this.resource), eq(this.targetType))).thenReturn(null);
     }
 
@@ -233,8 +247,6 @@ public class ResourceToModelAdapterTest {
             LookupResult result = mock(LookupResult.class);
             when(result.getSource()).thenReturn(source);
             this.sources.add(result);
-            when(source.getModelType()).thenReturn(model.getClass());
-            when(source.getModel()).thenReturn(model);
             when(this.mapper.map(eq(this.resource), eq(source))).thenReturn(model);
         }
     }
@@ -260,7 +272,7 @@ public class ResourceToModelAdapterTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        OsgiModelSource<?> modelSource = (OsgiModelSource<?>) invocation.getArguments()[1];
-        return new Key(resource.getPath(), modelSource.getModelType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
+        Key key = (Key) invocation.getArguments()[1];
+        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

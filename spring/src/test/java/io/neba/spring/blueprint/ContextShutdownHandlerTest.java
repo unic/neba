@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
 
@@ -43,18 +43,18 @@ public class ContextShutdownHandlerTest {
     };
 
     @Test(expected = IllegalArgumentException.class)
-    public void testBundleMustNotBeNull() throws Exception {
+    public void testBundleMustNotBeNull() {
         withNullBundle();
         handleStop();
     }
 
     @Test
-    public void testOrderOfShutdownEvents() throws Exception {
+    public void testOrderOfShutdownEvents() {
         handleStop();
     }
 
     @Test
-    public void testBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
+    public void testBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() {
         handleStop();
 
         InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);

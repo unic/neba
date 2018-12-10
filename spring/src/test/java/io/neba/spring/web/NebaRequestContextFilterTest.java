@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -42,7 +42,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -105,13 +105,13 @@ public class NebaRequestContextFilterTest {
     }
 
     @After
-    public void assertThreadLocalesAreRemoved() throws Exception {
+    public void assertThreadLocalesAreRemoved() {
         assertThat(getRequestAttributes()).isNull();
         assertThat(getLocaleContext()).isNull();
     }
 
     @After
-    public void verifyServletAttributesAreCompleted() throws Exception {
+    public void verifyServletAttributesAreCompleted() {
         verify(destructionCallback).run();
     }
 

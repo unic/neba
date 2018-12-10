@@ -152,7 +152,7 @@ public class SpringBundlesTransformer {
 
         mainAttributes.putValue(
                 "Require-Bundle",
-                        "com.fasterxml.jackson.core.jackson-core; bundle-version=\"[2.9,3)\"; resolution:=optional," +
+                "com.fasterxml.jackson.core.jackson-core; bundle-version=\"[2.9,3)\"; resolution:=optional," +
                         "com.fasterxml.jackson.core.jackson-databind; bundle-version=\"[2.9,3)\"; resolution:=optional," +
                         "com.fasterxml.jackson.core.jackson-annotations; bundle-version=\"[2.9,3)\"; resolution:=optional");
         return true;
@@ -200,7 +200,7 @@ public class SpringBundlesTransformer {
             }
         } else {
             if (JarFile.MANIFEST_NAME.equals(name)) {
-                // Skip manifest: It is provided as the first entry via the jar ouput stream.
+                // Skip manifest: It is provided as the first entry via the jar output stream.
                 return;
             }
             JarEntry entry = new JarEntry(name);

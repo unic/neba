@@ -19,16 +19,21 @@ package io.neba.core.resourcemodels.registration;
 import io.neba.api.services.ResourceModelResolver;
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
-import io.neba.core.resourcemodels.registration.LookupResult;
-import io.neba.core.resourcemodels.registration.ModelRegistry;
+import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Optional;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
+import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * Resolves a {@link Resource} to a {@link io.neba.api.annotations.ResourceModel}
@@ -84,28 +89,38 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
         return resolveMostSpecificModelForResource(resource, true, null);
     }
 
-    private <T> T resolveMostSpecificModelForResource(Resource resource, boolean includeBaseTypes, String modelName) {
-        T model = null;
+    private <T> T resolveMostSpecificModelForResource(@Nonnull Resource resource, boolean includeBaseTypes, @Nullable String modelName) {
+        final Key key = key(includeBaseTypes, modelName);
+
+        Optional<T> cachedModel = this.caches.lookup(resource, key);
+        if (cachedModel == empty()) {
+            return null;
+        }
+
+        if (cachedModel != null) {
+            return cachedModel.get();
+        }
+
         Collection<LookupResult> models = (modelName == null) ?
                 this.registry.lookupMostSpecificModels(resource) :
                 this.registry.lookupMostSpecificModels(resource, modelName);
 
-        if (models != null && models.size() == 1) {
-            LookupResult lookupResult = models.iterator().next();
-            if (includeBaseTypes || !isMappedFromGenericBaseType(lookupResult)) {
-
-                @SuppressWarnings("unchecked")
-                OsgiModelSource<T> source = (OsgiModelSource<T>) lookupResult.getSource();
-
-                model = this.caches.lookup(resource, source);
-                if (model != null) {
-                    return model;
-                }
-
-                model = this.mapper.map(resource, source);
-                this.caches.store(resource, source, model);
-            }
+        if (models == null || models.size() != 1) {
+            this.caches.store(resource, key, empty());
+            return null;
         }
+
+        LookupResult lookupResult = models.iterator().next();
+        if (!includeBaseTypes && isMappedFromGenericBaseType(lookupResult)) {
+            this.caches.store(resource, key, empty());
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        OsgiModelSource<T> source = (OsgiModelSource<T>) lookupResult.getSource();
+
+        T model = this.mapper.map(resource, source);
+        this.caches.store(resource, key, of(model));
 
         return model;
     }

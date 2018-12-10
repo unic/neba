@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.MultiValueMap;
@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -61,27 +61,27 @@ public class MultipartSlingHttpServletRequestTest {
 	}
 
 	@Test
-	public void testFilenameExtraction() throws Exception {
+	public void testFilenameExtraction() {
 		mockFileField("test", 1);
 		mockFileField("junit", 2);
 		assertExtractedFileNamesAre("test", "junit");
 	}
 
 	@Test
-	public void testFileRetrieval() throws Exception {
+	public void testFileRetrieval() {
 		mockFileField("test", 1);
 		assertRequestContainsFile("test");
 		assertRequestDoesNotContainFile("test1");
 	}
 
 	@Test
-	public void testRetrievalOfMultipleFiles() throws Exception {
+	public void testRetrievalOfMultipleFiles() {
 		mockFileField("test", 4);
 		assertRequestHasFiles("test", 4);
 	}
 
 	@Test
-	public void testRetrievalOfFileMapWithSingleFiles() throws Exception {
+	public void testRetrievalOfFileMapWithSingleFiles() {
 		mockFileField("test1", 1);
 		mockFileField("test2", 1);
 		mockFileField("test3", 1);
@@ -89,7 +89,7 @@ public class MultipartSlingHttpServletRequestTest {
 	}
 
 	@Test
-	public void testRetrievalOfFileMapWithMultipleFiles() throws Exception {
+	public void testRetrievalOfFileMapWithMultipleFiles() {
 		mockFileField("test1", 1);
 		mockFileField("test2", 1);
 		mockFileField("test3", 1);

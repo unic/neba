@@ -15,17 +15,16 @@
 */
 package io.neba.core.util;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.function.Function;
 
 import static io.neba.core.util.ResourcePaths.path;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -40,11 +39,6 @@ public class ResourcePathsTest {
     private Function<String, String> resolver;
 
     private String resolvedValue;
-
-    @Before
-    public void setUp() {
-        doReturn(null).when(this.resolver).apply(anyString());
-    }
 
     @Test
     public void testNonVariablesAreNotResolved() {

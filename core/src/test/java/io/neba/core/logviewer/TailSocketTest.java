@@ -60,18 +60,18 @@ public class TailSocketTest extends TailTests implements Eventual {
     }
 
     @Before
-    public void prepareWebSocketContext() throws Exception {
+    public void prepareWebSocketContext() {
         doReturn(getRemote()).when(this.session).getRemote();
         this.testee.onWebSocketConnect(session);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         this.testee.onWebSocketClose(-1, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorRequiresNonNullLogFiles() throws Exception {
+    public void testConstructorRequiresNonNullLogFiles() {
         new TailSocket(null);
     }
 
@@ -107,7 +107,7 @@ public class TailSocketTest extends TailTests implements Eventual {
     }
 
     @Test
-    public void testReplyToPingRequestFromClient() throws Exception {
+    public void testReplyToPingRequestFromClient() {
         sendPingFromClient();
         verifySocketRepliesAsynchronously("pong");
     }

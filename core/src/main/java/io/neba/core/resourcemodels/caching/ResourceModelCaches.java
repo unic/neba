@@ -19,14 +19,16 @@ package io.neba.core.resourcemodels.caching;
 import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static java.util.Optional.empty;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 /**
@@ -47,34 +49,43 @@ public class ResourceModelCaches {
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
-     * Looks up the {@link #store(Resource, OsgiModelSource, Object)} cached model}
+     * Looks up the {@link #store(Resource, Key, Object)} cached model}
      * of the given type for the given resource.
      * Returns the first model found in the caches.
      *
      * @param resource must not be <code>null</code>.
-     * @param modelSource must not be <code>null</code>.
-     * @return can be <code>null</code>.
+     * @param key      must not be <code>null</code>.
+     * @return can be <code>null</code> or {@link java.util.Optional#empty()}. A return value of {@link java.util.Optional#empty()} signals
+     * that a an empty model was previously {@link #store(Resource, Key, Optional) stored}, i.e. the adaptation result is known to be null
+     * and should not be attempted. A return value of <code>null</code> signals that the model is unknown to this cache, i.e. it was never stored.
      */
-    public <T> T lookup(Resource resource, OsgiModelSource<?> modelSource) {
+    public <T> Optional<T> lookup(@Nonnull Resource resource, @Nonnull Key key) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
-        if (modelSource == null) {
-            throw new IllegalArgumentException("Method argument modelSource must not be null");
+        if (key == null) {
+            throw new IllegalArgumentException("Method argument key must not be null");
         }
 
         if (this.caches.isEmpty()) {
             return null;
         }
 
-        final Key key = key(resource, modelSource.getModelType());
+        final Key lookupKey = key(resource, key);
         for (ResourceModelCache cache : this.caches) {
-            T model = cache.get(key);
+            final Optional<T> model = cache.get(lookupKey);
+            if (model == empty()) {
+                return model;
+            }
+
             if (model != null) {
-                metaDataRegistrar.get(model.getClass()).getStatistics().countCacheHit();
+                metaDataRegistrar.get(model.get().getClass()).getStatistics().countCacheHit();
                 return model;
             }
         }
+
+        // Null signals that the model was never stored in the cache, i.e. we do not know whether
+        // the model can be resolved to anything.
         return null;
     }
 
@@ -84,15 +95,15 @@ public class ResourceModelCaches {
      * to the given target type.
      *
      * @param resource must not be <code>null</code>.
-     * @param modelSource must not be <code>null</code>.
-     * @param model can be <code>null</code>.
+     * @param key      must not be <code>null</code>.
+     * @param model    can be <code>null</code>.
      */
-    public <T> void store(Resource resource, OsgiModelSource<?> modelSource, T model) {
+    public <T> void store(@Nonnull Resource resource, @Nonnull Key key, @Nonnull Optional<T> model) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
-        if (modelSource == null) {
-            throw new IllegalArgumentException("Method argument modelSource must not be null");
+        if (key == null) {
+            throw new IllegalArgumentException("Method argument key must not be null");
         }
         if (model == null) {
             throw new IllegalArgumentException("Method argument model must not be null");
@@ -102,9 +113,9 @@ public class ResourceModelCaches {
             return;
         }
 
-        final Key key = key(resource, modelSource.getModelType());
+        final Key lookupKey = key(resource, key);
         for (ResourceModelCache cache : this.caches) {
-            cache.put(resource, model, key);
+            cache.put(resource, model, lookupKey);
         }
     }
 
@@ -119,7 +130,11 @@ public class ResourceModelCaches {
         this.caches.remove(cache);
     }
 
-    private <T> Key key(Resource resource, Class<T> modelType) {
-        return new Key(resource.getPath(), modelType, resource.getResourceType(), resource.getResourceResolver().hashCode());
+    private <T> Key key(Resource resource, Key key) {
+        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
+    }
+
+    public static Key key(Object... contents) {
+        return new Key(contents);
     }
 }

@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -37,8 +37,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -82,17 +82,17 @@ public class SlingServletViewTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         SlingAdaptable.unsetAdapterManager(this.adapterManager);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorRequireNonNullResourceType() throws Exception {
+    public void testConstructorRequireNonNullResourceType() {
         new SlingServletView(null, this.script);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorRequireNonNullServlet() throws Exception {
+    public void testConstructorRequireNonNullServlet() {
         new SlingServletView("some/resource/type", null);
     }
 
@@ -103,7 +103,7 @@ public class SlingServletViewTest {
     }
 
     @Test
-    public void testViewDoesNotDefineContentTypeInAdvance() throws Exception {
+    public void testViewDoesNotDefineContentTypeInAdvance() {
         assertThat(this.testee.getContentType()).isNull();
     }
 
@@ -155,7 +155,7 @@ public class SlingServletViewTest {
 
         adaptResourceProvidedToScriptTo(getClass());
 
-        verifyAdaptermanagerTriedToAdaptResourceProvidedToScriptTo(getClass());
+        verifyAdapterManagerTriedToAdaptResourceProvidedToScriptTo(getClass());
     }
 
     @Test
@@ -201,7 +201,7 @@ public class SlingServletViewTest {
         assertThat(this.resourceProvidedToScript).isNotNull();
     }
 
-    private void verifyAdaptermanagerTriedToAdaptResourceProvidedToScriptTo(Class<?> type) {
+    private void verifyAdapterManagerTriedToAdaptResourceProvidedToScriptTo(Class<?> type) {
         verify(this.adapterManager).getAdapter(this.resourceProvidedToScript, type);
     }
 

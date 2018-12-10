@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.jcr.Node;
 import javax.jcr.nodetype.NodeType;
@@ -69,7 +69,7 @@ public class NodeTypeHierarchyIteratorTest {
     }
     
     @Test(expected = UnsupportedOperationException.class)
-    public void testIteratorModification() throws Exception {
+    public void testIteratorModification() {
         NodeTypeHierarchyIterator it = typeHierarchyOf(this.node);
         it.remove();
     }

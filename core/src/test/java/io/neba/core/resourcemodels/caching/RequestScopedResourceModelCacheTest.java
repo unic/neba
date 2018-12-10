@@ -25,14 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletResponse;
-import java.util.concurrent.Callable;
 
+import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -65,9 +65,6 @@ public class RequestScopedResourceModelCacheTest {
     @Before
     public void setUp() {
         this.testee = new RequestScopedResourceModelCache();
-        doReturn("GET")
-                .when(this.request)
-                .getMethod();
 
         doReturn(this.requestPathInfo)
                 .when(this.request)
@@ -90,7 +87,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsInCache();
-            return null;
         });
     }
 
@@ -108,7 +104,6 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             lookupModelFromCache();
             assertModelIsInCache();
-            return null;
         });
     }
 
@@ -125,7 +120,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsInCache();
-            return null;
         });
     }
 
@@ -142,7 +136,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsInCache();
-            return null;
         });
     }
 
@@ -161,7 +154,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsInCache();
-            return null;
         });
     }
 
@@ -178,7 +170,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsInCache();
-            return null;
         });
     }
 
@@ -196,7 +187,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsNotInCache();
-            return null;
         });
     }
 
@@ -214,7 +204,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsNotInCache();
-            return null;
         });
     }
 
@@ -234,7 +223,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsNotInCache();
-            return null;
         });
     }
 
@@ -254,7 +242,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsInCache();
-            return null;
         });
     }
 
@@ -272,7 +259,6 @@ public class RequestScopedResourceModelCacheTest {
 
             lookupModelFromCache();
             assertModelIsNotInCache();
-            return null;
         });
     }
 
@@ -295,8 +281,29 @@ public class RequestScopedResourceModelCacheTest {
             putModelInCache();
             lookupModelFromCache();
             assertModelIsNotInCache();
+        });
+    }
 
-            return null;
+    @Test
+    public void testCacheToleratesNullModelWrite() throws Exception {
+        request(() -> {
+            testee.put(this.resource, null, key());
+            putModelInCache();
+        });
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCacheDoesNotTolerateNullResourceWrite() throws Exception {
+        request(() -> {
+            testee.put(null, this.model, key());
+            putModelInCache();
+        });
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCacheDoesNotTolerateNullKeyWrite() throws Exception {
+        request(() -> {
+            testee.put(this.resource, this.model, null);
         });
     }
 
@@ -344,8 +351,15 @@ public class RequestScopedResourceModelCacheTest {
         doReturn(path).when(this.resource).getPath();
     }
 
-    private void request(final Callable<Object> callable) throws Exception {
-        doAnswer(invocationOnMock -> callable.call()).when(this.chain).doFilter(eq(this.request), eq(this.response));
+    private void request(final Request request) throws Exception {
+        doAnswer(invocationOnMock -> {
+            request.request();
+            return null;
+        }).when(this.chain).doFilter(eq(this.request), eq(this.response));
         this.testee.doFilter(this.request, this.response, this.chain);
+    }
+
+    private interface Request {
+        void request() throws Exception;
     }
 }

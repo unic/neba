@@ -29,13 +29,13 @@ public class FelixTaskExecutorTest {
     private FelixTaskExecutor testee = new FelixTaskExecutor();
 
     @Test
-    public void testSynchronousExecution() throws Exception {
+    public void testSynchronousExecution() {
         execute(() -> executed = true);
         assertThat(this.executed).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullTask() throws Exception {
+    public void testHandlingOfNullTask() {
         execute(null);
     }
 

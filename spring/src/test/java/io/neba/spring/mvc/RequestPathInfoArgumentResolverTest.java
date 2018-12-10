@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -38,7 +38,7 @@ public class RequestPathInfoArgumentResolverTest extends AbstractArgumentResolve
     private RequestPathInfoArgumentResolver testee;
 
     @Before
-    public void mockRequestPathInfo() throws Exception {
+    public void mockRequestPathInfo() {
         doReturn(this.requestPathInfo)
                 .when(getRequest())
                 .getRequestPathInfo();
@@ -51,7 +51,7 @@ public class RequestPathInfoArgumentResolverTest extends AbstractArgumentResolve
     }
 
     @Test
-    public void testResourceResolverIsSupported() throws Exception {
+    public void testResourceResolverIsSupported() {
         assertResolverSupports(RequestPathInfo.class);
     }
 

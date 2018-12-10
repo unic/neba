@@ -24,7 +24,7 @@ import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 
 import static java.io.File.createTempFile;
@@ -32,7 +32,7 @@ import static java.nio.file.Files.move;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -47,7 +47,7 @@ public class TailTest extends TailTests implements Eventual {
     private Tail testee;
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (this.testee != null) {
             this.testee.stop();
         }
@@ -142,12 +142,12 @@ public class TailTest extends TailTests implements Eventual {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFileArgument() throws Exception {
+    public void testHandlingOfNullFileArgument() {
         new Tail(mock(RemoteEndpoint.class), null, 1000);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullRemoteArgument() throws Exception {
+    public void testHandlingOfNullRemoteArgument() {
         new Tail(null, mock(File.class), 1000);
     }
 

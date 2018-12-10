@@ -18,7 +18,7 @@ package io.neba.core.util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 
@@ -35,24 +35,24 @@ public class ZipFileUtilTest {
     private File file;
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullArgumentsAreNotTolerated() throws Exception {
+    public void testNullArgumentsAreNotTolerated() {
         toZipFileEntryName(null);
     }
 
     @Test
-    public void testNormalizedPathsAreNotChanged() throws Exception {
+    public void testNormalizedPathsAreNotChanged() {
         withFilePath("/some/path");
         assertZipFileEntryNameIs("some/path");
     }
 
     @Test
-    public void testNetworkIdentifiersAreRemoved() throws Exception {
+    public void testNetworkIdentifiersAreRemoved() {
         withFilePath("//share/some/path");
         assertZipFileEntryNameIs("share/some/path");
     }
 
     @Test
-    public void testWindowsFilePathsAreRepresentedAsUnixPaths() throws Exception {
+    public void testWindowsFilePathsAreRepresentedAsUnixPaths() {
         withFilePath("D:\\share\\windows\\path");
         assertZipFileEntryNameIs("D/share/windows/path");
     }

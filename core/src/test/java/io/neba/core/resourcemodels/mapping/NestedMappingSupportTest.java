@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Set;
 
@@ -43,12 +43,12 @@ public class NestedMappingSupportTest {
     private NestedMappingSupport testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         withNewMapping();
     }
 
     @Test
-    public void testCycleDetection() throws Exception {
+    public void testCycleDetection() {
         beginMapping();
         assertMappingWasNotAlreadyStarted();
         beginMapping();
@@ -56,7 +56,7 @@ public class NestedMappingSupportTest {
     }
 
     @Test
-    public void testMappingCanBeginAgainAfterItHasEnded() throws Exception {
+    public void testMappingCanBeginAgainAfterItHasEnded() {
         beginMapping();
         assertMappingWasNotAlreadyStarted();
         endMapping();
@@ -66,13 +66,13 @@ public class NestedMappingSupportTest {
     }
 
     @Test
-    public void testOngoingMappingsAreEmptyWithoutMappings() throws Exception {
+    public void testOngoingMappingsAreEmptyWithoutMappings() {
         getOngoingMappings();
         assertOngoingMappingsAreEmpty();
     }
 
     @Test
-    public void testOngoingMappingsAreEmptyAfterMappingEnds() throws Exception {
+    public void testOngoingMappingsAreEmptyAfterMappingEnds() {
         beginMapping();
         endMapping();
         getOngoingMappings();
@@ -80,14 +80,14 @@ public class NestedMappingSupportTest {
     }
 
     @Test
-    public void testOngoingMappingsContainOngoingMapping() throws Exception {
+    public void testOngoingMappingsContainOngoingMapping() {
         beginMapping();
         getOngoingMappings();
         assertOngoingMappingsContainMapping();
     }
 
     @Test
-    public void testTrackingOfSubsequentMappings() throws Exception {
+    public void testTrackingOfSubsequentMappings() {
         beginMapping();
         verifyNumberOfSubsequentMappingsIs(0);
 
@@ -101,7 +101,7 @@ public class NestedMappingSupportTest {
     }
 
     @Test
-    public void testSubsequentMappingsOfSameResourceModelAreOnlyCountedOnce() throws Exception {
+    public void testSubsequentMappingsOfSameResourceModelAreOnlyCountedOnce() {
         beginMapping();
         verifyNumberOfSubsequentMappingsIs(0);
 
@@ -115,14 +115,14 @@ public class NestedMappingSupportTest {
     }
 
     @Test
-    public void testNoFalsePositiveDetectionOfResourceModelInOngoingMappings() throws Exception {
+    public void testNoFalsePositiveDetectionOfResourceModelInOngoingMappings() {
         beginMapping();
         withNewMapping();
         assertNoMappingForCurrentResourceModelTypeExists();
     }
 
     @Test
-    public void testDetectionOfResourceModelInOngoingMappings() throws Exception {
+    public void testDetectionOfResourceModelInOngoingMappings() {
         beginMapping();
         assertMappingForCurrentResourceModelTypeExists();
 
@@ -135,7 +135,7 @@ public class NestedMappingSupportTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testCheckingForResourceModelMappingDoesNotAcceptNull() throws Exception {
+    public void testCheckingForResourceModelMappingDoesNotAcceptNull() {
         this.testee.hasOngoingMapping(null);
     }
 

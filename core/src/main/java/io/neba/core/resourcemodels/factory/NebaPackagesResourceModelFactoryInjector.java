@@ -17,6 +17,7 @@ package io.neba.core.resourcemodels.factory;
 
 import io.neba.api.spi.ResourceModelFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -25,9 +26,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Hashtable;
 
+import static io.neba.core.util.BundleUtil.displayNameOf;
 import static org.osgi.framework.Bundle.ACTIVE;
 import static org.osgi.framework.Constants.SERVICE_DESCRIPTION;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
@@ -38,6 +42,8 @@ import static org.osgi.framework.Constants.SERVICE_VENDOR;
  */
 @Component
 public class NebaPackagesResourceModelFactoryInjector {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     private BundleTracker<ServiceRegistration<?>> tracker;
 
     @Activate
@@ -49,10 +55,17 @@ public class NebaPackagesResourceModelFactoryInjector {
                 if (factory.getModelDefinitions().isEmpty()) {
                     return null;
                 }
+
+                BundleContext bundleContext = bundle.getBundleContext();
+                if (bundleContext == null) {
+                    logger.warn("Unable to register the resource models of bundle " + displayNameOf(bundle) + ", the bundle context is null. This usually means the bundle activator or blueprint context failed to start.");
+                    return null;
+                }
+
                 Hashtable<String, Object> properties = new Hashtable<>();
                 properties.put(SERVICE_DESCRIPTION, "Provides NEBA resource model POJOs from packages specified in the 'Neba-Packages' bundle header.");
                 properties.put(SERVICE_VENDOR, "neba.io");
-                return bundle.getBundleContext().registerService(ResourceModelFactory.class, factory, properties);
+                return bundleContext.registerService(ResourceModelFactory.class, factory, properties);
             }
 
             @Override
@@ -62,6 +75,10 @@ public class NebaPackagesResourceModelFactoryInjector {
 
             @Override
             public void removedBundle(Bundle bundle, BundleEvent event, ServiceRegistration<?> registration) {
+                if (registration == null) {
+                    return;
+                }
+
                 registration.unregister();
             }
         });

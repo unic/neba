@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,13 +49,13 @@ public class MatchedBundlesPredicateTest {
 	}
 
 	@Test
-	public void testPredicateReturnsFalseForMatchedBundles() throws Exception {
+	public void testPredicateReturnsFalseForMatchedBundles() {
 		withSourceReferencingCurrentBundle();
 		assertPredicateSignalsThatReferenceIsInvalid();
 	}
 
 	@Test
-	public void testPredicateReturnsTrueForUnmatchedBundles() throws Exception {
+	public void testPredicateReturnsTrueForUnmatchedBundles() {
 		withSourceReferencingOtherBundle();
 		assertPredicateSignalsThatReferenceIsValid();
 	}

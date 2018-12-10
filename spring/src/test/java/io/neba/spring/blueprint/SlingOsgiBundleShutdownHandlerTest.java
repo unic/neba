@@ -24,13 +24,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,20 +64,20 @@ public class SlingOsgiBundleShutdownHandlerTest {
     }
     
     @Test
-    public void testDispatching() throws Exception {
+    public void testDispatching() {
         sendBundleStoppedEvent();
         verifyDispatcherServletReceivesEvent();
         verifyModelRegistrarReceivesEvent();
     }
 
     @Test
-    public void testRegistrationAtBundleContext() throws Exception {
+    public void testRegistrationAtBundleContext() {
         startListening();
         verifyShutdownHandlerIsRegisteredAsBundleListener();
     }
 
     @Test
-    public void testRemovalFromBundleContext() throws Exception {
+    public void testRemovalFromBundleContext() {
         stopListening();
         verifyShutdownHandlerIsRemovedAsBundleListener();
     }
@@ -88,7 +88,7 @@ public class SlingOsgiBundleShutdownHandlerTest {
         verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier();
     }
 
-    private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() throws Exception {
+    private void verifyBundleIsRemovedFromModelRegistrarAndDispatcherServletUsingEventHandlingBarrier() {
         InOrder inOrder = inOrder(this.modelRegistrar, this.dispatcherServlet);
         inOrder.verify(this.modelRegistrar).unregister(this.bundle);
         inOrder.verify(this.dispatcherServlet).disableMvc(this.bundle);

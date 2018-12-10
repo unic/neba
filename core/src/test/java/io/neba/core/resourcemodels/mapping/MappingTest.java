@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -52,17 +52,17 @@ public class MappingTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testMappingConstructorRequiresNonNullResourcePath() throws Exception {
+    public void testMappingConstructorRequiresNonNullResourcePath() {
         new Mapping(null, this.metaData);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testMappingConstructorRequiresNonNullMetaData() throws Exception {
+    public void testMappingConstructorRequiresNonNullMetaData() {
         new Mapping("/some/resource/path", null);
     }
 
     @Test
-    public void testHashCodeAndEquals() throws Exception {
+    public void testHashCodeAndEquals() {
         Mapping<?> secondMapping = new Mapping<>(this.source, this.metaData);
         assertThat(this.testee.hashCode()).isEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isEqualTo(secondMapping);
@@ -77,13 +77,13 @@ public class MappingTest {
     }
     
     @Test
-    public void testStringRepresentation() throws Exception {
+    public void testStringRepresentation() {
         mappingToString();
         assertMappingAsStringIs("Mapping [/src/path -> " + this.metaData.getTypeName() + "]");
     }
 
     @Test
-    public void testModelTransportation() throws Exception {
+    public void testModelTransportation() {
         setModel();
         assertGetterReturnsOriginalModel();
     }

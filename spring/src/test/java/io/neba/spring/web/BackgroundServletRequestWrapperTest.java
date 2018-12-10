@@ -16,17 +16,16 @@
 package io.neba.spring.web;
 
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
 
 /**
@@ -42,31 +41,27 @@ public class BackgroundServletRequestWrapperTest {
     private BackgroundServletRequestWrapper testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         testee = new BackgroundServletRequestWrapper(request);
 
         doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION"))
                 .when(request)
                 .getSession();
-
-        doThrow(new UnsupportedOperationException("THIS IS AN EXPECTED TEST EXCEPTION"))
-                .when(request)
-                .getSession(anyBoolean());
     }
 
     @Test
-    public void testRetrievalOfExistingSessionYieldsNull() throws Exception {
+    public void testRetrievalOfExistingSessionYieldsNull() {
         getExistingSession();
         assertRetrievedSessionIsNull();
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testPotentialCreationOfSessionYieldsException() throws Exception {
+    public void testPotentialCreationOfSessionYieldsException() {
         testee.getSession();
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testExplicitCreationOfSessionYieldsException() throws Exception {
+    public void testExplicitCreationOfSessionYieldsException() {
         testee.getSession(true);
     }
 

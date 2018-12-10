@@ -45,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
- * A web console plugin for tailing and downloading the CQ log files placed within the sling log directory as configured in the
+ * A web console plugin for tailing and downloading the Sling log files placed within the sling log directory as configured in the
  * Apache Sling Logging Configuration.
  *
  * @author Olaf Otto
@@ -83,7 +83,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
             this.tailServlet.init(getServletConfig());
         } catch (Throwable t) {
             this.logger.error("Unable to initialize the tail servlet - the log viewer will not be available", t);
-            // We have to catch an re-throw here, as Sling tends not to log exceptions thrown in servlet's init() methods.
+            // We have to catch and re-throw here, as Sling tends not to log exceptions thrown in servlet's init() methods.
             throw new ServletException("Unable to initialize the tail servlet - the log viewer will not be available", t);
         } finally {
             currentThread().setContextClassLoader(ccl);
@@ -141,6 +141,10 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         super.doGet(req, res);
     }
 
+    /**
+     * The {@link #DECORATED_OBJECT_FACTORY} is a dependency for using websockets and may not be registered,
+     * depending on the jetty runtime setup. If it is not registered, this method loads and registers it.
+     */
     private void injectDecoratorObjectFactoryIntoServletContext() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         ServletContext servletContext = getServletContext();
         if (servletContext.getAttribute(DECORATED_OBJECT_FACTORY) != null || !isDecoratedObjectFactoryAvailable()) {

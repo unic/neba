@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,34 +38,34 @@ public class ReadOnlyIteratorTest {
     private ReadOnlyIterator<?> testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         this.testee = new ReadOnlyIterator<>(this.iterator);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testIteratorDoesNotAcceptNullValues() throws Exception {
+    public void testIteratorDoesNotAcceptNullValues() {
         new ReadOnlyIterator<>(null);
     }
 
     @Test
-    public void testConvenienceMethodYieldsNewIterator() throws Exception {
+    public void testConvenienceMethodYieldsNewIterator() {
         assertThat(ReadOnlyIterator.readOnly(this.iterator)).isNotNull();
     }
 
     @Test
-    public void testHasNextDelegation() throws Exception {
+    public void testHasNextDelegation() {
         assertIteratorDoesNotHaveNext();
         verifyHasNextWasInvokedOnWrappedIterator();
     }
 
     @Test
-    public void testNextElementDelegation() throws Exception {
+    public void testNextElementDelegation() {
         withNextElement("ELEMENT");
         assertIteratorsNextElementIs("ELEMENT");
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIteratorPreventsModification() throws Exception {
+    public void testIteratorPreventsModification() {
         remove();
     }
 

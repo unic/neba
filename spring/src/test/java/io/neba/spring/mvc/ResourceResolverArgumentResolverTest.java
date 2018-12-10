@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.doReturn;
 
@@ -38,7 +38,7 @@ public class ResourceResolverArgumentResolverTest extends AbstractArgumentResolv
     private ResourceResolverArgumentResolver testee;
 
     @Before
-    public void mockResourceResolver() throws Exception {
+    public void mockResourceResolver() {
         doReturn(this.resourceResolver)
                 .when(getRequest())
                 .getResourceResolver();
@@ -51,7 +51,7 @@ public class ResourceResolverArgumentResolverTest extends AbstractArgumentResolv
     }
 
     @Test
-    public void testResourceResolverIsSupported() throws Exception {
+    public void testResourceResolverIsSupported() {
         assertResolverSupports(ResourceResolver.class);
     }
 

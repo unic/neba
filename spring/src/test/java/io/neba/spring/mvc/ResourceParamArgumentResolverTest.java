@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -38,9 +38,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.apache.sling.api.resource.Resource.RESOURCE_TYPE_NON_EXISTING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -75,10 +75,14 @@ public class ResourceParamArgumentResolverTest {
     private ResourceParamArgumentResolver testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn(this.resourceParam)
                 .when(this.methodParameter)
                 .getParameterAnnotation(eq(ResourceParam.class));
+
+        doReturn("parameterName")
+                .when(this.methodParameter)
+                .getParameterName();
 
         doReturn(this.slingRequest)
                 .when(this.webRequest)
@@ -118,7 +122,7 @@ public class ResourceParamArgumentResolverTest {
     }
 
     @Test
-    public void testResourceParamAnnotationIsSupported() throws Exception {
+    public void testResourceParamAnnotationIsSupported() {
         assertThat(this.testee.supportsParameter(this.methodParameter)).isTrue();
     }
 

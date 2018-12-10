@@ -19,7 +19,7 @@ import io.neba.api.annotations.Filter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -78,6 +78,7 @@ public class ServiceDependencyTest {
 
         createDependency();
         resolveService();
+        assertDependencyWasResolved();
     }
 
     @Test

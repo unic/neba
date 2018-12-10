@@ -20,6 +20,7 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.LookupResult;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
+import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -28,7 +29,11 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Optional;
 
+import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
@@ -61,10 +66,23 @@ public class ResourceToModelAdapter implements AdapterFactory {
         }
 
         Resource resource = (Resource) adaptable;
+        final Key key = key(target);
+
+        Optional<T> cachedModel = this.caches.lookup(resource, key);
+        if (cachedModel == empty()) {
+            // The model cannot be resolved, i.e. adapdation results in null and has been cached before.
+            return null;
+        }
+
+        if (cachedModel != null) {
+            return cachedModel.get();
+        }
 
         Collection<LookupResult> models = this.registry.lookupMostSpecificModels(resource, target);
 
         if (models == null || models.isEmpty()) {
+            // Cache the lookup failure
+            this.caches.store(resource, key, empty());
             return null;
         }
 
@@ -75,14 +93,9 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
         OsgiModelSource<?> source = models.iterator().next().getSource();
 
-        T model = this.caches.lookup(resource, source);
-        if (model != null) {
-            return model;
-        }
+        T model = (T) this.mapper.map(resource, source);
 
-        model = (T) this.mapper.map(resource, source);
-
-        this.caches.store(resource, source, model);
+        this.caches.store(resource, key, of(model));
 
         return model;
     }

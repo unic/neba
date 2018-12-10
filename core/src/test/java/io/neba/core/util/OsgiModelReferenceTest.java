@@ -19,7 +19,7 @@ package io.neba.core.util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +35,7 @@ public class OsgiModelReferenceTest {
 	private long bundleId = 123L;
 
 	@Test
-	public void testEqualsAndHashCodeForBundleId() throws Exception {
+	public void testEqualsAndHashCodeForBundleId() {
 		OsgiModelReference<Object> referenceOne = createReference();
 		OsgiModelReference<Object> referenceTwo = createReference();
 		
@@ -52,7 +52,7 @@ public class OsgiModelReferenceTest {
 	}
 
 	@Test
-	public void testEqualsHandHashCodeDependsOnModelTypeAndNotOnInstance() throws Exception {
+	public void testEqualsHandHashCodeDependsOnModelTypeAndNotOnInstance() {
 		OsgiModelReference<Object> referenceOne = createReference();
 		
 		withNewModel();
@@ -70,25 +70,25 @@ public class OsgiModelReferenceTest {
 	}
 
     @Test
-    public void testEqualsSelf() throws Exception {
+    public void testEqualsSelf() {
         OsgiModelReference<Object> reference = createReference();
         assertThat(reference.equals(reference)).isTrue();
     }
 
     @Test
-    public void testEqualsWithOtherType() throws Exception {
+    public void testEqualsWithOtherType() {
         OsgiModelReference<Object> reference = createReference();
         assertThat(reference.equals("")).isFalse();
     }
 
     @Test
-    public void testEqualsToNull() throws Exception {
+    public void testEqualsToNull() {
         OsgiModelReference<Object> reference = createReference();
         assertThat(reference.equals(null)).isFalse();
     }
 
     @Test
-    public void testToStringRepresentation() throws Exception {
+    public void testToStringRepresentation() {
         assertThat(createReference().toString()).isEqualTo("Model with type \"java.lang.Object\" from bundle with id 123");
     }
 

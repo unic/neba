@@ -17,7 +17,6 @@
 package io.neba.spring.mvc;
 
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -42,13 +41,12 @@ public abstract class AbstractArgumentResolverTest<T extends HandlerMethodArgume
     private Object argument;
 
     @Before
-    public void setUp() throws Exception {
-        doReturn(ResourceResolver.class).when(this.parameter).getParameterType();
+    public void setUp() {
         doReturn(this.request).when(this.nativeWebRequest).getNativeRequest();
     }
 
     @Test
-    public void testUnsupportedArgumentType() throws Exception {
+    public void testUnsupportedArgumentType() {
         withUnsupportedParameterType();
         assertParameterIsUnsupported();
     }

@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>5.0.1</version>
+        <version>5.0.2</version>
     </parent>
 
     <properties>
@@ -110,7 +110,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
@@ -127,7 +127,7 @@
                 <includes>
                     <include>**/*.xml</include>
                 </includes>
-                <!-- Copy resources directly to target to add content to the content packgage plugin's "vault-work" directory -->
+                <!-- Copy resources directly to target to add content to the content package plugin's "vault-work" directory -->
                 <targetPath>${project.build.directory}</targetPath>
             </resource>
             <!-- Process and do not filter all non-xml resources (binaries)  -->
@@ -136,7 +136,7 @@
                 <excludes>
                     <exclude>**/*.xml</exclude>
                 </excludes>
-                <!-- Copy resources directly to target to add content to the content packgage plugin's "vault-work" directory -->
+                <!-- Copy resources directly to target to add content to the content package plugin's "vault-work" directory -->
                 <targetPath>${project.build.directory}</targetPath>
             </resource>
         </resources>
@@ -208,6 +208,7 @@
                     <showImportPackageReport>false</showImportPackageReport>
                     <version>${project.version}</version>
                     <failOnMissingEmbed>true</failOnMissingEmbed>
+                    <filterSource />
                     <filters>
                         <filter>
                             <mode>replace</mode>
@@ -222,12 +223,14 @@
                         <id>default-package</id>
                         <phase>package</phase>
                         <goals>
+                            <goal>generate-metadata</goal>
                             <goal>package</goal>
                         </goals>
                         <configuration>
                             <packageType>container</packageType>
                             <finalName>${project.artifactId}-${project.version}-spring</finalName>
                             <workDirectory>${project.build.directory}/filefault-work-spring</workDirectory>
+
                             <properties>
                                 <description>Packages NEBA along with the NEBA Spring integration and the Spring Framework.</description>
                             </properties>
@@ -285,6 +288,7 @@
                         <id>create-core-aem-distribution</id>
                         <phase>package</phase>
                         <goals>
+                            <goal>generate-metadata</goal>
                             <goal>package</goal>
                         </goals>
                         <configuration>

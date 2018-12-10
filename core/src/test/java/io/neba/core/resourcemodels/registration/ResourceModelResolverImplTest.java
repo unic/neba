@@ -18,14 +18,8 @@ package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
-import io.neba.core.resourcemodels.registration.LookupResult;
-import io.neba.core.resourcemodels.registration.ModelRegistry;
-import io.neba.core.resourcemodels.registration.ResourceModelResolverImpl;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -34,16 +28,20 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -86,15 +84,15 @@ public class ResourceModelResolverImplTest {
             return null;
         },
 
-        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+                lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
                 .when(this.caches)
-                .store(isA(Resource.class), isA(OsgiModelSource.class), any());
+                .store(isA(Resource.class), isA(Key.class), any());
 
         doAnswer(lookupFromCache)
                 .when(this.caches)
-                .lookup(isA(Resource.class), isA(OsgiModelSource.class));
+                .lookup(isA(Resource.class), isA(Key.class));
 
         doReturn(this.resourceResolver)
                 .when(this.resource)
@@ -119,10 +117,6 @@ public class ResourceModelResolverImplTest {
         when(this.osgiModelSource.getModel())
                 .thenReturn(this.model);
 
-        doReturn(this.model.getClass())
-                .when(this.osgiModelSource)
-                .getModelType();
-
         when(this.registry.lookupMostSpecificModels(eq(this.resource)))
                 .thenReturn(lookupResults);
 
@@ -131,55 +125,55 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelWithModelNameRequiresResource() throws Exception {
+    public void testResolveMostSpecificModelWithModelNameRequiresResource() {
         this.testee.resolveMostSpecificModelWithName(null, "modelName");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelWithModelNameRequiresModelName() throws Exception {
+    public void testResolveMostSpecificModelWithModelNameRequiresModelName() {
         this.testee.resolveMostSpecificModelWithName(mock(Resource.class), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelRequiresResource() throws Exception {
+    public void testResolveMostSpecificModelRequiresResource() {
         this.testee.resolveMostSpecificModel(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testResolveMostSpecificModelsIncludingBaseTypesRequiresResource() throws Exception {
+    public void testResolveMostSpecificModelsIncludingBaseTypesRequiresResource() {
         this.testee.resolveMostSpecificModelIncludingModelsForBaseTypes(null);
     }
 
     @Test
-    public void testResolutionOfSpecificModelIncludingBaseTypes() throws Exception {
+    public void testResolutionOfSpecificModelIncludingBaseTypes() {
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
 
     @Test
-    public void testResolutionOfSpecificModelWithModelForNtUnstructured() throws Exception {
+    public void testResolutionOfSpecificModelWithModelForNtUnstructured() {
         withModelFoundForResourceType("nt:unstructured");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
-    public void testResolutionOfSpecificModelWithModelForNtBase() throws Exception {
+    public void testResolutionOfSpecificModelWithModelForNtBase() {
         withModelFoundForResourceType("nt:base");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
-    public void testResolutionOfSpecificModelWithModelForSyntheticResourceRoot() throws Exception {
+    public void testResolutionOfSpecificModelWithModelForSyntheticResourceRoot() {
         withModelFoundForResourceType(SYNTHETIC_RESOURCETYPE_ROOT);
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         assertResolvedModelIsNull();
     }
 
     @Test
-    public void testResolutionOfAnyModelWithModelForNtUnstructured() throws Exception {
+    public void testResolutionOfAnyModelWithModelForNtUnstructured() {
         withModelFoundForResourceType("nt:unstructured");
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
@@ -187,7 +181,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithModelForNtBase() throws Exception {
+    public void testResolutionOfAnyModelWithModelForNtBase() {
         withModelFoundForResourceType("nt:base");
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
@@ -195,7 +189,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithModelForSyntheticResourceRoot() throws Exception {
+    public void testResolutionOfAnyModelWithModelForSyntheticResourceRoot() {
         withModelFoundForResourceType(SYNTHETIC_RESOURCETYPE_ROOT);
         provideMostSpecificModelIncludingBaseTypes();
         verifyResourceIsMappedToModel();
@@ -203,47 +197,79 @@ public class ResourceModelResolverImplTest {
     }
 
     @Test
-    public void testResolutionOfAnyModelWithSpecificModelName() throws Exception {
+    public void testResolutionOfAnyModelWithSpecificModelName() {
         provideMostSpecificModelWithModelName("unitTestModel");
-        verifyRegistryIsQueriedWithModelName();
+        verifyRegistryWasQueriedOnceWithModelName();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
 
     @Test
-    public void testResolutionOfAnyModelWithSpecificModelNameDisregardsBasicTypes() throws Exception {
+    public void testResolutionOfAnyModelWithSpecificModelNameDisregardsBasicTypes() {
         withModelFoundForResourceType("nt:base");
         provideMostSpecificModelWithModelName("unitTestModel");
-        verifyRegistryIsQueriedWithModelName();
+        verifyRegistryWasQueriedOnceWithModelName();
         verifyResourceIsMappedToModel();
         assertResolvedModelIsReturned();
     }
 
     @Test
-    public void testSubsequentResolutionOfSameResourceWithDifferentResourceTypeIsNotServedFromCache() throws Exception {
+    public void testSubsequentResolutionOfSameResourceWithDifferentResourceTypeIsNotServedFromCache() {
         withResourcePath("/resource/path");
         withResourceType("resource/type/one");
 
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModel();
 
         withResourceType("resource/type/two");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModelAgain();
     }
 
     @Test
-    public void testSubsequentResolutionOfSameResourceWithSameResourceTypeIsServedFromCache() throws Exception {
+    public void testSubsequentResolutionOfSameResourceWithSameResourceTypeIsServedFromCache() {
         withResourcePath("/resource/path");
 
         withResourceType("resource/type/one");
 
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModel();
 
         withResourceType("resource/type/one");
-        provideMostSpecificModel();
+        resolveMostSpecificModel();
         verifyResourceIsMappedToModel();
+    }
+
+    @Test
+    public void testNoModelIsResolvedIfNoModelIsAvailable() {
+        withoutAnyModelInRegistry();
+        resolveMostSpecificModel();
+        assertResolvedModelIsNull();
+    }
+
+    @Test
+    public void testNoModelIsResolvedIfMoreThanOneModelIsAvailable() {
+        withTwoResolvedModels();
+        resolveMostSpecificModel();
+        assertResolvedModelIsNull();
+    }
+
+    @Test
+    public void testRegistryIsNotQueriedWhenLookupFailureIsCached() {
+        withoutAnyModelInRegistry();
+        resolveMostSpecificModel();
+        verifyRegistryWasQueriedOnceWithoutModelName();
+
+        resolveMostSpecificModel();
+        verifyRegistryWasQueriedOnceWithoutModelName();
+    }
+
+    private void withTwoResolvedModels() {
+        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(asList(mock(LookupResult.class), mock(LookupResult.class)));
+    }
+
+    private void withoutAnyModelInRegistry() {
+        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(null);
     }
 
     private void withResourceType(String type) {
@@ -254,8 +280,12 @@ public class ResourceModelResolverImplTest {
         doReturn(path).when(this.resource).getPath();
     }
 
-    private void verifyRegistryIsQueriedWithModelName() {
+    private void verifyRegistryWasQueriedOnceWithModelName() {
         verify(this.registry).lookupMostSpecificModels(eq(this.resource), anyString());
+    }
+
+    private void verifyRegistryWasQueriedOnceWithoutModelName() {
+        verify(this.registry).lookupMostSpecificModels(eq(this.resource));
     }
 
     private void provideMostSpecificModelWithModelName(String name) {
@@ -266,7 +296,7 @@ public class ResourceModelResolverImplTest {
         this.resolutionResult = this.testee.resolveMostSpecificModelIncludingModelsForBaseTypes(this.resource);
     }
 
-    private void provideMostSpecificModel() {
+    private void resolveMostSpecificModel() {
         this.resolutionResult = this.testee.resolveMostSpecificModel(this.resource);
     }
 
@@ -295,7 +325,7 @@ public class ResourceModelResolverImplTest {
      */
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
-        OsgiModelSource<?> modelSource = (OsgiModelSource<?>) invocation.getArguments()[1];
-        return new Key(resource.getPath(), modelSource.getModelType(), resource.getResourceType(), resource.getResourceResolver().hashCode());
+        Key key = (Key) invocation.getArguments()[1];
+        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

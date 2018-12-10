@@ -24,13 +24,13 @@ import org.assertj.core.api.AbstractAssert;
  * @author Olaf Otto
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ConcurrentMultivalueMapAssert extends AbstractAssert<ConcurrentMultivalueMapAssert, ConcurrentDistinctMultiValueMap> {
+public class ConcurrentMultiValueMapAssert extends AbstractAssert<ConcurrentMultiValueMapAssert, ConcurrentDistinctMultiValueMap> {
 
-    public static ConcurrentMultivalueMapAssert assertThat(ConcurrentDistinctMultiValueMap<?, ?> map) {
-        return new ConcurrentMultivalueMapAssert(map);
+    public static ConcurrentMultiValueMapAssert assertThat(ConcurrentDistinctMultiValueMap<?, ?> map) {
+        return new ConcurrentMultiValueMapAssert(map);
     }
 
-    public ConcurrentMultivalueMapAssert contains(Object key, Object value) {
+    public ConcurrentMultiValueMapAssert contains(Object key, Object value) {
         Collection<?> values = valuesForKey(key);
         if (!values.contains(value)) {
             failWithMessage(values + " does not contain the value " + value + ".");
@@ -38,7 +38,7 @@ public class ConcurrentMultivalueMapAssert extends AbstractAssert<ConcurrentMult
         return myself;
     }
 
-    public ConcurrentMultivalueMapAssert contains(Object key, Object... values) {
+    public ConcurrentMultiValueMapAssert contains(Object key, Object... values) {
         Collection<?> containedValues = valuesForKey(key);
         if (!containedValues.containsAll(Arrays.asList(values))) {
             failWithMessage(Arrays.toString(values) + " do not contain the values " + Arrays.toString(values) + ".");
@@ -46,7 +46,7 @@ public class ConcurrentMultivalueMapAssert extends AbstractAssert<ConcurrentMult
         return myself;
     }
 
-    public ConcurrentMultivalueMapAssert containsOnly(Object key, Object... values) {
+    public ConcurrentMultiValueMapAssert containsOnly(Object key, Object... values) {
         Collection<?> containedValues = valuesForKey(key);
         if (containedValues.size() != values.length || !containedValues.containsAll(Arrays.asList(values))) {
             failWithMessage(Arrays.toString(values) + " do not only contain " + Arrays.toString(values) + ".");
@@ -54,7 +54,7 @@ public class ConcurrentMultivalueMapAssert extends AbstractAssert<ConcurrentMult
         return myself;
     }
 
-    ConcurrentMultivalueMapAssert containsExactlyOneValueFor(Object key) {
+    ConcurrentMultiValueMapAssert containsExactlyOneValueFor(Object key) {
         Collection<?> values = valuesOrFail(key);
         if (values.size() != 1) {
             failWithMessage("Expected exactly one value for " + key + ", but got " + values + ".");
@@ -62,7 +62,7 @@ public class ConcurrentMultivalueMapAssert extends AbstractAssert<ConcurrentMult
         return myself;
     }
 
-    ConcurrentMultivalueMapAssert doesNotContain(Object key) {
+    ConcurrentMultiValueMapAssert doesNotContain(Object key) {
         if (this.actual.get(key) != null) {
             failWithMessage(this.actual + " does contains the key " + key + ".");
         }
@@ -73,8 +73,8 @@ public class ConcurrentMultivalueMapAssert extends AbstractAssert<ConcurrentMult
         return valuesOrFail(key);
     }
 
-    private ConcurrentMultivalueMapAssert(ConcurrentDistinctMultiValueMap map) {
-        super(map, ConcurrentMultivalueMapAssert.class);
+    private ConcurrentMultiValueMapAssert(ConcurrentDistinctMultiValueMap map) {
+        super(map, ConcurrentMultiValueMapAssert.class);
     }
 
     private Collection<?> valuesOrFail(Object key) {

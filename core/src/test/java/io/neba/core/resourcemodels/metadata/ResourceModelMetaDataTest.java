@@ -21,7 +21,7 @@ import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
 
@@ -77,13 +77,13 @@ public class ResourceModelMetaDataTest {
     }
 
     @Test
-    public void testMappableFieldsAreInherited() throws Exception {
+    public void testMappableFieldsAreInherited() {
         createMetadataFor(ExtendedTestResourceModel.class);
         assertMetadataEqualsMetadataOf(TestResourceModel.class);
     }
 
     @Test
-    public void testToStringRepresentation() throws Exception {
+    public void testToStringRepresentation() {
         assertThat(this.testee.toString()).isEqualTo("ResourceModelMetaData[" + TestResourceModel.class.getName() + "]");
     }
 

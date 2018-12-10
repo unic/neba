@@ -35,7 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Array;
@@ -55,9 +55,9 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -127,7 +127,6 @@ public class FieldValueMappingCallbackTest {
 
         doReturn(emptyList()).when(this.annotatedFieldMappers).get(isA(MappedFieldMetaData.class));
         doReturn(this.path).when(this.mappedFieldMetadata).getPath();
-        doReturn(this.path).when(this.path).resolve(any());
     }
 
     /**
@@ -669,7 +668,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
-     * Resources targeted by references may be unresolvable, i.e. their resolution or adaptaion results
+     * Resources targeted by references may be unresolvable, i.e. their resolution or adaptation results
      * in a <code>null</code> value. In this case, the <code>null</code> value must not
      * be stored in the injected collection of references.
      */
@@ -806,6 +805,34 @@ public class FieldValueMappingCallbackTest {
         assertMappedFieldValueIsCollectionContainingTargetValue();
     }
 
+    /**
+     * Tests that the resolved children default to an empty list if the parent
+     * resource cannot ne resolved, e.g. when the field is a reference
+     * pointing to a nonexistent resource.
+     *
+     * <p/>
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         &#64;{@link io.neba.api.annotations.Reference}
+     *         &#64;{@link io.neba.api.annotations.Children}
+     *         private List&lt;ModelForChild&gt; children;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testChildrenAnnotationWithUnresolvableParentYieldsEmptyCollection() {
+        withField(Collection.class);
+        withCollectionTypedField();
+        withInstantiableCollectionTypedField();
+        withTypeParameter(TestResourceModel.class);
+        withChildrenAnnotationPresent();
+        withReferenceAnnotationPresent();
+
+        mapField();
+
+        assertMappedFieldValueIsEmptyCollection();
+    }
 
     /**
      * Test the retrieval of the children of the resource targeted by the
@@ -1416,7 +1443,6 @@ public class FieldValueMappingCallbackTest {
 
     private void withParentOfTargetResource(String path) {
         this.parentOfResourceTargetedByMapping = mock(Resource.class);
-        when(this.parentOfResourceTargetedByMapping.getPath()).thenReturn(path);
         when(this.resourceResolver.getResource(eq(this.resource), eq(path)))
                 .thenReturn(this.parentOfResourceTargetedByMapping);
         @SuppressWarnings("unchecked")

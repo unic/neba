@@ -16,15 +16,16 @@
 
 package io.neba.core.util;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
+import static io.neba.core.util.NodeUtil.getPrimaryType;
 import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
 
 /**
@@ -37,9 +38,9 @@ import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
  * falls back to the {@link javax.jcr.Node#getPrimaryNodeType() primary node type}
  * if no "sling:resourceType" property is set; however the node type hierarchy
  * is covered by the {@link NodeTypeHierarchyIterator} and is not used by this iterator.
- * 
- * @see ResourceResolver#getParentResourceType(String)
+ *
  * @author Olaf Otto
+ * @see ResourceResolver#getParentResourceType(String)
  */
 public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable<String> {
     /**
@@ -80,7 +81,7 @@ public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable
                 // However, the resourceType provided by resource#getResourceType could be the node type since
                 // Resource#getResourceType falls back to the node type of no sling:resourceType is specified.
                 try {
-                    String nodeType = node.getPrimaryNodeType().getName();
+                    String nodeType = getPrimaryType(node);
                     if (!nodeType.equals(resourceType)) {
                         this.currentResourceType = resourceType;
                     }
@@ -122,7 +123,7 @@ public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable
      * This iterator provides a virtual resource type root
      * common to all synthetic resources to enable mapping to all
      * resources including synthetic ones.
-     * 
+     *
      * @see io.neba.api.Constants#SYNTHETIC_RESOURCETYPE_ROOT
      */
     private boolean isProvideSyntheticResourceRoot() {

@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -36,7 +36,9 @@ import java.util.List;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apache.commons.lang3.reflect.FieldUtils.getDeclaredField;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
@@ -78,7 +80,7 @@ public class AnnotatedFieldMappersTest {
     private AnnotatedFieldMappers testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn(CustomAnnotation1.class)
                 .when(this.mapper1)
                 .getAnnotationType();
@@ -147,27 +149,27 @@ public class AnnotatedFieldMappersTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testQueryingWithNullMetaData() throws Exception {
+    public void testQueryingWithNullMetaData() {
         this.testee.get(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAdditionOfNullMapper() throws Exception {
+    public void testAdditionOfNullMapper() {
         bind(null);
     }
 
     @Test
-    public void testRemovalOfNullMapperDoesNotCauseException() throws Exception {
+    public void testRemovalOfNullMapperDoesNotCauseException() {
         unbind(null);
     }
 
     @Test
-    public void testEmptyMappers() throws Exception {
+    public void testEmptyMappers() {
         assertNoMapperExistFor(this.metadata1);
     }
 
     @Test
-    public void testMapperResolutionWithDisjointMappers() throws Exception {
+    public void testMapperResolutionWithDisjointMappers() {
         bind(this.mapper1);
         bind(this.mapper2);
 
@@ -178,7 +180,7 @@ public class AnnotatedFieldMappersTest {
     }
 
     @Test
-    public void testMapperResolutionWithOverlappingMappers() throws Exception {
+    public void testMapperResolutionWithOverlappingMappers() {
         withMapperSupporting(this.mapper1, Resource.class);
 
         bind(this.mapper1);
@@ -190,20 +192,16 @@ public class AnnotatedFieldMappersTest {
     }
 
     @Test
-    public void testMappersForBoxedTypesAreaAppliedToTheirPrimitiveVariants() throws Exception {
+    public void testMappersForBoxedTypesAreaAppliedToTheirPrimitiveVariants() {
         bind(this.mapper1);
 
         doReturn(Boolean.class).when(this.mapper1).getFieldType();
         doReturn(boolean.class).when(this.metadata1).getType();
         assertMetadataHasMappers(this.metadata1, this.mapper1);
-
-        doReturn(Integer.class).when(this.mapper1).getFieldType();
-        doReturn(int.class).when(this.metadata1).getType();
-        assertMetadataHasMappers(this.metadata1, this.mapper1);
     }
 
     @Test
-    public void testMapperRemoval() throws Exception {
+    public void testMapperRemoval() {
         assertNoMapperExistFor(this.metadata1);
 
         bind(this.mapper1);
@@ -214,7 +212,7 @@ public class AnnotatedFieldMappersTest {
     }
 
     @Test
-    public void testLookupCache() throws Exception {
+    public void testLookupCache() {
         bind(this.mapper1);
 
         assertMetadataHasMappers(this.metadata1, this.mapper1);
@@ -226,7 +224,7 @@ public class AnnotatedFieldMappersTest {
     }
 
     @Test
-    public void testAdditionAndRemovalOfMappersForSameAnnotationType() throws Exception {
+    public void testAdditionAndRemovalOfMappersForSameAnnotationType() {
         bind(this.mapper2);
         bind(this.mapper3);
 
@@ -256,11 +254,11 @@ public class AnnotatedFieldMappersTest {
     }
 
     private void assertMetadataHasMappers(MappedFieldMetaData metadata, AnnotatedFieldMapper... mappers) {
-        assertThat(this.testee.get(metadata)).extracting("mapper").containsOnly(mappers);
+        assertThat(this.testee.get(metadata)).extracting("mapper").containsOnly((Object[]) mappers);
     }
 
     private void assertMetadataHasAnnotations(MappedFieldMetaData metadata, Annotation... annotations) {
-        assertThat(this.testee.get(metadata)).extracting("annotation").containsOnly(annotations);
+        assertThat(this.testee.get(metadata)).extracting("annotation").containsOnly((Object[]) annotations);
     }
 
     private void bind(AnnotatedFieldMapper mapper) {

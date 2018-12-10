@@ -18,7 +18,7 @@ package io.neba.core.util;
 import org.junit.Test;
 
 
-import static io.neba.core.util.StringUtil.append;
+import static io.neba.core.util.StringUtil.appendToAll;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -27,24 +27,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StringUtilTest {
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullValueForAppend() throws Exception {
-        append(null, new String[]{});
+    public void testNullValueForAppend() {
+        appendToAll(null, new String[]{});
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullValueForAppendTo() throws Exception {
-        append("", null);
+    public void testNullValueForAppendTo() {
+        appendToAll("", null);
     }
 
     @Test
-    public void testNullValuesInAppendToRemainNull() throws Exception {
-        assertThat(append("", new String[]{null, null}))
+    public void testNullValuesInAppendToRemainNull() {
+        assertThat(appendToAll("", new String[]{null, null}))
                    .containsOnly(null, null);
     }
 
     @Test
-    public void testAppending() throws Exception {
-        assertThat(append("/test", new String[]{"/one", "", "/two"}))
+    public void testAppending() {
+        assertThat(appendToAll("/test", new String[]{"/one", "", "/two"}))
                 .isEqualTo(new String[]{"/one/test", "/test", "/two/test"});
 
     }

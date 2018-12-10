@@ -19,7 +19,7 @@ package io.neba.core.util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -37,7 +37,7 @@ public class BundleUtilTest {
 	private String displayName;
 
     @Test
-	public void testDisplayNameCreation() throws Exception {
+	public void testDisplayNameCreation() {
 		withVersion("1.0.0");
 		withSymbolicName("symbolic name");
 
@@ -47,7 +47,7 @@ public class BundleUtilTest {
 	}
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullBundle() throws Exception {
+    public void testHandlingOfNullBundle() {
         withBundle(null);
         getDisplayNameOfBundle();
     }

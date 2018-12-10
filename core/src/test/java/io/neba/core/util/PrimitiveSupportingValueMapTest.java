@@ -24,11 +24,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -52,42 +52,42 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     @Test
-    public void testPrimitiveBooleanSupport() throws Exception {
+    public void testPrimitiveBooleanSupport() {
         with(true);
         get(boolean.class);
         assertResultIs(true);
     }
 
     @Test
-    public void testPrimitiveIntSupport() throws Exception {
+    public void testPrimitiveIntSupport() {
         with(1);
         get(int.class);
         assertResultIs(1);
     }
 
     @Test
-    public void testPrimitiveLongSupport() throws Exception {
+    public void testPrimitiveLongSupport() {
         with(1L);
         get(long.class);
         assertResultIs(1L);
     }
 
     @Test
-    public void testPrimitiveDoubleSupport() throws Exception {
+    public void testPrimitiveDoubleSupport() {
         with(1D);
         get(double.class);
         assertResultIs(1D);
     }
 
     @Test
-    public void testPrimitiveFloatSupport() throws Exception {
+    public void testPrimitiveFloatSupport() {
         with(1F);
         get(float.class);
         assertResultIs(1F);
     }
 
     @Test
-    public void testPrimitiveByteSupport() throws Exception {
+    public void testPrimitiveByteSupport() {
         byte b = 1;
         with(b);
         get(byte.class);
@@ -95,7 +95,7 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     @Test
-    public void testPrimitiveCharSupport() throws Exception {
+    public void testPrimitiveCharSupport() {
         char c = 1;
         with(c);
         get(char.class);
@@ -103,7 +103,7 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     @Test
-    public void testPrimitiveShortSupport() throws Exception {
+    public void testPrimitiveShortSupport() {
         short s = 1;
         with(s);
         get(short.class);
@@ -111,63 +111,63 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     @Test
-    public void testDefaultValueIsNotUsedIfValueExists() throws Exception {
+    public void testDefaultValueIsNotUsedIfValueExists() {
         with(1F);
         get(2F);
         assertResultIs(1F);
     }
 
     @Test
-    public void testFallbackValueIsUsedIfValueDoesNotExist() throws Exception {
+    public void testFallbackValueIsUsedIfValueDoesNotExist() {
         get(2F);
         assertResultIs(2F);
     }
 
     @Test
-    public void testUntypedGetWithValue() throws Exception {
+    public void testUntypedGetWithValue() {
         with("JUnitTestValue");
         get();
         assertResultIs("JUnitTestValue");
     }
 
     @Test
-    public void testKeySetDelegation() throws Exception {
+    public void testKeySetDelegation() {
         withKeySet("key");
         assertKeySetIs("key");
     }
 
     @Test
-    public void testValuesDelegation() throws Exception {
+    public void testValuesDelegation() {
         withValues("value");
         assertValuesAre("value");
     }
 
     @Test
-    public void testEntrySetDelegation() throws Exception {
+    public void testEntrySetDelegation() {
         withEntries("key", "value");
         assertEntriesAre("key", "value");
     }
 
     @Test
-    public void testIsEmpty() throws Exception {
+    public void testIsEmpty() {
         withEmptyWrappedValueMap();
         assertMapIsEmpty();
     }
 
     @Test
-    public void testSize() throws Exception {
+    public void testSize() {
         withWrappedSize(12);
         assertSizeIs(12);
     }
 
     @Test
-    public void testContainsKey() throws Exception {
+    public void testContainsKey() {
         withWrappedContainingKey("key");
         assertKeyIsContained("key");
     }
 
     @Test
-    public void testContainsValue() throws Exception {
+    public void testContainsValue() {
         withWrappedContainingValue("value");
         assertValueIsContained("value");
     }
@@ -241,38 +241,38 @@ public class PrimitiveSupportingValueMapTest {
     }
 
     @Test
-    public void testUntypedGetWithoutValue() throws Exception {
+    public void testUntypedGetWithoutValue() {
         get();
         assertResultIsNull();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullArgumentToConstructor() throws Exception {
+    public void testHandlingOfNullArgumentToConstructor() {
         new PrimitiveSupportingValueMap(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullArgumentKeyToGetWithClass() throws Exception {
+    public void testNullArgumentKeyToGetWithClass() {
         this.testee.get(null, String.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullArgumentClassToGetWithClass() throws Exception {
+    public void testNullArgumentClassToGetWithClass() {
         this.testee.get("test", null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullArgumentKeyToGetWithDefaultValue() throws Exception {
+    public void testNullArgumentKeyToGetWithDefaultValue() {
         this.testee.get(null, "defaultValue");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullArgumentDefaultValueKeyToGetWithDefaultValue() throws Exception {
+    public void testNullArgumentDefaultValueKeyToGetWithDefaultValue() {
         this.testee.get("test", (Object) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullArgumentToSimpleGet() throws Exception {
+    public void testNullArgumentToSimpleGet() {
         this.testee.get(null);
     }
 

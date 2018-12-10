@@ -26,10 +26,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -44,16 +42,14 @@ import java.util.HashMap;
 
 import static java.util.Locale.ENGLISH;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.springframework.web.context.request.RequestContextHolder.resetRequestAttributes;
 import static org.springframework.web.context.request.RequestContextHolder.setRequestAttributes;
-import static org.springframework.web.servlet.DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE;
 
 /**
  * @author Olaf Otto
@@ -69,8 +65,6 @@ public class NebaViewResolverTest {
     @Mock
     private RequestDispatcher dispatcher;
     @Mock
-    private FlashMapManager flashMapManager;
-    @Mock
     private ServletResolver servletResolver;
 
     private View resolvedView;
@@ -79,7 +73,7 @@ public class NebaViewResolverTest {
     private NebaViewResolver testee;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         doReturn("")
                 .when(this.request)
                 .getContextPath();
@@ -88,39 +82,30 @@ public class NebaViewResolverTest {
                 .when(this.request)
                 .getRequestDispatcher(anyString());
 
-        doReturn(this.flashMapManager)
-                .when(this.request)
-                .getAttribute(FLASH_MAP_MANAGER_ATTRIBUTE);
-
         doReturn(this.resourceResolver)
                 .when(this.request)
                 .getResourceResolver();
-
-        Answer<Object> original = invocation -> invocation.getArguments()[0];
-        doAnswer(original)
-                .when(this.response)
-                .encodeRedirectURL(anyString());
 
         setRequestAttributes(new ServletRequestAttributes(this.request));
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         resetRequestAttributes();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testConstructorRequiresNonNullServletResolver() throws Exception {
+    public void testConstructorRequiresNonNullServletResolver() {
         new NebaViewResolver(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullViewNamesAreNotTolerated() throws Exception {
+    public void testNullViewNamesAreNotTolerated() {
         this.testee.resolveViewName(null, ENGLISH);
     }
 
     @Test
-    public void testNullLocaleIstTolerated() throws Exception {
+    public void testNullLocaleIstTolerated() {
         this.testee.resolveViewName("viewName", null);
     }
 
@@ -147,7 +132,7 @@ public class NebaViewResolverTest {
      * to allow other view resolvers to provide a view.
      */
     @Test
-    public void testUnresolvableViewYieldsNull() throws Exception {
+    public void testUnresolvableViewYieldsNull() {
         resolve("nonexistent/view");
         assertViewIsNull();
     }
@@ -158,7 +143,7 @@ public class NebaViewResolverTest {
      * a view for this script.
      */
     @Test
-    public void testResolutionOfSlingScriptWithoutInheritance() throws Exception {
+    public void testResolutionOfSlingScriptWithoutInheritance() {
         withDefaultScriptForType("app/components/myComponent");
 
         resolve("app/components/myComponent");
@@ -173,7 +158,7 @@ public class NebaViewResolverTest {
      * the view resolver must attempt to resolve the default script for the super type.s
      */
     @Test
-    public void testResolutionOfInheritedSlingScript() throws Exception {
+    public void testResolutionOfInheritedSlingScript() {
         withSuperType("app/components/myComponent", "app/components/superType");
         withDefaultScriptForType("app/components/superType");
 
@@ -189,7 +174,7 @@ public class NebaViewResolverTest {
      * which must be tolerated and result in no view.
      */
     @Test
-    public void testHandlingOfSlingExceptionDuringServletResolution() throws Exception {
+    public void testHandlingOfSlingExceptionDuringServletResolution() {
         withExceptionDuringServletResolution();
 
         resolve("some/type");
@@ -203,7 +188,7 @@ public class NebaViewResolverTest {
      * view resolvers.
      */
     @Test
-    public void testNebaViewResolverOrderIsDirectlyAboveSpringsDefaultResolverOrder() throws Exception {
+    public void testNebaViewResolverOrderIsDirectlyAboveSpringsDefaultResolverOrder() {
         assertThat(this.testee.getOrder()).isEqualTo(new InternalResourceViewResolver().getOrder() - 1);
     }
 
@@ -249,7 +234,7 @@ public class NebaViewResolverTest {
         assertThat(this.resolvedView).isInstanceOf(type);
     }
 
-    private void resolve(String viewName) throws Exception {
+    private void resolve(String viewName) {
         this.resolvedView = this.testee.resolveViewName(viewName, null);
     }
 }
