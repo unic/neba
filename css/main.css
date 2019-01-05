@@ -236,7 +236,6 @@ html, body {
 
 .up-to-three-columns, .up-to-two-columns {
     display: grid;
-    grid-template-rows: 50%;
 }
 
 html {
