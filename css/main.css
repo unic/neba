@@ -345,6 +345,10 @@ figure.listing figcaption {
     border-top: 1px solid #f0f0f0
 }
 
+.highlight {
+    overflow-x: scroll;
+}
+
 .highlight code,
 .highlight pre {
     color: black;
@@ -352,9 +356,7 @@ figure.listing figcaption {
     text-shadow: 0 1px white;
     font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
     text-align: left;
-    white-space: pre-wrap;
     word-spacing: normal;
-    word-break: break-all;
     word-wrap: normal;
     line-height: 1.5;
 
@@ -389,7 +391,7 @@ figure.listing figcaption {
 
 /* Code blocks */
 .highlight pre {
-    padding: 1em;
+    padding: 0 1em 1em 1em;
     margin: 1em 0 0 0;
     overflow: auto;
 }
