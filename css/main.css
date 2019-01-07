@@ -21,6 +21,10 @@ html, body {
         background-position: 0 2.5em;
     }
 
+    .up-to-three-columns, .up-to-two-columns {
+        display: grid;
+    }
+
     .up-to-two-columns {
         grid-template-columns: 50% 50%;
     }
@@ -89,6 +93,10 @@ html, body {
 @media (max-width: 1599px) and (min-width: 1000px) {
     html {
         background-position: 0 2.5em;
+    }
+
+    .up-to-three-columns, .up-to-two-columns {
+        display: grid;
     }
 
     .up-to-three-columns {
@@ -234,10 +242,6 @@ html, body {
   General design
  */
 
-.up-to-three-columns, .up-to-two-columns {
-    display: grid;
-}
-
 html {
     font-family: 'Barlow', sans-serif;
     font-size: 20px;
@@ -346,7 +350,7 @@ figure.listing figcaption {
 }
 
 .highlight {
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .highlight code,
@@ -393,7 +397,6 @@ figure.listing figcaption {
 .highlight pre {
     padding: 0 1em 1em 1em;
     margin: 1em 0 0 0;
-    overflow: auto;
 }
 
 /* Rouge Highlighter (pygments css) */
