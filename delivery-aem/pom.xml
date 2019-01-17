@@ -203,7 +203,7 @@
             <!-- Build the content package including bundles with customized manifests (those are already copied to the target/vault-work directory) -->
             <plugin>
                 <groupId>org.apache.jackrabbit</groupId>
-                <artifactId>filevault-package-maven-plugin</artifactId>
+                    <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
                     <showImportPackageReport>false</showImportPackageReport>
                     <version>${project.version}</version>
@@ -215,8 +215,7 @@
                             <root>/apps/neba</root>
                         </filter>
                     </filters>
-                    <thumbnailImage>${project.build.directory}/filefault-work/META-INF/vault/definition/thumbnail.png
-                    </thumbnailImage>
+                    <thumbnailImage>${project.build.directory}/filefault-work/META-INF/vault/definition/thumbnail.png</thumbnailImage>
                 </configuration>
                 <executions>
                     <execution>
@@ -230,10 +229,12 @@
                             <packageType>container</packageType>
                             <finalName>${project.artifactId}-${project.version}-spring</finalName>
                             <workDirectory>${project.build.directory}/filefault-work-spring</workDirectory>
-
+                            <name>io.neba.neba-delivery-aem-spring</name>
                             <properties>
-                                <description>Packages NEBA along with the NEBA Spring integration and the Spring Framework.</description>
+                                <comment>NEBA with Spring support</comment>
+                                <description>Packages NEBA core and API bundles along with the NEBA Spring integration and the Spring Framework.</description>
                             </properties>
+
                             <embeddeds>
                                 <!-- Spring dependencies shall start first at start level 16 -->
                                 <embedded>
@@ -292,6 +293,10 @@
                             <goal>package</goal>
                         </goals>
                         <configuration>
+                            <properties>
+                                <comment>NEBA core</comment>
+                                <description>Packages the NEBA core and API bundles.</description>
+                            </properties>
                             <packageType>container</packageType>
                             <workDirectory>${project.build.directory}/filefault-work</workDirectory>
                             <embeddeds>
