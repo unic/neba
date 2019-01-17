@@ -113,7 +113,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     @Override
     protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         writeScriptIncludes(res);
-        writeHead(res);
+        writeHead(req, res);
     }
 
     @Override
@@ -149,10 +149,12 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         }
     }
 
-    private void writeHead(HttpServletResponse res) throws IOException {
+    private void writeHead(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String requestedFile = req.getParameter("file");
         StringBuilder options = new StringBuilder(1024);
         this.logFiles.resolveLogFiles().forEach(file ->
                 options.append("<option value=\"").append(file.getAbsolutePath()).append("\" ")
+                        .append(file.getAbsolutePath().equals(requestedFile) ? "selected " : "")
                         .append("title=\"").append(file.getAbsolutePath()).append("\">")
                         .append(file.getParentFile().getName()).append('/').append(file.getName())
                         .append("</option>"));
@@ -200,9 +202,10 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     }
 
     private void writeScriptIncludes(HttpServletResponse response) throws IOException {
-        response.getWriter().write("<script src=\"" + getLabel() + "/static/script.js\"></script>");
+        response.getWriter().write("<script src=\"" + getLabel() + "/static/chosen.jquery.min.js\"></script>");
         response.getWriter().write("<script src=\"" + getLabel() + "/static/encoding-indexes.js\"></script>");
         response.getWriter().write("<script src=\"" + getLabel() + "/static/encoding.js\"></script>");
+        response.getWriter().write("<script src=\"" + getLabel() + "/static/script.js\"></script>");
     }
 
     @Override

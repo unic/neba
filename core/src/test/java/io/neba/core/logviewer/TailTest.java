@@ -15,11 +15,12 @@
  */
 package io.neba.core.logviewer;
 
+import io.neba.core.Eventual;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,20 +32,22 @@ import static java.nio.file.Files.move;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TailTest extends TailTests {
+public class TailTest extends TailTests implements Eventual {
     private final ExecutorService executorService = newSingleThreadExecutor();
 
     private Tail testee;
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (this.testee != null) {
             this.testee.stop();
         }
@@ -55,7 +58,7 @@ public class TailTest extends TailTests {
     public void testHandlingOfFileNotFoundExceptionDuringLogFileRotation() throws Exception {
         File logFile = createTempFile("tailsocket-test-", ".log", this.getTestLogfileDirectory().getParentFile());
 
-        tailAsynchronously(logFile);
+        followAsynchronously(logFile);
 
         // Synchronously rotate the file when the first line is received
         uponWriteToRemoteDo(() -> rotate(logFile));
@@ -79,7 +82,7 @@ public class TailTest extends TailTests {
     public void testHandlingOfFileRotation() throws Exception {
         File logFile = createTempFile("tailsocket-test-", ".log", this.getTestLogfileDirectory().getParentFile());
 
-        tailAsynchronously(logFile);
+        followAsynchronously(logFile);
 
         // When the first line is read, synchronously rotate and re-create the log file.
         uponWriteToRemoteDo(() -> {
@@ -97,7 +100,7 @@ public class TailTest extends TailTests {
     @Test
     public void testHandlingOfRemovedLogFile() throws Exception {
         File logFile = createTempFile("tailsocket-test-", ".log", this.getTestLogfileDirectory().getParentFile());
-        tailAsynchronously(logFile);
+        followAsynchronously(logFile);
 
         // Synchronously rotate the logfile when the first line is read. Do not re-created it.
         uponWriteToRemoteDo(() -> rotate(logFile));
@@ -124,8 +127,8 @@ public class TailTest extends TailTests {
         eventually(() ->
                 assertSendTextContains(
                         "06.09.2013 15:03:50.719 *ERROR* error message with stacktrace\r\n" +
-                        "  at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)\r\n" +
-                        "        at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)"));
+                                "  at org.apache.sling.jcr.resource.internal.JcrResourceResolverFactoryImpl.getDefaultWorkspaceName(JcrResourceResolverFactoryImpl.java:398)\r\n" +
+                                "        at org.apache.sling.jcr.resource.internal.JcrResourceResolver.getResource(JcrResourceResolver.java:817)"));
     }
 
     @Test
@@ -139,13 +142,13 @@ public class TailTest extends TailTests {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullFileArgument() throws Exception {
-        new Tail(mock(RemoteEndpoint.class), null, 1000);
+    public void testHandlingOfNullFileArgument() {
+        new Tail(mock(RemoteEndpoint.class), null, 1000, Tail.Mode.TAIL);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHandlingOfNullRemoteArgument() throws Exception {
-        new Tail(null, mock(File.class), 1000);
+    public void testHandlingOfNullRemoteArgument() {
+        new Tail(null, mock(File.class), 1000, Tail.Mode.TAIL);
     }
 
     private void assertSendTextEndsWith(String s) {
@@ -165,17 +168,17 @@ public class TailTest extends TailTests {
     }
 
     private void tailSynchronously(String fileName) {
-        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L);
+        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L, Tail.Mode.TAIL);
         this.testee.run();
     }
 
     private void tailAsynchronously(String fileName) {
-        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L);
+        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L, Tail.Mode.TAIL);
         this.executorService.execute(this.testee);
     }
 
-    private void tailAsynchronously(File logFile) {
-        this.testee = new Tail(getRemote(), logFile, 1024);
+    private void followAsynchronously(File logFile) {
+        this.testee = new Tail(getRemote(), logFile, 1024, Tail.Mode.FOLLOW);
         this.executorService.execute(this.testee);
     }
 
