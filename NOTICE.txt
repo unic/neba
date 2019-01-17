@@ -1,5 +1,5 @@
 NEBA
-Copyright 2009-2016 Unic AG
+Copyright 2009-2019 Unic AG
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -8,7 +8,7 @@ the License.
 --------------------------------------
 
 Spring Framework
-Copyright (c) 2002-2017 Pivotal, Inc.
+Copyright (c) 2002-2019 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -30,3 +30,21 @@ both of these Licenses.
 
 Aopalliance
 This product is Public Domain.
+
+--------------------------------------
+
+D3.js
+
+This library is licensed under the BSD 3-Clause license (https://github.com/d3/d3/blob/master/LICENSE)
+
+--------------------------------------
+
+D3 Starplot
+
+This library is published under the MIT license (https://github.com/kevinschaul/d3-star-plot/blob/master/LICENSE)
+
+--------------------------------------
+
+JQuery, JQuery UI
+
+This library is licensed on der MIT license
