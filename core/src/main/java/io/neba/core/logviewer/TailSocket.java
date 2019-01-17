@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.math.NumberUtils.toFloat;
  * @author Olaf Otto
  */
 public class TailSocket extends WebSocketAdapter {
-    private static final Pattern TAIL_COMMAND = compile("tail:(([0-9]+\\.)?[0-9]+)mb:(.+)");
+    private static final Pattern TAIL_COMMAND = compile("((?<mode>tail|follow):(?<amount>([0-9]+\\.)?[0-9]+)mb:(?<path>.+))");
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private ExecutorService executorService = newSingleThreadExecutor();
 
@@ -61,7 +61,7 @@ public class TailSocket extends WebSocketAdapter {
     }
 
     /**
-     * @param message a tail command as specified by {@link #TAIL_COMMAND}.
+     * @param message either "ping" or "stop", or a tail command as specified by {@link #TAIL_COMMAND}.
      *                immediately sends the last <code>n</code> bytes of a specified
      *                log file, if present, and begins tailing the logfile thereafter.
      */
@@ -69,6 +69,11 @@ public class TailSocket extends WebSocketAdapter {
     public void onWebSocketText(String message) {
         if (isPing(message)) {
             sendPong();
+            return;
+        }
+
+        if (isStop(message)) {
+            stopTail();
             return;
         }
 
@@ -80,20 +85,25 @@ public class TailSocket extends WebSocketAdapter {
         }
 
         try {
-            float including = toFloat(m.group(1));
-            String path = m.group(m.groupCount());
+            float bytesToRead = toFloat(m.group("amount"));
+            String path = m.group("path");
             File file = resolveLogFile(path);
+            Tail.Mode mode = "tail".equals(m.group("mode")) ? Tail.Mode.TAIL : Tail.Mode.FOLLOW;
 
             if (file == null) {
                 return;
             }
 
-            long bytesToTail = round(including * 1024L * 1024L);
+            long bytesToTail = round(bytesToRead * 1024L * 1024L);
 
-            tail(file, bytesToTail);
+            tail(file, bytesToTail, mode);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isStop(String message) {
+        return "stop".equals(message);
     }
 
     private void sendPong() {
@@ -104,9 +114,9 @@ public class TailSocket extends WebSocketAdapter {
         return "ping".equals(message);
     }
 
-    private void tail(File file, long bytesToTail) throws IOException {
+    private void tail(File file, long bytesToTail, Tail.Mode mode) {
         stopTail();
-        this.tail = new Tail(getRemote(), file, bytesToTail);
+        this.tail = new Tail(getRemote(), file, bytesToTail, mode);
         this.executorService.execute(this.tail);
     }
 

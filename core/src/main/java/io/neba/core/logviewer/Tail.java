@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 
+import static io.neba.core.logviewer.Tail.Mode.TAIL;
 import static java.lang.Math.max;
 import static java.lang.Thread.sleep;
 import static java.nio.ByteBuffer.allocate;
@@ -38,6 +39,13 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
  * @author Olaf Otto
  */
 public class Tail implements Runnable {
+    private final Mode mode;
+
+    public enum Mode {
+        TAIL,
+        FOLLOW
+    }
+
     private static final int AWAIT_FILE_ROTATION_MILLIS = 1000;
     private static final int TAIL_CHECK_INTERVAL_MILLIS = 500;
 
@@ -54,13 +62,18 @@ public class Tail implements Runnable {
      * @param file must not be <code>null</code>.
      * @param bytesToTail the number of bytes up to which are immediately read from the file.
      */
-    Tail(RemoteEndpoint remoteEndpoint, File file, long bytesToTail) {
+    Tail(RemoteEndpoint remoteEndpoint, File file, long bytesToTail, Mode mode) {
         if (remoteEndpoint == null) {
             throw new IllegalArgumentException("constructor parameter remoteEndpoint must not be null");
         }
         if (file == null) {
             throw new IllegalArgumentException("constructor parameter file must not be null");
         }
+        if (mode == null) {
+            throw new IllegalArgumentException("constructor parameter mode must not be null");
+        }
+
+        this.mode = mode;
         this.bytesToTail = bytesToTail;
         this.remoteEndpoint = remoteEndpoint;
         this.file = file;
@@ -79,6 +92,7 @@ public class Tail implements Runnable {
             channel.position(startingFromInByte);
 
             long position = startingFromInByte;
+            long totalBytesRead = 0L;
 
             // Read up to this amount of data from the file at once.
             ByteBuffer readBuffer = allocate(4096);
@@ -104,15 +118,25 @@ public class Tail implements Runnable {
                 int read = channel.read(readBuffer);
 
                 if (read == -1) {
+                    if (mode == TAIL) {
+                        // EOF, we are done.
+                        return;
+                    }
+                    // If we are in follow mode, reaching the end of the file might signal a file rotation. Sleep and re-try.
                     sleep(TAIL_CHECK_INTERVAL_MILLIS);
                     continue;
                 }
 
-                position = channel.position();
+                totalBytesRead += read;
 
+                position = channel.position();
                 readBuffer.flip();
                 this.remoteEndpoint.sendBytes(readBuffer);
                 readBuffer.clear();
+
+                if (mode == TAIL && totalBytesRead >= this.bytesToTail) {
+                    return;
+                }
             }
         } catch (IOException e) {
             this.logger.error("Unable to tail " + this.file.getAbsolutePath() + ".", e);

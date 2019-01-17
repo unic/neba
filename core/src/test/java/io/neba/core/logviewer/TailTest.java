@@ -16,16 +16,16 @@
 package io.neba.core.logviewer;
 
 import io.neba.core.Eventual;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 
 import static java.io.File.createTempFile;
 import static java.nio.file.Files.move;
@@ -58,7 +58,7 @@ public class TailTest extends TailTests implements Eventual {
     public void testHandlingOfFileNotFoundExceptionDuringLogFileRotation() throws Exception {
         File logFile = createTempFile("tailsocket-test-", ".log", this.getTestLogfileDirectory().getParentFile());
 
-        tailAsynchronously(logFile);
+        followAsynchronously(logFile);
 
         // Synchronously rotate the file when the first line is received
         uponWriteToRemoteDo(() -> rotate(logFile));
@@ -82,7 +82,7 @@ public class TailTest extends TailTests implements Eventual {
     public void testHandlingOfFileRotation() throws Exception {
         File logFile = createTempFile("tailsocket-test-", ".log", this.getTestLogfileDirectory().getParentFile());
 
-        tailAsynchronously(logFile);
+        followAsynchronously(logFile);
 
         // When the first line is read, synchronously rotate and re-create the log file.
         uponWriteToRemoteDo(() -> {
@@ -100,7 +100,7 @@ public class TailTest extends TailTests implements Eventual {
     @Test
     public void testHandlingOfRemovedLogFile() throws Exception {
         File logFile = createTempFile("tailsocket-test-", ".log", this.getTestLogfileDirectory().getParentFile());
-        tailAsynchronously(logFile);
+        followAsynchronously(logFile);
 
         // Synchronously rotate the logfile when the first line is read. Do not re-created it.
         uponWriteToRemoteDo(() -> rotate(logFile));
@@ -143,12 +143,12 @@ public class TailTest extends TailTests implements Eventual {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullFileArgument() {
-        new Tail(mock(RemoteEndpoint.class), null, 1000);
+        new Tail(mock(RemoteEndpoint.class), null, 1000, Tail.Mode.TAIL);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullRemoteArgument() {
-        new Tail(null, mock(File.class), 1000);
+        new Tail(null, mock(File.class), 1000, Tail.Mode.TAIL);
     }
 
     private void assertSendTextEndsWith(String s) {
@@ -168,17 +168,17 @@ public class TailTest extends TailTests implements Eventual {
     }
 
     private void tailSynchronously(String fileName) {
-        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L);
+        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L, Tail.Mode.TAIL);
         this.testee.run();
     }
 
     private void tailAsynchronously(String fileName) {
-        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L);
+        this.testee = new Tail(getRemote(), new File(getTestLogfileDirectory(), fileName), 1024L * 1024L, Tail.Mode.TAIL);
         this.executorService.execute(this.testee);
     }
 
-    private void tailAsynchronously(File logFile) {
-        this.testee = new Tail(getRemote(), logFile, 1024);
+    private void followAsynchronously(File logFile) {
+        this.testee = new Tail(getRemote(), logFile, 1024, Tail.Mode.FOLLOW);
         this.executorService.execute(this.testee);
     }
 
