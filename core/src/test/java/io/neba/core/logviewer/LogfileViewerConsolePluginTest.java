@@ -16,6 +16,23 @@
 
 package io.neba.core.logviewer;
 
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.util.DecoratedObjectFactory;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -29,33 +46,15 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.util.DecoratedObjectFactory;
-import org.eclipse.jetty.util.thread.ThreadPool;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
-
+import static io.neba.core.util.ReflectionUtil.findField;
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -64,8 +63,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.util.ReflectionUtils.findField;
-import static org.springframework.util.ReflectionUtils.findMethod;
 
 /**
  * @author Olaf Otto
@@ -82,10 +79,6 @@ public class LogfileViewerConsolePluginTest {
     private ServletConfig config;
     @Mock
     private ContextHandler.Context context;
-    @Mock
-    private ContextHandler contextHandler;
-    @Mock
-    private Server server;
     @Mock
     private LogFiles logFiles;
     @Mock
@@ -111,26 +104,11 @@ public class LogfileViewerConsolePluginTest {
         this.testLogfileDirectory = new File(testLogfileUrl.getFile());
         this.availableLogFiles = listFiles(this.testLogfileDirectory, null, true);
 
-        when(this.context.getContextHandler())
-                .thenReturn(contextHandler);
-
-        when(this.contextHandler.getServer())
-                .thenReturn(this.server);
-
-        when(this.server.getThreadPool())
-                .thenReturn(mock(ThreadPool.class));
-
         when(this.request.getServletPath())
                 .thenReturn("/system/console");
 
         when(this.request.getServerName())
                 .thenReturn("servername");
-
-        when(this.request.getMethod())
-                .thenReturn("GET");
-
-        when(this.request.getProtocol())
-                .thenReturn("HTTP");
 
         when(this.response.getWriter())
                 .thenReturn(writer);
@@ -165,7 +143,7 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
-    public void testGetResources() throws Exception {
+    public void testGetResources() {
         URL resource = this.testee.getResource("/logviewer/static/testresource.txt");
         assertThat(resource).isNotNull();
     }
@@ -182,6 +160,13 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
+    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException {
+        withFileRequestParameter(pathOf("logs/error.log"));
+        renderContent();
+        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log") + "\" selected");
+    }
+
+    @Test
     public void testDownloadLogFilesAsZip() throws Exception {
         getZippedLogfiles();
         verifyLogFilesAreSendAs("logfiles-servername.zip");
@@ -191,7 +176,7 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
-    public void testDestroy() throws Exception {
+    public void testDestroy() {
         destroy();
         verifyTailServletIsDestroyed();
     }
@@ -268,27 +253,20 @@ public class LogfileViewerConsolePluginTest {
         verify(context, never()).removeAttribute(any());
     }
 
-    private void invokeInit(Servlet servlet, ServletConfig config) throws InvocationTargetException, IllegalAccessException {
-        Method method = findMethod(
-                servlet.getClass(),
-                "init",
-                ServletConfig.class);
+    private void invokeInit(Servlet servlet, ServletConfig config) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method method = servlet.getClass().getMethod("init", ServletConfig.class);
         method.setAccessible(true);
         method.invoke(servlet, config);
     }
 
-    private void invokeDestroy(Servlet servlet) throws InvocationTargetException, IllegalAccessException {
-        Method method = findMethod(
-                servlet.getClass(),
-                "destroy");
+    private void invokeDestroy(Servlet servlet) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method method = servlet.getClass().getMethod("destroy");
         method.setAccessible(true);
         method.invoke(servlet);
     }
 
-    private void injectTailServlet(Object o) throws InvocationTargetException, IllegalAccessException {
-        Field field = findField(
-                o.getClass(),
-                "tailServlet");
+    private void injectTailServlet(Object o) throws IllegalAccessException {
+        Field field = findField(o.getClass(), "tailServlet");
         field.setAccessible(true);
         field.set(o, this.tailServlet);
     }
@@ -352,14 +330,17 @@ public class LogfileViewerConsolePluginTest {
 
     private void withRequestPath(String requestPath) {
         when(this.request.getRequestURI()).thenReturn(requestPath);
-        when(this.request.getPathInfo()).thenReturn(requestPath);
+    }
+
+    private void withFileRequestParameter(String value) {
+        doReturn(value).when(this.request).getParameter("file");
     }
 
     private void assertHtmlResponseContains(String expected) {
         assertThat(this.htmlResponse).contains(expected);
     }
 
-    private void renderContent() throws ServletException, IOException {
+    private void renderContent() throws IOException {
         this.testee.renderContent(this.request, this.response);
         this.htmlResponse = this.internalWriter.getBuffer().toString();
     }
