@@ -70,7 +70,7 @@ html, body {
         padding-right: 1em;
     }
 
-    #main-navigation a:not(:first-child) {
+    #main-navigation a:not(:nth-child(1)):not(:nth-child(2)) {
         padding-left: 1em;
     }
 
@@ -135,12 +135,12 @@ html, body {
         padding-right: 1em;
     }
 
-    #main-navigation a:not(:first-child) {
+    #main-navigation a:not(:nth-child(1)):not(:nth-child(2)) {
         padding-left: 1em;
     }
 
     h1 {
-        font-size: 250%;
+        font-size: 280%;
     }
 
     body section.up-to-three-columns section, body section.up-to-two-columns section,
@@ -166,7 +166,7 @@ html, body {
     }
 
     h1 {
-        font-size: 160%;
+        font-size: 230%;
     }
 
     #introduction, main, footer {
@@ -178,6 +178,7 @@ html, body {
         padding-left: 2em;
         padding-right: 1em;
         margin-bottom: 4em;
+        text-align: center;
     }
 
     #main-navigation #logo {
@@ -190,7 +191,7 @@ html, body {
         padding-right: 1em;
     }
 
-    #main-navigation a:not(:first-child) {
+    #main-navigation a:not(:nth-child(1)):not(:nth-child(2)) {
         padding-left: 1em;
     }
 }
@@ -233,7 +234,7 @@ html, body {
         padding-right: .3em;
     }
 
-    #main-navigation a:not(:first-child) {
+    #main-navigation a:not(:nth-child(1)):not(:nth-child(2)) {
         padding-left: .3em;
     }
 }
@@ -258,11 +259,16 @@ body {
 
 h1 {
     margin: 0;
+    color: #4aafe2;
 }
 
 a {
     text-decoration: none;
-    color: #2e79ffcf;
+    color: #4aafe2;
+}
+
+main a:hover {
+    text-decoration: underline;
 }
 
 a.action {
@@ -294,12 +300,8 @@ img {
     color: #000;
 }
 
-#main-navigation a:not(:last-child) {
-    border-right: 1px solid #000;
-}
-
 #main-navigation a:hover, #main-navigation a.active {
-    color: rgba(0, 112, 159, 0.81);
+    color: #4aafe2;
 }
 
 #main-navigation #logo {
