@@ -17,9 +17,10 @@ description: Download and integrate NEBA into Apache Sling or Adobe AEM
             <h1>Download NEBA</h1>
         </header>
         <p>
-            NEBA is available in two distributions, the <a href="#core">core distribution</a>, featuring all of NEBA's resource-to-object mapping and tooling in a flyweight distribution containing only two bundles, and
-            the <a href="#spring-integration">spring distribution</a>, which contains the core and the the optional spring integration, along with all spring bundles.
-            If you are getting started and do not plan to use Spring MVC, we recommend using the core distribution.
+            NEBA is available in two distributions, the flyweight <a href="#core">core distribution</a>, featuring all of NEBA's resource-to-object mapping and tooling, and
+            the <a href="#spring-integration">spring distribution</a> which contains the core distribution and the optional spring integration along with all spring bundles.
+            If you are getting started and do not plan to use Spring MVC, we recommend using the core distribution.<br />
+            Both distributions are available via maven central.
         </p>
 
         <nav title="Available distributions" >
@@ -103,20 +104,6 @@ description: Download and integrate NEBA into Apache Sling or Adobe AEM
 </dependency>{% endhighlight %}
             </p>
 
-            <p>
-                In order to use Gemini Blueprint's <a
-                    href="https://www.eclipse.org/gemini/blueprint/documentation/reference/2.1.0.RELEASE/html/service-registry.html#service-registry:annotations-vs-xml-declarations">annotation-based
-                service injection</a>
-                available since NEBA 4.2.0, add the gemini-blueprint-extensions bundle to your dependencies:
-            </p>
-            <p>
-            {% highlight xml %}<dependency>
-    <groupId>org.eclipse.gemini.blueprint</groupId>
-    <artifactId>gemini-blueprint-extensions</artifactId>
-    <version>3.0.0.M01</version>
-</dependency>{% endhighlight %}
-            </p>
-
             <p>The CRX deployment package for Adobe AEM&trade; can be referenced like so:</p>
 
             <p>
@@ -156,6 +143,20 @@ description: Download and integrate NEBA into Apache Sling or Adobe AEM
     <classifier>spring</classifier>
     <version>{{site.nebaVersion}}</version>
 </dependency>{% endhighlight %}
+
+            <p>
+                In order to use Gemini Blueprint's <a
+                    href="https://www.eclipse.org/gemini/blueprint/documentation/reference/2.1.0.RELEASE/html/service-registry.html#service-registry:annotations-vs-xml-declarations">annotation-based
+                service injection</a>
+                available since NEBA 4.2.0, add the gemini-blueprint-extensions bundle to your dependencies:
+            </p>
+            <p>
+            {% highlight xml %}<dependency>
+    <groupId>org.eclipse.gemini.blueprint</groupId>
+    <artifactId>gemini-blueprint-extensions</artifactId>
+    <version>3.0.0.M01</version>
+</dependency>{% endhighlight %}
+            </p>
 
             <p id="content-package-maven-plugin">Finally, in order to <a
                     href="https://docs.adobe.com/docs/en/aem/6-2/develop/dev-tools/vlt-mavenplugin.html#install">install
