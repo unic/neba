@@ -33,8 +33,8 @@ description: A comprehensive guide to using the NEBA features
                 </header>
                 <ul>
                     <li><a href="#what_is_a_resource_model">What is a resource model?</a></li>
-                    <li><a href="#dependency_injection">Dependency injection and content-to-object mapping</a></li>
                     <li><a href="#about_resource_models">Resources, resource types and resource models</a></li>
+                    <li><a href="#dependency_injection">Dependency injection</a></li>
                     <li><a href="#using_models_in_views">Using models in views</a></li>
                     <li><a href="#mapping_resources_to_models">Mapping properties and resources to models</a></li>
                     <li>
@@ -170,8 +170,77 @@ description: A comprehensive guide to using the NEBA features
             <code>${resource}</code> representation is recommended.
         </p>
 
-        <h3 id="dependency_injection">Dependency injection and content-to-object mapping</h3>
+        <h3 id="about_resource_models">Resources, resource types and resource models</h3>
+
+    <section class="info">
+        <h4>Background: How NEBA uses resource types in Sling</h4>
+        <p>The <a href="http://sling.apache.org/site/index.html">Sling Web Framework</a> is a REST architecture implementation.
+            Consequently, it treats each thing it works with (every piece of content, every script, servlet) as a <a href="http://sling.apache.org/site/resources.html">Resource</a>.
+            Resources are typed using the property <em>sling:resourceType</em>. Resource types - very much like types in many other languages - also support inheritance
+            by means of a <em>sling:resourceSuperType</em> attribute.</p>
+
+        <p>Resource types are used by Sling to determine the view(s) that shall be used to render the resource. It does so by adding
+            a prefix such as /apps or /libs to the resource type and checking whether it finds views for the
+            resource in the corresponding directory.</p>
+
+        <p>Furthermore, any content stored in the JCR is represented by a javax.jcr.Node. <a href="http://jackrabbit.apache.org/jcr/node-types.html">Nodes are strongly typed</a>.
+            They always possess a <em>primaryType</em> as well as an arbitrary number of<em>mixin types</em>.
+            Both the primary type and the mixin types can have <em>super types</em>.</p>
+
+        <p>In order to provide a JAVA model for a resource, they are thus associated
+            with either the resource's sling:resourceType or the resource's Node type(s). NEBA represents this association using the <a href="apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a>
+            annotation.</p>
+    </section>
+
+    <p>Let's assume we need a simple JAVA model for a sling component called &quot;carousel&quot;.
+        The carousel has the sling:resourceType &quot;foundation/components/carousel&quot;. The component has the following properties:</p>
+
+    <figure class="listing" id="listing:sample-content">
+{% highlight json%}{
+  "jcr:primaryType": "nt:unstructured",
+  "playSpeed": "6000",
+  "jcr:lastModifiedBy": "admin",
+  "pages": [
+    "/content/geometrixx/en/events/techsummit",
+    "/content/geometrixx/en/events/userconf"
+  ],
+  "jcr:lastModified": "Tue Oct 05 2010 14:14:27 GMT+0200",
+  "transTime": "1000",
+  "sling:resourceType": "foundation/components/carousel",
+  "listFrom": "static"
+}{% endhighlight %}
+        <figcaption>A typical JSON view of JCR repository content</figcaption></figure>
+
+    <p>Create the following class in your bundle package (i.e. within or below the &quot;my.project.models&quot;
+        package)</p>
+
+    <figure class="listing" id="listing:resource-model-annotation">
+        {% highlight java %}@ResourceModel(types = "foundation/components/carousel")
+public class Carousel {
+}{% endhighlight %}<figcaption>Application of the @ResourceModel annotation</figcaption></figure>
+
+    <p>The resource type given in the @ResourceModel annotation does not have to be the exact
+        resource type of the resource. One may also specify any resource super type of the resource, primary
+        node type or mixin type. for example, the resource super type of the carousel could be &quot;foundation/components/list&quot;.
+        Using this resource type in a @ResourceModel would work, too. This way, one can provide general models for super types,
+        and more specific models for derived types, e.g. a generic model for pages and  a more specific model
+        for specific page types.</p>
+
+    <section class="info">
+        <h4>Background: The @ResourceModel annotation</h4>
         <p>
+            Classes annotated with <a href="/apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a> are automatically detected by NEBA if their package is listed in the "Neba-Packages" bundle header.
+            For each detected model, NEBA registers the defined resource types and node types supported by the model and
+            automatically registers an <a href="https://sling.apache.org/documentation/the-sling-engine/adapters.html#adapterfactory">Adapter Factory</a> supporting the adaptation of resources to the model.
+        </p>
+    </section>
+
+    <p>Once a bundle with NEBA models is active, all of its models appear in the <a href="#tooling_modelregistry">NEBA model registry (/system/console/modelregistry)</a> in the sling console.
+        If they are not visible in the model registry, the bundle either failed to start or is missing the "Neba-Packages" header.</p>
+
+        <section>
+            <header><h3 id="dependency_injection">Dependency injection</h3></header>
+                <p>
             NEBA makes a clear distinction between IOC (dependency injection) and content to object mapping and makes sure that these two concepts are not mixed.
             The bottom line is: Collaborators are injected with @Inject (or other means, when models are <a href="#spring">managed by a Spring application context</a>), and content
             is injected using NEBA's dedicated annotations.
@@ -243,73 +312,7 @@ public class SomeModelClass {
     }
 }{% endhighlight %}<figcaption>Injecting multiple instances of the same OSGi service</figcaption></figure>
 
-        <h3 id="about_resource_models">Resources, resource types and resource models</h3>
-
-    <section class="info">
-        <h4>Background: How NEBA uses resource types in Sling</h4>
-        <p>The <a href="http://sling.apache.org/site/index.html">Sling Web Framework</a> is a REST architecture implementation.
-            Consequently, it treats each thing it works with (every piece of content, every script, servlet) as a <a href="http://sling.apache.org/site/resources.html">Resource</a>.
-            Resources are typed using the property <em>sling:resourceType</em>. Resource types - very much like types in many other languages - also support inheritance
-            by means of a <em>sling:resourceSuperType</em> attribute.</p>
-
-        <p>Resource types are used by Sling to determine the view(s) that shall be used to render the resource. It does so by adding
-            a prefix such as /apps or /libs to the resource type and checking whether it finds views for the
-            resource in the corresponding directory.</p>
-
-        <p>Furthermore, any content stored in the JCR is represented by a javax.jcr.Node. <a href="http://jackrabbit.apache.org/jcr/node-types.html">Nodes are strongly typed</a>.
-            They always possess a <em>primaryType</em> as well as an arbitrary number of<em>mixin types</em>.
-            Both the primary type and the mixin types can have <em>super types</em>.</p>
-
-        <p>In order to provide a JAVA model for a resource, they are thus associated
-            with either the resource's sling:resourceType or the resource's Node type(s). NEBA represents this association using the <a href="apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a>
-            annotation.</p>
-    </section>
-
-    <p>Let's assume we need a simple JAVA model for a sling component called &quot;carousel&quot;.
-        The carousel has the sling:resourceType &quot;foundation/components/carousel&quot;. The component has the following properties:</p>
-
-    <figure class="listing" id="listing:sample-content">
-{% highlight json%}{
-  "jcr:primaryType": "nt:unstructured",
-  "playSpeed": "6000",
-  "jcr:lastModifiedBy": "admin",
-  "pages": [
-    "/content/geometrixx/en/events/techsummit",
-    "/content/geometrixx/en/events/userconf"
-  ],
-  "jcr:lastModified": "Tue Oct 05 2010 14:14:27 GMT+0200",
-  "transTime": "1000",
-  "sling:resourceType": "foundation/components/carousel",
-  "listFrom": "static"
-}{% endhighlight %}
-        <figcaption>A typical JSON view of JCR repository content</figcaption></figure>
-
-    <p>Create the following class in your bundle package (i.e. within or below the &quot;my.project.models&quot;
-        package)</p>
-
-    <figure class="listing" id="listing:resource-model-annotation">
-        {% highlight java %}@ResourceModel(types = "foundation/components/carousel")
-public class Carousel {
-}{% endhighlight %}<figcaption>Application of the @ResourceModel annotation</figcaption></figure>
-
-    <p>The resource type given in the @ResourceModel annotation does not have to be the exact
-        resource type of the resource. One may also specify any resource super type of the resource, primary
-        node type or mixin type. for example, the resource super type of the carousel could be &quot;foundation/components/list&quot;.
-        Using this resource type in a @ResourceModel would work, too. This way, one can provide general models for super types,
-        and more specific models for derived types, e.g. a generic model for pages and  a more specific model
-        for specific page types.</p>
-
-    <section class="info">
-        <h4>Background: The @ResourceModel annotation</h4>
-        <p>
-            Classes annotated with <a href="/apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a> are automatically detected by NEBA if their package is listed in the "Neba-Packages" bundle header.
-            For each detected model, NEBA registers the defined resource types and node types supported by the model and
-            automatically registers an <a href="https://sling.apache.org/documentation/the-sling-engine/adapters.html#adapterfactory">Adapter Factory</a> supporting the adaptation of resources to the model.
-        </p>
-    </section>
-
-    <p>Once a bundle with NEBA models is active, all of its models appear in the <a href="#tooling_modelregistry">NEBA model registry (/system/console/modelregistry)</a> in the sling console.
-        If they are not visible in the model registry, the bundle either failed to start or is missing the "Neba-Packages" header.</p>
+        </section>
 
     <h3 id="using_models_in_views">Using models in views</h3>
 
