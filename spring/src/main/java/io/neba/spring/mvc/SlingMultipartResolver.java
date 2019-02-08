@@ -23,33 +23,38 @@ import org.springframework.web.multipart.MultipartResolver;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
 /**
  * @author Olaf Otto
  */
 public class SlingMultipartResolver implements MultipartResolver {
 
-	@Override
-	public boolean isMultipart(HttpServletRequest request) {
-		return request != null && isMultipartContent(request);
-	}
+    @Override
+    public boolean isMultipart(HttpServletRequest request) {
+        return request != null && isMultipartContent(request);
+    }
 
-	@Override
-	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
-	    if (request == null) {
-	        throw new IllegalArgumentException("Method argument request must not be null.");
-	    }
-	    if (!(request instanceof SlingHttpServletRequest)) {
-	        throw new IllegalArgumentException("Method argument request must be a " + 
-	        		SlingHttpServletRequest.class + ", but is a " + request.getClass() + ".");
-	    }
-		return new MultipartSlingHttpServletRequest((SlingHttpServletRequest) request);
-	}
+    @Override
+    public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
+        if (request == null) {
+            throw new IllegalArgumentException("Method argument request must not be null.");
+        }
+        if (!(request instanceof SlingHttpServletRequest)) {
+            throw new IllegalArgumentException("Method argument request must be a " +
+                    SlingHttpServletRequest.class + ", but is a " + request.getClass() + ".");
+        }
+        return new MultipartSlingHttpServletRequest((SlingHttpServletRequest) request);
+    }
 
-	@Override
-	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		// This is done by sling.
-	}
+    @Override
+    public void cleanupMultipart(MultipartHttpServletRequest request) {
+        // This is done by sling.
+    }
 
+    private static boolean isMultipartContent(HttpServletRequest request) {
+        return equalsIgnoreCase(request.getMethod(), "POST") &&
+                startsWithIgnoreCase(request.getContentType(), "multipart/");
+    }
 }

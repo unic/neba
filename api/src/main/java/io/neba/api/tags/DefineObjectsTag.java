@@ -32,10 +32,16 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 /**
+ * @deprecated Using this tag library to automatically to adapt to the most specific model is deprecated
+ *             as it introduces implicit and intransparent coupling between a view and a model. This coupling is
+ *             easily broken by introducing a new model for the same resource type. This is almost impossible to foresee and
+ *             hard to fix. Thus, instead of using this tag, explicitly adapting the resource to the desired model via the sling tag library,
+ *             e.g. <code>&lt;sling:adaptTo adaptable="${resource}" adaptTo="my.model.Type" var="someName" /&gt;</code>, is advised.
  * @author Olaf Otto
  */
 @Tag(description = "Adds the most specific @ResourceModel" +
                    " for the current resource under the key \"m\", if such a model exists.")
+@Deprecated
 public final class DefineObjectsTag extends TagSupport {
     private static final long serialVersionUID = 3746304163438347809L;
 

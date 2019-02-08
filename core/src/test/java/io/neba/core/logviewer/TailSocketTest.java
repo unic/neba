@@ -76,11 +76,11 @@ public class TailSocketTest extends TailTests implements Eventual {
     }
 
     @Test
-    public void testTailing() throws Exception {
+    public void testFollowLogfile() throws Exception {
         File emptyLog = createTempFile("tailsocket-test-", ".log", getTestLogfileDirectory().getParentFile());
         this.availableLogFiles.add(emptyLog);
 
-        testee.onWebSocketText("tail:0.1mb:" + emptyLog.getAbsolutePath());
+        testee.onWebSocketText("follow:0.1mb:" + emptyLog.getAbsolutePath());
 
         sleepUpTo(1, SECONDS);
 
@@ -89,6 +89,26 @@ public class TailSocketTest extends TailTests implements Eventual {
         write(emptyLog, "test line");
 
         eventually(() -> assertSendTextContains("test line"));
+    }
+
+    @Test
+    public void testStopFollowLogfile() throws Exception {
+        File emptyLog = createTempFile("tailsocket-test-", ".log", getTestLogfileDirectory().getParentFile());
+        this.availableLogFiles.add(emptyLog);
+
+        testee.onWebSocketText("follow:0.1mb:" + emptyLog.getAbsolutePath());
+
+        sleepUpTo(1, SECONDS);
+
+        verifyNoTextWasSent();
+
+        testee.onWebSocketText("stop");
+
+        write(emptyLog, "test line");
+
+        sleepUpTo(1, SECONDS);
+
+        verifyNoTextWasSent();
     }
 
     @Test

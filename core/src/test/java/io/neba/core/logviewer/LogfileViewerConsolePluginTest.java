@@ -16,7 +16,6 @@
 
 package io.neba.core.logviewer;
 
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.util.DecoratedObjectFactory;
 import org.junit.Before;
@@ -80,10 +79,6 @@ public class LogfileViewerConsolePluginTest {
     private ServletConfig config;
     @Mock
     private ContextHandler.Context context;
-    @Mock
-    private ContextHandler contextHandler;
-    @Mock
-    private Server server;
     @Mock
     private LogFiles logFiles;
     @Mock
@@ -162,6 +157,13 @@ public class LogfileViewerConsolePluginTest {
         assertHtmlResponseContains("value=\"" + pathOf("logs/crx/error.log") + "\"");
         assertHtmlResponseContains("value=\"" + pathOf("logs/crx/error.log.0") + "\"");
         assertHtmlResponseContains("value=\"" + pathOf("logs/crx/error.log.2020-11-23") + "\"");
+    }
+
+    @Test
+    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException {
+        withFileRequestParameter(pathOf("logs/error.log"));
+        renderContent();
+        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log") + "\" selected");
     }
 
     @Test
@@ -328,6 +330,10 @@ public class LogfileViewerConsolePluginTest {
 
     private void withRequestPath(String requestPath) {
         when(this.request.getRequestURI()).thenReturn(requestPath);
+    }
+
+    private void withFileRequestParameter(String value) {
+        doReturn(value).when(this.request).getParameter("file");
     }
 
     private void assertHtmlResponseContains(String expected) {

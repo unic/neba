@@ -69,7 +69,7 @@ In addition, a GPG installation executable from the [maven-gpg-plugin](https://m
 Furthermore, JDK 1.8 is required for building and releasing NEBA.
  
 ### Write a release post for the neba.io site
-In a separate clone of the neba.io git repo, checkout the gh-pages branch and write a release post, such as https://github.com/unic/neba/blob/gh-pages/_posts/2016-01-22-neba-release-3.9.0.html. Testing the site locally requires running Jekyll including pygments for and Python 2.x for code highlighting, see https://jekyllrb.com/docs/installation/.
+In a separate clone of the neba.io git repo, checkout the gh-pages branch and write a release post, such as https://github.com/unic/neba/blob/gh-pages/_posts/2016-01-22-neba-release-3.9.0.html. Testing the site locally requires running Jekyll, see https://jekyllrb.com/docs/installation/.
 
 ### Perform the release
 Invoke
