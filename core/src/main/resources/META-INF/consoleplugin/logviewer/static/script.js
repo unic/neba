@@ -31,7 +31,7 @@ $(function () {
     /**
      * Enable chosen-select on the logfile dropdown.
      */
-    $(".chosen-select").chosen();
+    $(".chosen-select").chosen({width : "16em"});
 
     var KEY_ENTER = 13,
         KEY_A = 65,
