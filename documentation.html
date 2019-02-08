@@ -316,44 +316,13 @@ public class SomeModelClass {
 
     <h3 id="using_models_in_views">Using models in views</h3>
 
-    <p>Resource models can be automatically provided in either HTL (Sightly) or JSP views using the neba.js or neba:defineObjects tag library, respectively:</p>
-
-    <figure class="listing" id="listing:neba-js-in-htl">
-        {% highlight html %}<sly data-sly-use.m="/apps/neba/neba.js"> ... </sly>{% endhighlight %}<figcaption>Using the neba.js to obtain the most specific NEBA model in an HTL (Sightly) view</figcaption></figure>
-
-    <figure class="listing" id="listing:neba-defineobjects-jsp-tag">
-        {% highlight html %}<%@taglib prefix="neba" uri="http://neba.io/1.0"%>
-<neba:defineObjects />{% endhighlight %}<figcaption>Importing the NEBA taglib namespace</figcaption></figure>
-
-    <p>Both are looking up the most specific model for the current resource.
-        By default, the neba:defineObjects tag publish the model into the scripting context under the key &quot;m&quot;.
-        In both examples above, one can access the model like so:</p>
-
-    <figure class="listing" id="listing:accessing-the-neba-model">
-        {% highlight java %}${m}{% endhighlight %}<figcaption>Accessing the NEBA model in HTL (Sightly) or JSP</figcaption></figure>
-
-    <p>
-        The <em>most specific model</em> is the one who's <em>type</em> attribute points to the most specific type within a resource's type
-        hierarchy. For example, if the resource has the type "cq:Page" and the super type "nt:base", a  model
-        for "cq:Page" is <em>more specific</em> than one for "nt:base". If there is more than one most specific model, e.g. two models
-        for "cq:Page", neba.js and the neba:defineObjectsTag will not provide the model automatically. In such cases, one can either
-        explicitly adapt to the desired model type or specify the desired model's
-        name as displayed in the <a href="#tooling_modelregistry">model registry</a>, e.g.:
-    </p>
-
-    <figure class="listing" id="listing:neba-model-by-name-in-htl">
-        {% highlight html %}<sly data-sly-use.m="${'/apps/neba/neba.js' @ modelName=carousel}"> ... </sly>{% endhighlight %}<figcaption>Resolving a NEBA model by name in HTL (Sightly)</figcaption></figure>
-
-    <figure class="listing" id="listing:neba-model-ny-name-ion-jsp">
-        {% highlight html %}<neba:defineObjects useModelNamed="carousel"/>{% endhighlight %}<figcaption>Resolving a NEBA model by name in JSP</figcaption></figure>
-
-    <p>However, one may also explicitly adapt the current resource to the model, like so:</p>
+    <p>Resource models can be automatically provided in either HTL (Sightly) or JSP views by adapting the resource to the desired model, like so:</p>
 
     <figure class="listing" id="listing:adapt-to-neba-model-in-htl">
-        {% highlight html %}<sly data-sly-use.m="my.package.MyModel"> ...</sly>{% endhighlight %}<figcaption>Directly adapting to a NEBA model in HTL (Sightly)</figcaption></figure>
+        {% highlight html %}<sly data-sly-use.m="my.package.MyModel"> ...</sly>{% endhighlight %}<figcaption>Adapting to a NEBA model in HTL (Sightly)</figcaption></figure>
 
     <figure class="listing" id="listing:adapt-to-neba-model-in-jsp">
-        {% highlight java %}<% MyModel model = resource.adaptTo(my.package.MyModel.class); %>{% endhighlight %}<figcaption>Directly adapting to a NEBA model in JSP</figcaption></figure>
+        {% highlight java %}<sling:adaptTo adaptable="${resource}" adaptTo="my.package.MyModel" var="m" />{% endhighlight %}<figcaption>Adapting to a NEBA model in JSP</figcaption></figure>
 
     <h3 id="mapping_resources_to_models">Mapping properties and resources to models</h3>
 
