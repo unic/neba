@@ -20,6 +20,7 @@
  * of project-specific implementations to the NEBA core, i.e. to prevent
  * project code to inherit from these tag implementations.
  */
+@Deprecated
 @TagLibrary(
         value = "http://neba.io/1.0",
         descriptorFile = "neba.tld",
