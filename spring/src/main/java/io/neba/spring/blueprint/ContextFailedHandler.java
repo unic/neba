@@ -24,6 +24,8 @@ import org.osgi.framework.BundleException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import static org.osgi.framework.Bundle.STOP_TRANSIENT;
+
 /**
  * When an application context activation fails, NEBA removes any previously
  * registered resource models, self tests, MVC infrastructure and the like, since these
@@ -34,7 +36,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("osgiApplicationContextListener")
 public class ContextFailedHandler extends ContextShutdownHandler
-                                  implements OsgiBundleApplicationContextListener<OsgiBundleApplicationContextEvent> {
+        implements OsgiBundleApplicationContextListener<OsgiBundleApplicationContextEvent> {
     /**
      * This method is executed asynchronously since the original extender thread may try to obtain a lock to the OSGi
      * framework's registry state during the stop while holding the event handling lock, which may result in a transitive
@@ -59,7 +61,7 @@ public class ContextFailedHandler extends ContextShutdownHandler
     private void stop(Bundle bundle) {
         try {
             if (canStop(bundle)) {
-                bundle.stop();
+                bundle.stop(STOP_TRANSIENT);
             }
         } catch (BundleException e) {
             throw new RuntimeException("Unable to stop bundle " + bundle.getSymbolicName() + ".", e);
@@ -67,6 +69,6 @@ public class ContextFailedHandler extends ContextShutdownHandler
     }
 
     private boolean canStop(Bundle bundle) {
-        return bundle.getState() == Bundle.ACTIVE || bundle.getState() ==  Bundle.STARTING;
+        return bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING;
     }
 }
