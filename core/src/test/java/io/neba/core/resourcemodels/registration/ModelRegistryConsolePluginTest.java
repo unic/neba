@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 
 import javax.jcr.RepositoryException;
@@ -111,6 +112,8 @@ public class ModelRegistryConsolePluginTest {
     private ServletConfig servletConfig;
     @Mock
     private Bundle bundle;
+    @Mock
+    private BundleContext bundleContext;
     @Mock
     private Version version;
 
@@ -199,10 +202,15 @@ public class ModelRegistryConsolePluginTest {
                 .when(this.nodeTypeManager)
                 .getNodeType("nt:unstructured");
 
+        doReturn(new Bundle[]{})
+                .when(this.bundleContext)
+                .getBundles();
+
         doThrow(new LoginException("THIS IS AN EXPECTED TEST EXCEPTION"))
                 .when(this.factory)
                 .getServiceResourceResolver(any());
 
+        this.testee.activate(this.bundleContext);
         this.testee.init(this.servletConfig);
     }
 
@@ -240,6 +248,21 @@ public class ModelRegistryConsolePluginTest {
     }
 
     @Test
+    public void testLinkToComposumConsoleWhenComposumIsAvailable() throws Exception {
+        withComposumConsoleBundlePresent();
+
+        withRegisteredModel("some/resource/type", Model.class, 123L, "modelName");
+        withResolution("some/resource/type", "/apps/some/resource/type");
+
+        renderContent();
+
+        assertResponseContainsModel("<a href=\"/bin/browser.html" +
+                "/apps/some/resource/type\" class=\"consoleLink\">" +
+                "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>some/resource/type</a>", Model.class, 123L, "modelName");
+
+    }
+
+    @Test
     public void testRenderingOfLinkToCrxDe() throws Exception {
         withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
         withResolution("cq/Page", "/libs/foundation/components/primary/cq/Page");
@@ -247,7 +270,7 @@ public class ModelRegistryConsolePluginTest {
         renderContent();
 
         assertResponseContainsModel("<a href=\"/crx/de/#" +
-                "/libs/foundation/components/primary/cq/Page\" class=\"crxdelink\">" +
+                "/libs/foundation/components/primary/cq/Page\" class=\"consoleLink\">" +
                 "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/>cq:Page</a>", Model.class, 123L, "modelName");
     }
 
@@ -450,6 +473,13 @@ public class ModelRegistryConsolePluginTest {
 
         }
         doReturn(children.iterator()).when(this.pathResource).listChildren();
+    }
+
+    private void withComposumConsoleBundlePresent() {
+        Bundle composumConsoleBundle = mock(Bundle.class);
+        doReturn("com.composum.core.console").when(composumConsoleBundle).getSymbolicName();
+        doReturn(new Bundle[]{composumConsoleBundle}).when(this.bundleContext).getBundles();
+        this.testee.init();
     }
 
     private void withPathResource(String path) {

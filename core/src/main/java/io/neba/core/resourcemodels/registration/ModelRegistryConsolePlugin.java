@@ -52,6 +52,7 @@ import static io.neba.core.util.BundleUtil.displayNameOf;
 import static io.neba.core.util.ClassHierarchyIterator.hierarchyOf;
 import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Character.isUpperCase;
+import static java.util.Arrays.stream;
 import static java.util.Collections.singletonMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -103,6 +104,13 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     private ResourceResolverFactory resourceResolverFactory;
     @Reference
     private ModelRegistry registry;
+
+    private boolean isComposumConsoleAvailable;
+
+    @Override
+    public void init() {
+        this.isComposumConsoleAvailable = isComposumConsoleAvailable();
+    }
 
     @SuppressWarnings("unused")
     public String getCategory() {
@@ -168,7 +176,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 String sourceBundleName = displayNameOf(source.getBundle());
 
                 writer.write("<tr data-modeltype=\"" + source.getModelType().getName() + "\">");
-                String resourceType = buildCrxDeLinkToResourceType(req, entry.getKey());
+                String resourceType = buildLinkToResourceType(req, entry.getKey());
                 writer.write("<td>" + resourceType + "</td>");
                 writer.write("<td>" + source.getModelType().getName() + "</td>");
                 writer.write("<td>" + source.getModelName() + "</td>");
@@ -181,7 +189,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         writer.write("</table>");
     }
 
-    private String buildCrxDeLinkToResourceType(HttpServletRequest request, String type) {
+    private String buildLinkToResourceType(HttpServletRequest request, String type) {
         return getResourceResolver().map(r -> {
             try {
                 String path = resourceTypeToPath(type);
@@ -210,8 +218,8 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 }
 
                 return resource != null ? "<a href=\"" + request.getContextPath() +
-                        "/crx/de/#" + resource.getPath() + "\" " +
-                        "class=\"crxdelink\">"
+                        (this.isComposumConsoleAvailable ? "/bin/browser.html" : "/crx/de/#") + resource.getPath() + "\" " +
+                        "class=\"consoleLink\">"
                         + "<img class=\"componentIcon\" src=\""
                         + getLabel() + API_PATH + API_COMPONENTICON + (iconResource == null ? "" : resource.getPath())
                         + "\"/>"
@@ -433,5 +441,10 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         } finally {
             closeQuietly(in);
         }
+    }
+
+    private boolean isComposumConsoleAvailable() {
+        return stream(this.getBundleContext().getBundles())
+                .anyMatch(b -> b.getSymbolicName().equals("com.composum.core.console"));
     }
 }

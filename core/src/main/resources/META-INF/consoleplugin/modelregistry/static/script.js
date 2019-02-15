@@ -95,8 +95,8 @@ $(function() {
     $("span.unresolved").each(function(idx, elem) {
 	    $(elem).attr("title", "This resource type cannot be resolved to a node via the resource resolver")
 	});
-	$("a.crxdelink").each(function(idx, elem) {
-	    $(elem).attr("title", "Open this resource type in CRXDE light")
+	$("a.consoleLink").each(function(idx, elem) {
+	    $(elem).attr("title", "Open this resource type")
 	});
     $table.find("td").hover(function(elem) {
         $(this).parent().children().css("background-color", "#c0c0c0");
