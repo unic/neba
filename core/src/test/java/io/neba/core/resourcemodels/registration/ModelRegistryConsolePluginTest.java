@@ -31,6 +31,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Workspace;
+import javax.jcr.nodetype.NodeType;
+import javax.jcr.nodetype.NodeTypeManager;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -86,6 +91,14 @@ public class ModelRegistryConsolePluginTest {
     private ResourceResolverFactory factory;
     @Mock
     private ResourceResolver resolver;
+    @Mock
+    private Session session;
+    @Mock
+    private Workspace workspace;
+    @Mock
+    private NodeTypeManager nodeTypeManager;
+    @Mock
+    private NodeType nodeType;
     @Mock
     private Resource iconResource;
     @Mock
@@ -170,6 +183,22 @@ public class ModelRegistryConsolePluginTest {
                 .when(this.version)
                 .toString();
 
+        doReturn(this.session)
+                .when(this.resolver)
+                .adaptTo(Session.class);
+
+        doReturn(this.workspace)
+                .when(this.session)
+                .getWorkspace();
+
+        doReturn(this.nodeTypeManager)
+                .when(this.workspace)
+                .getNodeTypeManager();
+
+        doReturn(this.nodeType)
+                .when(this.nodeTypeManager)
+                .getNodeType("nt:unstructured");
+
         doThrow(new LoginException("THIS IS AN EXPECTED TEST EXCEPTION"))
                 .when(this.factory)
                 .getServiceResourceResolver(any());
@@ -186,6 +215,28 @@ public class ModelRegistryConsolePluginTest {
         assertResponseContainsTableHead();
         assertResponseContainsNumberOfModelsText(1);
         assertResponseContainsModel("<span class=\"unresolved\">cq:Page</span>", Model.class, 123L, "modelName");
+    }
+
+    @Test
+    public void testRenderingOfExistingNodeTypeWithoutSlingResourceType() throws Exception {
+        withRegisteredModel("nt:unstructured", Model.class, 123L, "modelName");
+
+        renderContent();
+
+        assertResponseContainsModel(
+                "<img class=\"componentIcon\" src=\"modelregistry/api/componenticon\"/> nt:unstructured", Model.class, 123L, "modelName");
+    }
+
+    @Test
+    public void testHandlingOfRepositoryExceptionDuringNodeTypeRetrieval() throws Exception {
+        withRepositoryExceptionDuringNodeTypeManagerRetrieval();
+        withRegisteredModel("nt:unstructured", Model.class, 123L, "modelName");
+
+        renderContent();
+
+        assertResponseContainsModel(
+                "<span class=\"unresolved\">nt:unstructured</span>", Model.class, 123L, "modelName");
+
     }
 
     @Test
@@ -511,5 +562,11 @@ public class ModelRegistryConsolePluginTest {
 
     private void verifyResponseHasContentType(String type) {
         verify(this.response).setContentType(type);
+    }
+
+    private void withRepositoryExceptionDuringNodeTypeManagerRetrieval() throws RepositoryException {
+        doThrow(new RepositoryException("THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(this.workspace)
+                .getNodeTypeManager();
     }
 }
