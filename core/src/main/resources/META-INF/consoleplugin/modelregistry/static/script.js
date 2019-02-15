@@ -28,7 +28,7 @@ $(function() {
             var domElement = elem[0];
             return {
                 show : function () {
-                    if (!domElement.hiddenBy || domElement.hiddenBy == source) {
+                    if (!domElement.hiddenBy || domElement.hiddenBy === source) {
                         elem.show();
                         domElement.hiddenBy = undefined;
                     }
@@ -51,14 +51,14 @@ $(function() {
         var toggle = visibility(toggleUnresolvedResourceTypes);
         showOnlyUnresolved = !showOnlyUnresolved;
 
-        $("a.crxdelink").each(function(idx, elem) {
+        $("img.componentIcon").each(function(idx, elem) {
             var $tr = $(elem).closest("tr");
             showOnlyUnresolved ? toggle($tr).hide() : toggle($tr).show();
         });
         if (showOnlyUnresolved) {
-            $("#unresolvedToggle").text("Show all mappings");
+            $("#unresolvedToggle").text("Show all models");
         } else {
-            $("#unresolvedToggle").text("Only show mappings to unresolvable resource types");
+            $("#unresolvedToggle").text("Show models for unresolvable types");
         }
 
         $("#plugin_table").tablesorter();
@@ -75,7 +75,7 @@ $(function() {
                 var $elem = $(elem);
                 var attr = $elem.attr("data-modeltype");
                 if (attr) {
-                    $.inArray(attr, typeNames) != -1 ? toggle($elem).show() : toggle($elem).hide();
+                    $.inArray(attr, typeNames) !== -1 ? toggle($elem).show() : toggle($elem).hide();
                 }
             });
             $table.tablesorter();
@@ -83,7 +83,7 @@ $(function() {
     }
 
     function filterTableOnReturn(event) {
-        if (event.which == ENTER) {
+        if (event.which === ENTER) {
             filterTable();
             return false;
         }
