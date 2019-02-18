@@ -717,7 +717,7 @@ public class MyModel {
     <p>
         Furthermore, The NEBA Spring module enables using Spring MVC in Sling by Providing an OSGi-capable
         <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/javadoc-api/org/springframework/web/servlet/DispatcherServlet.html">Dispatcher Servlet</a>. To avoid conflict with resource resolution and servlet mappings, <a
-            href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC</a>
+            href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/web.html#mvc">Spring MVC</a>
         is integrated into Sling using a Servlet with the fixed URL &quot;/bin/mvc&quot; (Resource Resolver
         mappings can be used to change this path). Since each distinct path in sling maps to a different resource (servlets are
         resources, too), the path /bin/mvc/url would not point to the /bin/mvc/ servlet. Thus, to have a request handled by
@@ -875,11 +875,11 @@ public class DemoController {
 <p>It is thus not necessary to obtain these elements from the request.</p>
 
 <p>Note that the annotation-driven controllers have a lot more very powerful options. See the
-    <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html">Spring MVC
+    <a href="http://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/web.html#mvc">Spring MVC
     documentation</a> for more examples. NEBA also supports Spring&apos;s special view names for redirecting and
     forwarding views: returning &quot;redirect:/some/path&quot; from a controller method will cause a redirect to
     /some/path, returning forward:/some/path will forward the request to /some/path, see also
-    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-redirecting">MVC redirecting</a>.</p>
+    <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/web.html#mvc-redirecting-redirect-prefix">MVC redirecting</a>.</p>
     <p>You may also directly work with the response. For this, provide your own
 View in the ModelAndView provided by the controller;
 this way, your View's render method is used to render the response. Alternatively, you may also simply write to the
@@ -890,7 +890,7 @@ and thus discouraged.</p>
 <header><h3 id="mvc_sling_views">Using Sling Scripts as controller views</h3></header>
 <p>
     NEBA supports using sling scripts to render controller views.
-    NEBA provides a <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/html/mvc.html#mvc-viewresolver">view resolver</a>
+    NEBA provides a <a href="http://static.springsource.org/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/web.html#mvc-config-view-resolvers">view resolver</a>
     that resolves resource type names to the corresponding sling scripts and uses these to render views. Consider the following controller method:
 </p>
 
@@ -915,7 +915,7 @@ public class DemoController {
    conflicting the Spring controller mapping.
 </p>
 <p>
-    Each request to a Spring @Controller is associated with a generic <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/htmlsingle/#mvc-coc-modelmap">Model</a>.
+    Each request to a Spring @Controller is associated with a generic <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/web.html#mvc-ann-modelattrib-methods">Model</a>.
     The attributes of this model are available as request attributes to Sling Scripts used as controller views. In a JSP view, for instance, a model attribute "page" can be accessed via:
 </p>
 <figure class="listing" id="listing:controller-view-variables">
