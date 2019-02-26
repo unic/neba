@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,22 +36,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static io.neba.core.util.ClassHierarchyIterator.hierarchyOf;
 import static io.neba.core.util.JsonUtil.toJson;
 import static java.lang.Character.isUpperCase;
+import static java.util.Arrays.stream;
 import static java.util.Collections.singletonMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.apache.sling.api.resource.ResourceResolverFactory.*;
-import static org.apache.sling.api.resource.ResourceUtil.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import static org.apache.sling.api.resource.ResourceResolverFactory.PASSWORD;
+import static org.apache.sling.api.resource.ResourceResolverFactory.SUBSERVICE;
+import static org.apache.sling.api.resource.ResourceResolverFactory.USER;
+import static org.apache.sling.api.resource.ResourceUtil.isNonExistingResource;
+import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
+import static org.apache.sling.api.resource.ResourceUtil.resourceTypeToPath;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
@@ -86,6 +104,13 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
     private ResourceResolverFactory resourceResolverFactory;
     @Reference
     private ModelRegistry registry;
+
+    private boolean isComposumConsoleAvailable;
+
+    @Override
+    public void init() {
+        this.isComposumConsoleAvailable = isComposumConsoleAvailable();
+    }
 
     @SuppressWarnings("unused")
     public String getCategory() {
@@ -151,7 +176,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 String sourceBundleName = displayNameOf(source.getBundle());
 
                 writer.write("<tr data-modeltype=\"" + source.getModelType().getName() + "\">");
-                String resourceType = buildCrxDeLinkToResourceType(req, entry.getKey());
+                String resourceType = buildLinkToResourceType(req, entry.getKey());
                 writer.write("<td>" + resourceType + "</td>");
                 writer.write("<td>" + source.getModelType().getName() + "</td>");
                 writer.write("<td>" + source.getModelName() + "</td>");
@@ -164,7 +189,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         writer.write("</table>");
     }
 
-    private String buildCrxDeLinkToResourceType(HttpServletRequest request, String type) {
+    private String buildLinkToResourceType(HttpServletRequest request, String type) {
         return getResourceResolver().map(r -> {
             try {
                 String path = resourceTypeToPath(type);
@@ -177,13 +202,29 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                         break;
                     }
                 }
+
+                // Mappings may point to a primary node type or mixin type and that mixin type
+                // may not have a sling resource type representation.
+                if (resource == null && type.indexOf(':') != -1) {
+                    try {
+                        return r.adaptTo(Session.class).getWorkspace().getNodeTypeManager().getNodeType(type) == null ?
+                                "<span class=\"unresolved\">" + type + "</span>"
+                                :
+                                "<img class=\"componentIcon\" src=\"" + getLabel() + API_PATH + API_COMPONENTICON  + "\"/> " +
+                                type;
+                    } catch (Exception e) {
+                        logger.debug("Unable to determine whether node type {} exists.", type, e);
+                    }
+                }
+
                 return resource != null ? "<a href=\"" + request.getContextPath() +
-                        "/crx/de/#" + resource.getPath() + "\" " +
-                        "class=\"crxdelink\">"
+                        (this.isComposumConsoleAvailable ? "/bin/browser.html" : "/crx/de/#") + resource.getPath() + "\" " +
+                        "class=\"consoleLink\">"
                         + "<img class=\"componentIcon\" src=\""
                         + getLabel() + API_PATH + API_COMPONENTICON + (iconResource == null ? "" : resource.getPath())
                         + "\"/>"
-                        + type + "</a>" :
+                        + type + "</a>"
+                        :
                         "<span class=\"unresolved\">" + type + "</span>";
             } finally {
                 r.close();
@@ -400,5 +441,10 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         } finally {
             closeQuietly(in);
         }
+    }
+
+    private boolean isComposumConsoleAvailable() {
+        return stream(this.getBundleContext().getBundles())
+                .anyMatch(b -> b.getSymbolicName().equals("com.composum.core.console"));
     }
 }
