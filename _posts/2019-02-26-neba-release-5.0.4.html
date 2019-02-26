@@ -1,0 +1,46 @@
+---
+title: NEBA 5.0.4
+layout: post
+twitterAuthor: deploynix
+description: NEBA 5.0.4 Ships with support for the composum console, primary node types in the model registry and improved bundle state handling.
+tags: [release,current]
+release:
+    version: 5.0.4
+    previousVersion: 5.0.3
+    requiresChange: false
+---
+
+<section>
+    <header><h1>NEBA 5.0.4 released</h1></header>
+    <p>
+        NEBA 5.0.4 ships with out of the box support for the <a href="https://github.com/ist-dresden/composum">Apache Sling Composum Console</a> which is the advanced
+        <a href="https://helpx.adobe.com/experience-manager/6-4/sites/developing/using/developing-with-crxde-lite.html">CRXDE</a> replacement included in
+        the <a href="https://sling.apache.org/downloads.cgi">Sling starter distributions</a>.
+        The <a href="/documentation.html#tooling_modelregistry">Model registry</a> now automatically links resolvable sling resource types to the composum console, if it is available.
+    </p>
+    <p>
+        In addition, the <a href="/documentation.html#tooling_modelregistry">Model registry</a> now tests whether <a href="https://docs.adobe.com/docs/en/spec/jcr/1.0/4.8_Node_Types.html">JCR primary node types or mixin node types</a> referenced by resource models exist,
+        thus allowing to better filter models referencing resource types or node types that do not exist.
+    </p>
+
+    <p>
+        Finally, when using <a href="/documentation.html#spring">NEBA's Spring integration</a>, the shutdown of bundles with a failed application context start is no longer persistent. Thus,
+        if the framework is restarted, it will attempt to start the bundle again, provided its <a href="https://osgi.org/specification/osgi.core/7.0.0/framework.startlevel.html">autostart level</a> is active (which is the default).
+        This will make deployments more resilient to temporary failure, e.g. the temporary absence of required configurations or services during an automated deployment.
+    </p>
+
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="25" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        None.
+    </section>
+</section>
