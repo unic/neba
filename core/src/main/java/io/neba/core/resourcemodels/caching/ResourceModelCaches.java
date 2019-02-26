@@ -23,6 +23,7 @@ import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class ResourceModelCaches {
     private final List<ResourceModelCache> caches = new ArrayList<>();
 
     /**
-     * Looks up the {@link #store(Resource, Key, Object)} cached model}
+     * Looks up the {@link #store(Resource, Key, Optional)} cached model}
      * of the given type for the given resource.
      * Returns the first model found in the caches.
      *
@@ -59,6 +60,7 @@ public class ResourceModelCaches {
      * that a an empty model was previously {@link #store(Resource, Key, Optional) stored}, i.e. the adaptation result is known to be null
      * and should not be attempted. A return value of <code>null</code> signals that the model is unknown to this cache, i.e. it was never stored.
      */
+    @CheckForNull
     public <T> Optional<T> lookup(@Nonnull Resource resource, @Nonnull Key key) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");

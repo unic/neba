@@ -70,7 +70,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
         Optional<T> cachedModel = this.caches.lookup(resource, key);
         if (cachedModel == empty()) {
-            // The model cannot be resolved, i.e. adapdation results in null and has been cached before.
+            // The model cannot be resolved, i.e. adaptation results in null and has been cached before.
             return null;
         }
 
