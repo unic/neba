@@ -42,6 +42,7 @@ import static org.osgi.framework.Bundle.ACTIVE;
 import static org.osgi.framework.Bundle.RESOLVED;
 import static org.osgi.framework.Bundle.STARTING;
 import static org.osgi.framework.Bundle.STOPPING;
+import static org.osgi.framework.Bundle.STOP_TRANSIENT;
 
 /**
  * @author Olaf Otto
@@ -145,11 +146,11 @@ public class ContextFailedHandlerTest {
     }
 
     private void verifyBundleIsStopped() throws BundleException {
-        verify(this.bundle).stop();
+        verify(this.bundle).stop(STOP_TRANSIENT);
     }
 
     private void verifyBundleIsNotStopped() throws BundleException {
-        verify(this.bundle, never()).stop();
+        verify(this.bundle, never()).stop(STOP_TRANSIENT);
     }
 
     private void verifyInfrastructureIsUnregisteredInCorrectOrder() {

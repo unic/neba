@@ -28,6 +28,9 @@ import static io.neba.core.util.BundleUtil.displayNameOf;
 import static org.osgi.framework.Bundle.ACTIVE;
 import static org.osgi.framework.Bundle.STARTING;
 
+import static org.osgi.framework.Bundle.STOP_TRANSIENT;
+
+
 /**
  * When an application context activation fails, NEBA removes any previously
  * registered resource models, self tests, MVC infrastructure and the like, since these
@@ -63,7 +66,7 @@ public class ContextFailedHandler extends ContextShutdownHandler
     private void stop(Bundle bundle) {
         try {
             if (canStop(bundle)) {
-                bundle.stop();
+                bundle.stop(STOP_TRANSIENT);
             }
         } catch (BundleException e) {
             throw new RuntimeException("Unable to stop bundle " + displayNameOf(bundle) + ".", e);
