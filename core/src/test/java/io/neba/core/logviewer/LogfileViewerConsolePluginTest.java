@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import javax.servlet.Servlet;
@@ -47,14 +47,13 @@ import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static io.neba.core.util.ReflectionUtil.findField;
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -63,6 +62,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.util.ReflectionUtils.findField;
 
 /**
  * @author Olaf Otto
@@ -160,7 +160,7 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
-    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException {
+    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException, ServletException {
         withFileRequestParameter(pathOf("logs/error.log"));
         renderContent();
         assertHtmlResponseContains("value=\"" + pathOf("logs/error.log") + "\" selected");
@@ -340,7 +340,7 @@ public class LogfileViewerConsolePluginTest {
         assertThat(this.htmlResponse).contains(expected);
     }
 
-    private void renderContent() throws IOException {
+    private void renderContent() throws IOException, ServletException {
         this.testee.renderContent(this.request, this.response);
         this.htmlResponse = this.internalWriter.getBuffer().toString();
     }

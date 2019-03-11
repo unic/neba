@@ -15,12 +15,11 @@
  */
 package io.neba.core.logviewer;
 
-import io.neba.core.Eventual;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +31,7 @@ import static java.nio.file.Files.move;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -41,7 +40,7 @@ import static org.mockito.Mockito.verify;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TailTest extends TailTests implements Eventual {
+public class TailTest extends TailTests {
     private final ExecutorService executorService = newSingleThreadExecutor();
 
     private Tail testee;

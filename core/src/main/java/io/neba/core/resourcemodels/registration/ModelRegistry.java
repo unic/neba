@@ -46,6 +46,8 @@ import java.util.stream.Collectors;
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
 import static io.neba.core.util.BundleUtil.displayNameOf;
+import static io.neba.core.util.NodeUtil.geMixinTypes;
+import static io.neba.core.util.NodeUtil.getPrimaryType;
 import static java.util.Collections.unmodifiableCollection;
 
 /**
@@ -81,8 +83,8 @@ public class ModelRegistry {
                 key = new Key(
                         resource.getResourceType(),
                         resource.getResourceSuperType(),
-                        node.getPrimaryNodeType().getName(),
-                        Arrays.toString(node.getMixinNodeTypes()),
+                        getPrimaryType(node),
+                        geMixinTypes(node),
                         furtherElementsKey);
             } catch (RepositoryException e) {
                 throw new RuntimeException("Unable to retrieve the primary type of " + resource + ".", e);

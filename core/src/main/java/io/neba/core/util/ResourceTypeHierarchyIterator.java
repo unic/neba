@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
+import static io.neba.core.util.NodeUtil.getPrimaryType;
 import static org.apache.sling.api.resource.ResourceUtil.isSyntheticResource;
 
 /**
@@ -80,7 +81,7 @@ public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable
                 // However, the resourceType provided by resource#getResourceType could be the node type since
                 // Resource#getResourceType falls back to the node type of no sling:resourceType is specified.
                 try {
-                    String nodeType = node.getPrimaryNodeType().getName();
+                    String nodeType = getPrimaryType(node);
                     if (!nodeType.equals(resourceType)) {
                         this.currentResourceType = resourceType;
                     }
