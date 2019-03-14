@@ -500,6 +500,10 @@
                     <groupId>external.atlassian.jgitflow</groupId>
                     <artifactId>jgitflow-maven-plugin</artifactId>
                     <version>1.0-m5.1</version>
+                    <configuration>
+                        <noReleaseMerge>true</noReleaseMerge>
+                        <keepBranch>true</keepBranch>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
