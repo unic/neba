@@ -503,6 +503,9 @@
                     <configuration>
                         <noReleaseMerge>true</noReleaseMerge>
                         <keepBranch>true</keepBranch>
+                        <flowInitContext>
+                            <developBranchName>4.x</developBranchName>
+                        </flowInitContext>
                     </configuration>
                 </plugin>
                 <plugin>
