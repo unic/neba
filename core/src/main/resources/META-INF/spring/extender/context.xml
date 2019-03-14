@@ -88,7 +88,7 @@
 			</bp:service-properties>
 		</bp:service>
 
-		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" id="requestContextFilterService">
+		<bp:service interface="javax.servlet.Filter" ref="requestContextFilter" id="requestContextFilterService" ranking="9100">
 			<bp:service-properties>
 				<entry key="sling.filter.scope">
 					<array value-type="java.lang.String">
