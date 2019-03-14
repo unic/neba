@@ -1,0 +1,1 @@
+<p>Neba 4.3.4 ships with Spring 4.3.22. It is recommended to update dependencies to Spring bundles to the <a href="https://search.maven.org/search?q=g:org.apache.servicemix.bundles%20AND%20a:org.apache.servicemix.bundles.spring-*%20AND%20v:4.3.33.RELEASE_1">respective Spring bundle versions</a></p>
