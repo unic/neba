@@ -9,7 +9,7 @@
     Report-To: { "url": "https://unic.report-uri.com/r/d/csp/reportOnly", "group": "cspro", "max-age": 10886400 }, { "url": "https://unic.report-uri.com/r/d/csp/enforce", "group": "csp","max-age": 10886400 }
 
 /apidocs/*
-     Content-Security-Policy: "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self'; frame-src 'self'"
+     Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self'; frame-src 'self'
 
 /assets/*
     Cache-Control: public, max-age=604800
