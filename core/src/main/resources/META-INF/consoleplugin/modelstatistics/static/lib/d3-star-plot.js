@@ -45,12 +45,12 @@ d3.starPlot = function() {
         radians = 2 * Math.PI / radii,
         scale = d3.scale.linear()
             .domain([0, 100])
-            .range([0, radius])
+            .range([0, radius]);
 
     function chart(selection) {
         datum = selection.datum();
         g = selection
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         if (includeGuidelines) {
             drawGuidelines();
@@ -76,7 +76,7 @@ d3.starPlot = function() {
                 .attr('x1', origin[0])
                 .attr('y1', origin[1])
                 .attr('x2', origin[0] + x)
-                .attr('y2', origin[1] + y)
+                .attr('y2', origin[1] + y);
 
             r += radians;
         })
@@ -85,18 +85,24 @@ d3.starPlot = function() {
     function drawLabels() {
         var r = 0;
         properties.forEach(function(d, i) {
-            var l, x, y;
+            var l, x, y, text = (typeof labels == "function") ? labels(datum, i) : labels[i];
 
             l = radius;
             x = (l + labelMargin) * Math.cos(r);
             y = (l + labelMargin) * Math.sin(r);
-            g.append('text')
+            var textNode = g.append('text')
                 .attr('class', 'star-label')
                 .attr('x', origin[0] + x)
                 .attr('y', origin[1] + y)
-                .text(typeof labels == "function" ? labels(datum, i) : labels[i])
-                .style('text-anchor', 'middle')
                 .style('dominant-baseline', 'central')
+                .style('text-anchor', 'middle');
+
+            text.split(/[\r\n]/).map(function (line) {
+                textNode.append('tspan')
+                    .attr('dy', '1.3em')
+                    .attr('x', origin[0] + x)
+                    .text(line)
+            });
 
             r += radians;
         })
@@ -107,9 +113,9 @@ d3.starPlot = function() {
             .attr('class', 'star-origin')
             .attr('cx', origin[0])
             .attr('cy', origin[1])
-            .attr('r', 2)
+            .attr('r', 2);
 
-        var path = d3.svg.line.radial()
+        var path = d3.svg.line.radial();
 
         var pathData = [];
         var r = Math.PI / 2;
@@ -118,7 +124,7 @@ d3.starPlot = function() {
             pathData.push([
                 scale(userScale(datum[d])),
                 r
-            ])
+            ]);
             r += radians;
         });
 
@@ -189,7 +195,7 @@ d3.starPlot = function() {
     }
 
     function nop() {
-        return;
+
     }
 
     chart.interaction = function() {
@@ -219,7 +225,7 @@ d3.starPlot = function() {
         width = _;
         radius = width / 2;
         origin = [radius, radius];
-        scale.range([0, radius])
+        scale.range([0, radius]);
         return chart;
     };
 
@@ -261,4 +267,4 @@ d3.starPlot = function() {
     };
 
     return chart;
-}
+};
