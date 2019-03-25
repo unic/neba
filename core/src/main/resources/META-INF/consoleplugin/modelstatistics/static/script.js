@@ -54,7 +54,7 @@
                 filter.valid = false;
             },
             provideDefaultValue = function() {
-                if (filter.val() == "") {
+                if (filter.val() === "") {
                     filter.val(filter.attr("data-default-value"));
                 }
             },
@@ -63,14 +63,14 @@
                     var selection = document.selection.createRange();
                     selection.moveStart ('character', -filter.value().length);
                     return selection.text.length;
-                }  else if (filter[0].selectionStart || filter[0].selectionStart == '0') {
+                }  else if (filter[0].selectionStart || filter[0].selectionStart === '0') {
                     return filter[0].selectionStart;
                 }
                 return 0;
             },
             processFilterExpression = function(force) {
                 var val = filter.val(),
-                    hasValueChanged = val == "" && lastValue && lastValue != val || val != "" && val != lastValue,
+                    hasValueChanged = val === "" && lastValue && lastValue !== val || val !== "" && val !== lastValue,
                     hasVisualization = !d3.selectAll(".wrapper").empty();
 
                 if (hasVisualization && !hasValueChanged) {
@@ -78,24 +78,24 @@
                 }
 
                 if (!force) {
-                    if (val == defaultValue) {
+                    if (val === defaultValue) {
                         valid();
                         // If there is no visualization yet, provide a default view.
                         !hasVisualization && visualize();
                         return;
                     }
-                    if (val == lastValue) {
+                    if (val === lastValue) {
                         return;
                     }
                 }
 
-                if (val == defaultValue) {
+                if (val === defaultValue) {
                     val = "";
                 }
 
                 lastValue = val;
 
-                if (val == "") {
+                if (val === "") {
                     valid();
                     visualize();
                     return;
@@ -137,7 +137,7 @@
                             {name: "greedyFields", max: 0, label: 'Greedy fields'},
                             {name: "totalMappingDuration", max: 0, label: 'Total time', unit: "ms"},
                             {name: "instantiations", max: 0, label: 'Instantiations'},
-                            {name: "cacheHits", max: 0, label: 'Cache hits'},
+                            {name: "cacheHits", max: 0, label: 'NEBA Cache hits'},
                             {name: "mappings", max: 0, label: 'Subsequent mappings'},
                             {name: "mappableFields", max: 0},
                             {name: "minimumMappingDuration", max: 0},
@@ -180,7 +180,18 @@
                             return d3.scale.linear().domain([0, field.max]).range([0, 100]);
                         }))
                         .labels(function (d, i) {
-                            return fields[i].label + ": " + parseFloat(d[fields[i].name].toFixed(1)) + " " + (fields[i].unit || "");
+                            var numericValue = parseFloat(d[fields[i].name]);
+                            var formattedValue = function (v) {
+                                function round(v) {
+                                    if (Number.isInteger(v)) return v;
+                                    return v.toFixed(1);
+                                }
+                                if (v === 0) return v;
+                                if (v >= 1000000) return round(v / 1000000) + "m";
+                                if (v >= 10000) return round(v / 10000) + "k";
+                                return round(v);
+                            }(numericValue);
+                            return fields[i].label + ":\n" + formattedValue + " " + (fields[i].unit || "");
                         })
                         .title(function (d) {
                             var idx = d.type.lastIndexOf(".");
@@ -197,7 +208,7 @@
                         var svg = wrapper.append('svg')
                             .attr('class', 'chart')
                             .attr('width', width + margin.left + margin.right)
-                            .attr('height', width + margin.top + margin.bottom);
+                            .attr('height', height + margin.top + margin.bottom);
                         var starG = svg.append('g')
                             .datum(d)
                             .call(star)
@@ -274,7 +285,7 @@
                 } catch (e) {
                     invalid();
                     if(e.expected) {
-                        // special case: use enters spaces only - remove spaces to allow starting to type a valid expression
+                        // special case: user enters spaces only - remove spaces to allow starting to type a valid expression
                         if (/^\s+/.test(request.term)) {
                             request.term = "";
                             filter.val("");
@@ -282,10 +293,10 @@
 
                         var validTextPortion = request.term.substr(0, e.location.start.column - 1),
                             invalidTextPortion = request.term.substr(e.location.start.column - 1, cursorPosition()),
-                            // if there is invalid text and any of the suggestions starts with it, present the suggestion.
+                            // if there is invalid text and one of the suggestions starts with it, present the suggestion.
                             // otherwise, present all suggestions
                             showSpecific = e.found && e.expected.some(function (element) {
-                                            return element.value && element.value.indexOf(invalidTextPortion) == 0;
+                                            return element.value && element.value.indexOf(invalidTextPortion) === 0;
                                            });
                         suggestions = e.expected
                             .filter(function(element) {
@@ -293,7 +304,7 @@
                                 // include all elements in case no specific element matches.
                                 return element.description &&
                                     element.description.length && (
-                                        !showSpecific ||  element.value && element.value.indexOf(invalidTextPortion) == 0
+                                        !showSpecific ||  element.value && element.value.indexOf(invalidTextPortion) === 0
                                     );
                             }).map(function(expected) {
                                 // The completion metadata key is either the value, or, if not present, the description.
@@ -333,11 +344,11 @@
                 filter.valid || filter.autocomplete("search");
             },
             select: function(e, ui) {
-                filter.val(ui.item.value == "NONE" ? "" : ui.item.value);
+                filter.val(ui.item.value === "NONE" ? "" : ui.item.value);
                 return false;
             },
             focus: function(e, ui) {
-                filter.val(ui.item.value == "NONE" ? "" : ui.item.value);
+                filter.val(ui.item.value === "NONE" ? "" : ui.item.value);
                 return false;
             },
             appendTo: "#plotarea"
@@ -345,7 +356,7 @@
             // Automatically apply the recent most filter changes
             filter.autoApply && processFilterExpression()
         }).on("focus", function() {
-            if (filter.val() == defaultValue) {
+            if (filter.val() === defaultValue) {
                 filter.val("");
             }
         }).on("blur", function() {
@@ -365,7 +376,7 @@
         $("#helpWithExpressions")
         .click(function() {
             $("#expressionHelp").slideToggle(500, function() {
-                $("#helpWithExpressions").text($(this).css("display") == "none" ? "Help" : "Close help");
+                $("#helpWithExpressions").text($(this).css("display") === "none" ? "Help" : "Close help");
             });
         });
 

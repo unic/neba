@@ -1,6 +1,6 @@
 <script src="modelstatistics/static/lib/jquery-2.1.3.min.js" charset="utf-8"></script>
 <script src="modelstatistics/static/lib/d3.v3.min.js" charset="utf-8"></script>
-<script src="modelstatistics/static/lib/d3-star-plot-0.0.3.min.js" charset="utf-8"></script>
+<script src="modelstatistics/static/lib/d3-star-plot.js" charset="utf-8"></script>
 <script src="modelstatistics/static/lib/parser.js" charset="utf-8"></script>
 <script src="modelstatistics/static/script.js" charset="utf-8"></script>
 <style>
@@ -19,6 +19,7 @@
     #plotarea .star-label {
         font-size: 11px;
         pointer-events: none;
+        text-shadow: #fff 0 0 3px;
     }
     #plotarea .star-origin {
         fill: #333;
@@ -26,12 +27,11 @@
     #plotarea .star-axis {
         stroke: #ccc;
         stroke-width: 2px;
-        stroke-dasharray: 4 5;
+        stroke-dasharray: 4;
     }
+
     #plotarea .star-path {
-        stroke: #888;
-        stroke-width: 1px;
-        fill: #709CB1;
+        fill: #91ecff;
         fill-opacity: 0.6;
     }
 
