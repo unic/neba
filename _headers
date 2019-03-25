@@ -10,7 +10,7 @@
 
 /apidocs/*
     X-Frame-Options: sameorigin
-    Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self'; frame-src 'self'; img-src 'self'
+    Content-Security-Policy: default-src 'none'; script-src 'self' 'unsafe-inline'  https://*.cloudfront.net; style-src 'self' https://*.cloudfront.net; frame-src 'self'; img-src 'self'
 
 /assets/*
     Cache-Control: public, max-age=604800
