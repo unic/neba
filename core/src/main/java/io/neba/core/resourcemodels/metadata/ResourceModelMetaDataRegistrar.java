@@ -96,7 +96,7 @@ public class ResourceModelMetaDataRegistrar {
      *
      * @param modelSource must not be <code>null</code>.
      */
-    public void register(OsgiModelSource<?> modelSource) {
+    public synchronized void register(OsgiModelSource<?> modelSource) {
         if (modelSource == null) {
             throw new IllegalArgumentException("method parameter modelSource must not be null");
         }
@@ -116,7 +116,7 @@ public class ResourceModelMetaDataRegistrar {
      *
      * @param bundle must not be <code>null</code>
      */
-    public void removeMetadataForModelsIn(Bundle bundle) {
+    public synchronized void removeMetadataForModelsIn(Bundle bundle) {
         if (bundle == null) {
             throw new IllegalArgumentException("method parameter bundle must not be null");
         }
