@@ -23,7 +23,7 @@ package io.neba.api;
  */
 public class Constants {
     /**
-     * Models provided by the define object tag and models
+     * Models provided by the {@link io.neba.api.tags.DefineObjectsTag} tag and models
      * returned from controllers (i.e. stored in a ModelAndView) are provided
      * under this key.
      */

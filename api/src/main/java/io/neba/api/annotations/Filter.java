@@ -26,7 +26,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * <p>
  * Can be used to specify an OSGi service filter to narrow the service(s) that shall be
- * injected, for example:
+ * injected.
  * </p>
  *
  * <pre>
@@ -34,6 +34,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * &#064;{@link Filter}("(&amp;(property=value)(otherProperty=otherValue))")
  * private SomeService service;
  * </pre>
+ *
+ * <em>This annotation can not be used on a Spring bean.</em> There, use an XML configuration or the gemini blueprint &#064;ServiceReference annotation.
  *
  * @since 5.0.0
  */
