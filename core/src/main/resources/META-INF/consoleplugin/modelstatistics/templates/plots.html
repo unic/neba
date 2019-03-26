@@ -11,11 +11,13 @@
         One can also employ sub clauses and arithmetic expressions. For instance, <span class="expressionExample">totalMappingDuration > entire(totalMappingDuration) * 0.05</span> finds models that are responsible for more than 5% of the entire mapping time.
 
         <h2>The model visualization</h2>
-        The models are ordered by their total mapping time (totalMappingDuration). Each graph exhibits the following dimensions;
+        The models are ordered by their total mapping time (totalMappingDuration). The visualization scales are relative, i.e. each axis is scaled with regard to the highest value found in all models.
+        <br>
+        Each graph exhibits the following dimensions;
         <table>
             <tbody>
                 <tr><th>Instantiations</th><td>The number of times the model was instantiated</td></tr>
-                <tr><th>NEBA Cache hits</th><td>The number of times the model was loaded from a resource model cache, for instance the default NEBA request-scoped resource model cache.</td></tr>
+                <tr><th>NEBA Cache hits</th><td>The number of times the model was loaded from a resource model cache, for instance the default NEBA request-scoped resource model cache. A value of 0 indicates that the model is never adapted more than once from the same resource during a request.</td></tr>
                 <tr><th>Subsequent mappings</th><td>The total number of resource to model mappings initiated by a resource model, i.e. the subsequently used resource models.</td></tr>
                 <tr><th>&#x00D8; duration</th><td>The average duration of one resource to model mapping for this type</td></tr>
                 <tr><th>Median</th><td>The median duration of one resource to model mapping for this type</td></tr>

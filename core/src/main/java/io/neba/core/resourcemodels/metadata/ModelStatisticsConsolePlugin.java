@@ -32,7 +32,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static io.neba.core.util.JsonUtil.toJson;
-import static java.lang.Math.round;
 import static org.apache.commons.collections.CollectionUtils.find;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.startsWith;
@@ -233,7 +232,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         String template = readTemplateFile("/META-INF/consoleplugin/modelstatistics/templates/head.html");
         response.getWriter().printf(template,
                 numberOfModelsWithInstantiations,
-                round(highestAverageMappingDuration),
+                highestAverageMappingDuration,
                 nameOfModelWithHighestAverageMappingDuration,
                 highestNumberOfFields,
                 nameOfModelWithGreatestNumberOfFields);

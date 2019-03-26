@@ -73,7 +73,7 @@ public class ResourceModelMetaDataRegistrar {
             throw new IllegalArgumentException("Method argument modelType must not be null.");
         }
 
-        // Optimistic lookup: Most of the models types are most likely not enhanced by CGLib.
+        // Optimistic lookup: The model types are most likely not enhanced by CGLib.
         ResourceModelMetadataHolder metaDataHolder = this.cache.get(modelType);
 
         if (metaDataHolder == null) {
