@@ -36,6 +36,7 @@ $(function () {
     var KEY_ENTER = 13,
         KEY_A = 65,
         NEWLINE = /\r?\n/,
+        LINES_PER_MB = 14000, // approximate number of log viewer lines per MB log data.
         textDecoder = new TextDecoder("UTF-8"),
         tailSocket,
         tailDomNode = document.getElementById("tail"),
@@ -47,7 +48,8 @@ $(function () {
         $hideRotated = $("#hideRotated"),
         $downloadButton = $("#downloadButton"),
         $focusOnErrorsButton = $("#focusOnErrors"),
-        $focusOnErrorsCount = $("#numberOfDetectedErrors");
+        $focusOnErrorsCount = $("#numberOfDetectedErrors"),
+        scrollBackBuffer = (parseFloat($amount.val()) || 0.1) * LINES_PER_MB;
 
     /**
      * Represents the Tail views (tail and error focused) and the
@@ -215,6 +217,12 @@ $(function () {
 
                         // Add the newly created error section to the log view
                         tailDomNode.appendChild(this.errorSection);
+
+                        // Limit number of entries to scrollback buffer
+                        while (tailDomNode.childNodes.length > scrollBackBuffer) {
+                            tailDomNode.childNodes.item(0).remove()
+                        }
+
                         // Add the current text to the newly created error section
                         this.errorSection.appendChild(textNode);
                         this.errorSection.appendChild(document.createElement("br"));
@@ -244,6 +252,11 @@ $(function () {
                 // Simply append the line
                 tailDomNode.appendChild(textNode);
                 tailDomNode.appendChild(document.createElement("br"));
+
+                // Limit number of entries to scrollback buffer
+                while (tailDomNode.childNodes.length > scrollBackBuffer) {
+                    tailDomNode.childNodes.item(0).remove()
+                }
             }
 
             if (lines[lines.length - 1]) {
@@ -271,6 +284,11 @@ $(function () {
         toggleFollowMode: function () {
             this.followMode = !this.followMode;
             if (this.followMode) {
+                // If "focus on errors" is on, deactivate it since we are re-loading the entire view.
+                if (this.errorFocused) {
+                    this.toggleErrorFocus();
+                    inactiveStyle($focusOnErrorsButton);
+                }
                 this.clear();
                 followSelectedLogFile();
             } else {
@@ -372,6 +390,10 @@ $(function () {
                 logfileParametersChanged();
             }
             return false;
+        });
+
+        $amount.change(function() {
+            scrollBackBuffer = (parseFloat($amount.val()) || 0.1) * LINES_PER_MB;
         });
 
         $followButton.click(function () {
