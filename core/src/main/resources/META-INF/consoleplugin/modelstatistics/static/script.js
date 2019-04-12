@@ -181,17 +181,40 @@
                         }))
                         .labels(function (d, i) {
                             var numericValue = parseFloat(d[fields[i].name]);
+
+                            function round(v) {
+                                if (Number.isInteger(v)) return v;
+                                return v.toFixed(1);
+                            }
+
+                            function formatMilliseconds(v) {
+                                var format = [
+                                    {limit: 1000 * 60 * 60 * 24 * 365, label: "years"},
+                                    {limit: 1000 * 60 * 60 * 24, label: "days"},
+                                    {limit: 1000 * 60 * 60, label: "hours"},
+                                    {limit: 1000 * 60, label: "minutes"},
+                                    {limit: 1000, label: "s"},
+                                    {limit: 0, label: "ms"}
+                                ].find(function (element, _) {
+                                    return v >= element.limit;
+                                });
+
+                                return round(v / (format.limit || 1)) + " " + format.label;
+                            }
+
                             var formattedValue = function (v) {
-                                function round(v) {
-                                    if (Number.isInteger(v)) return v;
-                                    return v.toFixed(1);
-                                }
                                 if (v === 0) return v;
+
+                                if (fields[i].unit === "ms") {
+                                    return formatMilliseconds(v);
+                                }
+
                                 if (v >= 1000000) return round(v / 1000000) + "m";
                                 if (v >= 10000) return round(v / 10000) + "k";
                                 return round(v);
                             }(numericValue);
-                            return fields[i].label + ":\n" + formattedValue + " " + (fields[i].unit || "");
+
+                            return fields[i].label + ":\n" + formattedValue;
                         })
                         .title(function (d) {
                             var idx = d.type.lastIndexOf(".");
