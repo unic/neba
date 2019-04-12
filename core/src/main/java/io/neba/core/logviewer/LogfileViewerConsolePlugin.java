@@ -138,12 +138,12 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
             return;
         }
 
-        if (!isBlank(suffix) && suffix.equals("/download")) {
+        if ("/download".equals(suffix)) {
             download(res, req);
             return;
         }
 
-        if (!isBlank(suffix) && suffix.equals("/serverTime")) {
+        if ("/serverTime".equals(suffix)) {
             serverTime(res);
             return;
         }
