@@ -29,6 +29,27 @@ $(function () {
     })();
 
     /**
+     * Continuously update the server time view with the actual backend time.
+     */
+    (function() {
+        var failures = 0;
+        var timerId = window.setInterval(function() {
+            $.ajax({
+                url: "logviewer/serverTime",
+                global : false,
+                error: function() {
+                    if (++ failures > 10) {
+                        window.clearInterval(timerId);
+                    }
+                },
+                success: function(data) {
+                    $("#serverTime").text(data);
+                }
+            });
+        }, 1000);
+    })();
+
+    /**
      * Enable chosen-select on the logfile dropdown.
      */
     $(".chosen-select").chosen({width : "16em"});

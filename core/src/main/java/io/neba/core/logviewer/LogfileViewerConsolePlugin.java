@@ -16,6 +16,7 @@
 
 package io.neba.core.logviewer;
 
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -31,11 +32,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static io.neba.core.util.ZipFileUtil.toZipFileEntryName;
 import static java.lang.Class.forName;
+import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.currentThread;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
@@ -62,6 +66,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     static final String LABEL = "logviewer";
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
     private static final String DECORATED_OBJECT_FACTORY = "org.eclipse.jetty.util.DecoratedObjectFactory";
+    private static final FastDateFormat DATETIME_FORMAT = FastDateFormat.getInstance("dd.MM.yyyy HH:mm:ss.S", TimeZone.getDefault());
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -138,7 +143,25 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
             return;
         }
 
+        if (!isBlank(suffix) && suffix.equals("/serverTime")) {
+            serverTime(res);
+            return;
+        }
+
         super.doGet(req, res);
+    }
+
+    /**
+     * Prints the current server time and UTC offset, formatted using the servers time zone.
+     */
+    private void serverTime(HttpServletResponse res) throws IOException {
+        final long now = currentTimeMillis();
+        // Including current DST, if any.
+        long utcOffsetInHours = TimeUnit.MILLISECONDS.toHours(TimeZone.getDefault().getOffset(now));
+        res.setContentType("text/plain");
+        res.setCharacterEncoding("UTF-8");
+        res.setHeader("Cache-Control", "no-store");
+        res.getWriter().write(DATETIME_FORMAT.format(currentTimeMillis()) + " (UTC " + (utcOffsetInHours < 0 ? "-" : "+") + " " + utcOffsetInHours + ")");
     }
 
     /**

@@ -86,7 +86,7 @@ public class LogfileViewerConsolePluginTest {
 
     private File testLogfileDirectory;
     private StringWriter internalWriter;
-    private String htmlResponse;
+    private String responseText;
     private ByteArrayOutputStream internalOutputStream;
     private ZipInputStream zippedFiles;
     private Collection<File> availableLogFiles;
@@ -151,19 +151,19 @@ public class LogfileViewerConsolePluginTest {
     @Test
     public void testRenderContentContainsDropdownValuesForTestLogfiles() throws Exception {
         renderContent();
-        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log") + "\"");
-        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log.1") + "\"");
-        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log.2020-01-01") + "\"");
-        assertHtmlResponseContains("value=\"" + pathOf("logs/crx/error.log") + "\"");
-        assertHtmlResponseContains("value=\"" + pathOf("logs/crx/error.log.0") + "\"");
-        assertHtmlResponseContains("value=\"" + pathOf("logs/crx/error.log.2020-11-23") + "\"");
+        assertResponseContains("value=\"" + pathOf("logs/error.log") + "\"");
+        assertResponseContains("value=\"" + pathOf("logs/error.log.1") + "\"");
+        assertResponseContains("value=\"" + pathOf("logs/error.log.2020-01-01") + "\"");
+        assertResponseContains("value=\"" + pathOf("logs/crx/error.log") + "\"");
+        assertResponseContains("value=\"" + pathOf("logs/crx/error.log.0") + "\"");
+        assertResponseContains("value=\"" + pathOf("logs/crx/error.log.2020-11-23") + "\"");
     }
 
     @Test
-    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException {
+    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException, ServletException {
         withFileRequestParameter(pathOf("logs/error.log"));
         renderContent();
-        assertHtmlResponseContains("value=\"" + pathOf("logs/error.log") + "\" selected");
+        assertResponseContains("value=\"" + pathOf("logs/error.log") + "\" selected");
     }
 
     @Test
@@ -212,6 +212,13 @@ public class LogfileViewerConsolePluginTest {
 
         destroy();
         verifyDecoratorObjectFactoryIsNotRemovedFromServletContext();
+    }
+
+    @Test
+    public void testServerTimeRetrieval() throws ServletException, IOException {
+        withRequestPath("/system/console/logviewer/serverTime");
+        doGet();
+        assertResponseMatches("[0-9]{1,2}.[0-9]{1,2}.[0-9]{4} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.[0-9]+ \\(UTC \\+ [0-9]+\\)");
     }
 
     @Test
@@ -325,7 +332,12 @@ public class LogfileViewerConsolePluginTest {
 
     private void doGet() throws ServletException, IOException {
         this.testee.doGet(this.request, this.response);
-        this.htmlResponse = this.internalWriter.toString();
+        this.responseText = this.internalWriter.toString();
+    }
+
+    private void renderContent() throws IOException {
+        this.testee.renderContent(this.request, this.response);
+        this.responseText = this.internalWriter.getBuffer().toString();
     }
 
     private void withRequestPath(String requestPath) {
@@ -336,13 +348,12 @@ public class LogfileViewerConsolePluginTest {
         doReturn(value).when(this.request).getParameter("file");
     }
 
-    private void assertHtmlResponseContains(String expected) {
-        assertThat(this.htmlResponse).contains(expected);
+    private void assertResponseContains(String expected) {
+        assertThat(this.responseText).contains(expected);
     }
 
-    private void renderContent() throws IOException {
-        this.testee.renderContent(this.request, this.response);
-        this.htmlResponse = this.internalWriter.getBuffer().toString();
+    private void assertResponseMatches(String regex) {
+        assertThat(this.responseText).matches(regex);
     }
 
     private String pathOf(String relativePath) {
