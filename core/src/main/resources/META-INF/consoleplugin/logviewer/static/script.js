@@ -26,6 +26,10 @@ $(function () {
                 return this.substring(this_len - search.length, this_len) === search;
             };
         }
+
+        if (window.NodeList && !NodeList.prototype.forEach) {
+            NodeList.prototype.forEach = Array.prototype.forEach;
+        }
     })();
 
     /**
@@ -70,7 +74,7 @@ $(function () {
         $downloadButton = $("#downloadButton"),
         $focusOnErrorsButton = $("#focusOnErrors"),
         $focusOnErrorsCount = $("#numberOfDetectedErrors"),
-        scrollBackBuffer = (parseFloat($amount.val()) || 0.1) * LINES_PER_MB;
+        $grep = $("#grep");
 
     /**
      * Represents the Tail views (tail and error focused) and the
@@ -85,6 +89,16 @@ $(function () {
             REQUEST: 1,
             ACCESS: 2
         }),
+
+        /**
+         * The regular expression to apply to all log entries (hide elements not matching)
+         */
+        filterExpression : undefined,
+
+        /**
+         * The amount of entries in the tail view to keep.
+         */
+        scrollBackBuffer : (parseFloat($amount.val()) || 0.1) * LINES_PER_MB,
 
         /**
          * The currently tailed log file type.
@@ -220,6 +234,9 @@ $(function () {
                             // Add the node to the existing error section
                             this.errorSection.appendChild(textNode);
                             this.errorSection.appendChild(document.createElement("br"));
+                            // The error section might be hidden as it did not yet contain a match for the grep expression.
+                            // Make it visible in case the grep expression  matches after new data is added.
+                            this.filterExpression && this.errorSection.style.display === "none" && this.filterExpression.test(this.errorSection.textContent) && (this.errorSection.style.display = "");
                             this.updateErrorFocusedView();
                             this.notifyErrorUpdateListeners();
                             continue;
@@ -235,18 +252,11 @@ $(function () {
                         this.errorSection = document.createElement("div");
                         this.errorSection.className = "error";
                         this.errorSectionNodes.push(this.errorSection);
-
-                        // Add the newly created error section to the log view
-                        tailDomNode.appendChild(this.errorSection);
-
-                        // Limit number of entries to scrollback buffer
-                        while (tailDomNode.childNodes.length > scrollBackBuffer) {
-                            tailDomNode.childNodes.item(0).remove()
-                        }
-
                         // Add the current text to the newly created error section
                         this.errorSection.appendChild(textNode);
                         this.errorSection.appendChild(document.createElement("br"));
+                        // Add the newly created error section to the log view
+                        this.addToTail(this.errorSection);
                         this.addErrorToErrorFocusedView();
                         this.notifyNewErrorListeners();
                         continue;
@@ -271,13 +281,9 @@ $(function () {
                 }
 
                 // Simply append the line
-                tailDomNode.appendChild(textNode);
-                tailDomNode.appendChild(document.createElement("br"));
-
-                // Limit number of entries to scrollback buffer
-                while (tailDomNode.childNodes.length > scrollBackBuffer) {
-                    tailDomNode.childNodes.item(0).remove()
-                }
+                var div = document.createElement("div");
+                div.appendChild(textNode);
+                this.addToTail(div);
             }
 
             if (lines[lines.length - 1]) {
@@ -290,10 +296,61 @@ $(function () {
         },
 
         /**
+         * Adds a new node to the tail view. removes old nodes with regards to the
+         * scroll back buffer and calculates the nodes visibility based on the grep regex.
+         */
+        addToTail: function(node) {
+            Tail.filterExpression && node.style && (node.style.display = Tail.filterExpression.test(node.textContent) ? "" : "none");
+            tailDomNode.appendChild(node);
+            // Limit number of entries to scrollback buffer
+            while (tailDomNode.childNodes.length > this.scrollBackBuffer) {
+                tailDomNode.childNodes.item(0).remove()
+            }
+        },
+
+        updateFilterExpressionFromUserInput : function() {
+            if ($grep.val() === "") {
+                Tail.filterExpression = undefined;
+                $grep.css("border", "1px solid transparent")
+                    .attr("title", "");
+                Tail.showAllTailEntries();
+                return;
+            }
+
+            try {
+                Tail.filterExpression = new RegExp($grep.val());
+                Tail.applyFilterExpression();
+                $grep.css("border", "1px solid green")
+                    .attr("title", "")
+            } catch (e) {
+                Tail.filterExpression = undefined;
+                $grep.css("border", "1px solid red")
+                    .attr("title", "Invalid regular expression: " + e.message);
+            }
+        },
+
+        /**
+         * Applies a new or changed filter expression to all nodes
+         * of the tail view.
+         */
+        applyFilterExpression: function() {
+            var expression = Tail.filterExpression;
+            expression && tailDomNode.childNodes.forEach(function(node) {
+                node.style && (node.style.display = expression.test(node.textContent) ? "" : "none");
+            });
+        },
+
+        showAllTailEntries : function() {
+            tailDomNode.childNodes.forEach(function(node) {
+                node.style && (node.style.display = "");
+            });
+        },
+
+        /**
          * When follow mode is on, scroll to the bottom of the views.
          */
         follow: function () {
-            this.followMode &&
+            Tail.followMode &&
             (tailDomNode.scrollTop = tailDomNode.scrollHeight) &&
             (focusedViewDomNode.scrollTop = focusedViewDomNode.scrollHeight);
         },
@@ -303,20 +360,20 @@ $(function () {
          * @returns {boolean} whether follow mode is on.
          */
         toggleFollowMode: function () {
-            this.followMode = !this.followMode;
-            if (this.followMode) {
+            Tail.followMode = !Tail.followMode;
+            if (Tail.followMode) {
                 // If "focus on errors" is on, deactivate it since we are re-loading the entire view.
-                if (this.errorFocused) {
-                    this.toggleErrorFocus();
+                if (Tail.errorFocused) {
+                    Tail.toggleErrorFocus();
                     inactiveStyle($focusOnErrorsButton);
                 }
-                this.clear();
+                Tail.clear();
                 followSelectedLogFile();
             } else {
                 stopFollowing();
             }
-            this.follow();
-            return this.followMode;
+            Tail.follow();
+            return Tail.followMode;
         },
 
         /**
@@ -326,18 +383,18 @@ $(function () {
         toggleErrorFocus: function () {
             focusedViewDomNode.innerHTML = "";
 
-            this.errorFocused = !this.errorFocused;
-            if (this.errorFocused) {
-                this.errorSectionNodes.forEach(function (node) {
+            Tail.errorFocused = !Tail.errorFocused;
+            if (Tail.errorFocused) {
+                Tail.errorSectionNodes.forEach(function (node) {
                     focusedViewDomNode.appendChild(node.cloneNode(true));
                 });
-                this.follow();
+                Tail.follow();
                 focusedViewDomNode.style.zIndex = 0;
             } else {
                 focusedViewDomNode.style.zIndex = -1;
             }
 
-            return this.errorFocused;
+            return Tail.errorFocused;
         },
 
         /**
@@ -345,9 +402,9 @@ $(function () {
          * error section.
          */
         updateErrorFocusedView: function () {
-            if (this.errorFocused) {
+            if (Tail.errorFocused) {
                 var oldNode = focusedViewDomNode.childNodes[focusedViewDomNode.childNodes.length - 1];
-                focusedViewDomNode.replaceChild(this.errorSection.cloneNode(true), oldNode);
+                focusedViewDomNode.replaceChild(Tail.errorSection.cloneNode(true), oldNode);
             }
         },
 
@@ -355,8 +412,8 @@ $(function () {
          * Updates the error focused view with a new error section.
          */
         addErrorToErrorFocusedView: function () {
-            if (this.errorFocused) {
-                focusedViewDomNode.appendChild(this.errorSection.cloneNode(true));
+            if (Tail.errorFocused) {
+                focusedViewDomNode.appendChild(Tail.errorSection.cloneNode(true));
             }
         },
 
@@ -365,7 +422,7 @@ $(function () {
          *           the tail or focused view node.
          */
         view: function () {
-            return this.errorFocused ? focusedViewDomNode : tailDomNode;
+            return Tail.errorFocused ? focusedViewDomNode : tailDomNode;
         }
     };
 
@@ -394,7 +451,7 @@ $(function () {
         tailSocket = createSocket();
         tailSocket.onopen = function () {
             initUiBehavior();
-            selectLogfileAndAmountFromRequestParameters();
+            updateFromRequestParameters();
         }
     } catch (e) {
         console && console.log(e);
@@ -413,8 +470,22 @@ $(function () {
             return false;
         });
 
+        $grep.keydown(function (event) {
+            return event.which !== KEY_ENTER;
+        });
+
+        $grep.keyup(function() {
+            // De-bounce handling: Do not apply the filter expression upon
+            // every character that is being typed, but a certain amount of time after
+            // the last key press
+            $grep.timer && window.clearTimeout($grep.timer);
+            $grep.timer = window.setTimeout(Tail.updateFilterExpressionFromUserInput, 300);
+        });
+
+        Tail.updateFilterExpressionFromUserInput();
+
         $amount.change(function() {
-            scrollBackBuffer = (parseFloat($amount.val()) || 0.1) * LINES_PER_MB;
+            Tail.scrollBackBuffer = (parseFloat($amount.val()) || 0.1) * LINES_PER_MB;
         });
 
         $followButton.click(function () {
@@ -511,7 +582,7 @@ $(function () {
     /**
      * Load selected logfile from the request parameters, e.g. ?file=/my/file&amount=100
      */
-    function selectLogfileAndAmountFromRequestParameters() {
+    function updateFromRequestParameters() {
 
         var queryString = document.location.search;
         if (!queryString) {
@@ -525,47 +596,42 @@ $(function () {
             opts[match[2]] = match[3];
         }
 
-        if (! (opts.amount && opts.file)) {
-            return;
-        }
+        opts.amount && (parseFloat(opts.amount) > 0) && $amount.val(opts.amount);
 
-        if (parseInt(opts.amount) < 0) {
-            return;
-        }
+        if (opts.file) {
+            // The log was not found in the non-rotated log files - perhaps it is in the rotated files?
+            if ($hideRotated.is(":checked")) {
+                var found = false;
 
-        $amount.val(opts.amount);
-
-        // The log was not found in the non-rotated log files - perhaps it is in the rotated files?
-        if ($hideRotated.is(":checked")) {
-            var found = false;
-
-            $logfile.find("option").each(function (_, v) {
-                if (v.value === opts.file) {
-                    found = true;
-                }
-            });
-
-            // The logfile is in the list on non-rotated logfiles, done.
-            if (!found) {
-                $logfiles.each(function (_, v) {
+                $logfile.find("option").each(function (_, v) {
                     if (v.value === opts.file) {
                         found = true;
                     }
                 });
 
-                // The logfile is in the list on rotated logfiles, update the selection.
-                if (found) {
-                    $hideRotated.prop("checked", false);
-                    filterLogFiles();
-                    $logfile.val(opts.file);
-                    $logfile.trigger("chosen:updated");
+                // The logfile is in the list on non-rotated logfiles, done.
+                if (!found) {
+                    $logfiles.each(function (_, v) {
+                        if (v.value === opts.file) {
+                            found = true;
+                        }
+                    });
+
+                    // The logfile is in the list on rotated logfiles, update the selection.
+                    if (found) {
+                        $hideRotated.prop("checked", false);
+                        filterLogFiles();
+                        $logfile.val(opts.file);
+                        $logfile.trigger("chosen:updated");
+                    }
                 }
             }
+
+            tailDomNode.innerHTML = "";
+            tailSelectedLogFile();
         }
 
-
-        tailDomNode.innerHTML = "";
-        tailSelectedLogFile();
+        opts.grep && $grep.val(opts.grep) && Tail.updateFilterExpressionFromUserInput();
     }
 
     /**
@@ -574,6 +640,7 @@ $(function () {
     function logfileParametersChanged() {
         var file = $logfile.val(),
             amount = $amount.val(),
+            grep = $grep.val(),
             href = document.location.href,
             queryPos = Math.max(href.indexOf("?"), href.indexOf("#")),
             endPos = queryPos === -1 ? href.length : queryPos;
@@ -582,7 +649,7 @@ $(function () {
             return;
         }
 
-        document.location.href = href.substr(0, endPos) + "?file=" + file + '&amount=' + amount;
+        document.location.href = href.substr(0, endPos) + "?file=" + file + '&amount=' + amount + "&grep=" + (grep || "");
     }
 
     /**
