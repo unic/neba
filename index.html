@@ -93,11 +93,20 @@ public class MyModel {
             </h2>
             <p>NEBA supports <a href="documentation.html#lazy_loading">Lazy-Loading repository data</a>, transparently and simple, to allow building high speed
                 applications - regardless of the amount of repository content. </p>
-            <figure>
-                <img src="assets/images/lazy-loading-statistics.png"
+{% highlight java %}@ResourceModel(types = "sling/resource/type")
+public class MyModel {
+    @Reference
+    private Lazy<Page> referencedPage;
 
-                     alt="NEBA has first-class support for lazy-loading">
-            </figure>
+    @Children
+    // Collections are lazy by default
+    private List<CarouselEntries> entries;
+
+    public Optional<PageContent> getPageContent() {
+        return referencedPage.map(Page::getContent).asOptional();
+    }
+}
+{% endhighlight %}
         </section>
         <section>
             <h2>Keep track of your models</h2>
