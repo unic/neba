@@ -1,0 +1,60 @@
+---
+title: NEBA 5.0.5
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.0.5 features improvements to the log viewer nad model statistics and includes a minor Spring upgrade.
+tags: [release,current]
+release:
+    version: 5.0.5
+    previousVersion: 5.0.4
+    requiresChange: false
+---
+
+<section>
+    <header><h1>NEBA 5.0.5 released</h1></header>
+    <p>
+        NEBA 5.0.5 focuses on improvements on the NEBA tooling for <a href="/documentation.html#tooling_modelstatistics">resource model statistics</a> and <a href="/documentation.html#tooling_logviewer">viewing logfiles</a>.
+        It also contains a <a href="https://github.com/unic/neba/issues/305">bug fix for a potential, albeit unlikely race condition</a> if multiple model registries services are started concurrently at exactly the same point in time.
+    </p>
+    <section>
+        <header><h2>Model statistics improvements</h2></header>
+        <p>
+            The model statistics view now has improved smart formatting of the statistical data. Larger amounts (e.g. number of instantiations) are now formatted in 1000's (k) or millions (m)
+            and millisecond data is formatted as milliseconds (ms), seconds (s), hours, days or years to better fit scenarios with large volumes of data.
+        </p>
+        <img src="/assets/images/modelstatistics-large.png" title="NEBA resource model statistics" alt="NEBA resource model statistics">
+    </section>
+    <section>
+        <header><h2>Log viewer improvements</h2></header>
+        <p>
+            The log viewer now shows a continuously updated view of the actual time on the server and the server time's UTC offset to support log analysis spanning different time zones.
+            With 5.0.5, the log viewer now has a limited scrollback buffer when tailing log files. The number of lines correspond to the chosen amount of tail data (0.1 MB by default). This allows
+            following logfiles with a lot of changes over a longer period of time without increasing the browser memory usage.
+        </p>
+        <p>
+            The log viewer has also been enhanced with client-side grep support. The grep term is a regular expression applied to the client's view on the log data. This allows flexible filtering of the data viewed
+            and works for both live followed data and tailed data. The grep mechanism respects the semantics of ERROR stack traces in the logfile. That is, if a grep expression matches
+            part of a stacktrace, the entire stack trace is shown and not just the matching line.
+        </p>
+        <img src="/assets/images/logviewer-large.png" title="NEBA Sling log viewer" alt="NEBA Sling log viewer"><
+    </section>
+
+    <p>
+    Finally, the optional NEBA Spring integration has been updated to Spring Version 5.1.5, containing <a href="https://jira.spring.io/secure/ReleaseNote.jspa?version=17343&styleName=Text&projectId=10000">minor updates and improvements</a>.
+    </p>
+
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="26" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="26" data-labels="bug"></ul>
+    </section>
+</section>
