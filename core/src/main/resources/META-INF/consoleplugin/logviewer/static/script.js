@@ -184,7 +184,7 @@ $(function () {
             );
             tailDomNode.appendChild(document.createElement("br"));
             tailDomNode.appendChild(document.createElement("br"));
-            this.follow();
+            this.followUp();
         },
 
         /**
@@ -192,14 +192,18 @@ $(function () {
          */
         add: function (text) {
 
-            function linkRequestLog(match) {
-                var link = document.createElement("a");
+            function linkRequestLog(match, linkAttribute) {
+                var link = document.createElement("a"),
+                    div = document.createElement("div");
+
                 link.textContent = '[' + match[2] + ']';
-                tailDomNode.appendChild(document.createTextNode(match[1]));
-                tailDomNode.appendChild(link);
-                tailDomNode.appendChild(document.createTextNode(match[3]));
-                tailDomNode.appendChild(document.createElement("br"));
-                return link;
+                link.setAttribute(linkAttribute.name, linkAttribute.value);
+
+                div.appendChild(document.createTextNode(match[1]));
+                div.appendChild(link);
+                div.appendChild(document.createTextNode(match[3]));
+                div.appendChild(document.createElement("br"));
+                return div;
             }
 
             function requestStartPattern() {
@@ -267,15 +271,14 @@ $(function () {
                     var match = requestStartPattern().exec(textNode.nodeValue);
                     if (match != null) {
                         this.logType = Tail.LogType.REQUEST;
-                        var link = linkRequestLog(match);
-                        link.setAttribute("href", '#r' + match[2]);
+                        this.addToTail(linkRequestLog(match, {name : "href", value: '#r' + match[2]}));
                         continue;
                     }
 
                     match = requestEndPattern().exec(textNode.nodeValue);
                     if (match != null) {
                         this.logType = Tail.LogType.REQUEST;
-                        linkRequestLog(match).setAttribute("name", 'r' + match[2]);
+                        this.addToTail(linkRequestLog(match, {name : "name", value: '#r' + match[2]}));
                         continue;
                     }
                 }
@@ -292,7 +295,7 @@ $(function () {
                 this.buffer = "";
             }
 
-            this.follow();
+            this.followUp();
         },
 
         /**
@@ -349,7 +352,7 @@ $(function () {
         /**
          * When follow mode is on, scroll to the bottom of the views.
          */
-        follow: function () {
+        followUp: function () {
             Tail.followMode &&
             (tailDomNode.scrollTop = tailDomNode.scrollHeight) &&
             (focusedViewDomNode.scrollTop = focusedViewDomNode.scrollHeight);
@@ -372,7 +375,7 @@ $(function () {
             } else {
                 stopFollowing();
             }
-            Tail.follow();
+            Tail.followUp();
             return Tail.followMode;
         },
 
@@ -388,7 +391,7 @@ $(function () {
                 Tail.errorSectionNodes.forEach(function (node) {
                     focusedViewDomNode.appendChild(node.cloneNode(true));
                 });
-                Tail.follow();
+                Tail.followUp();
                 focusedViewDomNode.style.zIndex = 0;
             } else {
                 focusedViewDomNode.style.zIndex = -1;
@@ -591,7 +594,9 @@ $(function () {
 
         var opts = {};
 
-        var requestParameterPattern = /([?&])([^=]+)=([^&?]*)/g;
+        var requestParameterPattern = /([?&])([^=]+)=([^&?]*)/g,
+            match;
+
         while ((match = requestParameterPattern.exec(queryString)) !== null) {
             opts[match[2]] = match[3];
         }
