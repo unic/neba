@@ -167,12 +167,20 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
-    public void testDownloadLogFilesAsZip() throws Exception {
-        getZippedLogfiles();
+    public void testDownloadAllLogFilesAsZip() throws Exception {
+        getAllLogfilesAsZip();
         verifyLogFilesAreSendAs("logfiles-servername.zip");
         for (File file : this.availableLogFiles) {
             assertNextZipEntryIs(toZipFileEntryName(file));
         }
+    }
+
+    @Test
+    public void testDownloadCurrentLogfileAsZip() throws Exception {
+        getLogfileAsZip(pathOf("logs/error.log"));
+        verifyLogFilesAreSendAs("logfiles-servername-error.log.zip");
+        assertZipResponseHasOneFile();
+        assertNextZipEntryIs(toZipFileEntryName(toFile("logs/error.log")));
     }
 
     @Test
@@ -218,7 +226,7 @@ public class LogfileViewerConsolePluginTest {
     public void testServerTimeRetrieval() throws ServletException, IOException {
         withRequestPath("/system/console/logviewer/serverTime");
         doGet();
-        assertResponseMatches("[0-9]{1,2}.[0-9]{1,2}.[0-9]{4} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.[0-9]+ \\(UTC \\+ [0-9]+\\)");
+        assertResponseMatches("\\{\"time\": \"[0-9]{1,2}.[0-9]{1,2}.[0-9]{4} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.[0-9]+ \\(UTC \\+ [0-9]+\\)\"\\}");
     }
 
     @Test
@@ -324,8 +332,15 @@ public class LogfileViewerConsolePluginTest {
         assertThat(nextEntry.getName()).isEqualTo(expected);
     }
 
-    private void getZippedLogfiles() throws ServletException, IOException {
+    private void getAllLogfilesAsZip() throws ServletException, IOException {
         withRequestPath("/system/console/logviewer/download");
+        doGet();
+        this.zippedFiles = new ZipInputStream(new ByteArrayInputStream(this.internalOutputStream.toByteArray()));
+    }
+
+    private void getLogfileAsZip(String filePath) throws ServletException, IOException {
+        withRequestPath("/system/console/logviewer/download");
+        withFileRequestParameter(filePath);
         doGet();
         this.zippedFiles = new ZipInputStream(new ByteArrayInputStream(this.internalOutputStream.toByteArray()));
     }
@@ -356,7 +371,15 @@ public class LogfileViewerConsolePluginTest {
         assertThat(this.responseText).matches(regex);
     }
 
+    private void assertZipResponseHasOneFile() throws IOException {
+        assertThat(this.zippedFiles.available()).isEqualTo(1);
+    }
+
     private String pathOf(String relativePath) {
-        return new File(this.testLogfileDirectory, relativePath).getAbsolutePath();
+        return toFile(relativePath).getAbsolutePath();
+    }
+
+    private File toFile(String relativePath) {
+        return new File(this.testLogfileDirectory, relativePath);
     }
 }
