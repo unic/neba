@@ -44,8 +44,10 @@ import static java.lang.Thread.currentThread;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
@@ -158,10 +160,12 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
         final long now = currentTimeMillis();
         // Including current DST, if any.
         long utcOffsetInHours = TimeUnit.MILLISECONDS.toHours(TimeZone.getDefault().getOffset(now));
-        res.setContentType("text/plain");
+        res.setContentType("application/json");
         res.setCharacterEncoding("UTF-8");
         res.setHeader("Cache-Control", "no-store");
-        res.getWriter().write(DATETIME_FORMAT.format(currentTimeMillis()) + " (UTC " + (utcOffsetInHours < 0 ? "-" : "+") + " " + utcOffsetInHours + ")");
+        res.getWriter().write('{');
+        res.getWriter().write("\"time\": \"" + DATETIME_FORMAT.format(currentTimeMillis()) + " (UTC " + (utcOffsetInHours < 0 ? "-" : "+") + " " + utcOffsetInHours + ")\"");
+        res.getWriter().write('}');
     }
 
     /**
@@ -210,11 +214,18 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
      * Streams the contents of the log directory as a zip file.
      */
     private void download(HttpServletResponse res, HttpServletRequest req) throws IOException {
+        final String selectedLogfile = req.getParameter("file");
+        final String filenameSuffix = isEmpty(selectedLogfile) ? "" : "-" + substringAfterLast(selectedLogfile, File.separator);
+
         res.setContentType("application/zip");
-        res.setHeader("Content-Disposition", "attachment;filename=logfiles-" + req.getServerName() + ".zip");
+        res.setHeader("Content-Disposition", "attachment;filename=logfiles-" + req.getServerName() + filenameSuffix + ".zip");
         ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
         try {
             for (File file : this.logFiles.resolveLogFiles()) {
+                if (selectedLogfile != null && !file.getAbsolutePath().equals(selectedLogfile)) {
+                    continue;
+                }
+
                 ZipEntry ze = new ZipEntry(toZipFileEntryName(file));
                 zos.putNextEntry(ze);
                 FileInputStream in = new FileInputStream(file);

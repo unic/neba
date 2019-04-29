@@ -40,14 +40,17 @@ $(function () {
         var timerId = window.setInterval(function() {
             $.ajax({
                 url: "logviewer/serverTime",
+                dataType: "json",
                 global : false,
                 error: function() {
                     if (++ failures > 10) {
+                        // Bail after 10 successive error responses from the server.
                         window.clearInterval(timerId);
                     }
                 },
                 success: function(data) {
-                    $("#serverTime").text(data);
+                    failures = 0;
+                    $("#serverTime").text(data.time);
                 }
             });
         }, 1000);
@@ -62,12 +65,11 @@ $(function () {
         KEY_A = 65,
         NEWLINE = /\r?\n/,
         LINES_PER_MB = 14000, // approximate number of log viewer lines per MB log data.
+        PATTERN_SECTION_START = /\*(TRACE|DEBUG|INFO|WARN|ERROR)\*/,
         textDecoder = new TextDecoder("UTF-8"),
         tailSocket,
         tailDomNode = document.getElementById("tail"),
-        focusedViewDomNode = document.getElementById("focusedView"),
         $logfile = $("#logfile"),
-        $logfiles = $logfile.children().clone(),
         $amount = $("#amount"),
         $followButton = $("#followButton"),
         $hideRotated = $("#hideRotated"),
@@ -77,17 +79,35 @@ $(function () {
         $grep = $("#grep");
 
     /**
-     * Represents the Tail views (tail and error focused) and the
-     * related operations.
+     * Enable chosen-select on the logfile dropdown.
+     */
+    $logfile.chosen({width : "16em"});
+
+    /**
+     * Enable download behaviors for the download buttons.
+     */
+    downloadCurrentLogfile.click(function() {
+        if ($logfile.val()) {
+            window.open("logviewer/download?file=" + $logfile.val());
+        }
+        return false;
+    });
+    $downloadAllLogfiles.click(function() {
+        window.open("logviewer/download");
+        return false;
+    });
+
+    /**
+     * Represents the Tail view and the related operations.
      */
     var Tail = {
         /**
          * The known types of logfiles.
          */
         LogType: Object.freeze({
-            ERROR: 0,
-            REQUEST: 1,
-            ACCESS: 2
+            ERROR_LOG: 0,
+            REQUEST_LOG: 1,
+            ACCESS_LOG: 2
         }),
 
         /**
@@ -111,66 +131,19 @@ $(function () {
         buffer: "",
 
         /**
-         * Whether the error focused view is active.
-         */
-        errorFocused: false,
-
-        /**
          * The currently open error section, if any.
          */
-        errorSection: undefined,
-
-        /**
-         * The nodes representing error sections.
-         */
-        errorSectionNodes: [],
-
-        /**
-         * Event listeners to be notified when an error is added or an error section is updated.
-         */
-        errorUpdateListeners: [],
-
-        /**
-         * Event listeners to be notified when an new error section is added.
-         */
-        newErrorListeners: [],
+        currentSection: undefined,
 
         followMode: false,
-
-        numberOfErrors: function () {
-            return this.errorSectionNodes.length;
-        },
-
-        onNewError: function (callback) {
-            this.newErrorListeners.push(callback);
-        },
-
-        notifyErrorUpdateListeners: function () {
-            var section = this.errorSection;
-            this.errorUpdateListeners.forEach(function (listener) {
-                listener(section);
-            });
-        },
-
-        notifyNewErrorListeners: function () {
-            var section = this.errorSection;
-            this.newErrorListeners.forEach(function (listener) {
-                listener(section)
-            });
-        },
 
         /**
          * Clears the tail and re-sets any associated state.
          */
         clear: function () {
             tailDomNode.innerHTML = "";
-            focusedViewDomNode.innerHTML = "";
             this.buffer = "";
-            this.errorSection = undefined;
-            this.errorSectionNodes = [];
-            if (this.errorFocused) {
-                this.toggleErrorFocus();
-            }
+            this.currentSection = undefined;
         },
 
         /**
@@ -228,56 +201,56 @@ $(function () {
                  */
                 var textNode = document.createTextNode(lines[i]);
 
-                if (this.logType === Tail.LogType.ERROR || this.logType === undefined) {
+                // Enable section detection if we know we are in an error.log or the logfile type is not known.
+                if (this.logType === Tail.LogType.ERROR_LOG || this.logType === undefined) {
 
-                    // An error statement was detected before and is not yet finished
-                    if (this.errorSection) {
+                    // An interrelated entry, e.g. an error stack trace, was detected before and is not yet finished
+                    if (this.currentSection) {
                         var firstChar = textNode.nodeValue.charAt(0);
                         // The first character is a tab or not a number -> consider it part of a stack trace.
                         if (firstChar === '\t' || (firstChar * 0) !== 0) {
-                            // Add the node to the existing error section
-                            this.errorSection.appendChild(textNode);
-                            this.errorSection.appendChild(document.createElement("br"));
-                            // The error section might be hidden as it did not yet contain a match for the grep expression.
+                            // Add the node to the existing section
+                            this.currentSection.appendChild(textNode);
+                            this.currentSection.appendChild(document.createElement("br"));
+                            // The section might be hidden as it did not yet contain a match for the grep expression.
                             // Make it visible in case the grep expression  matches after new data is added.
-                            this.filterExpression && this.errorSection.style.display === "none" && this.filterExpression.test(this.errorSection.textContent) && (this.errorSection.style.display = "");
-                            this.updateErrorFocusedView();
-                            this.notifyErrorUpdateListeners();
+                            this.filterExpression &&
+                                this.currentSection.style.display === "none" &&
+                                this.filterExpression.test(this.currentSection.textContent) &&
+                                (this.currentSection.style.display = "");
                             continue;
                         }
-                        // The text is not part of the current error section -> end the error section
-                        this.errorSection = undefined;
+                        // The text is not part of the current section -> end the section
+                        this.currentSection = undefined;
                     }
 
-                    // An error is detected.
-                    if (textNode.nodeValue.indexOf("*ERROR*") !== -1) {
-                        this.logType = Tail.LogType.ERROR;
-                        // Create a new div that will hold all elements of the logged error, including stack traces
-                        this.errorSection = document.createElement("div");
-                        this.errorSection.className = "error";
-                        this.errorSectionNodes.push(this.errorSection);
-                        // Add the current text to the newly created error section
-                        this.errorSection.appendChild(textNode);
-                        this.errorSection.appendChild(document.createElement("br"));
-                        // Add the newly created error section to the log view
-                        this.addToTail(this.errorSection);
-                        this.addErrorToErrorFocusedView();
-                        this.notifyNewErrorListeners();
+                    // A new interrelated section is detected is detected.
+                    var match = PATTERN_SECTION_START.exec(textNode.nodeValue);
+                    if (match !== null) {
+                        this.logType = Tail.LogType.ERROR_LOG;
+                        // Create a new div that will hold all elements of the logged entry, including stack traces
+                        this.currentSection = document.createElement("div");
+                        this.currentSection.className = match[1].toLowerCase();
+                        // Add the current text to the newly created section
+                        this.currentSection.appendChild(textNode);
+                        this.currentSection.appendChild(document.createElement("br"));
+                        // Add the newly created section to the log view
+                        this.addToTail(this.currentSection);
                         continue;
                     }
                 }
 
-                if (this.logType === Tail.LogType.REQUEST || this.logType === undefined) {
+                if (this.logType === Tail.LogType.REQUEST_LOG || this.logType === undefined) {
                     var match = requestStartPattern().exec(textNode.nodeValue);
                     if (match != null) {
-                        this.logType = Tail.LogType.REQUEST;
+                        this.logType = Tail.LogType.REQUEST_LOG;
                         this.addToTail(linkRequestLog(match, {name : "href", value: '#r' + match[2]}));
                         continue;
                     }
 
                     match = requestEndPattern().exec(textNode.nodeValue);
                     if (match != null) {
-                        this.logType = Tail.LogType.REQUEST;
+                        this.logType = Tail.LogType.REQUEST_LOG;
                         this.addToTail(linkRequestLog(match, {name : "name", value: '#r' + match[2]}));
                         continue;
                     }
@@ -354,8 +327,7 @@ $(function () {
          */
         followUp: function () {
             Tail.followMode &&
-            (tailDomNode.scrollTop = tailDomNode.scrollHeight) &&
-            (focusedViewDomNode.scrollTop = focusedViewDomNode.scrollHeight);
+            (tailDomNode.scrollTop = tailDomNode.scrollHeight);
         },
 
         /**
@@ -365,11 +337,6 @@ $(function () {
         toggleFollowMode: function () {
             Tail.followMode = !Tail.followMode;
             if (Tail.followMode) {
-                // If "focus on errors" is on, deactivate it since we are re-loading the entire view.
-                if (Tail.errorFocused) {
-                    Tail.toggleErrorFocus();
-                    inactiveStyle($focusOnErrorsButton);
-                }
                 Tail.clear();
                 followSelectedLogFile();
             } else {
@@ -377,77 +344,9 @@ $(function () {
             }
             Tail.followUp();
             return Tail.followMode;
-        },
-
-        /**
-         * Whether to only show errors.
-         * @returns {boolean} whether only show errors is on.
-         */
-        toggleErrorFocus: function () {
-            focusedViewDomNode.innerHTML = "";
-
-            Tail.errorFocused = !Tail.errorFocused;
-            if (Tail.errorFocused) {
-                Tail.errorSectionNodes.forEach(function (node) {
-                    focusedViewDomNode.appendChild(node.cloneNode(true));
-                });
-                Tail.followUp();
-                focusedViewDomNode.style.zIndex = 0;
-            } else {
-                focusedViewDomNode.style.zIndex = -1;
-            }
-
-            return Tail.errorFocused;
-        },
-
-        /**
-         * Updates the error focused view with a piece of text belonging to the last
-         * error section.
-         */
-        updateErrorFocusedView: function () {
-            if (Tail.errorFocused) {
-                var oldNode = focusedViewDomNode.childNodes[focusedViewDomNode.childNodes.length - 1];
-                focusedViewDomNode.replaceChild(Tail.errorSection.cloneNode(true), oldNode);
-            }
-        },
-
-        /**
-         * Updates the error focused view with a new error section.
-         */
-        addErrorToErrorFocusedView: function () {
-            if (Tail.errorFocused) {
-                focusedViewDomNode.appendChild(Tail.errorSection.cloneNode(true));
-            }
-        },
-
-        /**
-         * @returns {Element} the DOM node representing the current view on the log data, i.e.
-         *           the tail or focused view node.
-         */
-        view: function () {
-            return Tail.errorFocused ? focusedViewDomNode : tailDomNode;
-        }
-    };
-
-    /**
-     * Show and / or update the error focus button.
-     */
-    Tail.onNewError(function () {
-        if (Tail.numberOfErrors() === 1) {
-            $focusOnErrorsCount.fadeIn();
-        }
-        $focusOnErrorsCount.html(Tail.numberOfErrors());
-        if ($focusOnErrorsButton.inAnimation) {
-            return;
-        }
-        $focusOnErrorsButton.inAnimation = true;
-        $focusOnErrorsButton.effect("highlight", {color: "#883B26"}, 600, function () {
-            $focusOnErrorsButton.inAnimation = false;
-        })
-    });
+        }};
 
     adjustViewsToScreenHeight();
-    filterLogFiles();
     restrictCopyAllToLogView();
 
     try {
@@ -507,16 +406,6 @@ $(function () {
             }
             return true;
         });
-
-        $hideRotated.change(function () {
-            filterLogFiles();
-            return false;
-        });
-
-        $focusOnErrorsButton.click(function () {
-            Tail.toggleErrorFocus() ? activeStyle($focusOnErrorsButton) : inactiveStyle($focusOnErrorsButton);
-            return false;
-        })
     }
 
     function activeStyle($button) {
@@ -604,37 +493,16 @@ $(function () {
         opts.amount && (parseFloat(opts.amount) > 0) && $amount.val(opts.amount);
 
         if (opts.file) {
-            // The log was not found in the non-rotated log files - perhaps it is in the rotated files?
-            if ($hideRotated.is(":checked")) {
-                var found = false;
-
-                $logfile.find("option").each(function (_, v) {
-                    if (v.value === opts.file) {
-                        found = true;
-                    }
-                });
-
-                // The logfile is in the list on non-rotated logfiles, done.
-                if (!found) {
-                    $logfiles.each(function (_, v) {
-                        if (v.value === opts.file) {
-                            found = true;
-                        }
-                    });
-
-                    // The logfile is in the list on rotated logfiles, update the selection.
-                    if (found) {
-                        $hideRotated.prop("checked", false);
-                        filterLogFiles();
-                        $logfile.val(opts.file);
-                        $logfile.trigger("chosen:updated");
-                    }
+            $logfile.children().each(function (_, v) {
+                if (v.value === opts.file) {
+                    $logfile.val(opts.file);
+                    $logfile.trigger("chosen:updated");
                 }
-            }
-
-            tailDomNode.innerHTML = "";
-            tailSelectedLogFile();
+            });
         }
+
+        tailDomNode.innerHTML = "";
+        tailSelectedLogFile();
 
         opts.grep && $grep.val(opts.grep) && Tail.updateFilterExpressionFromUserInput();
     }
@@ -694,29 +562,6 @@ $(function () {
 
     function adjustViewsToScreenHeight() {
         tailDomNode.style.height = (screen.height * 0.65) + "px";
-        focusedViewDomNode.style.height = tailDomNode.style.height;
-    }
-
-    function filterLogFiles() {
-        // E.g. 2029-01-01.log
-        var currentDateSuffix = new Date().toISOString().slice(0,10) + ".log";
-        // E.g. some-log-2020-01-01.log
-        var logFileWithDateSuffix = /^.+-[0-9]{4}-[0-9]{2}-[0-9]{2}\.log$/;
-
-        var currentlySelectedFile = $logfile.val();
-
-        $logfile.children().remove();
-
-        $logfile.append(
-            $hideRotated.is(":checked") ? $logfiles.filter("[value$='\\.log'],[value='']").filter(function(idx, elem) {
-                return !logFileWithDateSuffix.test(elem.value) ||
-                        elem.value.endsWith(currentDateSuffix)
-            }) : $logfiles
-        );
-
-        if (currentlySelectedFile) $logfile.val(currentlySelectedFile);
-
-        $logfile.trigger("chosen:updated");
     }
 
     /**
@@ -728,7 +573,7 @@ $(function () {
             if (e.keyCode === KEY_A && e.ctrlKey) {
                 e.preventDefault();
                 var range = document.createRange();
-                range.selectNode(Tail.view());
+                range.selectNode(tailDomNode);
                 var selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(range);
