@@ -56,11 +56,6 @@ $(function () {
         }, 1000);
     })();
 
-    /**
-     * Enable chosen-select on the logfile dropdown.
-     */
-    $(".chosen-select").chosen({width : "16em"});
-
     var KEY_ENTER = 13,
         KEY_A = 65,
         NEWLINE = /\r?\n/,
@@ -72,10 +67,8 @@ $(function () {
         $logfile = $("#logfile"),
         $amount = $("#amount"),
         $followButton = $("#followButton"),
-        $hideRotated = $("#hideRotated"),
-        $downloadButton = $("#downloadButton"),
-        $focusOnErrorsButton = $("#focusOnErrors"),
-        $focusOnErrorsCount = $("#numberOfDetectedErrors"),
+        $downloadCurrentLogfile = $("#downloadCurrentLogfile"),
+        $downloadAllLogfiles = $("#downloadAllLogfiles"),
         $grep = $("#grep");
 
     /**
@@ -86,7 +79,7 @@ $(function () {
     /**
      * Enable download behaviors for the download buttons.
      */
-    downloadCurrentLogfile.click(function() {
+    $downloadCurrentLogfile.click(function() {
         if ($logfile.val()) {
             window.open("logviewer/download?file=" + $logfile.val());
         }
@@ -393,10 +386,6 @@ $(function () {
         $followButton.click(function () {
             Tail.toggleFollowMode() ? activeStyle($followButton) : inactiveStyle($followButton);
             return false;
-        });
-
-        $downloadButton.click(function () {
-            window.location.href = pluginRoot + "/download";
         });
 
         $amount.keydown(function (event) {
