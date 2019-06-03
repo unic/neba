@@ -30,7 +30,7 @@ import java.util.Collection;
 public interface ResourceModelFactory {
     /**
      * @return A list of all {@link ModelDefinition model definitions} suitable for {@link #getModel(ModelDefinition) model} resolution.
-     * Never <code>null</code> but rather an empty collections.
+     * Never <code>null</code> but rather an empty collection.
      */
     @Nonnull
     Collection<ModelDefinition> getModelDefinitions();
