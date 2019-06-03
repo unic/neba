@@ -1,0 +1,41 @@
+---
+title: NEBA 5.0.6
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.0.6 ships with a simplified and improved log viewer and Spring 5.1.6.
+tags: [release,current]
+release:
+    version: 5.0.6
+    previousVersion: 5.0.5
+    requiresChange: false
+---
+
+<section>
+    <header><h1>NEBA 5.0.6 released</h1></header>
+    <p>
+        NEBA 5.0.6 ships with a simplified log viewer. Here, we have removed special-case handling of error detection in the logs in favor of the new <a href="https://neba.io/2019/04/15/neba-release-5.0.5.html">grep functionality added in the previous release</a>.
+        Since users can search for any regular expression in the log file and the grep functionality has smart stack trace handling, there is no need for error-specific filtering any more.
+    </p>
+    <p>
+        In addition, the log viewer now allows downloading either the currently viewed or all logfiles, since downloading all logfiles might not be a good idea on larger production deployments.
+    </p>
+
+    <p>
+        Finally, the optional NEBA Spring integration has been updated to <a href="https://search.maven.org/search?q=g:org.apache.servicemix.bundles%20spring&v:5.1.6.RELEASE_1=">Spring Version 5.1.6</a>, containing <a href="https://github.com/spring-projects/spring-framework/milestone/210?closed=1">multiple important bugfixes and improvements</a>.
+    </p>
+
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="28" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        None
+    </section>
+</section>
