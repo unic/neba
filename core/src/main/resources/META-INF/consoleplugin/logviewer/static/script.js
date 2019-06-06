@@ -337,7 +337,12 @@ $(function () {
             }
             Tail.followUp();
             return Tail.followMode;
-        }};
+        },
+
+        updateScrollbackBufferSize: function() {
+            Tail.scrollBackBuffer = (parseFloat($amount.val()) || 0.1) * LINES_PER_MB;
+        }
+    };
 
     adjustViewsToScreenHeight();
     restrictCopyAllToLogView();
@@ -379,9 +384,7 @@ $(function () {
 
         Tail.updateFilterExpressionFromUserInput();
 
-        $amount.change(function() {
-            Tail.scrollBackBuffer = (parseFloat($amount.val()) || 0.1) * LINES_PER_MB;
-        });
+        $amount.change(Tail.updateScrollbackBufferSize);
 
         $followButton.click(function () {
             Tail.toggleFollowMode() ? activeStyle($followButton) : inactiveStyle($followButton);
@@ -479,7 +482,7 @@ $(function () {
             opts[match[2]] = match[3];
         }
 
-        opts.amount && (parseFloat(opts.amount) > 0) && $amount.val(opts.amount);
+        opts.amount && (parseFloat(opts.amount) > 0) && $amount.val(opts.amount) && Tail.updateScrollbackBufferSize();
 
         if (opts.file) {
             $logfile.children().each(function (_, v) {
