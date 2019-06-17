@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://neba.io/sitemap.xml

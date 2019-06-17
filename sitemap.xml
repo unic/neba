@@ -1,0 +1,41 @@
+---
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 https://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+    <url>
+        <loc>https:/neba.io/</loc>
+        <lastmod>2019-06-17</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https:/neba.io/documentation.html</loc>
+        <lastmod>2019-06-17</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://neba.io/about.html</loc>
+        <lastmod>2019-06-17</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://neba.io/download.html</loc>
+        <lastmod>2019-06-17</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    {% assign posts = site.posts | where_exp:"item", "item.tags contains 'release'" | sort: "release.version"
+    %}{% for post in posts
+    %}
+    <url>
+        <loc>https://neba.io{{ post.url }}</loc>
+        <lastmod>{{ post.date | date: "%Y-%m-%d" }}</lastmod>
+        <changefreq>never</changefreq>
+        <priority>0.5</priority>
+    </url>
+    {% endfor %}
+</urlset>
