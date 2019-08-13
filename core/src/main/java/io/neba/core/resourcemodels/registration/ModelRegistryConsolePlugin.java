@@ -229,7 +229,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
             } finally {
                 r.close();
             }
-        }).orElse("#");
+        }).orElse(type);
     }
 
     private void provideAllModelTypes(HttpServletResponse res) throws IOException {
