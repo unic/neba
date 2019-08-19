@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.neba</groupId>
 	<artifactId>io.neba.neba-parent</artifactId>
-    <version>5.0.6</version>
+    <version>5.0.7</version>
 	<name>NEBA parent POM</name>
 	<packaging>pom</packaging>
 	
@@ -54,7 +54,7 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.1.6.RELEASE_1</spring.version>
+		<spring.version>5.1.8.RELEASE_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
 		<language.level>1.8</language.level>
@@ -403,7 +403,7 @@
 				<plugin>
 					<groupId>org.apache.sling</groupId>
 					<artifactId>maven-sling-plugin</artifactId>
-					<version>2.3.8</version>
+					<version>2.4.2</version>
 					<configuration>
 						<slingUrl>${sling.url}</slingUrl>
 					</configuration>
@@ -411,7 +411,7 @@
 				<plugin>
 					<groupId>org.apache.jackrabbit</groupId>
 					<artifactId>filevault-package-maven-plugin</artifactId>
-					<version>1.0.3</version>
+					<version>1.0.4</version>
 				</plugin>
 				<plugin>
 					<groupId>com.vecna</groupId>
@@ -426,11 +426,11 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.0</version>
+					<version>3.8.1</version>
 					<configuration>
 						<source>${language.level}</source>
 						<target>${language.level}</target>
@@ -447,7 +447,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-project-info-reports-plugin</artifactId>
@@ -467,7 +467,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.0</version>
 					<executions>
 						<execution>
 							<id>attach-sources</id>
@@ -494,7 +494,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.1</version>
 					<executions>
 						<execution>
 							<id>attach-javadocs</id>

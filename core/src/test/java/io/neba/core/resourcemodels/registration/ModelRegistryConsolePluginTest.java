@@ -437,6 +437,14 @@ public class ModelRegistryConsolePluginTest {
         assertResponseDoesNotContainContain("Warning: No amendment mapping for io.neba.neba-core:");
     }
 
+    @Test
+    public void testResourceTypesAreStillListedWhenPluginCannotAccessToRepository() throws IOException, LoginException {
+        withFailureWhenRetrievingAdminUser();
+        withRegisteredModel("cq:Page", Model.class, 123L, "modelName");
+        renderContent();
+        assertResponseContains("cq:Page");
+    }
+
     private void assertResponseDoesNotContainContain(String notExpected) {
         assertThat(this.renderedResponse).doesNotContain(notExpected);
     }
