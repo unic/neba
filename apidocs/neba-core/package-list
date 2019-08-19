@@ -1,5 +1,4 @@
 io.neba.core.logviewer
-io.neba.core.resourcemodels
 io.neba.core.resourcemodels.adaptation
 io.neba.core.resourcemodels.caching
 io.neba.core.resourcemodels.factory
