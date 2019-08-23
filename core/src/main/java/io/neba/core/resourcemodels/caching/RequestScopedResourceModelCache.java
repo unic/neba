@@ -172,10 +172,10 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
     }
 
     /**
-     * The externally provided key may be wrapped to add more key elements in order
+     * The provided key may be wrapped to add more key elements in order
      * to restrict the cached object's scope to a specific component when safe mode is enabled.
      *
-     * @return A request-state sensitive key in {@link Configuration#safeMode()}, the original key otherwise.
+     * @return A request-state sensitive key if the cached if the current thread is a HTTP request, the original key if not.
      */
     private Object createSafeModeKey(Object key) {
         // Create a request-state sensitive key to scope the cached model to a request with specific parameters.
