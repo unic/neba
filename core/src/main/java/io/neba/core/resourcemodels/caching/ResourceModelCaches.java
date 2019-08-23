@@ -98,7 +98,7 @@ public class ResourceModelCaches {
      *
      * @param resource must not be <code>null</code>.
      * @param key      must not be <code>null</code>.
-     * @param model    can be <code>null</code>.
+     * @param model    must not be <code>null</code>.
      */
     public <T> void store(@Nonnull Resource resource, @Nonnull Key key, @Nonnull Optional<T> model) {
         if (resource == null) {
