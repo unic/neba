@@ -26,9 +26,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
@@ -60,25 +58,19 @@ public class AnnotatedFieldMappers {
             return annotation;
         }
 
-        public AnnotatedFieldMapper getMapper() {
+        AnnotatedFieldMapper getMapper() {
             return mapper;
         }
     }
 
-    private static final Collection<AnnotationMapping> EMPTY = emptyList();
-    private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache
-            = new ConcurrentDistinctMultiValueMap<>();
-    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers
-            = new ConcurrentDistinctMultiValueMap<>();
-
-    private final AtomicInteger state = new AtomicInteger(0);
+    private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache = new ConcurrentDistinctMultiValueMap<>();
+    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers = new ConcurrentDistinctMultiValueMap<>();
 
     @Reference(cardinality = MULTIPLE, policy = DYNAMIC, unbind = "unbind")
     protected synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
         if (mapper == null) {
             throw new IllegalArgumentException("Method argument mapper must not be null.");
         }
-        this.state.getAndIncrement();
         this.fieldMappers.put(mapper.getAnnotationType(), mapper);
         this.cache.clear();
     }
@@ -90,7 +82,6 @@ public class AnnotatedFieldMappers {
         if (mapper == null) {
             return;
         }
-        this.state.getAndIncrement();
         this.fieldMappers.removeValue(mapper);
         this.cache.clear();
     }
@@ -110,8 +101,10 @@ public class AnnotatedFieldMappers {
             return mappers;
         }
 
-        final int ticket = this.state.get();
+        return this.cache.computeIfAbsent(metaData.getField(), key -> resolveCompatibleMappers(metaData));
+    }
 
+    private Collection<AnnotationMapping> resolveCompatibleMappers(MappedFieldMetaData metaData) {
         List<AnnotationMapping> compatibleMappers = new ArrayList<>();
         for (Annotation annotation : metaData.getAnnotations()) {
             Collection<AnnotatedFieldMapper> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
@@ -119,23 +112,14 @@ public class AnnotatedFieldMappers {
                 continue; // with next element
             }
             for (AnnotatedFieldMapper<?, ?> mapper : mappersForAnnotation) {
-                // Mappers supporting boxed types shall also support the primitive equivalent,
-                // e.g. Boolean and boolean, Integer / int.
+                // Mappers supporting boxed types must also support the primitive equivalent,
+                // e.g. Boolean / boolean, Integer / int.
                 Class type = primitiveToWrapper(metaData.getType());
                 if (mapper.getFieldType().isAssignableFrom(type)) {
                     compatibleMappers.add(new AnnotationMapping(annotation, mapper));
                 }
             }
         }
-
-        mappers = compatibleMappers.isEmpty() ? EMPTY : compatibleMappers;
-
-        synchronized (this) {
-            if (ticket == this.state.get()) {
-                this.cache.put(metaData.getField(), mappers);
-            }
-        }
-
-        return mappers;
+        return compatibleMappers;
     }
 }

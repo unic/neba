@@ -26,7 +26,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -35,8 +34,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
@@ -44,6 +41,7 @@ import static io.neba.core.util.BundleUtil.displayNameOf;
 import static io.neba.core.util.NodeUtil.geMixinTypes;
 import static io.neba.core.util.NodeUtil.getPrimaryType;
 import static java.util.Collections.unmodifiableCollection;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Contains {@link OsgiModelSource model sources} associated to
@@ -54,8 +52,6 @@ import static java.util.Collections.unmodifiableCollection;
  */
 @Component(service = ModelRegistry.class)
 public class ModelRegistry {
-    private static final Object NULL_VALUE = new Object();
-
     /**
      * Generate a {@link Key} representing both the
      * {@link org.apache.sling.api.resource.Resource#getResourceType() sling resource type},
@@ -69,24 +65,23 @@ public class ModelRegistry {
      * @return never <code>null</code>.
      */
     private static Key key(Resource resource, Object... furtherKeyElements) {
-        Key key;
         final Key furtherElementsKey = furtherKeyElements == null ? null : new Key(furtherKeyElements);
-        Node node = resource.adaptTo(Node.class);
-        if (node != null) {
-            try {
-                key = new Key(
-                        resource.getResourceType(),
-                        resource.getResourceSuperType(),
-                        getPrimaryType(node),
-                        geMixinTypes(node),
-                        furtherElementsKey);
-            } catch (RepositoryException e) {
-                throw new RuntimeException("Unable to retrieve the primary type of " + resource + ".", e);
-            }
-        } else {
-            key = new Key(resource.getResourceType(), furtherElementsKey);
+        final Node node = resource.adaptTo(Node.class);
+
+        if (node == null) {
+            return new Key(resource.getResourceType(), furtherElementsKey);
         }
-        return key;
+
+        try {
+            return new Key(
+                    resource.getResourceType(),
+                    resource.getResourceSuperType(),
+                    getPrimaryType(node),
+                    geMixinTypes(node),
+                    furtherElementsKey);
+        } catch (RepositoryException e) {
+            throw new RuntimeException("Unable to retrieve the primary type of " + resource + ".", e);
+        }
     }
 
     /**
@@ -140,14 +135,9 @@ public class ModelRegistry {
         return sourcesWithModelName;
     }
 
-    private final ConcurrentDistinctMultiValueMap<String, OsgiModelSource<?>>
-            typeNameToModelSourcesMap = new ConcurrentDistinctMultiValueMap<>();
-    private final ConcurrentDistinctMultiValueMap<Key, LookupResult>
-            lookupCache = new ConcurrentDistinctMultiValueMap<>();
-
-    private final Map<Key, Object> unmappedTypesCache = new ConcurrentHashMap<>();
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final AtomicInteger state = new AtomicInteger(0);
+    private final ConcurrentDistinctMultiValueMap<String, OsgiModelSource<?>> typeNameToModelSourcesMap = new ConcurrentDistinctMultiValueMap<>();
+    private final ConcurrentDistinctMultiValueMap<Key, LookupResult> lookupCache = new ConcurrentDistinctMultiValueMap<>();
+    private final Logger logger = getLogger(getClass());
 
     /**
      * Finds the most specific models for the given {@link Resource}. The model's model
@@ -167,21 +157,9 @@ public class ModelRegistry {
 
         Key key = key(resource, modelName);
 
-        if (isUnmapped(key)) {
-            return null;
-        }
-
-        Collection<LookupResult> matchingModels = lookupFromCache(key);
+        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
         if (matchingModels == null) {
-            final int currentStateId = this.state.get();
-
-            matchingModels = resolveMostSpecificModelSources(resource, modelName);
-
-            if (matchingModels.isEmpty()) {
-                markAsUnmapped(key, currentStateId);
-            } else {
-                cache(key, matchingModels, currentStateId);
-            }
+            matchingModels = lookupCache.computeIfAbsent(key, k -> resolveMostSpecificModelSources(resource, modelName));
         }
 
         return nullIfEmpty(matchingModels);
@@ -202,23 +180,12 @@ public class ModelRegistry {
 
         final Key key = key(resource);
 
-        if (isUnmapped(key)) {
-            return null;
+        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
+        if (matchingModels == null) {
+            matchingModels = lookupCache.computeIfAbsent(key, k -> resolveMostSpecificModelSources(resource));
         }
 
-        Collection<LookupResult> sources = lookupFromCache(key);
-
-        if (sources == null) {
-            final int currentStateId = this.state.get();
-            sources = resolveMostSpecificModelSources(resource);
-
-            if (sources.isEmpty()) {
-                markAsUnmapped(key, currentStateId);
-            } else {
-                cache(key, sources, currentStateId);
-            }
-        }
-        return nullIfEmpty(sources);
+        return nullIfEmpty(matchingModels);
     }
 
     /**
@@ -236,24 +203,12 @@ public class ModelRegistry {
 
         final Key key = key(resource, "allModels");
 
-        if (isUnmapped(key)) {
-            return null;
+        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
+        if (matchingModels == null) {
+            matchingModels = lookupCache.computeIfAbsent(key, k -> resolveModelSources(resource, null, false));
         }
 
-        Collection<LookupResult> sources = lookupFromCache(key);
-
-        if (sources == null) {
-            final int currentStateId = this.state.get();
-            sources = resolveModelSources(resource, null, false);
-
-            if (sources.isEmpty()) {
-                markAsUnmapped(key, currentStateId);
-            } else {
-                cache(key, sources, currentStateId);
-            }
-        }
-
-        return nullIfEmpty(sources);
+        return nullIfEmpty(matchingModels);
     }
 
     /**
@@ -274,20 +229,9 @@ public class ModelRegistry {
 
         final Key key = key(resource, targetType);
 
-        if (isUnmapped(key)) {
-            return null;
-        }
-
-        Collection<LookupResult> matchingModels = lookupFromCache(key);
+        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
         if (matchingModels == null) {
-            final int currentStateId = this.state.get();
-            matchingModels = resolveMostSpecificModelSources(resource, targetType);
-
-            if (matchingModels.isEmpty()) {
-                markAsUnmapped(key, currentStateId);
-            } else {
-                cache(key, matchingModels, currentStateId);
-            }
+            matchingModels = lookupCache.computeIfAbsent(key, k -> resolveMostSpecificModelSources(resource, targetType));
         }
 
         return nullIfEmpty(matchingModels);
@@ -354,19 +298,9 @@ public class ModelRegistry {
      * Clears all quick lookup caches for resource models, but
      * not the registry itself.
      */
-    synchronized void clearLookupCaches() {
-        this.state.incrementAndGet();
+    void clearLookupCaches() {
         this.lookupCache.clear();
-        this.unmappedTypesCache.clear();
         this.logger.debug("Cache cleared.");
-    }
-
-    private boolean isUnmapped(Key key) {
-        return this.unmappedTypesCache.containsKey(key);
-    }
-
-    private Collection<LookupResult> lookupFromCache(Key key) {
-        return this.lookupCache.get(key);
     }
 
     private void clearRegisteredModels() {
@@ -436,27 +370,5 @@ public class ModelRegistry {
             }
         }
         return unmodifiableCollection(sources);
-    }
-
-    /**
-     * A mapping might apply to any type somewhere within a resource's
-     * {@link  MappableTypeHierarchy}. This cache saves the registrar from searching
-     * this entire hierarchy each time the model is resolved by remembering a found
-     * resource type -&gt; model relationship.
-     */
-    private void cache(final Key key, final Collection<LookupResult> sources, final int stateId) {
-        synchronized (this) {
-            if (stateId == this.state.get()) {
-                this.lookupCache.put(key, sources);
-            }
-        }
-    }
-
-    private void markAsUnmapped(final Key key, final int stateId) {
-        synchronized (this) {
-            if (stateId == this.state.get()) {
-                this.unmappedTypesCache.put(key, NULL_VALUE);
-            }
-        }
     }
 }
