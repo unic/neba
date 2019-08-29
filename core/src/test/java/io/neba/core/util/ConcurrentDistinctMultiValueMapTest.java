@@ -16,91 +16,82 @@
 
 package io.neba.core.util;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
 import static io.neba.core.util.ConcurrentMultiValueMapAssert.assertThat;
+import static java.util.Collections.singleton;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
  */
 public class ConcurrentDistinctMultiValueMapTest {
-	private ConcurrentDistinctMultiValueMap<String, Object> testee;
-	
-	@Before
-	public void prepareTest() {
-		this.testee = new ConcurrentDistinctMultiValueMap<>();
-	}
-	
-	@Test
-	public void testDistinctValuesAreGuaranteed() {
-		put("test", "test1");
-		put("test", "test1");
-		assertOnlyOneValueFor("test");
-	}
+    private ConcurrentDistinctMultiValueMap<String, String> testee;
 
-	@Test
-	public void testDifferentValuesAreAccepted() {
-		put("test", "test1");
-		put("test", "test2");
-		assertMapContains("test", "test1", "test2");
-	}
-	
-	@Test
-	public void testRemoveKey() {
-		put("test", "test1");
-		put("test", "test2");
-
-		removeKey("test");
-
-		assertMapDoesNotContain("test");
-	}
-
-	@Test
-	public void testRemoveValue() {
-		put("test", "test1");
-		put("test", "test2");
-
-		removeValue("test1");
-		assertMapContainsOnly("test", "test2");
-
-		removeValue("test2");
-		assertMapContainsOnly("test");
-	}
-
-	@Test
-    public void testIsEmpty() {
-        Assertions.assertThat(this.testee.isEmpty()).isTrue();
-        put("test", "test1");
-        Assertions.assertThat(this.testee.isEmpty()).isFalse();
+    @Before
+    public void prepareTest() {
+        this.testee = new ConcurrentDistinctMultiValueMap<>();
     }
 
-    private void assertMapDoesNotContain(String key) {
-		assertThat(this.testee).doesNotContain(key);
-	}
+    @Test
+    public void testDistinctValuesAreGuaranteed() {
+        this.testee.put("test", "test1");
+        this.testee.put("test", "test1");
 
-	private void removeKey(String key) {
-		this.testee.remove(key);
-	}
+        assertThat(this.testee).containsExactlyOneValueFor("test");
+    }
 
-	private void removeValue(String value) {
-		this.testee.removeValue(value);
-	}
+    @Test
+    public void testDifferentValuesAreAccepted() {
+        this.testee.put("test", "test1");
+        this.testee.put("test", "test2");
 
-	private ConcurrentMultiValueMapAssert assertMapContains(String key, Object... value) {
-		return assertThat(this.testee).contains(key, value);
-	}
+        assertThat(this.testee).contains("test", "test1", "test2");
+    }
 
-	private ConcurrentMultiValueMapAssert assertMapContainsOnly(String key, Object... value) {
-		return assertThat(this.testee).containsOnly(key, value);
-	}
+    @Test
+    public void testRemoveKey() {
+        this.testee.put("test", "test1");
+        this.testee.put("test", "test2");
+        this.testee.remove("test");
 
-	private ConcurrentMultiValueMapAssert assertOnlyOneValueFor(String key) {
-		return assertThat(this.testee).containsExactlyOneValueFor(key);
-	}
+        assertThat(this.testee).doesNotContain("test");
+    }
 
-	private void put(String key, String value) {
-		this.testee.put(key, value);
-	}
+    @Test
+    public void testRemoveValue() {
+        this.testee.put("test", "test1");
+        this.testee.put("test", "test2");
+        this.testee.removeValue("test1");
+
+        assertThat(this.testee).containsOnly("test", "test2");
+
+        this.testee.removeValue("test2");
+
+        assertThat(this.testee).containsOnly("test");
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertThat(this.testee.isEmpty()).isTrue();
+
+        this.testee.put("test", "test1");
+
+        assertThat(this.testee.isEmpty()).isFalse();
+    }
+
+    @Test
+    public void testComputeIfAbsentOfExistingEntry() {
+        this.testee.put("key", "existing value");
+
+        assertThat(this.testee.computeIfAbsent("key", key -> singleton("new value"))).containsOnly("existing value");
+        assertThat(this.testee).containsOnly("key", "existing value");
+    }
+
+    @Test
+    public void testComputeIfAbsentOfNonExistingEntry() {
+        assertThat(this.testee.computeIfAbsent("key", key -> singleton("previously absent value"))).containsOnly("previously absent value");
+        assertThat(this.testee).containsOnly("key", "previously absent value");
+    }
 }

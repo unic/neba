@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * A thread-safe storage for key -&gt; value associations. Unlike
@@ -36,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * In addition, the values stored in this map are distinct, i.e.
  * if a value already exists in the values collection it is {@link Collection#remove(Object) removed}
  * prior to the insertion of the new element.
- * 
+ *
  * @param <K> The key's type.
  * @param <V> The value's type.
  * @author Olaf Otto
@@ -48,9 +49,8 @@ public class ConcurrentDistinctMultiValueMap<K, V> {
         return this.store.get(key);
     }
 
-    public synchronized void put(K key, V value) {
-        Collection<V> vs = getOrCreate(key);
-        vs.add(value);
+    public void put(K key, V value) {
+        this.store.computeIfAbsent(key, k -> new ConcurrentLinkedDistinctQueue<>()).add(value);
     }
 
     public void clear() {
@@ -65,25 +65,24 @@ public class ConcurrentDistinctMultiValueMap<K, V> {
         return this.store.values();
     }
 
-    public synchronized void put(K key, Collection<V> values) {
-        Collection<V> vs = getOrCreate(key);
-        vs.addAll(values);
+    public void put(K key, Collection<V> values) {
+        this.store.computeIfAbsent(key, k -> new ConcurrentLinkedDistinctQueue<>()).addAll(values);
     }
 
-    private Collection<V> getOrCreate(K key) {
-        Collection<V> vs = this.store.get(key);
-        if (vs == null) {
-            vs = new ConcurrentLinkedDistinctQueue<>();
-            this.store.put(key, vs);
-        }
-        return vs;
+    /**
+     * @param key             must not be <code>null</code>.
+     * @param mappingFunction must not be <code>null</code>.
+     * @return the existing value, or the value computed by the mapping function, which may be <code>null</code>.
+     */
+    public Collection<V> computeIfAbsent(K key, Function<? super K, ? extends Collection<V>> mappingFunction) {
+        return store.computeIfAbsent(key, mappingFunction);
     }
 
     /**
      * @return a shallow copy of the current state of this map. Note that the
-     *         map values (the collection) are also copied; it is thus save to
-     *         modify the state of the returned map and the state of the
-     *         collections returned as the map values. Never returns null.
+     * map values (the collection) are also copied; it is thus save to
+     * modify the state of the returned map and the state of the
+     * collections returned as the map values. Never returns null.
      */
     public Map<K, Collection<V>> getContents() {
         HashMap<K, Collection<V>> contents = new HashMap<>(this.store.size());
@@ -111,8 +110,6 @@ public class ConcurrentDistinctMultiValueMap<K, V> {
         if (value == null) {
             throw new IllegalArgumentException("Method argument value must not be null.");
         }
-        for (Collection<V> values : values()) {
-            values.remove(value);
-        }
+        this.store.values().forEach(v -> v.remove(value));
     }
 }
