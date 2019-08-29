@@ -16,9 +16,10 @@
 
 package io.neba.core.util;
 
+import org.assertj.core.api.AbstractAssert;
+
 import java.util.Arrays;
 import java.util.Collection;
-import org.assertj.core.api.AbstractAssert;
 
 /**
  * @author Olaf Otto
@@ -49,7 +50,7 @@ public class ConcurrentMultiValueMapAssert extends AbstractAssert<ConcurrentMult
     public ConcurrentMultiValueMapAssert containsOnly(Object key, Object... values) {
         Collection<?> containedValues = valuesForKey(key);
         if (containedValues.size() != values.length || !containedValues.containsAll(Arrays.asList(values))) {
-            failWithMessage(Arrays.toString(values) + " do not only contain " + Arrays.toString(values) + ".");
+            failWithMessage("Expected " + containedValues + " to only contain " + Arrays.toString(values) + ".");
         }
         return myself;
     }

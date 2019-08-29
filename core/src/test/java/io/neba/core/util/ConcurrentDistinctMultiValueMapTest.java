@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import static io.neba.core.util.ConcurrentMultiValueMapAssert.assertThat;
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -74,8 +75,6 @@ public class ConcurrentDistinctMultiValueMapTest {
 
     @Test
     public void testIsEmpty() {
-        assertThat(this.testee.isEmpty()).isTrue();
-
         this.testee.put("test", "test1");
 
         assertThat(this.testee.isEmpty()).isFalse();
@@ -93,5 +92,49 @@ public class ConcurrentDistinctMultiValueMapTest {
     public void testComputeIfAbsentOfNonExistingEntry() {
         assertThat(this.testee.computeIfAbsent("key", key -> singleton("previously absent value"))).containsOnly("previously absent value");
         assertThat(this.testee).containsOnly("key", "previously absent value");
+    }
+
+    @Test
+    public void testMultiValuePutAddsValues() {
+        testee.put("key", "value");
+        testee.put("key", singletonList("additional value"));
+
+        assertThat(testee).containsOnly("key", "value", "additional value");
+    }
+
+    @Test
+    public void testMultiValuePutInitializesValues() {
+        testee.put("key", singletonList("value"));
+
+        assertThat(testee).containsOnly("key", "value");
+    }
+
+    @Test
+    public void testGetContentsContainsAllData() {
+        testee.put("key", "value");
+
+        assertThat(testee.getContents()).containsOnlyKeys("key");
+        assertThat(testee.getContents().get("key")).containsExactly("value");
+    }
+
+    @Test
+    public void testGetContentsReturnsShallowCopy() {
+        testee.put("key", "value");
+        testee.getContents().clear();
+
+        assertThat(testee).containsOnly("key", "value");
+
+        testee.getContents().get("key").add("additional value");
+
+        assertThat(testee).containsOnly("key", "value");
+    }
+
+    @Test
+    public void testGetValues() {
+        testee.put("key", "value1");
+        testee.put("key", "value2");
+
+        assertThat(testee.values()).hasSize(1);
+        assertThat(testee.values().iterator().next()).containsExactly("value1", "value2");
     }
 }
