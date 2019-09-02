@@ -158,13 +158,14 @@ $(function () {
          */
         add: function (text) {
 
-            function linkRequestLog(match, linkAttribute) {
+            function linkRequestLog(match, config) {
                 var link = document.createElement("a"),
                     div = document.createElement("div");
 
                 link.textContent = '[' + match[2] + ']';
-                link.setAttribute(linkAttribute.name, linkAttribute.value);
-
+                config.attributes.forEach(function(attribute) {
+                    link.setAttribute(attribute.name, attribute.value);
+                });
                 div.appendChild(document.createTextNode(match[1]));
                 div.appendChild(link);
                 div.appendChild(document.createTextNode(match[3]));
@@ -172,10 +173,16 @@ $(function () {
                 return div;
             }
 
+            /**
+             * Regexp instances have state and must the be re-created upon each usage.
+             */
             function requestStartPattern() {
                 return /(.* )\[([0-9]+)]( -> (GET|POST|PUT|HEAD|DELETE) .*)/g;
             }
 
+            /**
+             * Regexp instances have state and must the be re-created upon each usage.
+             */
             function requestEndPattern() {
                 return /(.* )\[([0-9]+)]( <- [0-9]+ .*)/g;
             }
@@ -234,17 +241,38 @@ $(function () {
                 }
 
                 if (this.logType === Tail.LogType.REQUEST_LOG || this.logType === undefined) {
-                    var match = requestStartPattern().exec(textNode.nodeValue);
-                    if (match != null) {
+                    var requestStartMatch = requestStartPattern().exec(textNode.nodeValue);
+                    if (requestStartMatch != null) {
                         this.logType = Tail.LogType.REQUEST_LOG;
-                        this.addToTail(linkRequestLog(match, {name : "href", value: '#r' + match[2]}));
+                        var id = requestStartMatch[2];
+                        var logLine = linkRequestLog(requestStartMatch, { attributes: [
+                                {name : "href", value: '#res' + id},
+                                {name : "name", value: 'req' + id}
+                            ]});
+                        logLine.id = 'req' + id;
+                        logLine.nebaRequestId = 'res' + id;
+                        logLine.onmouseover = function () {
+                            var responseLine = document.getElementById(this.nebaRequestId);
+                            this.title = responseLine ? responseLine.textContent : "No response for this request found in the current log excerpt.";
+                        };
+
+                        this.addToTail(logLine);
                         continue;
                     }
 
-                    match = requestEndPattern().exec(textNode.nodeValue);
-                    if (match != null) {
+                    var requestEndMatch = requestEndPattern().exec(textNode.nodeValue);
+                    if (requestEndMatch != null) {
                         this.logType = Tail.LogType.REQUEST_LOG;
-                        this.addToTail(linkRequestLog(match, {name : "name", value: '#r' + match[2]}));
+                        var id = requestEndMatch[2];
+                        var requestLine = document.getElementById('req' + id);
+                        var logLine = linkRequestLog(requestEndMatch, { attributes: [
+                                {name : "href", value: '#req' + id},
+                                {name : "name", value: 'res' + id}
+                            ]});
+                        logLine.id = 'res' + id;
+                        logLine.title = requestLine ? requestLine.textContent : "No request for this response found in the current log excerpt.";
+
+                        this.addToTail(logLine);
                         continue;
                     }
                 }
