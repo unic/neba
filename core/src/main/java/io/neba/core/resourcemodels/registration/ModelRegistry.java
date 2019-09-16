@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.neba.core.resourcemodels.registration.MappableTypeHierarchy.mappableTypeHierarchyOf;
 import static io.neba.core.util.BundleUtil.displayNameOf;
@@ -270,7 +269,9 @@ public class ModelRegistry {
     public List<OsgiModelSource<?>> getModelSources() {
         Collection<Collection<OsgiModelSource<?>>> sources = this.typeNameToModelSourcesMap.values();
         List<OsgiModelSource<?>> linearizedSources = new LinkedList<>();
-        sources.forEach(linearizedSources::addAll);
+        for (Collection<OsgiModelSource<?>> source : sources) {
+            linearizedSources.addAll(source);
+        }
         return linearizedSources;
     }
 
@@ -341,7 +342,12 @@ public class ModelRegistry {
             Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToModelSourcesMap.get(resourceType);
             Collection<OsgiModelSource<?>> sourcesForCompatibleType = filter(allSourcesForType, compatibleType);
             if (sourcesForCompatibleType != null && !sourcesForCompatibleType.isEmpty()) {
-                sources.addAll(sourcesForCompatibleType.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
+                List<LookupResult> list = new ArrayList<>();
+                for (OsgiModelSource<?> source : sourcesForCompatibleType) {
+                    LookupResult lookupResult = new LookupResult(source, resourceType);
+                    list.add(lookupResult);
+                }
+                sources.addAll(list);
                 if (resolveMostSpecific) {
                     break;
                 }
@@ -365,7 +371,12 @@ public class ModelRegistry {
             Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToModelSourcesMap.get(resourceType);
             Collection<OsgiModelSource<?>> sourcesWithMatchingModelName = filter(allSourcesForType, modelName);
             if (sourcesWithMatchingModelName != null && !sourcesWithMatchingModelName.isEmpty()) {
-                sources.addAll(sourcesWithMatchingModelName.stream().map(source -> new LookupResult(source, resourceType)).collect(Collectors.toList()));
+                List<LookupResult> list = new ArrayList<>();
+                for (OsgiModelSource<?> source : sourcesWithMatchingModelName) {
+                    LookupResult lookupResult = new LookupResult(source, resourceType);
+                    list.add(lookupResult);
+                }
+                sources.addAll(list);
                 break;
             }
         }
