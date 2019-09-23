@@ -20,7 +20,6 @@ import io.neba.api.spi.AopSupport;
 import io.neba.api.spi.ResourceModelFactory;
 import io.neba.api.spi.ResourceModelPostProcessor;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
-import io.neba.core.resourcemodels.metadata.MethodMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
@@ -39,13 +38,13 @@ import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -110,7 +109,7 @@ public class ResourceToModelMapperTest {
         when(this.resourceModelMetaDataRegistrar.get(isA(Class.class)))
                 .thenReturn(this.modelMetaData);
 
-        when(this.nestedMappingSupport.begin(isA(Mapping.class)))
+        when(this.nestedMappingSupport.push(isA(Mapping.class)))
                 .thenReturn(null);
 
         when(this.modelMetaData.getMappableFields())
@@ -237,6 +236,20 @@ public class ResourceToModelMapperTest {
         this.testee.unbindProcessor(null);
     }
 
+    @Test
+    public void testTrackingOfSubsequentMappings() {
+        mapResourceToModel();
+        verifyNumberOfSubsequentMappingsIs(0);
+
+        withParentMapping();
+        mapResourceToModel();
+        verifyNumberOfSubsequentMappingsIs(1);
+    }
+
+    private void verifyNumberOfSubsequentMappingsIs(int mappings) {
+        verify(this.resourceModelStatistics, times(mappings)).countSubsequentMapping();
+    }
+
     private void withOngoingMappingForSameResourceModel() {
         doReturn(true).when(this.nestedMappingSupport).hasOngoingMapping(this.modelMetaData);
     }
@@ -249,9 +262,15 @@ public class ResourceToModelMapperTest {
         verify(this.resourceModelStatistics, never()).countMappingDuration(anyInt());
     }
 
+    private void withParentMapping() {
+        Mapping<?> parent = mock(Mapping.class);
+        doReturn(modelMetaData).when(parent).getMetadata();
+        doReturn(parent).when(this.nestedMappingSupport).peek();
+    }
+
     @SuppressWarnings("unchecked")
     private void withAlreadyOngoingMapping() {
-        doReturn(this.ongoingMapping).when(this.nestedMappingSupport).begin(isA(Mapping.class));
+        doReturn(this.ongoingMapping).when(this.nestedMappingSupport).push(isA(Mapping.class));
         doReturn(this.model).when(this.ongoingMapping).getMappedModel();
     }
 
@@ -283,12 +302,12 @@ public class ResourceToModelMapperTest {
     }
 
     private void verifyCycleCheckIsNotEnded() {
-        verify(this.nestedMappingSupport, never()).end(isA(Mapping.class));
+        verify(this.nestedMappingSupport, never()).pop();
     }
 
     @SuppressWarnings("unchecked")
     private void withCycleCheckerReportingCycle() {
-        when(this.nestedMappingSupport.begin(isA(Mapping.class))).thenReturn(this.ongoingMapping);
+        when(this.nestedMappingSupport.push(isA(Mapping.class))).thenReturn(this.ongoingMapping);
     }
 
     private void withMappedModelReturnedFromMapping() {
@@ -337,7 +356,7 @@ public class ResourceToModelMapperTest {
     }
 
     private void verifyPostProcessorIsInvokedAfterMapping() {
-        verify(this.postProcessor).processAfterMapping(anyObject(), eq(this.resource), eq(this.factory));
+        verify(this.postProcessor).processAfterMapping(any(), eq(this.resource), eq(this.factory));
     }
 
     private void withPostProcessor(ResourceModelPostProcessor mock) {

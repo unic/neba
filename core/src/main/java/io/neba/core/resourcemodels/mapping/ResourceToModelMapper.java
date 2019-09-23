@@ -82,7 +82,7 @@ public class ResourceToModelMapper {
         // a useless average and total mapping time as the mapping durations would sum up multiple times.
         final boolean trackMappingDuration = !this.nestedMappingSupport.hasOngoingMapping(metaData);
 
-        final Mapping<T> alreadyOngoingMapping = this.nestedMappingSupport.begin(mapping);
+        final Mapping<T> alreadyOngoingMapping = this.nestedMappingSupport.push(mapping);
 
         if (alreadyOngoingMapping == null) {
             try {
@@ -102,13 +102,19 @@ public class ResourceToModelMapper {
 
                 model = map(resource, mappedModel, metaData, modelSource.getFactory());
 
+                // Always count the subsequent mapping, if there is a parent.
+                Mapping<?> parent = nestedMappingSupport.peek();
+                if (parent != null) {
+                    parent.getMetadata().getStatistics().countSubsequentMapping();
+                }
+
                 if (trackMappingDuration) {
                     // Update statistics with mapping duration
                     metaData.getStatistics().countMappingDuration((int) (currentTimeMillis() - startTimeInMs));
                 }
 
             } finally {
-                this.nestedMappingSupport.end(mapping);
+                this.nestedMappingSupport.pop();
             }
         } else {
             // Yield the currently mapped model.
@@ -121,7 +127,7 @@ public class ResourceToModelMapper {
                 // thus we must raise an exception.
                 throw new CycleInModelInitializationException("Unable to provide model " + modelType +
                         " for resource " + resource + ". The model initialization resulted in a cycle: "
-                        + join(this.nestedMappingSupport.getOngoingMappings(), " >> ") + " >> " + mapping + ". " +
+                        + join(this.nestedMappingSupport.getMappingStack(), " >> ") + " >> " + mapping + ". " +
                         "Does the model depend on itself to initialize, e.g. in a @PostConstruct method?");
             }
         }

@@ -19,10 +19,12 @@ package io.neba.core.resourcemodels.mapping;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import org.osgi.service.component.annotations.Component;
 
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
+
+import static java.lang.ThreadLocal.withInitial;
 
 
 /**
@@ -35,51 +37,83 @@ import java.util.Set;
 @Component(service = NestedMappingSupport.class)
 @SuppressWarnings("rawtypes")
 public class NestedMappingSupport {
+
     /**
      * Represents the stack of the currently ongoing mappings.
      *
      * @author Olaf Otto
      */
-    private static class OngoingMappings {
-        private final Map<Mapping, Mapping> mappings = new LinkedHashMap<>();
-        private final Map<ResourceModelMetaData, Count> metaData = new HashMap<>();
+    private static class MappingStack {
+        private final Map<Mapping, Mapping> mappings = new LinkedHashMap<>(8);
+        private final Map<ResourceModelMetaData, Count> metaData = new HashMap<>(8);
+        private RecordedMapping<?> tail = null;
 
-        public void add(Mapping<?> mapping) {
+        private <T> void push(Mapping<T> mapping) {
+            this.tail = new RecordedMapping<>(mapping, this.tail);
+            // We are keeping an occurrence count in order to only remove resource model metadata
+            // if no mapping for the corresponding resource model is left on the stack.
+            Count occurrenceCount = new Count();
+            Count previousCount = this.metaData.put(mapping.getMetadata(), occurrenceCount);
+            if (previousCount != null) {
+                occurrenceCount.add(previousCount);
+            }
             this.mappings.put(mapping, mapping);
-            Count value = new Count();
-            Count previous = this.metaData.put(mapping.getMetadata(), value);
-            if (previous != null) {
-                value.add(previous);
-            }
         }
 
-        public void remove(Mapping<?> mapping) {
-            this.mappings.remove(mapping);
-            Count count = this.metaData.get(mapping.getMetadata());
-            if (count != null && count.decrement() == 0) {
-                this.metaData.remove(mapping.getMetadata());
+        /**
+         * Removes the last {@link #push(Mapping) pused mapping} form the stack.
+         *
+         * @return the stack depth after removing the mapping.
+         */
+        private int pop() {
+            if (tail == null) {
+                throw new EmptyStackException();
             }
+            this.mappings.remove(this.tail.mapping);
+
+            final ResourceModelMetaData metadata = this.tail.mapping.getMetadata();
+            Count count = this.metaData.remove(metadata);
+            if (count.decrement() != 0) {
+                this.metaData.put(metadata, count);
+            }
+
+            tail = tail.previous;
+            return mappings.size();
         }
+
 
         @SuppressWarnings("unchecked")
-        public <T> Mapping<T> get(Mapping<T> mapping) {
+        public <T> Mapping<T> get(Mapping<?> mapping) {
             return this.mappings.get(mapping);
         }
 
-        public boolean contains(ResourceModelMetaData metaData) {
-            return this.metaData.containsKey(metaData);
+        public Mapping<?> peek() {
+            return tail == null ? null : tail.mapping;
         }
 
-        public boolean isEmpty() {
-            return this.mappings.isEmpty();
-        }
-
-        public Set<Mapping> getMappings() {
+        public Iterable<Mapping> getMappings() {
             return this.mappings.keySet();
         }
 
-        public Set<ResourceModelMetaData> getMetaData() {
-            return this.metaData.keySet();
+        public boolean contains(ResourceModelMetaData metadata) {
+            return this.metaData.containsKey(metadata);
+        }
+
+        /**
+         * A backwards-linked map entry representing a mapping and its predecessor in the stack.
+         * This is mostly because there is no decent stack datastructure in standard java
+         * that combines Stack-Semantics with Set Semantics (Linear iterations, get by position and constant-time contains operations).
+         *
+         * @param <T>
+         */
+        private static class RecordedMapping<T> {
+            private final Mapping<T> mapping;
+            private RecordedMapping<?> previous;
+
+            private RecordedMapping(Mapping<T> mapping, RecordedMapping<?> previous) {
+                this.mapping = mapping;
+                this.previous = previous;
+            }
         }
 
         /**
@@ -102,70 +136,38 @@ public class NestedMappingSupport {
     }
 
     // Recursive mappings always occurs within the same thread.
-    private final ThreadLocal<OngoingMappings> ongoingMappings = new ThreadLocal<>();
+    private final ThreadLocal<MappingStack> ongoingMappings = withInitial(MappingStack::new);
 
     /**
-     * Contract: When invoked and <code>null</code> is returned,
-     * one <em>must</em> invoke {@link #end(Mapping)} after the corresponding mapping was executed.<br />
+     * Contract: When invoked and <code>true</code> is returned,
+     * one <em>must</em> invoke {@link #pop()} after the corresponding mapping was executed.<br />
      * Otherwise, a leak in the form of persisting thread-local attributes is introduced.
      *
      * @param mapping must not be <code>null</code>.
      * @return The already ongoing mapping, or <code>null</code> if the given mapping has not occurred
-     *         yet. The provided mapping <em>must</em> only be executed if this emthod returns <code>null</code>.
-     *         Otherwise, the execution results in an infinite loop.
+     * yet. The provided mapping <em>must</em> only be executed if this method returns <code>null</code>.
+     * Otherwise, the execution results in an infinite loop.
      */
-    <T> Mapping<T> begin(Mapping<T> mapping) {
+    <T> Mapping<T> push(Mapping<T> mapping) {
         if (mapping == null) {
             throw new IllegalArgumentException("Method argument mapping must not be null");
         }
-        OngoingMappings ongoingMappings = getOrCreateMappings();
+        MappingStack mappingStack = this.ongoingMappings.get();
         @SuppressWarnings("unchecked")
-        Mapping<T> alreadyExistingMapping = ongoingMappings.get(mapping);
+        Mapping<T> alreadyExistingMapping = mappingStack.get(mapping);
         if (alreadyExistingMapping == null) {
-            trackNestedMapping(ongoingMappings);
-            ongoingMappings.add(mapping);
+            mappingStack.push(mapping);
         }
         return alreadyExistingMapping;
     }
 
     /**
-     * Ends a mapping that was {@link #begin(Mapping) begun}.
-     *
-     * @param mapping must not be <code>null</code>.
+     * Ends a mapping that was {@link #push(Mapping) begun}.
      */
-    public void end(Mapping mapping) {
-        if (mapping == null) {
-            throw new IllegalArgumentException("Method argument mapping must not be null");
-        }
-        OngoingMappings ongoingMappings = this.ongoingMappings.get();
-        if (ongoingMappings != null) {
-            ongoingMappings.remove(mapping);
-            if (ongoingMappings.isEmpty()) {
-                this.ongoingMappings.remove();
-            }
-        }
-    }
-
-    /**
-     * @return a thread-local, ordered map representing the stack of currently ongoing mappings.
-     *         Never <code>null</code> but rather an empty map.
-     */
-    private OngoingMappings getOrCreateMappings() {
-        OngoingMappings ongoingMappings = this.ongoingMappings.get();
-        if (ongoingMappings == null) {
-            ongoingMappings = new OngoingMappings();
-            this.ongoingMappings.set(ongoingMappings);
-        }
-        return ongoingMappings;
-    }
-
-    /**
-     * Record a subsequent mapping in the {@link io.neba.core.resourcemodels.metadata.ResourceModelStatistics statistics}
-     * of every {@link ResourceModelMetaData resource model} in the current mapping stack.
-     */
-    private void trackNestedMapping(OngoingMappings ongoingMappings) {
-        for (ResourceModelMetaData metaData : ongoingMappings.getMetaData()) {
-            metaData.getStatistics().countSubsequentMapping();
+    public void pop() {
+        MappingStack mappingStack = this.ongoingMappings.get();
+        if (mappingStack.pop() == 0) {
+            this.ongoingMappings.remove();
         }
     }
 
@@ -173,8 +175,15 @@ public class NestedMappingSupport {
      * @return An unsafe view of the ongoing mappings. Modifications to the returned set will modify
      * the state of this instance. Never null.
      */
-    Set<Mapping> getOngoingMappings() {
-        return getOrCreateMappings().getMappings();
+    Iterable<Mapping> getMappingStack() {
+        return this.ongoingMappings.get().getMappings();
+    }
+
+    /**
+     * @return The mapping that was last {@link #push(Mapping) pushed} and not yet {@link #pop() popped}.
+     */
+    Mapping<?> peek() {
+        return this.ongoingMappings.get().peek();
     }
 
     /**
@@ -186,6 +195,6 @@ public class NestedMappingSupport {
         if (metadata == null) {
             throw new IllegalArgumentException("Method argument metadata must not be null");
         }
-        return getOrCreateMappings().contains(metadata);
+        return this.ongoingMappings.get().contains(metadata);
     }
 }
