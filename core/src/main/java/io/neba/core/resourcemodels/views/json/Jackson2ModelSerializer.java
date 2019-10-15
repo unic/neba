@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.neba.core.resourcemodels.mapping.Mapping;
+import io.neba.core.resourcemodels.views.json.JsonViewSupport.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +43,14 @@ class Jackson2ModelSerializer {
     private final JsonFactory jsonFactory;
     private final ObjectMapper mapper;
 
-    Jackson2ModelSerializer(@Nonnull Supplier<Map<Object, Mapping<?>>> recordedMappingsSupplier, @Nonnull String[] jacksonConfigurations) {
+    Jackson2ModelSerializer(@Nonnull Supplier<Map<Object, Mapping<?>>> recordedMappingsSupplier, @Nonnull String[] jacksonConfigurations, boolean addTypeAttribute) {
         this.mapper = new ObjectMapper();
-        this.mapper.registerModule(new JsonViewSupport(recordedMappingsSupplier));
+        this.mapper.registerModule(new JsonViewSupport(recordedMappingsSupplier, new Configuration() {
+            @Override
+            public boolean addTypeAttribute() {
+                return addTypeAttribute;
+            }
+        }));
         this.jsonFactory = new JsonFactory();
 
         stream(jacksonConfigurations)

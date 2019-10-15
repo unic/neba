@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.apache.sling.api.resource.Resource;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
@@ -34,7 +35,7 @@ public class ResourceSerializer extends StdSerializer<Resource> {
     }
 
     @Override
-    public void serialize(@Nonnull Resource value, @Nonnull JsonGenerator gen, SerializerProvider provider) throws IOException {
-        gen.writeString(value.getPath());
+    public void serialize(@CheckForNull Resource value, @Nonnull JsonGenerator gen, SerializerProvider provider) throws IOException {
+        gen.writeString(value == null ? null : value.getPath());
     }
 }

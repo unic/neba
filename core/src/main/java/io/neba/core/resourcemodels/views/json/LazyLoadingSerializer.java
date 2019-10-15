@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.neba.api.resourcemodels.Lazy;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
@@ -33,8 +34,9 @@ public class LazyLoadingSerializer extends StdSerializer<Lazy> {
     }
 
     @Override
-    public void serialize(@Nonnull Lazy value, @Nonnull JsonGenerator gen, SerializerProvider provider) throws IOException {
-        gen.writeObject(value.get());
+    @SuppressWarnings("unchecked")
+    public void serialize(@CheckForNull Lazy value, @Nonnull JsonGenerator gen, SerializerProvider provider) throws IOException {
+        gen.writeObject(value == null ? null : value.orElse(null));
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializer;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.impl.BeanAsArraySerializer;
@@ -47,9 +48,12 @@ import java.util.function.Supplier;
  */
 class JsonViewSupport extends SimpleModule {
     private final Supplier<Map<Object, Mapping<?>>> mappings;
+    private final Configuration configuration;
 
-    JsonViewSupport(@Nonnull Supplier<Map<Object, Mapping<?>>> mappings) {
+    JsonViewSupport(@Nonnull Supplier<Map<Object, Mapping<?>>> mappings, @Nonnull Configuration configuration) {
         this.mappings = mappings;
+        this.configuration = configuration;
+
         addSerializer(Lazy.class, new LazyLoadingSerializer());
         addSerializer(Resource.class, new ResourceSerializer());
     }
@@ -61,7 +65,7 @@ class JsonViewSupport extends SimpleModule {
             @Override
             public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc, JsonSerializer<?> serializer) {
                 if (serializer instanceof BeanSerializer) {
-                    return new ResourceModelSerializer(mappings, (BeanSerializer) serializer);
+                    return new ResourceModelSerializer(mappings, (BeanSerializer) serializer, configuration);
                 }
                 return serializer;
             }
@@ -70,30 +74,34 @@ class JsonViewSupport extends SimpleModule {
 
     private static class ResourceModelSerializer extends BeanSerializerBase {
         private final Supplier<Map<Object, Mapping<?>>> mappings;
+        private final Configuration configuration;
 
-        ResourceModelSerializer(Supplier<Map<Object, Mapping<?>>> mappings, BeanSerializer bs) {
+        ResourceModelSerializer(Supplier<Map<Object, Mapping<?>>> mappings, BeanSerializer bs, Configuration configuration) {
             super(bs);
             this.mappings = mappings;
+            this.configuration = configuration;
         }
 
-        ResourceModelSerializer(BeanSerializerBase src, ObjectIdWriter objectIdWriter, Object filterId, Supplier<Map<Object, Mapping<?>>> mappings) {
+        ResourceModelSerializer(BeanSerializerBase src, ObjectIdWriter objectIdWriter, Object filterId, Supplier<Map<Object, Mapping<?>>> mappings, Configuration configuration) {
             super(src, objectIdWriter, filterId);
             this.mappings = mappings;
+            this.configuration = configuration;
         }
 
-        ResourceModelSerializer(BeanSerializerBase src, Set<String> toIgnore, Supplier<Map<Object, Mapping<?>>> mappings) {
+        ResourceModelSerializer(BeanSerializerBase src, Set<String> toIgnore, Supplier<Map<Object, Mapping<?>>> mappings, Configuration configuration) {
             super(src, toIgnore);
             this.mappings = mappings;
+            this.configuration = configuration;
         }
 
         @Override
         public ResourceModelSerializer withObjectIdWriter(ObjectIdWriter objectIdWriter) {
-            return new ResourceModelSerializer(this, objectIdWriter, _propertyFilterId, mappings);
+            return new ResourceModelSerializer(this, objectIdWriter, _propertyFilterId, mappings, configuration);
         }
 
         @Override
         protected ResourceModelSerializer withIgnorals(Set<String> toIgnore) {
-            return new ResourceModelSerializer(this, toIgnore, mappings);
+            return new ResourceModelSerializer(this, toIgnore, mappings, configuration);
         }
 
         @Override
@@ -112,16 +120,13 @@ class JsonViewSupport extends SimpleModule {
 
         @Override
         public BeanSerializerBase withFilterId(Object filterId) {
-            return new ResourceModelSerializer(this, _objectIdWriter, filterId, mappings);
+            return new ResourceModelSerializer(this, _objectIdWriter, filterId, mappings, configuration);
         }
 
         @Override
         public void serialize(@Nonnull Object bean, @Nonnull JsonGenerator gen, @Nonnull SerializerProvider provider) throws IOException {
             gen.writeStartObject(bean);
-            Mapping<?> mapping = mappings.get().get(bean);
-            if (mapping != null) {
-                gen.writeStringField(":type", mapping.getResourceType());
-            }
+            maybeAddTypeAttribute(bean, gen, provider);
             if (_objectIdWriter != null) {
                 gen.setCurrentValue(bean); // [databind#631]
                 _serializeWithObjectId(bean, gen, provider, false);
@@ -131,6 +136,35 @@ class JsonViewSupport extends SimpleModule {
                 serializeFields(bean, gen, provider);
             }
             gen.writeEndObject();
+        }
+
+        private void maybeAddTypeAttribute(@Nonnull Object bean, @Nonnull JsonGenerator gen, @Nonnull SerializerProvider provider) throws IOException {
+            if (this.configuration.addTypeAttribute()) {
+                for (BeanPropertyWriter property : getBeanProperties(provider)) {
+                    if (property.getName().equals(":type")) {
+                        return;
+                    }
+                }
+
+                Mapping<?> mapping = mappings.get().get(bean);
+                if (mapping != null) {
+                    gen.writeStringField(":type", mapping.getResourceType());
+                }
+            }
+        }
+
+        private BeanPropertyWriter[] getBeanProperties(@Nonnull SerializerProvider provider) {
+            if (_filteredProps != null && provider.getActiveView() != null) {
+                return _filteredProps;
+            } else {
+                return _props;
+            }
+        }
+    }
+
+    public interface Configuration {
+        default boolean addTypeAttribute() {
+            return false;
         }
     }
 }

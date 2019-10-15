@@ -69,7 +69,7 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
         try {
             Class<?> generatorClass = getClass().getClassLoader().loadClass("com.fasterxml.jackson.core.JsonGenerator");
             LOGGER.info("Found JSON generator from {}. JSON views are enabled.", generatorClass.getClassLoader());
-            this.serializer = new Jackson2ModelSerializer(nestedMappingSupport::getRecordedMappings, configuration.jacksonSettings());
+            this.serializer = new Jackson2ModelSerializer(nestedMappingSupport::getRecordedMappings, configuration.jacksonSettings(), configuration.addTypeAttribute());
         } catch (ClassNotFoundException e) {
             LOGGER.info("JSON views will not be available since Jackson2 cannot be found from bundle {}. Jackson is an optional dependency. " +
                     "To use the NEBA model to JSON mapping, install at least the jackson-core " +
@@ -97,7 +97,7 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
             if (selectors.length == 1) {
                 model = modelResolver.resolveMostSpecificModel(request.getResource());
                 if (model == null) {
-                    response.sendError(SC_NOT_FOUND, "No model could be resolved for " + request.getResource().getPath());
+                    response.sendError(SC_NOT_FOUND, "No model could be resolved for resource " + request.getResource().getPath());
                     return;
                 }
             } else if (selectors.length == 2) {
@@ -106,13 +106,13 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
                 if (!EXPECTED_MODEL_NAME.matcher(modelName).matches()) {
                     // XSS security check: Since we echo the model name if no model was found and the model name is user input, we must make sure
                     // only to echo or record input matching a specific format.
-                    response.sendError(SC_BAD_REQUEST, "Invalid model name. The model name must match the pattern " + EXPECTED_MODEL_NAME.pattern() + ".");
+                    response.sendError(SC_BAD_REQUEST, "Invalid model name. The model name must match the pattern " + EXPECTED_MODEL_NAME.pattern());
                     return;
                 }
 
                 model = modelResolver.resolveMostSpecificModelWithName(request.getResource(), modelName);
                 if (model == null) {
-                    response.sendError(SC_NOT_FOUND, "No model with name " + modelName + " could be resolved for " + request.getResource().getPath());
+                    response.sendError(SC_NOT_FOUND, "No model with name " + modelName + " could be resolved for resource " + request.getResource().getPath());
                     return;
                 }
             } else {
@@ -175,5 +175,10 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
                         " for instance SerializationFeature.INDENT_OUTPUT=false or MapperFeature.SORT_PROPERTIES_ALPHABETICALLY=true.")
         String[] jacksonSettings() default {"SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true"};
 
+        @AttributeDefinition(
+                name = "Add :type attribute",
+                description = "Automatically add the resource type for which the model was resolved in an attribute called ':type' to the generated JSON. " +
+                        "This is useful e.g. to determine the frontend components responsible for rendering generated JSON.")
+        boolean addTypeAttribute() default false;
     }
 }
