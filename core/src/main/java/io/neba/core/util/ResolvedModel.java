@@ -14,9 +14,8 @@
   limitations under the License.
 */
 
-package io.neba.core.resourcemodels.registration;
+package io.neba.core.util;
 
-import io.neba.core.util.OsgiModelSource;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
@@ -27,8 +26,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  *
  * @author Olaf Otto
  */
-public class LookupResult {
-    private final OsgiModelSource<?> source;
+public class ResolvedModel<T> {
+    private final OsgiModelSource<T> source;
     private final String resourceType;
     private final int hashCode;
 
@@ -36,7 +35,7 @@ public class LookupResult {
      * @param source       must not be <code>null</code>
      * @param resourceType must not be <code>null</code>
      */
-    public LookupResult(OsgiModelSource<?> source, String resourceType) {
+    public ResolvedModel(OsgiModelSource<T> source, String resourceType) {
         if (source == null) {
             throw new IllegalArgumentException("Method argument source must not be null.");
         }
@@ -49,24 +48,24 @@ public class LookupResult {
         this.hashCode = new HashCodeBuilder().append(source).append(resourceType).toHashCode();
     }
 
-    public OsgiModelSource<?> getSource() {
+    public OsgiModelSource<T> getSource() {
         return source;
     }
 
     /**
-     * The resource type this lookup succeeded for. May be any type within the
+     * The resource type for which this model was resolved. May be any type within the
      * mapped resource's {@link io.neba.core.resourcemodels.registration.MappableTypeHierarchy}.
      *
      * @return never <code>null</code>.
      */
-    public String getResourceType() {
+    public String getResolvedResourceType() {
         return resourceType;
     }
 
     /**
      * Customized toString for better error log information.
      *
-     * @return a description of the LookupResult
+     * @return a description of the ResolvedModel
      */
     @Override
     public String toString() {
@@ -87,7 +86,7 @@ public class LookupResult {
             return false;
         }
 
-        LookupResult other = (LookupResult) obj;
+        ResolvedModel other = (ResolvedModel) obj;
 
         return this.source.equals(other.source) &&
                 this.resourceType.equals(other.resourceType);

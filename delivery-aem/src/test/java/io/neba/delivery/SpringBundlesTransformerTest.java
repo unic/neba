@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.jar.JarFile;
@@ -107,7 +106,7 @@ public class SpringBundlesTransformerTest {
     }
 
     private void transformUnpackedArtifacts() throws IOException {
-        new SpringBundlesTransformer(source, target).run();
+        new SpringBundlesTransformer(source, target, "[2.9,3)").run();
     }
 
     private URL getResource(String path) {

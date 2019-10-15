@@ -24,6 +24,7 @@ import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResolvedModel;
 import io.neba.core.util.ResourcePaths;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -370,6 +371,11 @@ public class ResourceToModelMapperTest {
         when(source.getModel()).thenReturn(this.model);
         when(source.getFactory()).thenReturn(this.factory);
         doReturn(this.modelType).when(source).getModelType();
-        this.mappedModel = this.testee.map(this.resource, source);
+
+        ResolvedModel<TestModel> resolvedModel = mock(ResolvedModel.class);
+        doReturn(source).when(resolvedModel).getSource();
+        doReturn("some/resource/type").when(resolvedModel).getResolvedResourceType();
+
+        this.mappedModel = this.testee.map(this.resource, resolvedModel);
     }
 }

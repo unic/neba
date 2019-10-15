@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
+import io.neba.core.util.ResolvedModel;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.sling.api.resource.LoginException;
@@ -163,7 +164,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
 
     @Override
     protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        writeHeadnavigation(res);
+        writeHeadNavigation(res);
 
         PrintWriter writer = res.getWriter();
         writeScriptIncludes(res);
@@ -356,11 +357,11 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 if (resource == null) {
                     return types;
                 }
-                Collection<LookupResult> lookupResults = this.registry.lookupAllModels(resource);
-                if (lookupResults == null) {
+                Collection<ResolvedModel<?>> resolvedModels = this.registry.lookupAllModels(resource);
+                if (resolvedModels == null) {
                     return types;
                 }
-                types.addAll(lookupResults.stream().map(LookupResult::getSource).collect(Collectors.toList()));
+                types.addAll(resolvedModels.stream().map(ResolvedModel::getSource).collect(Collectors.toList()));
             } finally {
                 resolver.get().close();
             }
@@ -380,7 +381,7 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
         response.getWriter().write("<script src=\"" + getLabel() + "/static/script.js\"></script>");
     }
 
-    private void writeHeadnavigation(HttpServletResponse response) throws IOException {
+    private void writeHeadNavigation(HttpServletResponse response) throws IOException {
         String template = readTemplateFile("/META-INF/consoleplugin/modelregistry/templates/head.html");
 
         Optional<ResourceResolver> resourceResolver = getResourceResolver();

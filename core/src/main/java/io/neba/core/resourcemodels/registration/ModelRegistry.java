@@ -18,6 +18,7 @@ package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
+import io.neba.core.util.ResolvedModel;
 import io.neba.core.util.MatchedBundlesPredicate;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.commons.collections.CollectionUtils;
@@ -135,7 +136,7 @@ public class ModelRegistry {
     }
 
     private final ConcurrentDistinctMultiValueMap<String, OsgiModelSource<?>> typeNameToModelSourcesMap = new ConcurrentDistinctMultiValueMap<>();
-    private final ConcurrentDistinctMultiValueMap<Key, LookupResult> lookupCache = new ConcurrentDistinctMultiValueMap<>();
+    private final ConcurrentDistinctMultiValueMap<Key, ResolvedModel<?>> lookupCache = new ConcurrentDistinctMultiValueMap<>();
     private final Logger logger = getLogger(getClass());
 
     /**
@@ -146,7 +147,7 @@ public class ModelRegistry {
      * @param modelName must not be <code>null</code>.
      * @return the resolved models, or <code>null</code> if no such models exist.
      */
-    Collection<LookupResult> lookupMostSpecificModels(Resource resource, String modelName) {
+    Collection<ResolvedModel<?>> lookupMostSpecificModels(Resource resource, String modelName) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
@@ -156,7 +157,7 @@ public class ModelRegistry {
 
         Key key = key(resource, modelName);
 
-        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
+        Collection<ResolvedModel<?>> matchingModels = this.lookupCache.get(key);
         if (matchingModels == null) {
             matchingModels = lookupCache.computeIfAbsent(key, k -> resolveMostSpecificModelSources(resource, modelName));
         }
@@ -172,14 +173,14 @@ public class ModelRegistry {
      * @param resource must not be <code>null</code>.
      * @return the model sources, or <code>null</code> if no models exist for the resource.
      */
-    Collection<LookupResult> lookupMostSpecificModels(Resource resource) {
+    Collection<ResolvedModel<?>> lookupMostSpecificModels(Resource resource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
 
         final Key key = key(resource);
 
-        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
+        Collection<ResolvedModel<?>> matchingModels = this.lookupCache.get(key);
         if (matchingModels == null) {
             matchingModels = lookupCache.computeIfAbsent(key, k -> resolveMostSpecificModelSources(resource));
         }
@@ -195,14 +196,14 @@ public class ModelRegistry {
      * @param resource must not be <code>null</code>.
      * @return the model sources, or <code>null</code> if no models exist for the resource.
      */
-    Collection<LookupResult> lookupAllModels(Resource resource) {
+    Collection<ResolvedModel<?>> lookupAllModels(Resource resource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
 
         final Key key = key(resource, "allModels");
 
-        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
+        Collection<ResolvedModel<?>> matchingModels = this.lookupCache.get(key);
         if (matchingModels == null) {
             matchingModels = lookupCache.computeIfAbsent(key, k -> resolveModelSources(resource, null, false));
         }
@@ -218,7 +219,7 @@ public class ModelRegistry {
      * @param targetType must not be <code>null</code>.
      * @return the sources of the models, or <code>null</code> if no such model exists.
      */
-    public Collection<LookupResult> lookupMostSpecificModels(Resource resource, Class<?> targetType) {
+    public Collection<ResolvedModel<?>> lookupMostSpecificModels(Resource resource, Class<?> targetType) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
@@ -228,7 +229,7 @@ public class ModelRegistry {
 
         final Key key = key(resource, targetType);
 
-        Collection<LookupResult> matchingModels = this.lookupCache.get(key);
+        Collection<ResolvedModel<?>> matchingModels = this.lookupCache.get(key);
         if (matchingModels == null) {
             matchingModels = lookupCache.computeIfAbsent(key, k -> resolveMostSpecificModelSources(resource, targetType));
         }
@@ -312,14 +313,14 @@ public class ModelRegistry {
     /**
      * @see #resolveMostSpecificModelSources(org.apache.sling.api.resource.Resource, Class)
      */
-    private Collection<LookupResult> resolveMostSpecificModelSources(Resource resource) {
+    private Collection<ResolvedModel<?>> resolveMostSpecificModelSources(Resource resource) {
         return resolveMostSpecificModelSources(resource, (Class<?>) null);
     }
 
     /**
      * @see #resolveModelSources(org.apache.sling.api.resource.Resource, Class, boolean)
      */
-    private Collection<LookupResult> resolveMostSpecificModelSources(
+    private Collection<ResolvedModel<?>> resolveMostSpecificModelSources(
             Resource resource,
             Class<?> compatibleType) {
 
@@ -336,16 +337,16 @@ public class ModelRegistry {
      * @param resolveMostSpecific whether to resolve only the most specific models.
      * @return never <code>null</code> but rather an empty collection.
      */
-    private Collection<LookupResult> resolveModelSources(Resource resource, Class<?> compatibleType, boolean resolveMostSpecific) {
-        Collection<LookupResult> sources = new ArrayList<>(64);
+    private Collection<ResolvedModel<?>> resolveModelSources(Resource resource, Class<?> compatibleType, boolean resolveMostSpecific) {
+        Collection<ResolvedModel<?>> sources = new ArrayList<>(64);
         for (final String resourceType : mappableTypeHierarchyOf(resource)) {
             Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToModelSourcesMap.get(resourceType);
             Collection<OsgiModelSource<?>> sourcesForCompatibleType = filter(allSourcesForType, compatibleType);
             if (sourcesForCompatibleType != null && !sourcesForCompatibleType.isEmpty()) {
-                List<LookupResult> list = new ArrayList<>();
+                List<ResolvedModel<?>> list = new ArrayList<>();
                 for (OsgiModelSource<?> source : sourcesForCompatibleType) {
-                    LookupResult lookupResult = new LookupResult(source, resourceType);
-                    list.add(lookupResult);
+                    ResolvedModel<?> resolvedModel = new ResolvedModel<>(source, resourceType);
+                    list.add(resolvedModel);
                 }
                 sources.addAll(list);
                 if (resolveMostSpecific) {
@@ -365,16 +366,16 @@ public class ModelRegistry {
      * @param modelName can be <code>null</code>.
      * @return never <code>null</code> but rather an empty collection.
      */
-    private Collection<LookupResult> resolveMostSpecificModelSources(Resource resource, String modelName) {
-        Collection<LookupResult> sources = new ArrayList<>();
+    private Collection<ResolvedModel<?>> resolveMostSpecificModelSources(Resource resource, String modelName) {
+        Collection<ResolvedModel<?>> sources = new ArrayList<>();
         for (final String resourceType : mappableTypeHierarchyOf(resource)) {
             Collection<OsgiModelSource<?>> allSourcesForType = this.typeNameToModelSourcesMap.get(resourceType);
             Collection<OsgiModelSource<?>> sourcesWithMatchingModelName = filter(allSourcesForType, modelName);
             if (sourcesWithMatchingModelName != null && !sourcesWithMatchingModelName.isEmpty()) {
-                List<LookupResult> list = new ArrayList<>();
+                List<ResolvedModel<?>> list = new ArrayList<>();
                 for (OsgiModelSource<?> source : sourcesWithMatchingModelName) {
-                    LookupResult lookupResult = new LookupResult(source, resourceType);
-                    list.add(lookupResult);
+                    ResolvedModel<?> resolvedModel = new ResolvedModel<>(source, resourceType);
+                    list.add(resolvedModel);
                 }
                 sources.addAll(list);
                 break;

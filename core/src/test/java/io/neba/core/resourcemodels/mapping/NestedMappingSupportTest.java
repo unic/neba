@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
+import org.assertj.core.data.MapEntry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -84,7 +86,6 @@ public class NestedMappingSupportTest {
         assertOngoingMappingsContainMapping();
     }
 
-
     @Test
     public void testNoFalsePositiveDetectionOfResourceModelInOngoingMappings() {
         beginMapping();
@@ -105,9 +106,93 @@ public class NestedMappingSupportTest {
         assertMappingForCurrentResourceModelTypeExists();
     }
 
+    @Test
+    public void testNoMappingsAreRecordedByDefault() {
+        beginMapping();
+        endMapping();
+        assertNoModelsWhereRecorded();
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testCheckingForResourceModelMappingDoesNotAcceptNull() {
         this.testee.hasOngoingMapping(null);
+    }
+
+    @Test
+    public void testMappingsAreRecordedWhenRecordingIsStared() {
+        beginRecordingMappings();
+        beginMapping();
+        endMapping();
+
+        assertRecordedMappingsAre(entry(this.mapping.getMappedModel(), this.mapping));
+
+        endRecordingMappings();
+    }
+
+    @Test
+    public void testNestedMappingsAreRecordedWhenRecordingIsStared() {
+        beginRecordingMappings();
+        beginMapping();
+        withNewMapping();
+        beginMapping();
+        endMapping();
+        endMapping();
+
+        assertNumberOfRecordedMappingsIs(2);
+
+        endRecordingMappings();
+    }
+
+    @Test
+    public void testSubsequentMappingsAreRecordedWhenRecordingIsStarted() {
+        beginRecordingMappings();
+
+        beginMapping();
+
+        endMapping();
+
+        withNewMapping();
+        beginMapping();
+        endMapping();
+
+        assertNumberOfRecordedMappingsIs(2);
+
+        endRecordingMappings();
+    }
+
+    @Test
+    public void testNoMoreMappingsAreRecordedAfterRecordingIsStopped() {
+        beginRecordingMappings();
+        beginMapping();
+        endMapping();
+        assertNumberOfRecordedMappingsIs(1);
+        endRecordingMappings();
+
+        withNewMapping();
+        beginMapping();
+        endMapping();
+
+        assertNoModelsWhereRecorded();
+    }
+
+    private void assertNoModelsWhereRecorded() {
+        assertThat(this.testee.getRecordedMappings()).isNull();
+    }
+
+    private void assertNumberOfRecordedMappingsIs(int expected) {
+        assertThat(this.testee.getRecordedMappings()).hasSize(expected);
+    }
+
+    private void assertRecordedMappingsAre(MapEntry<?, ? extends Mapping<?>> entry) {
+        assertThat(this.testee.getRecordedMappings()).containsOnly(entry);
+    }
+
+    private void endRecordingMappings() {
+        this.testee.endRecordingMappings();
+    }
+
+    private void beginRecordingMappings() {
+        this.testee.beginRecordingMappings();
     }
 
     private void assertMappingForCurrentResourceModelTypeExists() {
@@ -148,8 +233,10 @@ public class NestedMappingSupportTest {
 
     private void withNewMapping() {
         this.mapping = mock(Mapping.class);
+        Object model = mock(Object.class);
         ResourceModelMetaData metaData = mock(ResourceModelMetaData.class);
         doReturn(metaData).when(this.mapping).getMetadata();
+        doReturn(model).when(mapping).getMappedModel();
     }
 
     private void withNewMappingForSameResourceModel() {

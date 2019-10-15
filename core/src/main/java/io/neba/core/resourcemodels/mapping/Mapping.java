@@ -17,38 +17,47 @@
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
-import io.neba.core.util.Key;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * Represents a mapping of the form <code>resource path -&gt; model</code>.
- * 
+ *
+ * @param <T> the type of the contained {@link #getMappedModel()} mapped model.
  * @author Olaf Otto
  * @author Christoph Huber
- * @param <T> the type of the contained {@link #getMappedModel()} mapped model.
  */
-public class Mapping<T> extends Key {
+public class Mapping<T> {
     private final String srcPath;
     private final ResourceModelMetaData metadata;
+    private final String resourceType;
+    private final int hashCode;
+
     private T mappedModel = null;
 
     /**
      * @param resourcePath must not be <code>null</code>.
-     * @param metadata must not be <code>null</code>.
+     * @param metadata     must not be <code>null</code>.
+     * @param resourceType the resource type, e.g. "components/wide/teaser" or "cq:Page". Must not be <code>null</code>.
      */
-    Mapping(String resourcePath, ResourceModelMetaData metadata) {
-        super(resourcePath, metadata);
-
+    Mapping(@Nonnull String resourcePath, @Nonnull ResourceModelMetaData metadata, @Nonnull String resourceType) {
         if (resourcePath == null) {
-            throw new IllegalArgumentException("Method argument resourcePath must not be null.");
+            throw new IllegalArgumentException("Constructor parameter resourcePath must not be null.");
         }
         if (metadata == null) {
-            throw new IllegalArgumentException("Method argument metadata must not be null.");
+            throw new IllegalArgumentException("Constructor parameter metadata must not be null.");
+        }
+        if (resourceType == null) {
+            throw new IllegalArgumentException("Constructor parameter resourceType must not be null.");
         }
 
+        this.resourceType = resourceType;
         this.srcPath = resourcePath;
         this.metadata = metadata;
+        this.hashCode = 31 * (31 + srcPath.hashCode()) + metadata.hashCode();
     }
-    
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + " [" + srcPath + " -> " + this.metadata.getTypeName() + ']';
@@ -58,11 +67,33 @@ public class Mapping<T> extends Key {
         this.mappedModel = mappedModel;
     }
 
+    @CheckForNull
     T getMappedModel() {
         return mappedModel;
     }
 
+    @Nonnull
     public ResourceModelMetaData getMetadata() {
         return metadata;
+    }
+
+    @Nonnull
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Mapping<?> mapping = (Mapping<?>) o;
+        return srcPath.equals(mapping.srcPath) &&
+                metadata.equals(mapping.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.hashCode;
     }
 }

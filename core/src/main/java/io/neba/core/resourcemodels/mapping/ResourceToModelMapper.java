@@ -23,6 +23,7 @@ import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResolvedModel;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -60,24 +61,24 @@ public class ResourceToModelMapper {
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     /**
-     * @param resource    must not be <code>null</code>.
-     * @param modelSource must not be <code>null</code>.
      * @param <T>         the model type.
+     * @param resource    must not be <code>null</code>.
+     * @param resolvedModel must not be <code>null</code>.
      * @return never <code>null</code>.
      */
-    public <T> T map(final Resource resource, final OsgiModelSource<T> modelSource) {
+    public <T> T map(final Resource resource, final ResolvedModel<T> resolvedModel) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
-        if (modelSource == null) {
+        if (resolvedModel == null) {
             throw new IllegalArgumentException("Method argument modelSource must not be null");
         }
 
         T model;
-
+        final OsgiModelSource<T> modelSource = resolvedModel.getSource();
         final Class<?> modelType = modelSource.getModelType();
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(modelType);
-        final Mapping<T> mapping = new Mapping<>(resource.getPath(), metaData);
+        final Mapping<T> mapping = new Mapping<>(resource.getPath(), metaData, resolvedModel.getResolvedResourceType());
         // Do not track mapping time for nested resource models of the same type: this would yield
         // a useless average and total mapping time as the mapping durations would sum up multiple times.
         final boolean trackMappingDuration = !this.nestedMappingSupport.hasOngoingMapping(metaData);
