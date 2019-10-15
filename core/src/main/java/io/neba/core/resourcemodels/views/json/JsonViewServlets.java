@@ -116,7 +116,7 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
                     return;
                 }
             } else {
-                response.sendError(SC_BAD_REQUEST, "Invalid selectors " + request.getRequestPathInfo().getSelectorString() + ": Expected format is <json servlet selector>[.<optional model name>].");
+                response.sendError(SC_BAD_REQUEST, "Invalid selectors. The expected format is <json servlet selector>[.<optional model name>]");
                 return;
             }
 
@@ -137,7 +137,6 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
     public void destroy() {
         LOGGER.info("Servlet instance stopped");
     }
-
 
     @ObjectClassDefinition(name = "NEBA model JSON view servlet")
     public @interface Configuration {

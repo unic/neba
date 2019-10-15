@@ -61,12 +61,17 @@ public class MappingTest {
         new Mapping("/some/resource/path", null, "resource/type");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testMappingConstructorRequiresNonNullResourceType() {
+        new Mapping("/some/resource/path", this.metaData, null);
+    }
+
     @Test
     public void testHashCodeAndEquals() {
         Mapping<?> secondMapping = new Mapping<>(this.source, this.metaData, "resource/type");
         assertThat(this.testee.hashCode()).isEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isEqualTo(secondMapping);
-        
+
         secondMapping = new Mapping<>("/other/source", this.metaData, "resource/type");
         assertThat(this.testee.hashCode()).isNotEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isNotEqualTo(secondMapping);
@@ -75,7 +80,7 @@ public class MappingTest {
         assertThat(this.testee.hashCode()).isNotEqualTo(secondMapping.hashCode());
         assertThat(this.testee).isNotEqualTo(secondMapping);
     }
-    
+
     @Test
     public void testStringRepresentation() {
         mappingToString();
@@ -91,6 +96,11 @@ public class MappingTest {
     @Test
     public void testResourceTypeGetter() {
         assertThat(this.testee.getResourceType()).isEqualTo("resource/type");
+    }
+
+    @Test
+    public void testMetadataGetter() {
+        assertThat(this.testee.getMetadata()).isEqualTo(this.metaData);
     }
 
     private void assertGetterReturnsOriginalModel() {

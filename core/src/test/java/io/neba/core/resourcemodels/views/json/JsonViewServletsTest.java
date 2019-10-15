@@ -37,6 +37,7 @@ import java.io.StringWriter;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -91,12 +92,17 @@ public class JsonViewServletsTest {
         doReturn("UTF-8").when(this.configuration).encoding();
         doReturn(new String[]{"SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true"})
                 .when(this.configuration).jacksonSettings();
+    }
 
-        this.testee.activate(this.context, this.configuration);
+    @Test
+    public void testHandlingOfMissingSerializer() throws IOException {
+        serveRequest();
+        verify(this.response).sendError(SC_SERVICE_UNAVAILABLE, "The JSON view service is not available.");
     }
 
     @Test
     public void testHandlingOfBadResourceModelName() throws IOException {
+        activate();
         withSelectors("model", "<script>alert('bad name')</script>");
         serveRequest();
         verify(this.response).sendError(SC_BAD_REQUEST, "Invalid model name. The model name must match the pattern [A-z0-9_\\-#]+");
@@ -104,6 +110,7 @@ public class JsonViewServletsTest {
 
     @Test
     public void testHandlingOfMissingModel() throws IOException {
+        activate();
         withMissingModel();
         serveRequest();
         verify(this.response).sendError(SC_NOT_FOUND, "No model could be resolved for resource /some/resource/path");
@@ -111,6 +118,7 @@ public class JsonViewServletsTest {
 
     @Test
     public void testHandlingOfMissingNamedModel() throws IOException {
+        activate();
         withMissingModel();
         withSelectors("model", "modelName");
         serveRequest();
@@ -119,6 +127,7 @@ public class JsonViewServletsTest {
 
     @Test
     public void testLookupModelByName() throws IOException {
+        activate();
         withSelectors("model", "modelName");
         serveRequest();
         verifyServletAttemptsResolveModelWithName("modelName");
@@ -126,6 +135,7 @@ public class JsonViewServletsTest {
 
     @Test
     public void testJsonRenderingWithoutTypeAttribute() throws IOException {
+        activate();
         serveRequest();
         assertCharacterEncodingIs("UTF-8");
         assertContentTypeIs("application/json");
@@ -134,6 +144,7 @@ public class JsonViewServletsTest {
 
     @Test
     public void testBeginAndEndRecordMappingsHappensBeforeModelResolutionAndAfterJsonSerialization() throws IOException {
+        activate();
         InOrder inOrder = inOrder(this.nestedMappingSupport, this.resourceModelResolver, this.response);
 
         serveRequest();
@@ -146,6 +157,7 @@ public class JsonViewServletsTest {
 
     @Test
     public void testMappingRecordingIsAlwaysEnded() throws IOException {
+        activate();
         withExceptionDuringResponseAccess();
         Exception expectedException = null;
         try {
@@ -156,6 +168,18 @@ public class JsonViewServletsTest {
 
         assertThat(expectedException).describedAs("Expected error during response access").isNotNull();
         verify(this.nestedMappingSupport).endRecordingMappings();
+    }
+
+    @Test
+    public void testHandlingOfInvalidSelectorFormat() throws IOException {
+        activate();
+        withSelectors("model", "modelName", "nonsense");
+        serveRequest();
+        verify(this.response).sendError(SC_BAD_REQUEST, "Invalid selectors. The expected format is <json servlet selector>[.<optional model name>]");
+    }
+
+    private void activate() {
+        this.testee.activate(this.context, this.configuration);
     }
 
     private void withExceptionDuringResponseAccess() throws IOException {
