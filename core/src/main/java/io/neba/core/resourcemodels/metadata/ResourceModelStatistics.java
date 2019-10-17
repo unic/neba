@@ -16,8 +16,6 @@
 
 package io.neba.core.resourcemodels.metadata;
 
-import io.neba.api.spi.ResourceModelCache;
-
 import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.copyOf;
@@ -47,7 +45,7 @@ public class ResourceModelStatistics {
     private long mappings;
     private long cacheHits;
 
-    public ResourceModelStatistics() {
+    ResourceModelStatistics() {
         reset();
         int boundary = 1;
         for (int i = 0; i < indexBoundaries.length; ++i) {
@@ -101,7 +99,7 @@ public class ResourceModelStatistics {
     }
 
     /**
-     * @return The number of types a {@link ResourceModelCache} contained an instance
+     * @return The number of types the {@link io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache} contained an instance
      * of the resource model.
      */
     long getCacheHits() {
@@ -119,8 +117,8 @@ public class ResourceModelStatistics {
     }
 
     /**
-     * @return the total number of recorded subsequent resource-to-resourcemodel mappings
-     *         that occurred during the mapping of this model.
+     * @return the total number of recorded subsequent resource-to-resource model mappings
+     * that occurred during the mapping of this model.
      */
     long getNumberOfMappings() {
         return this.mappings;
@@ -157,7 +155,7 @@ public class ResourceModelStatistics {
 
     /**
      * @return the sum of all recorded mapping durations in ms,
-     *         i.e. summed up averages of the mapping duration frequency table interval means.
+     * i.e. summed up averages of the mapping duration frequency table interval means.
      */
     double getTotalMappingDuration() {
         double totalDuration = 0L;
@@ -246,9 +244,9 @@ public class ResourceModelStatistics {
 
     /**
      * @return the mapping duration corresponding to the nth measured duration.
-     *         Example: if the duration was measured seven times, get the position of the third sample from the
-     *         ordered frequency table; it represents the duration which has 50% of all mapping durations below
-     *         and 50% of all mapping durations above: <code>[0 1 2 (3) 4 5 5]</code>.
+     * Example: if the duration was measured seven times, get the position of the third sample from the
+     * ordered frequency table; it represents the duration which has 50% of all mapping durations below
+     * and 50% of all mapping durations above: <code>[0 1 2 (3) 4 5 5]</code>.
      */
     private double mappingDurationOf(long nthSample) {
         int index = 0;
@@ -283,9 +281,9 @@ public class ResourceModelStatistics {
         } while (index < this.mappingDurationFrequencies.length);
 
         // [n1, n2) -> mean is (n1 + n2) / 2
-        double leftHandBoundaryX1 = x1 == 0? 0 : this.indexBoundaries[x1 - 1];
+        double leftHandBoundaryX1 = x1 == 0 ? 0 : this.indexBoundaries[x1 - 1];
         double rightHandBoundaryX1 = this.indexBoundaries[x1];
-        double leftHandBoundaryX2 = x2 == 0? 0 : this.indexBoundaries[x2 - 1];
+        double leftHandBoundaryX2 = x2 == 0 ? 0 : this.indexBoundaries[x2 - 1];
         double rightHandBoundaryX2 = this.indexBoundaries[x2];
 
         // The boundaries are doubles as the intervals [0, 1) and [1, 2) have fraction means (0.5, 1.5)

@@ -46,6 +46,13 @@ public class Key {
         }
     }
 
+    /**
+     * @see Key#Key(Object...)
+     */
+    public static Key key(Object... contents) {
+        return new Key(contents);
+    }
+
     @Override
     public int hashCode() {
         return this.hashCode;

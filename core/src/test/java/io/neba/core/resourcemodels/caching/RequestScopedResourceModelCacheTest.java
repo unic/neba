@@ -17,7 +17,6 @@
 package io.neba.core.resourcemodels.caching;
 
 import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache.Configuration;
-import io.neba.core.util.Key;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -30,7 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletResponse;
 
-import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static io.neba.core.util.Key.key;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -287,7 +286,7 @@ public class RequestScopedResourceModelCacheTest {
     @Test
     public void testCacheToleratesNullModelWrite() throws Exception {
         request(() -> {
-            testee.put(this.resource, null, key());
+            testee.put(this.resource, key(), null);
             putModelInCache();
         });
     }
@@ -295,7 +294,7 @@ public class RequestScopedResourceModelCacheTest {
     @Test(expected = IllegalArgumentException.class)
     public void testCacheDoesNotTolerateNullResourceWrite() throws Exception {
         request(() -> {
-            testee.put(null, this.model, key());
+            testee.put(null, key(), this.model);
             putModelInCache();
         });
     }
@@ -303,7 +302,7 @@ public class RequestScopedResourceModelCacheTest {
     @Test(expected = IllegalArgumentException.class)
     public void testCacheDoesNotTolerateNullKeyWrite() throws Exception {
         request(() -> {
-            testee.put(this.resource, this.model, null);
+            testee.put(this.resource, null, this.model);
         });
     }
 
@@ -332,7 +331,7 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     private void putModelInCache() {
-        testee.put(this.resource, this.model, new Key(this.resource.getPath(), this.modelType));
+        testee.put(this.resource, key(this.resource.getPath(), this.modelType), this.model);
     }
 
     private void assertModelIsInCache() {
@@ -344,7 +343,7 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     private void lookupModelFromCache() {
-        cachedModel = testee.get(new Key(this.resource.getPath(), this.modelType));
+        cachedModel = testee.get(this.resource, key(this.resource.getPath(), this.modelType));
     }
 
     private void withResourcePath(String path) {

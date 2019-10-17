@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.resourcemodels.caching.ResourceModelCaches;
+import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
@@ -66,7 +66,7 @@ public class ResourceModelResolverImplTest {
     @Mock
     private ResolvedModel<Object> resolvedModel;
     @Mock
-    private ResourceModelCaches caches;
+    private RequestScopedResourceModelCache cache;
     @Mock
     private OsgiModelSource<Object> osgiModelSource;
 
@@ -88,12 +88,12 @@ public class ResourceModelResolverImplTest {
         lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
-                .when(this.caches)
-                .store(isA(Resource.class), isA(Key.class), any());
+                .when(this.cache)
+                .put(isA(Resource.class), isA(Key.class), any());
 
         doAnswer(lookupFromCache)
-                .when(this.caches)
-                .lookup(isA(Resource.class), isA(Key.class));
+                .when(this.cache)
+                .get(isA(Resource.class), isA(Key.class));
 
         doReturn(this.resourceResolver)
                 .when(this.resource)

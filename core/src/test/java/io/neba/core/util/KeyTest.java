@@ -18,6 +18,7 @@ package io.neba.core.util;
 
 import org.junit.Test;
 
+import static io.neba.core.util.Key.key;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -26,6 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KeyTest {
 	private Key key1;
 	private Key key2;
+
+	@Test
+	public void testConvenienceFactory() {
+		assertThat(key("a", "b"))
+				.isEqualTo(new Key("a", "b"));
+	}
 
 	@Test
 	public void testEqualKeys() {

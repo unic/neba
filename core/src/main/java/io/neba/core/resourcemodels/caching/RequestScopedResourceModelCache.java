@@ -16,7 +16,6 @@
 
 package io.neba.core.resourcemodels.caching;
 
-import io.neba.api.spi.ResourceModelCache;
 import io.neba.core.util.Key;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -46,14 +45,14 @@ import static org.osgi.framework.Constants.SERVICE_RANKING;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
 
 /**
- * A request-scoped {@link ResourceModelCache}. Models added to this cache may either be cached for the entire
+ * A request-scoped resource model cache. Models added to this cache may either be cached for the entire
  * request regardless of state changes (selectors, suffixes, extension, query string...)
  * during the request processing, or in a request-state sensitive manner.
  *
  * @author Olaf Otto
  */
 @Component(
-        service = {ResourceModelCache.class, Filter.class},
+        service = {Filter.class},
         property = {
                 SERVICE_VENDOR + "=neba.io",
                 "sling.filter.scope=REQUEST",
@@ -62,7 +61,7 @@ import static org.osgi.framework.Constants.SERVICE_VENDOR;
         }
 )
 @Designate(ocd = RequestScopedResourceModelCache.Configuration.class)
-public class RequestScopedResourceModelCache implements ResourceModelCache, Filter {
+public class RequestScopedResourceModelCache implements Filter {
     private final ThreadLocal<Map<Object, Object>> cacheHolder = new ThreadLocal<>();
     private final ThreadLocal<SlingHttpServletRequest> requestHolder = new ThreadLocal<>();
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -75,13 +74,19 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
     }
 
     /**
-     * {@inheritDoc}
+     * Retrieve a cached model.
+     * @param resource The resource {@link Resource#adaptTo(Class) adapted} to the target type. Never <code>null</code>.
+     * @param key The key used to identify the stored model. Never <code>null</code>.
+     * @return The cached model, or <code>null</code>.
      */
-    @Override
+    @CheckForNull
     @SuppressWarnings("unchecked")
-    public <T> T get(Object key) {
+    public <T> T get(@Nonnull Resource resource, @Nonnull Key key) {
         if (key == null) {
             throw new IllegalArgumentException("Method argument key must not be null.");
+        }
+        if (resource == null) {
+            throw new IllegalArgumentException("Method argument resource must not be null.");
         }
         if (!this.configuration.enabled()) {
             return null;
@@ -101,10 +106,11 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
     }
 
     /**
-     * {@inheritDoc}
+     * @param resource The resource {@link Resource#adaptTo(Class) adapted} to the target type. Never <code>null</code>.
+     * @param model    the model representing the mapped result of the adaptation. Can be <code>null</code>.
+     * @param key      the key by which the model is identified and {@link #get(Resource, Key)} retrieved}. Never <code>null</code>.
      */
-    @Override
-    public <T> void put(@Nonnull Resource resource, @CheckForNull T model, @Nonnull Object key) {
+    public <T> void put(@Nonnull Resource resource, @Nonnull Key key, @CheckForNull T model) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
@@ -209,5 +215,9 @@ public class RequestScopedResourceModelCache implements ResourceModelCache, Filt
                         "enabling this feature is likely to a significant negative performance impact. It is highly recommended to disable " +
                         "safemode in favor of safe-to-cache @ResourceModels.")
         boolean safeMode() default false;
+    }
+
+    private <T> Key key(Resource resource, Key key) {
+        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

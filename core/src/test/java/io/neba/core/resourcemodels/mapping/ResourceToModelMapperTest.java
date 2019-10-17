@@ -82,8 +82,10 @@ public class ResourceToModelMapperTest {
     @Mock
     private ResourceModelStatistics resourceModelStatistics;
     @Mock
+    @SuppressWarnings("unused") // Required for injection into testee
     private AnnotatedFieldMappers annotatedFieldMappers;
     @Mock
+    @SuppressWarnings("unused") // Required for injection into testee
     private PlaceholderVariableResolvers placeholderVariableResolvers;
     @Mock
     private Mapping<Object> ongoingMapping;
