@@ -16,6 +16,7 @@
 package io.neba.core.resourcemodels.views.json;
 
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import io.neba.api.services.ResourceModelResolver;
 import io.neba.core.resourcemodels.mapping.NestedMappingSupport;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -29,21 +30,29 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 
+import javax.servlet.Servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
+import java.util.Optional;
 
+import static java.util.Arrays.stream;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,6 +73,8 @@ public class JsonViewServletsTest {
     private SlingHttpServletResponse response;
     @Mock
     private RequestPathInfo requestPathInfo;
+    @Mock
+    private Bundle bundle;
 
     private PrintWriter writer;
     private StringWriter out;
@@ -82,6 +93,7 @@ public class JsonViewServletsTest {
         String modelName = "modelName";
         doReturn(testModel).when(this.resourceModelResolver).resolveMostSpecificModelWithName(this.resource, modelName);
 
+        doReturn("GET").when(request).getMethod();
         doReturn(this.requestPathInfo).when(this.request).getRequestPathInfo();
         doReturn(this.resource).when(this.request).getResource();
         doAnswer(inv -> this.selectors).when(this.requestPathInfo).getSelectors();
@@ -89,20 +101,58 @@ public class JsonViewServletsTest {
 
         doAnswer((inv) -> this.writer).when(this.response).getWriter();
 
+        doReturn(this.bundle).when(this.context).getUsingBundle();
+
         doReturn("UTF-8").when(this.configuration).encoding();
         doReturn(new String[]{"SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true"})
                 .when(this.configuration).jacksonSettings();
+
+        this.testee.activate(this.context, this.configuration);
     }
 
     @Test
-    public void testHandlingOfMissingSerializer() throws IOException {
-        serveRequest();
+    public void testMissingJacksonLibraryOnClasspathYieldsServiceUnavailable() throws Exception {
+        ClassLoader classLoaderWithoutDecoratedObjectFactory = new ClassLoader(getClass().getClassLoader()) {
+            @Override
+            public Class<?> loadClass(String name) throws ClassNotFoundException {
+                if (JsonGenerator.class.getName().equals(name)) {
+                    // This optional dependency is not present on the class path in this test scenario.
+                    throw new ClassNotFoundException("THIS IS AN EXPECTED TEST EXCEPTION. The presence of " + JsonGenerator.class.getName() + " is optional.");
+                }
+                if (JsonViewServlets.class.getName().equals(name)) {
+                    // Define the test subject's class class in this class loader, thus its dependencies -
+                    // such as the DecoratedObjectFactory - are also loaded via this class loader.
+                    try {
+                        byte[] classFileData = toByteArray(getResourceAsStream(name.replace('.', '/').concat(".class")));
+                        return defineClass(name, classFileData, 0, classFileData.length);
+                    } catch (IOException e) {
+                        throw new ClassNotFoundException("Unable to load " + name + ".", e);
+                    }
+                }
+
+                return super.loadClass(name);
+            }
+        };
+
+        @SuppressWarnings("unchecked")
+        Class<? extends Servlet> cls = (Class<? extends Servlet>) classLoaderWithoutDecoratedObjectFactory.loadClass(JsonViewServlets.class.getName());
+        Optional<Class<?>> configurationClass = stream(cls.getDeclaredClasses()).filter(c -> c.getName().equals(JsonViewServlets.Configuration.class.getName())).findFirst();
+        if (!configurationClass.isPresent()) {
+            fail("Unable to find " + JsonViewServlets.Configuration.class.getName() + " in class " + cls);
+        }
+        Servlet jsonViewServlets = cls.newInstance();
+        Object configuration = mock(configurationClass.get());
+
+        Method activate = cls.getDeclaredMethod("activate", ComponentContext.class, configurationClass.get());
+        activate.setAccessible(true);
+        activate.invoke(jsonViewServlets, this.context, configuration);
+
+        jsonViewServlets.service(this.request, this.response);
         verify(this.response).sendError(SC_SERVICE_UNAVAILABLE, "The JSON view service is not available.");
     }
 
     @Test
     public void testHandlingOfBadResourceModelName() throws IOException {
-        activate();
         withSelectors("model", "<script>alert('bad name')</script>");
         serveRequest();
         verify(this.response).sendError(SC_BAD_REQUEST, "Invalid model name. The model name must match the pattern [A-z0-9_\\-#]+");
@@ -110,7 +160,6 @@ public class JsonViewServletsTest {
 
     @Test
     public void testHandlingOfMissingModel() throws IOException {
-        activate();
         withMissingModel();
         serveRequest();
         verify(this.response).sendError(SC_NOT_FOUND, "No model could be resolved for resource /some/resource/path");
@@ -118,7 +167,6 @@ public class JsonViewServletsTest {
 
     @Test
     public void testHandlingOfMissingNamedModel() throws IOException {
-        activate();
         withMissingModel();
         withSelectors("model", "modelName");
         serveRequest();
@@ -127,7 +175,6 @@ public class JsonViewServletsTest {
 
     @Test
     public void testLookupModelByName() throws IOException {
-        activate();
         withSelectors("model", "modelName");
         serveRequest();
         verifyServletAttemptsResolveModelWithName("modelName");
@@ -135,7 +182,6 @@ public class JsonViewServletsTest {
 
     @Test
     public void testJsonRenderingWithoutTypeAttribute() throws IOException {
-        activate();
         serveRequest();
         assertCharacterEncodingIs("UTF-8");
         assertContentTypeIs("application/json");
@@ -144,7 +190,6 @@ public class JsonViewServletsTest {
 
     @Test
     public void testBeginAndEndRecordMappingsHappensBeforeModelResolutionAndAfterJsonSerialization() throws IOException {
-        activate();
         InOrder inOrder = inOrder(this.nestedMappingSupport, this.resourceModelResolver, this.response);
 
         serveRequest();
@@ -157,7 +202,6 @@ public class JsonViewServletsTest {
 
     @Test
     public void testMappingRecordingIsAlwaysEnded() throws IOException {
-        activate();
         withExceptionDuringResponseAccess();
         Exception expectedException = null;
         try {
@@ -172,14 +216,9 @@ public class JsonViewServletsTest {
 
     @Test
     public void testHandlingOfInvalidSelectorFormat() throws IOException {
-        activate();
         withSelectors("model", "modelName", "nonsense");
         serveRequest();
         verify(this.response).sendError(SC_BAD_REQUEST, "Invalid selectors. The expected format is <json servlet selector>[.<optional model name>]");
-    }
-
-    private void activate() {
-        this.testee.activate(this.context, this.configuration);
     }
 
     private void withExceptionDuringResponseAccess() throws IOException {

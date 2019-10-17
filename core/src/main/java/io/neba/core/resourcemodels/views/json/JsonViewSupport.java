@@ -72,6 +72,9 @@ class JsonViewSupport extends SimpleModule {
         });
     }
 
+    /**
+     * An augmented {@link BeanSerializer} that can add contextual data to a serialized bean representation.
+     */
     private static class ResourceModelSerializer extends BeanSerializerBase {
         private final Supplier<Map<Object, Mapping<?>>> mappings;
         private final Configuration configuration;
@@ -128,7 +131,7 @@ class JsonViewSupport extends SimpleModule {
             gen.writeStartObject(bean);
             maybeAddTypeAttribute(bean, gen, provider);
             if (_objectIdWriter != null) {
-                gen.setCurrentValue(bean); // [databind#631]
+                gen.setCurrentValue(bean);
                 _serializeWithObjectId(bean, gen, provider, false);
             } else if (_propertyFilterId != null) {
                 serializeFieldsFiltered(bean, gen, provider);
@@ -140,16 +143,20 @@ class JsonViewSupport extends SimpleModule {
 
         private void maybeAddTypeAttribute(@Nonnull Object bean, @Nonnull JsonGenerator gen, @Nonnull SerializerProvider provider) throws IOException {
             if (this.configuration.addTypeAttribute()) {
+                Mapping<?> mapping = mappings.get().get(bean);
+                if (mapping == null) {
+                    return;
+                }
+                // This is costly, but jackson does not provide a data structure to look up
+                // bean attributes in a more efficient way.
                 for (BeanPropertyWriter property : getBeanProperties(provider)) {
                     if (property.getName().equals(":type")) {
+                        // Do not override user-defined ":type" properties.
                         return;
                     }
                 }
 
-                Mapping<?> mapping = mappings.get().get(bean);
-                if (mapping != null) {
-                    gen.writeStringField(":type", mapping.getResourceType());
-                }
+                gen.writeStringField(":type", mapping.getResourceType());
             }
         }
 

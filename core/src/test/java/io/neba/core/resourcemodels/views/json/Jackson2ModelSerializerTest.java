@@ -42,7 +42,6 @@ public class Jackson2ModelSerializerTest {
     private boolean addTypeAttribute = false;
     private String[] settings;
     private StringWriter out;
-    private PrintWriter writer;
     private Object testModel;
 
     private Jackson2ModelSerializer testee;
@@ -60,7 +59,7 @@ public class Jackson2ModelSerializerTest {
 
     @Test
     public void testInvalidSettingsAreTolerated() {
-        withSettings("Invalid.Setting=EXPECTED ERROR");
+        withSettings("Invalid.Setting=EXPECTED ERROR", "broken", "", "==", "MapperFeature.DOES_NOT_EXIST=true");
         initializeModelSerializer();
     }
 
@@ -118,8 +117,8 @@ public class Jackson2ModelSerializerTest {
 
     private void serialize() throws IOException {
         this.out = new StringWriter();
-        this.writer = new PrintWriter(this.out);
-        this.testee.serialize(this.writer, this.testModel);
+        PrintWriter writer = new PrintWriter(this.out);
+        this.testee.serialize(writer, this.testModel);
     }
 
     private Map<Object, Mapping<?>> getMappings() {
