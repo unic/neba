@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Optional.empty;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 /**
@@ -51,39 +50,39 @@ public class ResourceModelCaches {
 
     /**
      * Looks up the {@link #store(Resource, Key, Optional)} cached model}
-     * of the given type for the given resource.
+     * of the given type (identified by the type key) for the given resource.
      * Returns the first model found in the caches.
      *
      * @param resource must not be <code>null</code>.
-     * @param key      must not be <code>null</code>.
+     * @param typeKey      must not be <code>null</code>.
      * @return can be <code>null</code> or {@link java.util.Optional#empty()}. A return value of {@link java.util.Optional#empty()} signals
      * that a an empty model was previously {@link #store(Resource, Key, Optional) stored}, i.e. the adaptation result is known to be null
      * and should not be attempted. A return value of <code>null</code> signals that the model is unknown to this cache, i.e. it was never stored.
      */
     @CheckForNull
-    public <T> Optional<T> lookup(@Nonnull Resource resource, @Nonnull Key key) {
+    public <T> Optional<T> lookup(@Nonnull Resource resource, @Nonnull Key typeKey) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
-        if (key == null) {
-            throw new IllegalArgumentException("Method argument key must not be null");
+        if (typeKey == null) {
+            throw new IllegalArgumentException("Method argument typeKey must not be null");
         }
 
         if (this.caches.isEmpty()) {
             return null;
         }
 
-        final Key lookupKey = key(resource, key);
+        final Key lookupKey = key(resource, typeKey);
         for (ResourceModelCache cache : this.caches) {
             final Optional<T> model = cache.get(lookupKey);
-            if (model == empty()) {
-                return model;
+            if (model == null) {
+                continue;
             }
-
-            if (model != null) {
+            if (model.isPresent()) {
                 metaDataRegistrar.get(model.get().getClass()).getStatistics().countCacheHit();
-                return model;
+
             }
+            return model;
         }
 
         // Null signals that the model was never stored in the cache, i.e. we do not know whether

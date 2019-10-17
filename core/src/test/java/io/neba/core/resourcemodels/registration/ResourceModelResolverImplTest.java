@@ -20,6 +20,7 @@ import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResolvedModel;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -63,7 +64,7 @@ public class ResourceModelResolverImplTest {
     @Mock
     private ResourceToModelMapper mapper;
     @Mock
-    private LookupResult lookupResult;
+    private ResolvedModel<Object> resolvedModel;
     @Mock
     private ResourceModelCaches caches;
     @Mock
@@ -84,7 +85,7 @@ public class ResourceModelResolverImplTest {
             return null;
         },
 
-                lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
                 .when(this.caches)
@@ -98,30 +99,30 @@ public class ResourceModelResolverImplTest {
                 .when(this.resource)
                 .getResourceResolver();
 
-        when(this.mapper.map(isA(Resource.class), isA(OsgiModelSource.class)))
+        when(this.mapper.map(isA(Resource.class), isA(ResolvedModel.class)))
                 .thenAnswer(inv -> {
-                    OsgiModelSource<Object> source = (OsgiModelSource<Object>) inv.getArguments()[1];
-                    return source.getModel();
+                    ResolvedModel<Object> resolvedModel = (ResolvedModel<Object>) inv.getArguments()[1];
+                    return resolvedModel.getSource().getModel();
                 });
     }
 
     @Before
     public void provideMockResourceModel() {
-        LinkedList<LookupResult> lookupResults = new LinkedList<>();
-        lookupResults.add(this.lookupResult);
+        LinkedList<ResolvedModel<?>> resolvedModels = new LinkedList<>();
+        resolvedModels.add(this.resolvedModel);
 
         doReturn(this.osgiModelSource)
-                .when(this.lookupResult)
+                .when(this.resolvedModel)
                 .getSource();
 
         when(this.osgiModelSource.getModel())
                 .thenReturn(this.model);
 
         when(this.registry.lookupMostSpecificModels(eq(this.resource)))
-                .thenReturn(lookupResults);
+                .thenReturn(resolvedModels);
 
         when(this.registry.lookupMostSpecificModels(eq(this.resource), anyString()))
-                .thenReturn(lookupResults);
+                .thenReturn(resolvedModels);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -265,7 +266,7 @@ public class ResourceModelResolverImplTest {
     }
 
     private void withTwoResolvedModels() {
-        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(asList(mock(LookupResult.class), mock(LookupResult.class)));
+        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(asList(mock(ResolvedModel.class), mock(ResolvedModel.class)));
     }
 
     private void withoutAnyModelInRegistry() {
@@ -301,15 +302,15 @@ public class ResourceModelResolverImplTest {
     }
 
     private void withModelFoundForResourceType(String type) {
-        when(this.lookupResult.getResourceType()).thenReturn(type);
+        when(this.resolvedModel.getResolvedResourceType()).thenReturn(type);
     }
 
     private void verifyResourceIsMappedToModel() {
-        verify(this.mapper).map(eq(this.resource), eq(this.osgiModelSource));
+        verify(this.mapper).map(eq(this.resource), eq(this.resolvedModel));
     }
 
     private void verifyResourceIsMappedToModelAgain() {
-        verify(this.mapper, times(2)).map(eq(this.resource), eq(this.osgiModelSource));
+        verify(this.mapper, times(2)).map(eq(this.resource), eq(this.resolvedModel));
     }
 
     private void assertResolvedModelIsNull() {

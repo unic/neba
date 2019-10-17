@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
+import io.neba.core.util.ResolvedModel;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.LoginException;
@@ -462,13 +463,13 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withPathResourceLookedUp() {
-        Set<LookupResult> lookupResults = new HashSet<>();
+        Set<ResolvedModel> resolvedModels = new HashSet<>();
         for (OsgiModelSource<?> source : this.modelSources) {
-            LookupResult result = mock(LookupResult.class);
+            ResolvedModel result = mock(ResolvedModel.class);
             doReturn(source).when(result).getSource();
-            lookupResults.add(result);
+            resolvedModels.add(result);
         }
-        doReturn(lookupResults).when(this.modelRegistry).lookupAllModels(eq(this.pathResource));
+        doReturn(resolvedModels).when(this.modelRegistry).lookupAllModels(eq(this.pathResource));
     }
 
     private void withPathResourceChildren(String... paths) {

@@ -46,14 +46,16 @@ import static aQute.bnd.osgi.Processor.printClauses;
  */
 public class SpringBundlesTransformer {
     private static final String MANIFEST_LOCATION = "META-INF/MANIFEST.MF";
+    private final String jacksonVersionRange;
 
     public static void main(String[] args) throws IOException {
-        if (args == null || args.length != 2) {
-            throw new IllegalArgumentException("Expected exactly two arguments, got: " + Arrays.toString(args) + ".");
+        if (args == null || args.length != 3) {
+            throw new IllegalArgumentException("Expected exactly three arguments, got: " + Arrays.toString(args) + ".");
         }
         new SpringBundlesTransformer(
                 asDirectory(args[0]),
-                asDirectory(args[1])
+                asDirectory(args[1]),
+                args[2]
         ).run();
     }
 
@@ -72,16 +74,20 @@ public class SpringBundlesTransformer {
     private final File unpackedArtifactsDir;
     private final File repackToDirectory;
 
-    SpringBundlesTransformer(File unpackedArtifactsDir, File repackToDir) {
+    SpringBundlesTransformer(File unpackedArtifactsDir, File repackToDir, String jacksonVersionRange) {
         if (unpackedArtifactsDir == null) {
             throw new IllegalArgumentException("Method argument unpackedArtifactsDir must not be null.");
         }
         if (repackToDir == null) {
             throw new IllegalArgumentException("Method argument repackToDir must not be null.");
         }
+        if (jacksonVersionRange == null) {
+            throw new IllegalArgumentException("Method argument jacksonVersionRange must not be null.");
+        }
 
         this.unpackedArtifactsDir = unpackedArtifactsDir;
         this.repackToDirectory = repackToDir;
+        this.jacksonVersionRange = jacksonVersionRange;
     }
 
     void run() throws IOException {
@@ -152,9 +158,9 @@ public class SpringBundlesTransformer {
 
         mainAttributes.putValue(
                 "Require-Bundle",
-                "com.fasterxml.jackson.core.jackson-core; bundle-version=\"[2.9,3)\"; resolution:=optional," +
-                        "com.fasterxml.jackson.core.jackson-databind; bundle-version=\"[2.9,3)\"; resolution:=optional," +
-                        "com.fasterxml.jackson.core.jackson-annotations; bundle-version=\"[2.9,3)\"; resolution:=optional");
+                "com.fasterxml.jackson.core.jackson-core; bundle-version=\"" + this.jacksonVersionRange + "\"; resolution:=optional," +
+                        "com.fasterxml.jackson.core.jackson-databind; bundle-version=\"" + this.jacksonVersionRange + "\"; resolution:=optional," +
+                        "com.fasterxml.jackson.core.jackson-annotations; bundle-version=\"" + this.jacksonVersionRange + "\"; resolution:=optional");
         return true;
     }
 

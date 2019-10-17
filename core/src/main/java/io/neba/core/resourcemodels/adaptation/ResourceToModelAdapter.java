@@ -18,10 +18,9 @@ package io.neba.core.resourcemodels.adaptation;
 
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
-import io.neba.core.resourcemodels.registration.LookupResult;
+import io.neba.core.util.ResolvedModel;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSource;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
@@ -69,34 +68,32 @@ public class ResourceToModelAdapter implements AdapterFactory {
         final Key key = key(target);
 
         Optional<T> cachedModel = this.caches.lookup(resource, key);
-        if (cachedModel == empty()) {
-            // The model cannot be resolved, i.e. adaptation results in null and has been cached before.
-            return null;
+
+        // A null model signals that we have not mapped the specific resource before and do not know whether it can be mapped.
+        // Resolve and map it, if present.
+        if (cachedModel == null) {
+            Collection<ResolvedModel<?>> models = this.registry.lookupMostSpecificModels(resource, target);
+
+            if (models == null || models.isEmpty()) {
+                // Cache the lookup failure
+                this.caches.store(resource, key, empty());
+                return null;
+            }
+
+            if (models.size() != 1) {
+                throw new AmbiguousModelAssociationException("There is more than one model that maps " +
+                        resource.getPath() + " to " + target.getName() + ": " + join(models, ", ") + ".");
+            }
+
+            T model = (T) this.mapper.map(resource, models.iterator().next());
+
+            this.caches.store(resource, key, of(model));
+
+            return model;
         }
 
-        if (cachedModel != null) {
-            return cachedModel.get();
-        }
-
-        Collection<LookupResult> models = this.registry.lookupMostSpecificModels(resource, target);
-
-        if (models == null || models.isEmpty()) {
-            // Cache the lookup failure
-            this.caches.store(resource, key, empty());
-            return null;
-        }
-
-        if (models.size() != 1) {
-            throw new AmbiguousModelAssociationException("There is more than one model that maps " +
-                    resource.getPath() + " to " + target.getName() + ": " + join(models, ", ") + ".");
-        }
-
-        OsgiModelSource<?> source = models.iterator().next().getSource();
-
-        T model = (T) this.mapper.map(resource, source);
-
-        this.caches.store(resource, key, of(model));
-
-        return model;
+        // A non-null cached model always means we have something cached - either an empty result (model cannot be mapped)
+        // or a non-empty result (model has already been mapped)
+        return cachedModel.orElse(null);
     }
 }

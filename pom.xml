@@ -57,6 +57,7 @@
 		<spring.version>5.1.8.RELEASE_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
+		<jackson.importVersionRange>[2.9,3)</jackson.importVersionRange>
 		<language.level>1.8</language.level>
 		<sling.url>http://localhost:4502/system/console</sling.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -369,6 +370,13 @@
 				<scope>provided</scope>
 			</dependency>
 
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.9.9.3</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<!-- Test dependencies -->
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
@@ -402,7 +410,7 @@
 			<plugins>
 				<plugin>
 					<groupId>org.apache.sling</groupId>
-					<artifactId>maven-sling-plugin</artifactId>
+					<artifactId>sling-maven-plugin</artifactId>
 					<version>2.4.2</version>
 					<configuration>
 						<slingUrl>${sling.url}</slingUrl>
@@ -574,7 +582,7 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.sling</groupId>
-				<artifactId>maven-sling-plugin</artifactId>
+				<artifactId>sling-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

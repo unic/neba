@@ -20,7 +20,7 @@ import io.neba.api.services.ResourceModelResolver;
 import io.neba.core.resourcemodels.caching.ResourceModelCaches;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.util.Key;
-import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResolvedModel;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -101,7 +101,7 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
             return cachedModel.get();
         }
 
-        Collection<LookupResult> models = (modelName == null) ?
+        Collection<ResolvedModel<?>> models = (modelName == null) ?
                 this.registry.lookupMostSpecificModels(resource) :
                 this.registry.lookupMostSpecificModels(resource, modelName);
 
@@ -110,23 +110,21 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
             return null;
         }
 
-        LookupResult lookupResult = models.iterator().next();
-        if (!includeBaseTypes && isMappedFromGenericBaseType(lookupResult)) {
+        @SuppressWarnings("unchecked")
+        ResolvedModel<T> resolvedModel = (ResolvedModel<T>) models.iterator().next();
+        if (!includeBaseTypes && isMappedFromGenericBaseType(resolvedModel)) {
             this.caches.store(resource, key, empty());
             return null;
         }
 
-        @SuppressWarnings("unchecked")
-        OsgiModelSource<T> source = (OsgiModelSource<T>) lookupResult.getSource();
-
-        T model = this.mapper.map(resource, source);
+        T model = this.mapper.map(resource, resolvedModel);
         this.caches.store(resource, key, of(model));
 
         return model;
     }
 
-    private boolean isMappedFromGenericBaseType(LookupResult lookupResult) {
-        final String resourceType = lookupResult.getResourceType();
+    private boolean isMappedFromGenericBaseType(ResolvedModel resolvedModel) {
+        final String resourceType = resolvedModel.getResolvedResourceType();
 
         return "nt:unstructured".equals(resourceType) ||
                 "nt:base".equals(resourceType) ||

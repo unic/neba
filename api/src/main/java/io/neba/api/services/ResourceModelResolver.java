@@ -39,7 +39,7 @@ public interface ResourceModelResolver {
     /**
      * @param resource must not be <code>null</code>.
      * @return the most specific model for the given resource, or <code>null</code> if
-     * there is no unique most specific model. Models for base types such as nt:usntructured
+     * there is no unique most specific model. Models for base types such as nt:unstructured
      * or nt:base are not considered.
      */
     @CheckForNull
