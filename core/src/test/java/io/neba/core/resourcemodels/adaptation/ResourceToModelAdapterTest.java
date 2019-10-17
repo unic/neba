@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.adaptation;
 
-import io.neba.core.resourcemodels.caching.ResourceModelCaches;
+import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
@@ -77,7 +77,7 @@ public class ResourceToModelAdapterTest {
     private ResourceResolver resourceResolver;
 
     @Mock
-    private ResourceModelCaches caches;
+    private RequestScopedResourceModelCache cache;
     private Map<Key, Object> testCache = new HashMap<>();
 
     private Class<?> targetType;
@@ -99,12 +99,12 @@ public class ResourceToModelAdapterTest {
         lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
-                .when(this.caches)
-                .store(isA(Resource.class), isA(Key.class), any());
+                .when(this.cache)
+                .put(isA(Resource.class), isA(Key.class), any());
 
         doAnswer(lookupFromCache)
-                .when(this.caches)
-                .lookup(isA(Resource.class), isA(Key.class));
+                .when(this.cache)
+                .get(isA(Resource.class), isA(Key.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
     }

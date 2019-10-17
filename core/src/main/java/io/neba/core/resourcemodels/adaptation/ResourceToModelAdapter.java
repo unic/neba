@@ -16,11 +16,11 @@
 
 package io.neba.core.resourcemodels.adaptation;
 
-import io.neba.core.resourcemodels.caching.ResourceModelCaches;
+import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
-import io.neba.core.util.ResolvedModel;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
+import io.neba.core.util.ResolvedModel;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
-import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static io.neba.core.util.Key.key;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -49,7 +49,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
     @Reference
     private ResourceToModelMapper mapper;
     @Reference
-    private ResourceModelCaches caches;
+    private RequestScopedResourceModelCache cache;
 
     /**
      * @return the resource model provided by the
@@ -67,7 +67,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
         Resource resource = (Resource) adaptable;
         final Key key = key(target);
 
-        Optional<T> cachedModel = this.caches.lookup(resource, key);
+        Optional<T> cachedModel = this.cache.get(resource, key);
 
         // A null model signals that we have not mapped the specific resource before and do not know whether it can be mapped.
         // Resolve and map it, if present.
@@ -76,7 +76,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
             if (models == null || models.isEmpty()) {
                 // Cache the lookup failure
-                this.caches.store(resource, key, empty());
+                this.cache.put(resource, key, empty());
                 return null;
             }
 
@@ -87,7 +87,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
             T model = (T) this.mapper.map(resource, models.iterator().next());
 
-            this.caches.store(resource, key, of(model));
+            this.cache.put(resource, key, of(model));
 
             return model;
         }

@@ -17,7 +17,7 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.services.ResourceModelResolver;
-import io.neba.core.resourcemodels.caching.ResourceModelCaches;
+import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.util.Key;
 import io.neba.core.util.ResolvedModel;
@@ -31,7 +31,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
-import static io.neba.core.resourcemodels.caching.ResourceModelCaches.key;
+import static io.neba.core.util.Key.key;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -54,7 +54,7 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
     @Reference
     private ResourceToModelMapper mapper;
     @Reference
-    private ResourceModelCaches caches;
+    private RequestScopedResourceModelCache cache;
 
     /**
      * {@inheritDoc}
@@ -92,7 +92,7 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
     private <T> T resolveMostSpecificModelForResource(@Nonnull Resource resource, boolean includeBaseTypes, @Nullable String modelName) {
         final Key key = key(includeBaseTypes, modelName);
 
-        Optional<T> cachedModel = this.caches.lookup(resource, key);
+        Optional<T> cachedModel = this.cache.get(resource, key);
         if (cachedModel == empty()) {
             return null;
         }
@@ -106,19 +106,19 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
                 this.registry.lookupMostSpecificModels(resource, modelName);
 
         if (models == null || models.size() != 1) {
-            this.caches.store(resource, key, empty());
+            this.cache.put(resource, key, empty());
             return null;
         }
 
         @SuppressWarnings("unchecked")
         ResolvedModel<T> resolvedModel = (ResolvedModel<T>) models.iterator().next();
         if (!includeBaseTypes && isMappedFromGenericBaseType(resolvedModel)) {
-            this.caches.store(resource, key, empty());
+            this.cache.put(resource, key, empty());
             return null;
         }
 
         T model = this.mapper.map(resource, resolvedModel);
-        this.caches.store(resource, key, of(model));
+        this.cache.put(resource, key, of(model));
 
         return model;
     }
