@@ -24,22 +24,36 @@ import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithInval
 import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModelWithUnsupportedCollectionTypes;
 import org.apache.sling.api.resource.Resource;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import static io.neba.core.util.ReflectionUtil.findField;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Olaf Otto
  */
+@RunWith(MockitoJUnitRunner.class)
 public class MappedFieldMetaDataTest {
-	private Class<?> modelType = TestResourceModel.class;
+    @Mock
+    private Callable<Object> callbackForLazyLoading;
+    private Object lazyLoadingProxy;
 
-	private MappedFieldMetaData testee;
+    private Class<?> modelType = TestResourceModel.class;
+
+    private MappedFieldMetaData testee;
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullField() {
@@ -266,6 +280,20 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
+    public void testLazyLoadingIsCallbackIsCalledExactlyOnce() throws Exception {
+        createMetadataForTestModelFieldWithName("childrenAsResources");
+        createLazyLoadingProxy();
+        assertLazyLoadingProxyHasType(List.class);
+        withListReturnedFromLazyLoadingCallback();
+
+        ((List) this.lazyLoadingProxy).isEmpty();
+        assertLazyLoadingCallbackWasCalledExactlyOnceDuringTestExecution();
+
+        ((List) this.lazyLoadingProxy).size();
+        assertLazyLoadingCallbackWasCalledExactlyOnceDuringTestExecution();
+    }
+
+    @Test
     public void testResolutionOfArrayComponentType() {
         createMetadataForTestModelFieldWithName("collectionOfStrings");
         assertArrayTypeOfComponentTypeIs(String[].class);
@@ -316,12 +344,28 @@ public class MappedFieldMetaDataTest {
                 .contains(Reference.class);
     }
 
+    private void assertLazyLoadingCallbackWasCalledExactlyOnceDuringTestExecution() throws Exception {
+        verify(this.callbackForLazyLoading, times(1)).call();
+    }
+
+    private void withListReturnedFromLazyLoadingCallback() throws Exception {
+        doReturn(new ArrayList<>()).when(this.callbackForLazyLoading).call();
+    }
+
+    private void assertLazyLoadingProxyHasType(Class<List> expectedType) {
+        assertThat(this.lazyLoadingProxy).isInstanceOf(expectedType);
+    }
+
+    private void createLazyLoadingProxy() {
+        this.lazyLoadingProxy = this.testee.getLazyLoadingProxy(this.callbackForLazyLoading);
+    }
+
     private void assertFieldTypeIs(Class<?> type) {
         assertThat(this.testee.getType()).isEqualTo(type);
     }
 
     private void assertLazyLoadingCollectionFactoryIsCreated() {
-        assertThat(this.testee.getCollectionProxyFactory()).isNotNull();
+        assertThat(this.testee.getLazyLoadingProxy(mock(Callable.class))).isNotNull();
     }
 
     private void assertLazyFieldIsDetected() {

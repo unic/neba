@@ -25,8 +25,6 @@ import io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.Annotations;
 import io.neba.core.util.ResourcePaths;
-import net.sf.cglib.proxy.Factory;
-import net.sf.cglib.proxy.LazyLoader;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.SyntheticResource;
@@ -47,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.Callable;
 
 import static io.neba.api.spi.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
@@ -80,8 +79,6 @@ public class FieldValueMappingCallbackTest {
     @Mock
     private MappedFieldMetaData mappedFieldMetadata;
     @Mock
-    private Factory lazyLoadingCollectionFactory;
-    @Mock
     private AnnotatedFieldMappers annotatedFieldMappers;
     @Mock
     private AnnotatedFieldMapper annotatedFieldMapper;
@@ -89,9 +86,6 @@ public class FieldValueMappingCallbackTest {
     private PlaceholderVariableResolvers placeholderVariableResolvers;
     @Mock
     private ResourcePaths.ResourcePath path;
-
-    private LazyLoader lazyLoadingCollectionCallback;
-
     private Resource resource;
     private Resource parentOfResourceTargetedByMapping;
     private Resource resourceTargetedByMapping;
@@ -109,22 +103,13 @@ public class FieldValueMappingCallbackTest {
     private OngoingMapping<?, ?> ongoingMapping;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         withMappedField("mappedFieldOfTypeObject");
         withResource(mock(Resource.class));
-
-        Answer<Object> loadImmediately = invocationOnMock -> {
-            lazyLoadingCollectionCallback = (LazyLoader) invocationOnMock.getArguments()[0];
-            return lazyLoadingCollectionCallback.loadObject();
-        };
-        doAnswer(loadImmediately)
-                .when(lazyLoadingCollectionFactory)
-                .newInstance(isA(LazyLoader.class));
-
-        doReturn(lazyLoadingCollectionFactory)
+        doAnswer((Answer<Object>) inv -> ((Callable<Object>) inv.getArguments()[0]).call())
                 .when(this.mappedFieldMetadata)
-                .getCollectionProxyFactory();
-
+                .getLazyLoadingProxy(isA(Callable.class));
         doReturn(emptyList()).when(this.annotatedFieldMappers).get(isA(MappedFieldMetaData.class));
         doReturn(this.path).when(this.mappedFieldMetadata).getPath();
     }
@@ -1689,11 +1674,11 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void assertNoLazyLoadingProxyIsCreated() {
-        verify(this.lazyLoadingCollectionFactory, never()).newInstance(isA(LazyLoader.class));
+        verify(this.mappedFieldMetadata, never()).getLazyLoadingProxy(any());
     }
 
     private void assertLazyLoadingProxyIsCreated() {
-        verify(this.lazyLoadingCollectionFactory).newInstance(isA(LazyLoader.class));
+        verify(this.mappedFieldMetadata).getLazyLoadingProxy(isA(Callable.class));
     }
 
     @SuppressWarnings("unchecked")

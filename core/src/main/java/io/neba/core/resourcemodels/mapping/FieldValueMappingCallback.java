@@ -23,7 +23,6 @@ import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.util.PrimitiveSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
 import io.neba.core.util.ResourcePaths;
-import net.sf.cglib.proxy.LazyLoader;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
 
@@ -35,6 +34,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
@@ -114,7 +115,7 @@ public class FieldValueMappingCallback {
 
         if (metaData.isLazy()) {
             // Lazy fields are never null, regardless of whether a value is mappable.
-            Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : java.util.Optional::empty;
+            Lazy<Object> lazy = isMappable ? new LazyFieldValue(fieldData, this) : LazyFieldValue.EMPTY;
             setField(metaData, lazy);
             return;
         }
@@ -230,7 +231,7 @@ public class FieldValueMappingCallback {
             return loadChildren(field);
         } else {
             // Create a lazy loading proxy for the collection
-            return (Collection<?>) field.metaData.getCollectionProxyFactory().newInstance(new LazyChildrenLoader(field, this));
+            return (Collection<?>) field.metaData.getLazyLoadingProxy(new LazyChildrenLoader(field, this));
         }
     }
 
@@ -328,7 +329,7 @@ public class FieldValueMappingCallback {
         }
         // Create a lazy loading proxy for the collection
         @SuppressWarnings("unchecked")
-        Collection<Object> result = (Collection<Object>) field.metaData.getCollectionProxyFactory().newInstance(new LazyReferencesLoader(field, paths, this));
+        Collection<Object> result = (Collection<Object>) field.metaData.getLazyLoadingProxy(new LazyReferencesLoader(field, paths, this));
         return result;
     }
 
@@ -340,7 +341,7 @@ public class FieldValueMappingCallback {
      * @param paths relative or absolute paths to resources.
      * @return never <code>null</code> but rather an empty collection.
      */
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings("unchecked")
     private Collection<Object> loadReferences(FieldData field, String[] paths) {
         final Class<Collection<Object>> collectionType = (Class<Collection<Object>>) field.metaData.getType();
         final Collection<Object> values = instantiateCollectionType(collectionType, paths.length);
@@ -582,6 +583,14 @@ public class FieldValueMappingCallback {
      * @author Olaf Otto
      */
     private static class LazyFieldValue implements Lazy<Object> {
+        static Lazy<Object> EMPTY = new Lazy<Object>() {
+            @Nonnull
+            @Override
+            public Optional<Object> asOptional() {
+                return Optional.empty();
+            }
+        };
+
         private static final Object NULL = new Object();
 
         private final FieldData fieldData;
@@ -624,7 +633,7 @@ public class FieldValueMappingCallback {
      * @author Olaf Otto
      * @see #resolveChildren(FieldData)
      */
-    private static class LazyChildrenLoader implements LazyLoader {
+    private static class LazyChildrenLoader implements Callable<Object> {
         private final FieldData field;
         private final FieldValueMappingCallback mapper;
 
@@ -633,8 +642,9 @@ public class FieldValueMappingCallback {
             this.mapper = callback;
         }
 
+        @Nonnull
         @Override
-        public Object loadObject() {
+        public Object call() {
             return this.mapper.loadChildren(field);
         }
     }
@@ -645,7 +655,7 @@ public class FieldValueMappingCallback {
      * @author Olaf Otto
      * @see #createCollectionOfReferences(io.neba.core.resourcemodels.mapping.FieldValueMappingCallback.FieldData, String[])
      */
-    private static class LazyReferencesLoader implements LazyLoader {
+    private static class LazyReferencesLoader implements Callable<Object> {
         private final FieldData field;
         private final String[] paths;
         private final FieldValueMappingCallback callback;
@@ -657,7 +667,8 @@ public class FieldValueMappingCallback {
         }
 
         @Override
-        public Object loadObject() {
+        @Nonnull
+        public Object call() {
             return this.callback.loadReferences(field, paths);
         }
     }
