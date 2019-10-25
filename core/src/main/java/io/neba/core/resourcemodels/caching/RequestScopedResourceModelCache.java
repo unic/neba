@@ -52,7 +52,7 @@ import static org.osgi.framework.Constants.SERVICE_VENDOR;
  * @author Olaf Otto
  */
 @Component(
-        service = {Filter.class},
+        service = {Filter.class, RequestScopedResourceModelCache.class},
         property = {
                 SERVICE_VENDOR + "=neba.io",
                 "sling.filter.scope=REQUEST",

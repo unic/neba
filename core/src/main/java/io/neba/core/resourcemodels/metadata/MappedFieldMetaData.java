@@ -24,23 +24,29 @@ import io.neba.api.resourcemodels.Lazy;
 import io.neba.core.util.Annotations;
 import io.neba.core.util.ReflectionUtil;
 import io.neba.core.util.ResourcePaths;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.Factory;
-import net.sf.cglib.proxy.LazyLoader;
+import net.bytebuddy.ByteBuddy;
 import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.Callable;
 
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
 import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static io.neba.core.util.ReflectionUtil.makeAccessible;
 import static io.neba.core.util.ResourcePaths.path;
+import static net.bytebuddy.description.modifier.Visibility.PRIVATE;
+import static net.bytebuddy.implementation.FieldAccessor.ofField;
+import static net.bytebuddy.implementation.InvocationHandlerAdapter.toField;
+import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
+import static net.bytebuddy.matcher.ElementMatchers.not;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -87,7 +93,7 @@ public class MappedFieldMetaData {
     private final Type genericFieldType;
     private final Class<?> fieldType;
     private final Class<?> modelType;
-    private final Factory collectionProxyFactory;
+    private final Class<? extends NebaDelegatingLazyLoadingProxy> collectionProxyFactory;
 
     /**
      * Immediately extracts all metadata for the provided field.
@@ -148,20 +154,38 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * Prepares a proxy instance of a collection type for use as a {@link Factory}.
-     * Proxy instances are always {@link Factory factories}.
-     * Using {@link Factory#newInstance(net.sf.cglib.proxy.Callback)}
-     * is significantly more efficient than using {@link Enhancer#create(Class, net.sf.cglib.proxy.Callback)}.
+     * If the field type is eligible for automated lazy-loading, prepare a proxy class for the field type that delegates
+     * all method calls to the {@link NebaLazyLoadingHandler}. To associate this handler with instances of the generated proxy class,
+     * a special field and interface are provided to allow injection of the handlers into the instances. The infrastructure interfaces must
+     * be public as ByteBuddy enhances a publicly visible type and adding inaccessible interfaces to it would break any reflective action
+     * occurring outside of the private namespace of the interfaces.
      */
-    private Factory prepareProxyFactoryForCollectionTypes() {
+    @SuppressWarnings("unchecked")
+    private Class<? extends NebaDelegatingLazyLoadingProxy> prepareProxyFactoryForCollectionTypes() {
         if (this.isInstantiableCollectionType) {
-            return (Factory) Enhancer.create(this.fieldType, (LazyLoader) () -> null);
+            return (Class<? extends NebaDelegatingLazyLoadingProxy>) new ByteBuddy()
+                    .subclass(this.fieldType)
+                    .defineField("__neba__lazyLoading_handler", InvocationHandler.class, PRIVATE)
+                    .implement(NebaDelegatingLazyLoadingProxy.class)
+                    .intercept(ofField("__neba__lazyLoading_handler"))
+                    .method(not(isDeclaredBy(NebaDelegatingLazyLoadingProxy.class)))
+                    .intercept(toField("__neba__lazyLoading_handler"))
+                    .make()
+                    .load(getClass().getClassLoader())
+                    .getLoaded();
         }
         return null;
     }
 
-    public Factory getCollectionProxyFactory() {
-        return this.collectionProxyFactory;
+    public Object getLazyLoadingProxy(Callable<?> valueFactory) {
+        NebaDelegatingLazyLoadingProxy proxy;
+        try {
+            proxy = this.collectionProxyFactory.newInstance();
+        } catch (Exception e) {
+            throw new IllegalStateException("Unable to instantiate a lazy loading proxy for field type " + this.fieldType + ".", e);
+        }
+        proxy.setHandler(new NebaLazyLoadingHandler(valueFactory));
+        return proxy;
     }
 
     private String getAppendPathFromReference() {
@@ -412,6 +436,32 @@ public class MappedFieldMetaData {
     @Override
     public String toString() {
         return getClass().getName() + " [" + this.field + "]";
+    }
+
+    public interface NebaDelegatingLazyLoadingProxy {
+        void setHandler(final InvocationHandler handler);
+    }
+
+    /**
+     * A simple lazy loader that will obtain a value from a provided {@link Callable} at most once,
+     * and retain the {@link Callable#call() obtained value} in an instance field.
+     */
+    private static class NebaLazyLoadingHandler implements InvocationHandler {
+        static final Object UNSET = new Object();
+        private final Callable<?> factory;
+        private Object target = UNSET;
+
+        private NebaLazyLoadingHandler(final Callable<?> factory) {
+            this.factory = factory;
+        }
+
+        @Override
+        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+            if (target == UNSET) {
+                target = factory.call();
+            }
+            return method.invoke(target, args);
+        }
     }
 
 }
