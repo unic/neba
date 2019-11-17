@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static java.lang.Boolean.parseBoolean;
 import static java.util.Arrays.stream;
 
 /**
@@ -65,14 +66,14 @@ class Jackson2ModelSerializer {
                         if (setting[0].startsWith(SERIALIZATION_PREFIX)) {
                             String enumName = setting[0].substring(SERIALIZATION_PREFIX.length());
                             SerializationFeature feature = SerializationFeature.valueOf(enumName);
-                            mapper.configure(feature, Boolean.valueOf(setting[1]));
+                            mapper.configure(feature, parseBoolean(setting[1]));
                             return;
                         }
 
                         if (setting[0].startsWith(MAPPER_PREFIX)) {
                             String enumName = setting[0].substring(MAPPER_PREFIX.length());
                             MapperFeature feature = MapperFeature.valueOf(enumName);
-                            mapper.configure(feature, Boolean.valueOf(setting[1]));
+                            mapper.configure(feature, parseBoolean(setting[1]));
                         }
                     } catch (Exception e) {
                         logger.error("Invalid Jackson configuration {}, ignoring.", (Object) setting);
