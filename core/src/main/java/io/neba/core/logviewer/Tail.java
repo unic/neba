@@ -149,7 +149,7 @@ public class Tail implements Runnable {
         }
     }
 
-    public void stop() {
+    void stop() {
         this.stopped = true;
     }
 }

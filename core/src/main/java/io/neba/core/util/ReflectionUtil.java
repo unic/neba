@@ -187,11 +187,9 @@ public final class ReflectionUtil {
     }
 
     /**
-     * Rerturns the {@link Class#getDeclaredFields() declared field} with the given name.
-     *
      * @param type must not be <code>null</code>.
      * @param name must not be <code>null</code>.
-     * @return the field, or <code>null</code>
+     * @return the {@link Class#getDeclaredFields() declared field} with the given name, or <code>null</code>
      */
     public static Field findField(Class<?> type, String name) {
         if (type == null) {

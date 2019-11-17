@@ -67,13 +67,11 @@ public class LogFiles {
     @Reference
     private ConfigurationAdmin configurationAdmin;
 
-    private BundleContext context;
     private File slingHomeDirectory;
 
     @Activate
     protected void activate(BundleContext context) {
-        this.context = context;
-        this.slingHomeDirectory = new File(this.context.getProperty("sling.home"));
+        this.slingHomeDirectory = new File(context.getProperty("sling.home"));
     }
 
     private File getLogfileDirectory() throws IOException {
@@ -105,12 +103,9 @@ public class LogFiles {
         return logFile.getCanonicalFile();
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<File> resolveLogFiles() throws IOException {
+    Collection<File> resolveLogFiles() throws IOException {
         File logDir = getLogfileDirectory();
-        Collection<File> logFiles = new TreeSet<>((o1, o2) -> {
-            return o1.getPath().compareToIgnoreCase(o2.getPath());
-        });
+        Collection<File> logFiles = new TreeSet<>((o1, o2) -> o1.getPath().compareToIgnoreCase(o2.getPath()));
 
         if (logDir == null) {
             // No configured log file directory exists, assume the default

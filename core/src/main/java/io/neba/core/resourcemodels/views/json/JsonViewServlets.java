@@ -52,6 +52,7 @@ import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
 public class JsonViewServlets extends SlingAllMethodsServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonViewServlets.class);
     private static final Pattern EXPECTED_MODEL_NAME = compile("[A-z0-9_\\-#]+");
+    private static final long serialVersionUID = -7762218328479266916L;
 
     @Reference
     private ResourceModelResolver modelResolver;

@@ -19,6 +19,7 @@ package io.neba.core.util;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
+import javax.annotation.Nonnull;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import java.util.Iterator;
@@ -135,6 +136,7 @@ public class ResourceTypeHierarchyIterator implements Iterator<String>, Iterable
     }
 
     @Override
+    @Nonnull
     public Iterator<String> iterator() {
         return this;
     }

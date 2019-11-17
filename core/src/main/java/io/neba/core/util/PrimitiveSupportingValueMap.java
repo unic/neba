@@ -16,11 +16,12 @@
 
 package io.neba.core.util;
 
+import org.apache.sling.api.resource.ValueMap;
+
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import org.apache.sling.api.resource.ValueMap;
-
 
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 
@@ -28,7 +29,7 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
  * This {@link ValueMap} decorator converts primitive types passed to {@link #get(String, Class)} or
  * {@link #get(String, Object)} to their boxed equivalents prior to their retrieval from the
  * wrapped value map, as the standard value map does not support primitive type retrieval.
- * 
+ *
  * @author Olaf Otto
  */
 public class PrimitiveSupportingValueMap implements ValueMap {
@@ -42,24 +43,23 @@ public class PrimitiveSupportingValueMap implements ValueMap {
             throw new IllegalArgumentException("Method argument valueMap must not be null.");
         }
         this.map = valueMap;
-	}
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T> T get(String name, Class<T> type) {
+    @SuppressWarnings("unchecked")
+    public <T> T get(@Nonnull String name, @Nonnull Class<T> type) {
         if (name == null) {
             throw new IllegalArgumentException("Method argument name must not be null.");
         }
         if (type == null) {
             throw new IllegalArgumentException("Method argument type must not be null.");
         }
-        @SuppressWarnings("unchecked")
-		final Class<?> boxedType = primitiveToWrapper(type);
-		return (T) this.map.get(name, boxedType);
-	}
+        final Class<?> boxedType = primitiveToWrapper(type);
+        return (T) this.map.get(name, boxedType);
+    }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T get(String name, T defaultValue) {
+    public <T> T get(@Nonnull String name, T defaultValue) {
         if (name == null) {
             throw new IllegalArgumentException("Method argument name must not be null.");
         }
@@ -69,7 +69,7 @@ public class PrimitiveSupportingValueMap implements ValueMap {
 
         T t = (T) get(name, defaultValue.getClass());
 
-        return t == null? defaultValue : t;
+        return t == null ? defaultValue : t;
     }
 
     @Override
@@ -112,7 +112,7 @@ public class PrimitiveSupportingValueMap implements ValueMap {
     }
 
     @Override
-    public void putAll(Map<? extends String, ?> m) {
+    public void putAll(@Nonnull Map<? extends String, ?> m) {
         throw new UnsupportedOperationException();
     }
 
@@ -122,16 +122,19 @@ public class PrimitiveSupportingValueMap implements ValueMap {
     }
 
     @Override
+    @Nonnull
     public Set<String> keySet() {
         return this.map.keySet();
     }
 
     @Override
+    @Nonnull
     public Collection<Object> values() {
         return this.map.values();
     }
 
     @Override
+    @Nonnull
     public Set<Entry<String, Object>> entrySet() {
         return this.map.entrySet();
     }

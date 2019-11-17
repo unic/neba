@@ -62,7 +62,6 @@ public class NestedMappingSupport {
             throw new IllegalArgumentException("Method argument mapping must not be null");
         }
         MappingStack mappingStack = this.mappingStack.get();
-        @SuppressWarnings("unchecked")
         Mapping<T> alreadyExistingMapping = mappingStack.get(mapping);
         if (alreadyExistingMapping == null) {
             mappingStack.push(mapping);
@@ -145,7 +144,7 @@ public class NestedMappingSupport {
 
         private Entry<?> tail = null;
 
-        public MappingStack(Map<Object, Mapping<?>> recordedMappings) {
+        MappingStack(Map<Object, Mapping<?>> recordedMappings) {
             this.recordedMappings = recordedMappings;
         }
 

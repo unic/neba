@@ -19,6 +19,8 @@ package io.neba.core.resourcemodels.factory;
  * Represents a failed attempt to instantiate a class annotated with {@link io.neba.api.annotations.ResourceModel}.
  */
 class ModelInstantiationException extends RuntimeException {
+    private static final long serialVersionUID = -5992590592581970733L;
+
     ModelInstantiationException(String message, Exception cause) {
         super(message, cause);
     }

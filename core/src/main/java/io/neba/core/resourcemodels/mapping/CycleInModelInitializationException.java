@@ -24,6 +24,8 @@ package io.neba.core.resourcemodels.mapping;
  * @author Olaf Otto
  */
 class CycleInModelInitializationException extends RuntimeException {
+    private static final long serialVersionUID = 3499210950311814181L;
+
     CycleInModelInitializationException(String message) {
         super(message);
     }

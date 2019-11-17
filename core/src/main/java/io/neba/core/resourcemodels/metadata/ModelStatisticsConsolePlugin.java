@@ -193,7 +193,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
 
     @Override
     protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        writeHeadnavigation(res);
+        writeHeadNavigation(res);
         writeBody(res);
     }
 
@@ -206,7 +206,7 @@ public class ModelStatisticsConsolePlugin extends AbstractWebConsolePlugin {
         return url;
     }
 
-    private void writeHeadnavigation(HttpServletResponse response) throws IOException {
+    private void writeHeadNavigation(HttpServletResponse response) throws IOException {
         int numberOfModelsWithInstantiations = 0;
         double highestAverageMappingDuration = 0D;
         int highestNumberOfFields = 0;

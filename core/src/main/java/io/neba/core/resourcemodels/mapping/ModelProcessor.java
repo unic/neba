@@ -29,7 +29,7 @@ import static io.neba.core.util.ReflectionUtil.makeAccessible;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Invokes the {@link io.neba.core.resourcemodels.metadata.MethodMetaData#isAfterMappingCallback post-mapping methods}
+ * Invokes the {@link ResourceModelMetaData#getAfterMappingMethods() post-mapping methods}
  * after the {@link io.neba.api.annotations.ResourceModel}'s mapping is complete.
  *
  * @author Olaf Otto

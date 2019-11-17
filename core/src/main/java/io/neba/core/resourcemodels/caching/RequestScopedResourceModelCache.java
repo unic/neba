@@ -75,8 +75,9 @@ public class RequestScopedResourceModelCache implements Filter {
 
     /**
      * Retrieve a cached model.
+     *
      * @param resource The resource {@link Resource#adaptTo(Class) adapted} to the target type. Never <code>null</code>.
-     * @param key The key used to identify the stored model. Never <code>null</code>.
+     * @param key      The key used to identify the stored model. Never <code>null</code>.
      * @return The cached model, or <code>null</code>.
      */
     @CheckForNull
@@ -215,9 +216,5 @@ public class RequestScopedResourceModelCache implements Filter {
                         "enabling this feature is likely to a significant negative performance impact. It is highly recommended to disable " +
                         "safemode in favor of safe-to-cache @ResourceModels.")
         boolean safeMode() default false;
-    }
-
-    private <T> Key key(Resource resource, Key key) {
-        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
     }
 }

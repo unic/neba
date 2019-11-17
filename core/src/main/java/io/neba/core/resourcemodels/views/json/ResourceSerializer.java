@@ -29,6 +29,7 @@ import java.io.IOException;
  * {@link Resource#getPath() resource path}.
  */
 public class ResourceSerializer extends StdSerializer<Resource> {
+    private static final long serialVersionUID = 4688482182504067337L;
 
     ResourceSerializer() {
         super(Resource.class);

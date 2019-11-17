@@ -29,6 +29,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 @Component(service = TailServlet.class)
 public class TailServlet extends WebSocketServlet {
+    private static final long serialVersionUID = 1326193543519605309L;
+
     @Reference
     private LogFiles logFiles;
 

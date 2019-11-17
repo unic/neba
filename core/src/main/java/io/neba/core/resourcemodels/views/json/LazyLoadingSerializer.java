@@ -29,6 +29,8 @@ import java.io.IOException;
  * when a model is serialized to JSON.
  */
 public class LazyLoadingSerializer extends StdSerializer<Lazy> {
+    private static final long serialVersionUID = -4291272104765126426L;
+
     LazyLoadingSerializer() {
         super(Lazy.class);
     }

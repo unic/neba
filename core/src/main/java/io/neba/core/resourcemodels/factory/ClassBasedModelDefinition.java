@@ -28,7 +28,7 @@ import static java.lang.Character.toLowerCase;
 class ClassBasedModelDefinition implements ResourceModelFactory.ModelDefinition {
     private final Class<?> c;
 
-    public ClassBasedModelDefinition(Class<?> c) {
+    ClassBasedModelDefinition(Class<?> c) {
         this.c = c;
     }
 

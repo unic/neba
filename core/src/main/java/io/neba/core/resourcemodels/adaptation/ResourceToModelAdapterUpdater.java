@@ -162,7 +162,6 @@ public class ResourceToModelAdapterUpdater {
      * @see org.apache.commons.lang3.ClassUtils#getAllInterfaces(Class)
      * @see org.apache.commons.lang3.ClassUtils#getAllSuperclasses(Class)
      */
-    @SuppressWarnings("unchecked")
     private Set<String> getAdapterTypeNames() {
         List<OsgiModelSource<?>> modelSources = this.registry.getModelSources();
         Set<String> modelNames = new HashSet<>();

@@ -20,6 +20,8 @@ package io.neba.core.resourcemodels.factory;
  * as ambiguous or missing constructors.
  */
 class InvalidModelException extends RuntimeException {
+    private static final long serialVersionUID = 8114381951265537980L;
+
     InvalidModelException(String message) {
         super(message);
     }

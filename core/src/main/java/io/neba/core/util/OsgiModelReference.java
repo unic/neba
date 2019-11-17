@@ -45,10 +45,6 @@ public class OsgiModelReference<T> {
         return model;
     }
 
-    public long getBundleId() {
-        return bundleId;
-    }
-
     @Override
     public int hashCode() {
         return this.hashCode;

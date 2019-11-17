@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.registration;
 
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 import javax.jcr.Node;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.sling.api.resource.Resource;
@@ -52,6 +53,7 @@ public class MappableTypeHierarchy implements Iterable<String> {
     }
     
     @Override
+    @Nonnull
     @SuppressWarnings("unchecked")
     public Iterator<String> iterator() {
         Iterator<String> it;

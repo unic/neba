@@ -85,7 +85,6 @@ class ModelFactory implements ResourceModelFactory {
         return this.modelDefinitions;
     }
 
-    @SuppressWarnings("unchecked")
     private Optional<Enumeration<URL>> findClassesInDirectory(String directory) {
         return ofNullable(bundle.findEntries(directory, "*.class", true));
     }

@@ -58,7 +58,7 @@ public class ResourceModelMetaData {
         }
 
         private MethodMetaData[] getAfterMappingMethods() {
-            return this.afterMappingMethods.toArray(new MethodMetaData[this.afterMappingMethods.size()]);
+            return this.afterMappingMethods.toArray(new MethodMetaData[0]);
         }
     }
 
@@ -85,7 +85,7 @@ public class ResourceModelMetaData {
         }
 
         private MappedFieldMetaData[] getMappableFields() {
-            return this.mappableFields.toArray(new MappedFieldMetaData[this.mappableFields.size()]);
+            return this.mappableFields.toArray(new MappedFieldMetaData[0]);
         }
 
         /**

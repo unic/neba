@@ -47,6 +47,7 @@ import java.util.function.Supplier;
  * such as {@link Resource}.
  */
 class JsonViewSupport extends SimpleModule {
+    private static final long serialVersionUID = -4796305586109570374L;
     private final Supplier<Map<Object, Mapping<?>>> mappings;
     private final Configuration configuration;
 
@@ -76,6 +77,7 @@ class JsonViewSupport extends SimpleModule {
      * An augmented {@link BeanSerializer} that can add contextual data to a serialized bean representation.
      */
     private static class ResourceModelSerializer extends BeanSerializerBase {
+        private static final long serialVersionUID = -2810312324356307359L;
         private final Supplier<Map<Object, Mapping<?>>> mappings;
         private final Configuration configuration;
 

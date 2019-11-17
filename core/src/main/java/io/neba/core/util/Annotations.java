@@ -15,6 +15,7 @@
  */
 package io.neba.core.util;
 
+import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.HashMap;
@@ -131,6 +132,7 @@ public class Annotations implements Iterable<Annotation> {
     }
 
     @Override
+    @Nonnull
     public Iterator<Annotation> iterator() {
         return readOnly(getAnnotationMap().values().iterator());
     }
