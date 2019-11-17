@@ -16,6 +16,7 @@
 
 package io.neba.core.util;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -46,12 +47,12 @@ public class ClassHierarchyIterator implements Iterable<Class<?>>, Iterator<Clas
 
     private Queue<Class<?>> queue = new LinkedList<>();
     private Class<?> current;
-    private Class<?> next = null;
+    private Class<?> next;
 
     /**
      * @param type must not be <code>null</code>.
      */
-    public ClassHierarchyIterator(Class<?> type) {
+    private ClassHierarchyIterator(Class<?> type) {
         if (type == null) {
             throw new IllegalArgumentException("Constructor parameter type must not be null.");
         }
@@ -59,6 +60,7 @@ public class ClassHierarchyIterator implements Iterable<Class<?>>, Iterator<Clas
         this.next = current;
     }
 
+    @Nonnull
     public Iterator<Class<?>> iterator() {
         return this;
     }
