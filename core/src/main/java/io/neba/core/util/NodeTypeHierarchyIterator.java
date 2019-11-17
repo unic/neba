@@ -16,14 +16,14 @@
 
 package io.neba.core.util;
 
+import javax.annotation.Nonnull;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.nodetype.NodeType;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import javax.jcr.Node;
-import javax.jcr.RepositoryException;
-import javax.jcr.nodetype.NodeType;
-
 
 import static java.util.Arrays.asList;
 
@@ -50,7 +50,7 @@ public class NodeTypeHierarchyIterator implements Iterator<String>, Iterable<Str
 
     private final Queue<NodeType> queue = new LinkedList<>();
     private NodeType current;
-    private NodeType next = null;
+    private NodeType next;
 
     /**
      * @param node must not be <code>null</code>.
@@ -72,6 +72,7 @@ public class NodeTypeHierarchyIterator implements Iterator<String>, Iterable<Str
         }
     }
 
+    @Nonnull
     public Iterator<String> iterator() {
         return this;
     }
