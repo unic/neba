@@ -507,7 +507,7 @@ $(function () {
             match;
 
         while ((match = requestParameterPattern.exec(queryString)) !== null) {
-            opts[match[2]] = match[3];
+            opts[match[2]] = decodeURI(match[3]);
         }
 
         opts.amount && (parseFloat(opts.amount) > 0) && $amount.val(opts.amount) && Tail.updateScrollbackBufferSize();
