@@ -69,12 +69,12 @@ public class ClassBasedModelDefinitionTest {
         this.testee = new ClassBasedModelDefinition(c);
     }
 
-    @ResourceModel(types = "some/type")
+    @ResourceModel("some/type")
     private static class Model {
 
     }
 
-    @ResourceModel(types = "some/type")
+    @ResourceModel("some/type")
     private static class OtherModel {
 
     }

@@ -103,5 +103,17 @@ public @interface ResourceModel {
      * values for the type mapping. Example: "myapps/components/mycomponent",
      * "nt:base", "mix:versionable".
      */
-    String[] types();
+    String[] value();
+
+    /**
+     * @deprecated use {@link #value()} instead. This method will be removed in future versions of neba.
+     */
+    @Deprecated
+    String[] types() default {};
+
+    /**
+     * A user-defined name for the model. Views can lookup a model by name (see neba.js and {@link io.neba.api.services.ResourceModelResolver#resolveMostSpecificModelWithName(Resource, String)}),
+     * thus, decoupling a view from the models type. If not given, the model name is automatically derived from the model's type name.
+     */
+    String name() default "";
 }

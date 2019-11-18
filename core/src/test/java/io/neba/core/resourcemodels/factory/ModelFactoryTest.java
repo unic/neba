@@ -99,7 +99,7 @@ public class ModelFactoryTest {
         this.testee.getModelDefinitions().add(mock(ModelDefinition.class));
     }
 
-    @ResourceModel(types = "some/type")
+    @ResourceModel("some/type")
     public static class ModelClass {
     }
 

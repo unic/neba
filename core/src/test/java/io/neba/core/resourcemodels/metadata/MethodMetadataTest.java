@@ -74,7 +74,7 @@ public class MethodMetadataTest {
     /**
      * @author Olaf Otto
      */
-    @ResourceModel(types = "ignored/junit/test/type")
+    @ResourceModel("ignored/junit/test/type")
     public static class TestResourceModelWithLifecycleCallbacks {
         @AfterMapping
         public void afterMapping() {
