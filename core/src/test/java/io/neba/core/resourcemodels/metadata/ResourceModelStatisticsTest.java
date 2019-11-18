@@ -133,6 +133,16 @@ public class ResourceModelStatisticsTest {
     }
 
     @Test
+    public void testTotalMappingTimeCalculation() {
+        int[] durations = {290, 180, 290, 300, 300, 310, 330, 270, 270, 180, 330};
+        withDurations(durations);
+
+        // The total duration is not precise, at it is based on interval average,ut
+        // it ha a finite error given a sufficiently distributed data set.
+        assertThat(this.testee.getTotalMappingDuration()).isEqualTo(3840);
+    }
+
+    @Test
     public void testMappingCount() {
         withMappings(114);
         calculateNumberOfMappings();

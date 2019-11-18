@@ -210,7 +210,7 @@
                                 }
 
                                 if (v >= 1000000) return round(v / 1000000) + "m";
-                                if (v >= 10000) return round(v / 10000) + "k";
+                                if (v >= 10000) return round(v / 1000) + "k";
                                 return round(v);
                             }(numericValue);
 
