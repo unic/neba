@@ -128,7 +128,7 @@ public class NebaPackagesResourceModelFactoryInjectorTest {
         this.registeredListener.bundleChanged(new BundleEvent(STARTING, bundle));
     }
 
-    @ResourceModel(types = "some/model/type")
+    @ResourceModel("some/model/type")
     public static class TestModel {
     }
 }

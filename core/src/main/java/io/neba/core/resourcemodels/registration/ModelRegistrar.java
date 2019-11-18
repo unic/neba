@@ -31,6 +31,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.Collection;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
@@ -97,11 +98,20 @@ public class ModelRegistrar {
         modelDefinitions.forEach(d -> {
             final OsgiModelSource<Object> source = new OsgiModelSource<>(d, factory, bundle);
             this.resourceModelMetaDataRegistrar.register(source);
-            this.registry.add(d.getResourceModel().types(), source);
-            logger.debug("Registered model {} as a model for the resource types {}.", d.getName(), join(d.getResourceModel().types(), ","));
+            this.registry.add(getTypes(d), source);
+            logger.debug("Registered model {} as a model for the resource types {}.", d.getName(), join(getTypes(d), ","));
         });
 
         this.resourceToModelAdapterUpdater.refresh();
+    }
+
+    private String[] getTypes(ResourceModelFactory.ModelDefinition d) {
+        try {
+            return d.getResourceModel().value();
+        } catch (IncompleteAnnotationException e) {
+            logger.trace("Legacy annotation support: falling back to types() of {}.", d.getResourceModel(), e);
+            return d.getResourceModel().types();
+        }
     }
 
     private void unregister(Bundle bundle) {

@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.neba.core.util.ReflectionUtil.findField;
@@ -80,7 +81,6 @@ public class ReflectionUtilTest {
     }
 
     private static abstract class TestSuperClass {
-
         private String superClassField;
 
         private void superClassMethod() {
@@ -92,8 +92,7 @@ public class ReflectionUtilTest {
     }
 
     private static class TestClass extends TestSuperClass implements TestInterface {
-
-        public String testClassField;
+        private String testClassField;
 
         @Inject
         private void classMethod() {
@@ -149,6 +148,7 @@ public class ReflectionUtilTest {
     private Method method;
     private Class<?> typeParameter;
     private Object collectionInstance;
+    private Optional<Method> resolvedMethod;
     private Class<?> type = getClass();
 
     @Test(expected = IllegalArgumentException.class)
@@ -209,9 +209,9 @@ public class ReflectionUtilTest {
 
     @Test
     public void testDetectionOfInstantiableCollectionType() {
-        assertThat(isInstantiableCollectionType(Collection.class));
-        assertThat(isInstantiableCollectionType(Set.class));
-        assertThat(isInstantiableCollectionType(List.class));
+        assertThat(isInstantiableCollectionType(Collection.class)).isTrue();
+        assertThat(isInstantiableCollectionType(Set.class)).isTrue();
+        assertThat(isInstantiableCollectionType(List.class)).isTrue();
     }
 
     @Test
@@ -271,7 +271,7 @@ public class ReflectionUtilTest {
 
         makeMethodAccessible();
 
-        assertMethodWasMadeAccessbile();
+        assertMethodWasMadeAccessible();
     }
 
     @Test
@@ -322,7 +322,7 @@ public class ReflectionUtilTest {
 
         makeMethodAccessible();
 
-        assertMethodWasMadeAccessbile();
+        assertMethodWasMadeAccessible();
     }
 
     @Test
@@ -332,10 +332,10 @@ public class ReflectionUtilTest {
 
         makeMethodAccessible();
 
-        assertMethodWasMadeAccessbile();
+        assertMethodWasMadeAccessible();
     }
 
-    private void assertMethodWasMadeAccessbile() {
+    private void assertMethodWasMadeAccessible() {
         assertThat(method.isAccessible()).isTrue();
     }
 
