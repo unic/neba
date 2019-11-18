@@ -79,7 +79,10 @@ public class SpringModelRegistrar {
                                 @Override
                                 @Nonnull
                                 public String getName() {
-                                    return n;
+                                    if (model.name().isEmpty()) {
+                                        return n;
+                                    }
+                                    return model.name();
                                 }
 
                                 @Override

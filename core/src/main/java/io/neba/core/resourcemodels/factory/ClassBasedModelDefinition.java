@@ -41,7 +41,11 @@ class ClassBasedModelDefinition implements ResourceModelFactory.ModelDefinition 
     @Nonnull
     @Override
     public String getName() {
-        return toLowerCase(c.getSimpleName().charAt(0)) + c.getSimpleName().substring(1);
+        ResourceModel resourceModel = getResourceModel();
+        if (resourceModel.name().isEmpty()) {
+            return toLowerCase(c.getSimpleName().charAt(0)) + c.getSimpleName().substring(1);
+        }
+        return resourceModel.name();
     }
 
     @Nonnull

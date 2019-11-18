@@ -17,6 +17,8 @@
 package io.neba.api.annotations;
 
 
+import org.apache.sling.api.resource.Resource;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -104,4 +106,10 @@ public @interface ResourceModel {
      * "nt:base", "mix:versionable".
      */
     String[] types();
+
+    /**
+     * A user-defined name for the model. Views can lookup a model by name (see neba.js and {@link io.neba.api.services.ResourceModelResolver#resolveMostSpecificModelWithName(Resource, String)}),
+     * thus, decoupling a view from the models type. If not given, the model name is automatically derived from the model's type name.
+     */
+    String name() default "";
 }
