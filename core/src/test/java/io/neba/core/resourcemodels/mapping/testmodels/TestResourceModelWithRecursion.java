@@ -25,7 +25,7 @@ import io.neba.api.annotations.ResourceModel;
  * 
  * @author Olaf Otto
  */
-@ResourceModel(types = "ignored/junit/test/type")
+@ResourceModel("ignored/junit/test/type")
 public class TestResourceModelWithRecursion extends TestResourceModel {
     @Reference
     private TestResourceModelWithRecursion link;

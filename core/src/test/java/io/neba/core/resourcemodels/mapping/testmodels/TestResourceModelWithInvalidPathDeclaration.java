@@ -24,7 +24,7 @@ import io.neba.api.annotations.ResourceModel;
  * 
  * @author Olaf Otto
  */
-@ResourceModel(types = "ignored/junit/test/type")
+@ResourceModel("ignored/junit/test/type")
 public class TestResourceModelWithInvalidPathDeclaration extends TestResourceModel {
     @Path(" ")
     private String fieldWithInvalidPathAnnotation;

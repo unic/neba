@@ -16,7 +16,12 @@
 
 package io.neba.core.resourcemodels.mapping.testmodels;
 
-import io.neba.api.annotations.*;
+import io.neba.api.annotations.Children;
+import io.neba.api.annotations.Path;
+import io.neba.api.annotations.Reference;
+import io.neba.api.annotations.ResourceModel;
+import io.neba.api.annotations.This;
+import io.neba.api.annotations.Unmapped;
 import io.neba.api.resourcemodels.Lazy;
 import org.apache.sling.api.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +38,7 @@ import java.util.List;
  *
  * @author Olaf Otto
  */
-@ResourceModel(types = "ignored/junit/test/type")
+@ResourceModel("ignored/junit/test/type")
 public class TestResourceModel {
     private static String staticField;
     private final String finalField = "finalValue";

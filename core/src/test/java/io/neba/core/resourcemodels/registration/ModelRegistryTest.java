@@ -17,8 +17,8 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.core.util.ResolvedModel;
 import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResolvedModel;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -522,7 +522,7 @@ public class ModelRegistryTest {
 
     private void withResourceModel(String resourceType) {
         ResourceModel annotation = mock(ResourceModel.class);
-        when(annotation.types()).thenReturn(new String[] {resourceType});
+        when(annotation.value()).thenReturn(new String[] {resourceType});
         this.resourceModelAnnotations.add(annotation);
     }
 
@@ -548,7 +548,7 @@ public class ModelRegistryTest {
     
     private void assertRegistryFindsResourceModelsByResourceType() {
         for (ResourceModel resourceModel : this.resourceModelAnnotations) {
-            String resourceTypeName = resourceModel.types()[0];
+            String resourceTypeName = resourceModel.value()[0];
             Resource resource = mockResourceWithResourceType(resourceTypeName);
             Collection<ResolvedModel<?>> models = this.testee.lookupMostSpecificModels(resource);
             assertThat(models).hasSize(1);
@@ -557,7 +557,7 @@ public class ModelRegistryTest {
 
     private void assertRegistryFindsResourceModelsByResourceSupertype() {
         for (ResourceModel resourceModel : this.resourceModelAnnotations) {
-            String resourceTypeName = resourceModel.types()[0];
+            String resourceTypeName = resourceModel.value()[0];
             Resource resource = mockResourceWithSupertype(resourceTypeName);
             Collection<ResolvedModel<?>> models = this.testee.lookupMostSpecificModels(resource);
             assertThat(models).hasSize(1);
@@ -616,7 +616,7 @@ public class ModelRegistryTest {
         for (ResourceModel model : this.resourceModelAnnotations) {
             OsgiModelSource<?> source = mock(OsgiModelSource.class);
             when(source.getBundleId()).thenReturn(this.bundleId);
-            this.testee.add(model.types(), source);
+            this.testee.add(model.value(), source);
         }
     }
     
