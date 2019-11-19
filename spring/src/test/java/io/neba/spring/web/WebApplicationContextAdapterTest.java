@@ -15,8 +15,6 @@
 */
 package io.neba.spring.web;
 
-import java.lang.reflect.Method;
-import javax.servlet.ServletContext;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,12 +22,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 
+import javax.servlet.ServletContext;
+import java.lang.reflect.Method;
 
 import static java.util.Arrays.stream;
-import static org.apache.commons.lang3.StringUtils.join;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -48,7 +46,7 @@ public class WebApplicationContextAdapterTest {
 
     @Before
     public void setUp() {
-        ApplicationContext applicationContext = mock(ApplicationContext.class, (Answer) inv -> {
+        ApplicationContext applicationContext = mock(ApplicationContext.class, inv -> {
             lastInvocationOnWrappedContext = inv;
             return null;
         });
@@ -73,18 +71,18 @@ public class WebApplicationContextAdapterTest {
     }
 
     private String signatureOf(Method m) {
-        return  m.getName() + "(" + StringUtils.join(m.getParameterTypes(), ", ") + ")";
+        return m.getName() + "(" + StringUtils.join(m.getParameterTypes(), ", ") + ")";
     }
 
     private Object[] mockArgs(Method method) {
         return stream(method.getParameterTypes()).map(type -> {
-                    if (!type.isPrimitive()) {
-                        return null;
-                    }
-                    if (type == boolean.class) {
-                        return false;
-                    }
-                    throw new AssertionError("Unable to mock type " + type + ".");
-                }).toArray();
+            if (!type.isPrimitive()) {
+                return null;
+            }
+            if (type == boolean.class) {
+                return false;
+            }
+            throw new AssertionError("Unable to mock type " + type + ".");
+        }).toArray();
     }
 }
