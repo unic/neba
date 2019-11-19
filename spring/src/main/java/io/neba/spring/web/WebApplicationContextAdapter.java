@@ -103,6 +103,11 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     }
 
     @Override
+    public String[] getBeanNamesForType(ResolvableType resolvableType, boolean includeNonSingletons, boolean allowEagerInit) {
+        return wrapped.getBeanNamesForType(resolvableType, includeNonSingletons, allowEagerInit);
+    }
+
+    @Override
     public String[] getBeanNamesForType(Class<?> type) {
         return wrapped.getBeanNamesForType(type);
     }
@@ -200,6 +205,11 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     @Override
     public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
         return wrapped.getType(name);
+    }
+
+    @Override
+    public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+        return wrapped.getType(name, allowFactoryBeanInit);
     }
 
     @Override

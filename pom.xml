@@ -54,10 +54,10 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.1.8.RELEASE_1</spring.version>
+		<spring.version>5.2.0.RELEASE_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
-		<jackson.importVersionRange>[2.9,3)</jackson.importVersionRange>
+		<jackson.importVersionRange>[2.10,3)</jackson.importVersionRange>
 		<language.level>1.8</language.level>
 		<sling.url>http://localhost:4502/system/console</sling.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -373,7 +373,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.9.10.1</version>
+				<version>2.10.1</version>
 				<scope>provided</scope>
 			</dependency>
 
