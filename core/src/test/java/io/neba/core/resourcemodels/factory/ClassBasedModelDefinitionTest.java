@@ -53,6 +53,12 @@ public class ClassBasedModelDefinitionTest {
         assertThat(one.hashCode()).isNotEqualTo(two.hashCode());
     }
 
+    @Test
+    public void testModelNameSpecificationInResourceModelAnnotationIsPreferred() {
+        withClassBasedModelDefinition(NamedModel.class);
+        assertModelDefinitionHasName("userDefinedModelName");
+    }
+
     private void assertModelTypeIs(Class<Model> modelType) {
         assertThat(this.testee.getType()).isSameAs(modelType);
     }
@@ -65,7 +71,7 @@ public class ClassBasedModelDefinitionTest {
         assertThat(this.testee.getResourceModel()).isSameAs(Model.class.getAnnotation(ResourceModel.class));
     }
 
-    private void withClassBasedModelDefinition(Class<Model> c) {
+    private void withClassBasedModelDefinition(Class<?> c) {
         this.testee = new ClassBasedModelDefinition(c);
     }
 
@@ -77,5 +83,10 @@ public class ClassBasedModelDefinitionTest {
     @ResourceModel("some/type")
     private static class OtherModel {
 
+    }
+
+    @ResourceModel(value = "some/type", name = "userDefinedModelName")
+    private static class NamedModel {
+      
     }
 }

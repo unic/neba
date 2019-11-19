@@ -17,6 +17,8 @@
 package io.neba.api.annotations;
 
 
+import org.apache.sling.api.resource.Resource;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

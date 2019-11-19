@@ -64,15 +64,15 @@ public class SpringModelRegistrarTest {
         when(this.context.getBundle()).thenReturn(this.bundle);
         when(this.bundle.getBundleContext()).thenReturn(this.context);
 
-        doAnswer(i ->  {
+        doAnswer(i -> {
             publishedService = (ResourceModelFactory) i.getArguments()[1];
             serviceRegistration = mock(ServiceRegistration.class);
             return serviceRegistration;
         }).when(this.context)
-          .registerService(
-                  eq(ResourceModelFactory.class.getName()),
-                  isA(ResourceModelFactory.class),
-                  isA(Dictionary.class));
+                .registerService(
+                        eq(ResourceModelFactory.class.getName()),
+                        isA(ResourceModelFactory.class),
+                        isA(Dictionary.class));
     }
 
     @Test
@@ -104,6 +104,20 @@ public class SpringModelRegistrarTest {
         shutdown();
 
         assertRegistrarUnregistersModelFactory();
+    }
+
+    @Test
+    public void testUserDefinedModelNameOverridesBeanName() {
+        withBeanFactory();
+        withResourceModelWithBeanNameAndUserDefinedName("beanName", "userDefinedName");
+        registerResourceModels();
+
+        assertModelIsPublishedWithName("userDefinedName");
+    }
+
+    private void assertModelIsPublishedWithName(String name) {
+        assertThat(this.publishedService.getModelDefinitions()).hasSize(1);
+        assertThat(this.publishedService.getModelDefinitions().iterator().next().getName()).isEqualTo(name);
     }
 
     private void shutdown() {
@@ -138,8 +152,17 @@ public class SpringModelRegistrarTest {
 
     private void mockResourceModelWithBeanName(String name) {
         ResourceModel type = mock(ResourceModel.class);
+        when(type.name()).thenReturn("");
         when(this.factory.findAnnotationOnBean(eq(name), eq(ResourceModel.class))).thenReturn(type);
         this.beanNamesInApplicationContext.add(name);
+    }
+
+    private void withResourceModelWithBeanNameAndUserDefinedName(String beanName, String userDefinedName) {
+        when(this.factory.getBeanNamesForType(eq(Object.class))).thenReturn(new String[]{beanName});
+        ResourceModel type = mock(ResourceModel.class);
+        when(this.factory.findAnnotationOnBean(eq(beanName), eq(ResourceModel.class))).thenReturn(type);
+        when(type.name()).thenReturn(userDefinedName);
+        this.beanNamesInApplicationContext.add(beanName);
     }
 
     private void registerResourceModels() {
