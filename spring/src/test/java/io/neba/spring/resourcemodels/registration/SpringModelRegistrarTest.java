@@ -29,14 +29,18 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,6 +83,7 @@ public class SpringModelRegistrarTest {
     public void testModelRegistration() {
         withBeanFactory();
         withResourceModelsInApplicationContext("bean1", "bean2");
+        withResolvableModelType();
         registerResourceModels();
 
         assertAllModelsArePublishedViaModelFactory();
@@ -110,9 +115,45 @@ public class SpringModelRegistrarTest {
     public void testUserDefinedModelNameOverridesBeanName() {
         withBeanFactory();
         withResourceModelWithBeanNameAndUserDefinedName("beanName", "userDefinedName");
+        withResolvableModelType();
         registerResourceModels();
 
         assertModelIsPublishedWithName("userDefinedName");
+    }
+
+    @Test
+    public void testIncompleteAnnotationSupport() {
+        withBeanFactory();
+        withResourceModelsInApplicationContext("bean1", "bean2");
+        withIncompleteResourceModelAnnotation();
+        withResolvableModelType();
+        registerResourceModels();
+
+        assertAllModelsArePublishedViaModelFactory();
+    }
+
+    @Test
+    public void testModelBeansWithUnknownTypeAreSkipped() {
+        withBeanFactory();
+        withResourceModelsInApplicationContext("bean1", "bean2");
+        withResolvableModelType();
+        withUnknownTypeOfBean("bean1");
+        registerResourceModels();
+
+        assertModelIsPublishedWithName("bean2");
+    }
+
+    private void withUnknownTypeOfBean(String name) {
+        doReturn(null).when(this.factory).getType(name);
+    }
+
+    private void withResolvableModelType() {
+        doReturn(ModelBean.class).when(this.factory).getType(any());
+    }
+
+    private void withIncompleteResourceModelAnnotation() {
+        doThrow(new IncompleteAnnotationException(ResourceModel.class, "THIS IS AN EXPECTED TEST EXCEPTION"))
+                .when(this.factory).findAnnotationOnBean(any(), any());
     }
 
     private void assertModelIsPublishedWithName(String name) {
@@ -171,5 +212,10 @@ public class SpringModelRegistrarTest {
 
     private void withBeanFactory() {
         this.factory = mock(ConfigurableListableBeanFactory.class);
+    }
+
+    @ResourceModel("some/type")
+    private static class ModelBean {
+
     }
 }
