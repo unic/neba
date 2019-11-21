@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
@@ -65,10 +66,18 @@ public class SpringModelRegistrar {
         final List<ResourceModelFactory.ModelDefinition> modelDefinitions =
                 stream(beanNamesForTypeIncludingAncestors(factory, Object.class))
                         .map(n -> {
-                            final ResourceModel model = factory.findAnnotationOnBean(n, ResourceModel.class);
+                            final Class<?> modelType = factory.getType(n);
+                            if (modelType == null) {
+                                logger.error("The spring application context cannot determine the type of the resource model bean {} in bundle {}. Skipping this model.", n, bundle);
+                                return null;
+                            }
+
+                            final ResourceModel model = getResourceModelAnnotation(factory, n, modelType);
+
                             if (model == null) {
                                 return null;
                             }
+
                             return new ResourceModelFactory.ModelDefinition() {
                                 @Override
                                 @Nonnull
@@ -88,7 +97,7 @@ public class SpringModelRegistrar {
                                 @Override
                                 @Nonnull
                                 public Class<?> getType() {
-                                    return factory.getType(n);
+                                    return modelType;
                                 }
                             };
                         })
@@ -116,6 +125,17 @@ public class SpringModelRegistrar {
                 },
                 properties
         ));
+    }
+
+    private ResourceModel getResourceModelAnnotation(ConfigurableListableBeanFactory factory, String n, Class<?> beanType) {
+        try {
+            return factory.findAnnotationOnBean(n, ResourceModel.class);
+        } catch (IncompleteAnnotationException e) {
+            // Legacy support: This is very likely an old version of the resource model annotation.
+            // Spring currently assumes it can always load all annotation values, which is not true for
+            // binary-compatible changes like newly added annotation attributes. This will be fixed in upcoming Spring version (issue 24029).
+            return Annotations.annotations(beanType).get(ResourceModel.class);
+        }
     }
 
     public void unregister(Bundle bundle) {
