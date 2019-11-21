@@ -100,10 +100,10 @@ public class RequestScopedResourceModelCache implements Filter {
         }
 
         if (this.configuration.safeMode()) {
-            return cache.get(createSafeModeKey(key));
+            return cache.get(createSafeModeKey(resource, key));
         }
 
-        return cache.get(key);
+        return cache.get(createKey(resource, key));
     }
 
     /**
@@ -135,11 +135,11 @@ public class RequestScopedResourceModelCache implements Filter {
         }
 
         if (this.configuration.safeMode()) {
-            cache.put(createSafeModeKey(key), model);
+            cache.put(createSafeModeKey(resource, key), model);
             return;
         }
 
-        cache.put(key, model);
+        cache.put(createKey(resource, key), model);
     }
 
     /**
@@ -183,8 +183,9 @@ public class RequestScopedResourceModelCache implements Filter {
      * to restrict the cached object's scope to a specific component when safe mode is enabled.
      *
      * @return A request-state sensitive key if the cached if the current thread is a HTTP request, the original key if not.
+     * @see #createKey(Resource, Key)
      */
-    private Object createSafeModeKey(Object key) {
+    private Key createSafeModeKey(Resource resource, Key key) {
         // Create a request-state sensitive key to scope the cached model to a request with specific parameters.
         final SlingHttpServletRequest request = this.requestHolder.get();
 
@@ -193,11 +194,31 @@ public class RequestScopedResourceModelCache implements Filter {
         }
 
         final RequestPathInfo requestPathInfo = request.getRequestPathInfo();
-        return new Key(key, new Key(substringBefore(requestPathInfo.getResourcePath(), "/jcr:content"),
+        return new Key(
+                resource.getPath(),
+                key,
+                resource.getResourceType(),
+                resource.getResourceResolver().hashCode(),
+
+                substringBefore(requestPathInfo.getResourcePath(), "/jcr:content"),
                 requestPathInfo.getSelectorString(),
                 requestPathInfo.getExtension(),
                 requestPathInfo.getSuffix(),
-                request.getQueryString()));
+                request.getQueryString());
+    }
+
+    /**
+     * Create a key by combining the given key with standardized resource information.
+     * Here, it is essential to  not only include the resource path but also the resource type, since the same resource path might be
+     * included (synthetic resources...) with different resource types, and the resource resolver identity, since different resource resolvers
+     * may be used within the same request and they might feature different views on resource trees, e.g. through deviating privileges.
+     */
+    private static Key createKey(Resource resource, Key key) {
+        return new Key(
+                resource.getPath(),
+                key,
+                resource.getResourceType(),
+                resource.getResourceResolver().hashCode());
     }
 
     @ObjectClassDefinition(name = "NEBA request-scoped resource model cache", description = "Provides a request-scoped resource model cache")

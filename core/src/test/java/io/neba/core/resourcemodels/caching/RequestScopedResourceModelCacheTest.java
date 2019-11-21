@@ -20,6 +20,7 @@ import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache.Confi
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,6 +45,8 @@ import static org.mockito.Mockito.when;
 public class RequestScopedResourceModelCacheTest {
     @Mock
     private Resource resource;
+    @Mock
+    private ResourceResolver resolver;
     @Mock
     private SlingHttpServletRequest request;
     @Mock
@@ -68,6 +72,7 @@ public class RequestScopedResourceModelCacheTest {
         doReturn(this.requestPathInfo)
                 .when(this.request)
                 .getRequestPathInfo();
+        doReturn(this.resolver).when(this.resource).getResourceResolver();
 
         doReturn(true).when(this.configuration).enabled();
         doReturn(false).when(this.configuration).safeMode();
@@ -107,6 +112,37 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     @Test
+    public void testLookupOfSameResourcePathsWithDifferentResourceTypes() throws Exception {
+        request(() -> {
+
+            withResourcePath("/junit/test/1");
+            withResourceType("resource/type");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelIsInCache();
+
+            withResourceType("other/resource/type");
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+        });
+    }
+
+    @Test
+    public void testLookupOfSameResourcePathsWithDifferentResourceResolvers() throws Exception {
+        request(() -> {
+            withResourcePath("/junit/test/1");
+            withDifferentResourceResolver();
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelIsInCache();
+
+            withDifferentResourceResolver();
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+        });
+    }
+
+    @Test
     public void testCacheIsNotSelectorSensitiveWithoutSafeMode() throws Exception {
         request(() -> {
 
@@ -142,14 +178,14 @@ public class RequestScopedResourceModelCacheTest {
     public void testCacheIsNotPagePathSensitiveWithoutSafeMode() throws Exception {
         request(() -> {
 
-            withPath("/old/path");
+            withRequestedPagePath("/old/path");
 
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
             assertModelIsInCache();
 
-            withPath("/new/path");
+            withRequestedPagePath("/new/path");
 
             lookupModelFromCache();
             assertModelIsInCache();
@@ -211,14 +247,14 @@ public class RequestScopedResourceModelCacheTest {
         request(() -> {
 
             withSafeMode();
-            withPath("/old/path");
+            withRequestedPagePath("/old/path");
 
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
             assertModelIsInCache();
 
-            withPath("/new/path");
+            withRequestedPagePath("/new/path");
 
             lookupModelFromCache();
             assertModelIsNotInCache();
@@ -230,14 +266,14 @@ public class RequestScopedResourceModelCacheTest {
         request(() -> {
 
             withSafeMode();
-            withPath("/a/page");
+            withRequestedPagePath("/a/page");
 
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
             assertModelIsInCache();
 
-            withPath("/a/page/jcr:content/parsys");
+            withRequestedPagePath("/a/page/jcr:content/parsys");
 
             lookupModelFromCache();
             assertModelIsInCache();
@@ -306,6 +342,14 @@ public class RequestScopedResourceModelCacheTest {
         });
     }
 
+    private void withResourceType(String type) {
+        doReturn(type).when(this.resource).getResourceType();
+    }
+
+    private void withDifferentResourceResolver() {
+        doReturn(mock(ResourceResolver.class)).when(this.resource).getResourceResolver();
+    }
+
     private void withDisabledCache() {
         doReturn(false).when(this.configuration).enabled();
     }
@@ -318,7 +362,7 @@ public class RequestScopedResourceModelCacheTest {
         when(this.request.getQueryString()).thenReturn(queryString);
     }
 
-    private void withPath(String path) {
+    private void withRequestedPagePath(String path) {
         when(this.requestPathInfo.getResourcePath()).thenReturn(path);
     }
 
@@ -331,7 +375,7 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     private void putModelInCache() {
-        testee.put(this.resource, key(this.resource.getPath(), this.modelType), this.model);
+        testee.put(this.resource, key(this.modelType), this.model);
     }
 
     private void assertModelIsInCache() {
@@ -343,7 +387,7 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     private void lookupModelFromCache() {
-        cachedModel = testee.get(this.resource, key(this.resource.getPath(), this.modelType));
+        cachedModel = testee.get(this.resource, key(this.modelType));
     }
 
     private void withResourcePath(String path) {
