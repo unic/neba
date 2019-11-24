@@ -16,6 +16,7 @@
 package io.neba.core.resourcemodels.factory;
 
 import io.neba.api.annotations.Filter;
+import io.neba.core.util.Annotations;
 import io.neba.core.util.ReflectionUtil;
 import org.osgi.framework.BundleContext;
 
@@ -23,6 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -30,9 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.neba.core.util.Annotations.annotations;
+import static io.neba.core.util.ReflectionUtil.makeAccessible;
 import static io.neba.core.util.ReflectionUtil.methodsOf;
+import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.apache.commons.lang3.ArrayUtils.reverse;
+import static org.apache.commons.lang3.reflect.FieldUtils.getAllFields;
 
 /**
  * Represents the way in which a model can be instantiated, including resolution of the
@@ -45,11 +50,13 @@ class ModelInstantiator<T> {
     private final ModelConstructor<T> constructor;
     private final ModelServiceSetter[] setters;
     private final Method[] postConstructMethods;
+    private final ModelFieldInjection[] fieldInjections;
 
     ModelInstantiator(@Nonnull Class<T> modelType) {
         this.constructor = resolveConstructor(modelType);
         this.setters = resolveServiceSetters(modelType);
         this.postConstructMethods = resolvePostConstructMethods(modelType);
+        this.fieldInjections = resolveServiceFieldInjections(modelType);
     }
 
     /**
@@ -63,11 +70,38 @@ class ModelInstantiator<T> {
             setter.set(context, instance);
         }
 
+        for (ModelFieldInjection injection : this.fieldInjections) {
+            injection.set(context, instance);
+        }
+
         for (Method m : this.postConstructMethods) {
             m.invoke(instance);
         }
 
         return instance;
+    }
+
+    private ModelFieldInjection[] resolveServiceFieldInjections(@Nonnull Class<T> modelType) {
+        List<ModelFieldInjection> fieldInjectionList = new ArrayList<>();
+
+        for (Field field : getAllFields(modelType)) {
+            if (isStatic(field.getModifiers()) || isFinal(field.getModifiers())) {
+                continue;
+            }
+
+            final Annotations annotations = annotations(field);
+            if (!annotations.containsName(INJECT_ANNOTATION_NAME)) {
+                continue;
+            }
+
+            final Filter filter = annotations.get(Filter.class);
+            final ServiceDependency serviceDependency = new ServiceDependency(field.getGenericType(), modelType, filter);
+
+            makeAccessible(field);
+            fieldInjectionList.add(new ModelFieldInjection(serviceDependency, field));
+        }
+
+        return fieldInjectionList.toArray(new ModelFieldInjection[0]);
     }
 
     /**
@@ -181,6 +215,32 @@ class ModelInstantiator<T> {
             }
         }
         return filter;
+    }
+
+    /**
+     * Represents a field with a  {@link ServiceDependency}.
+     */
+    private static class ModelFieldInjection {
+        private final ServiceDependency serviceDependency;
+        private final Field field;
+
+        private ModelFieldInjection(ServiceDependency serviceDependency, Field field) {
+            this.serviceDependency = serviceDependency;
+            this.field = makeAccessible(field);
+        }
+
+        public void set(@Nonnull BundleContext context, @Nonnull Object model) throws IllegalAccessException {
+            Object serviceInstance = this.serviceDependency.resolve(context);
+
+            if (serviceInstance == null) {
+                throw new ModelInstantiationException(
+                        "Unable to inject a required service dependency via '" + this.field + "', " +
+                                " the Service dependency '" + serviceDependency + "' resolved to null.");
+
+            }
+
+            this.field.set(model, serviceInstance);
+        }
     }
 
     /**
