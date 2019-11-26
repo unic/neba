@@ -18,6 +18,7 @@ package io.neba.core.resourcemodels.adaptation;
 
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiModelSource;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.BundleContext;
@@ -26,6 +27,9 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +70,7 @@ import static org.osgi.framework.Constants.SERVICE_VENDOR;
  * @author Olaf Otto
  */
 @Component(service = ResourceToModelAdapterUpdater.class)
+@Designate(ocd = ResourceToModelAdapterUpdater.Configuration.class)
 public class ResourceToModelAdapterUpdater {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -77,9 +82,11 @@ public class ResourceToModelAdapterUpdater {
     private BundleContext context = null;
     private ServiceRegistration resourceToModelAdapterRegistration = null;
     private ExecutorService executorService;
+    private Configuration configuration;
 
     @Activate
-    protected void activate(BundleContext context) {
+    protected void activate(Configuration configuration, BundleContext context) {
+        this.configuration = configuration;
         this.context = context;
         this.executorService = newSingleThreadExecutor();
         registerModelAdapter();
@@ -146,7 +153,10 @@ public class ResourceToModelAdapterUpdater {
         Dictionary<String, Object> properties = new Hashtable<>();
         Set<String> fullyQualifiedNamesOfRegisteredModels = getAdapterTypeNames();
         properties.put(ADAPTER_CLASSES, fullyQualifiedNamesOfRegisteredModels.toArray());
-        properties.put(ADAPTABLE_CLASSES, new String[]{Resource.class.getName()});
+        String[] adaptableClasses = configuration.allowAdaptingFromRequest() ?
+                new String[]{Resource.class.getName(), SlingHttpServletRequest.class.getName()} :
+                new String[]{Resource.class.getName()};
+        properties.put(ADAPTABLE_CLASSES, adaptableClasses);
         properties.put(SERVICE_VENDOR, "neba.io");
         properties.put(SERVICE_DESCRIPTION, "Adapts Resources to @ResourceModels.");
         return properties;
@@ -181,5 +191,13 @@ public class ResourceToModelAdapterUpdater {
         List<String> classNames = new ArrayList<>(l.size());
         classNames.addAll(l.stream().map(Class::getName).collect(Collectors.toList()));
         return classNames;
+    }
+
+    @ObjectClassDefinition(name = "NEBA adapter factory", description = "Adapts resources to NEBA models.")
+    public @interface Configuration {
+        @AttributeDefinition(
+                name = "Adapt from request",
+                description = "Support adapting the sling request to a model. This is a shortcut for retrieving the resource from the request and adapting it.")
+        boolean allowAdaptingFromRequest() default true;
     }
 }
