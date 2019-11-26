@@ -57,7 +57,7 @@ public class ModelInstantiatorTest {
     }
 
     @Test
-    public void testModelIsInstantiatedViaInjectConstructorIfInjectConstructorIsPresent() throws ReflectiveOperationException {
+    public void testModelIsInstantiatedViaInjectConstructorIfInjectConstructorIsPresent() throws ReflectiveOperationException, InvalidSyntaxException {
         ServiceInterface s1 = withOsgiService(ServiceInterface.class);
         OtherServiceInterface s2 = withOsgiService(OtherServiceInterface.class);
         withMetadataFor(TestModelWithInjectConstructor.class);
@@ -71,7 +71,7 @@ public class ModelInstantiatorTest {
     }
 
     @Test
-    public void testModelInstantiationFailsIfARequiredServiceDependencyForConstructorInjectionIsMissing() throws ReflectiveOperationException {
+    public void testModelInstantiationFailsIfARequiredServiceDependencyForConstructorInjectionIsMissing() throws ReflectiveOperationException, InvalidSyntaxException {
         withOsgiService(ServiceInterface.class);
         withMetadataFor(TestModelWithInjectConstructor.class);
         try {
@@ -113,7 +113,7 @@ public class ModelInstantiatorTest {
     }
 
     @Test
-    public void testResolutionOfServiceDependency() throws ReflectiveOperationException {
+    public void testResolutionOfServiceDependency() throws ReflectiveOperationException, InvalidSyntaxException {
         ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class);
         withMetadataFor(TestModelWithSetterDependency.class);
         createModelInstance();
@@ -121,7 +121,47 @@ public class ModelInstantiatorTest {
     }
 
     @Test
-    public void testResolutionOfExistingOptionalSetterDependency() throws ReflectiveOperationException {
+    public void testResolutionOfServiceDependencyViaFieldInjection() throws ReflectiveOperationException, InvalidSyntaxException {
+        ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class);
+        withMetadataFor(TestModelWithFieldInjectionDependency.class);
+        createModelInstance();
+        assertModelHasProperty("serviceInterface", serviceInstance);
+    }
+
+    @Test
+    public void testResolutionOfServiceDependencyViaFilteredFieldInjection() throws ReflectiveOperationException, InvalidSyntaxException {
+        ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class, "(property=1)");
+        withMetadataFor(TestModelWithFilteredFieldInjectionDependency.class);
+        createModelInstance();
+        assertModelHasProperty("serviceInterface", serviceInstance);
+    }
+
+    @Test
+    public void testResolutionOfServiceDependenciesViaFieldInjection() throws ReflectiveOperationException, InvalidSyntaxException {
+        ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class);
+        withMetadataFor(TestModelWithFieldInjectionDependencyList.class);
+        createModelInstance();
+        assertModelWasInjectedWithListOf(serviceInstance);
+    }
+
+    @Test
+    public void testResolutionOfServiceDependenciesViaFilteredFieldInjection() throws ReflectiveOperationException, InvalidSyntaxException {
+        ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class, "(property=1)");
+        withMetadataFor(TestModelWithFilteredFieldInjectionDependencyList.class);
+        createModelInstance();
+        assertModelWasInjectedWithListOf(serviceInstance);
+    }
+
+    @Test
+    public void testResolutionOfServiceDependencyViaOptionalFieldInjection() throws ReflectiveOperationException, InvalidSyntaxException {
+        ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class);
+        withMetadataFor(TestModelWithOptionalFieldInjectionDependency.class);
+        createModelInstance();
+        assertModelHasProperty("serviceInterface", Optional.of(serviceInstance));
+    }
+
+    @Test
+    public void testResolutionOfExistingOptionalSetterDependency() throws ReflectiveOperationException, InvalidSyntaxException {
         ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class);
         withMetadataFor(TestModelWithOptionalSetterDependency.class);
         createModelInstance();
@@ -136,7 +176,7 @@ public class ModelInstantiatorTest {
     }
 
     @Test
-    public void testResolutionOfExistingOptionalConstructorDependency() throws ReflectiveOperationException {
+    public void testResolutionOfExistingOptionalConstructorDependency() throws ReflectiveOperationException, InvalidSyntaxException {
         ServiceInterface serviceInstance = withOsgiService(ServiceInterface.class);
         withMetadataFor(TestModelWithOptionalConstructorDependency.class);
         createModelInstance();
@@ -229,12 +269,13 @@ public class ModelInstantiatorTest {
         assertThat(this.modelInstance).hasFieldOrPropertyWithValue(name, serviceInstance);
     }
 
-    private <T> T withOsgiService(Class<T> serviceType) {
+    private <T> T withOsgiService(Class<T> serviceType) throws InvalidSyntaxException {
         @SuppressWarnings("unchecked")
         ServiceReference<T> reference = mock(ServiceReference.class);
         T instance = mock(serviceType);
         doReturn(reference).when(this.context).getServiceReference(serviceType);
         doReturn(instance).when(this.context).getService(reference);
+        doReturn(singleton(reference)).when(this.context).getServiceReferences(serviceType, null);
         return instance;
     }
 
@@ -356,6 +397,44 @@ public class ModelInstantiatorTest {
         }
 
     }
+
+    public static class TestModelWithFieldInjectionDependency extends TestModel {
+        @Inject
+        private ServiceInterface serviceInterface;
+    }
+
+    public static class TestModelWithFilteredFieldInjectionDependency extends TestModel {
+        @Inject
+        @Filter("(property=1)")
+        private ServiceInterface serviceInterface;
+    }
+
+    public static class TestModelWithFieldInjectionDependencyList extends TestModel {
+        @Inject
+        private List<ServiceInterface> services;
+
+        @Override
+        Object getInjected() {
+            return services;
+        }
+    }
+
+    public static class TestModelWithFilteredFieldInjectionDependencyList extends TestModel {
+        @Inject
+        @Filter("(property=1)")
+        private List<ServiceInterface> services;
+
+        @Override
+        Object getInjected() {
+            return services;
+        }
+    }
+
+    public static class TestModelWithOptionalFieldInjectionDependency extends TestModel {
+        @Inject
+        private Optional<ServiceInterface> serviceInterface;
+    }
+
 
     @SuppressWarnings("unused")
     public static class TestModelWithInvalidSetter extends TestModel {

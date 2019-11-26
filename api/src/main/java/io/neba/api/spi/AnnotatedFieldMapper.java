@@ -36,9 +36,8 @@ import java.util.Map;
  * with a type <em>assignable to</em> {@link java.util.Collection}, e.g. List&lt;Resource&gt; or Set&lt;String&gt;.
  * </p>
  * <pre>
- * &#64;Service
- * &#64;Component(immediate = true)
- * public class MyFieldMapper&lt;Collection, MyAnnotation&gt; {
+ * &#64;Component(service = { AnnotatedFieldMapper.class })
+ * public class MyFieldMapper implements AnnotatedFieldMapper&lt;Collection, MyAnnotation&gt; {
  *     public Class&lt;? extends Collection&gt; getFieldType() {
  *         return Collection.class;
  *     }
