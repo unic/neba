@@ -21,6 +21,7 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
 import io.neba.core.util.ResolvedModel;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
@@ -60,11 +61,20 @@ public class ResourceToModelAdapter implements AdapterFactory {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getAdapter(@Nonnull Object adaptable, @Nonnull Class<T> target) {
-        if (!(adaptable instanceof Resource)) {
+        Resource resource = null;
+
+        if (adaptable instanceof Resource) {
+            resource = (Resource) adaptable;
+        }
+
+        if (adaptable instanceof SlingHttpServletRequest) {
+            resource = ((SlingHttpServletRequest) adaptable).getResource();
+        }
+
+        if (resource == null) {
             return null;
         }
 
-        Resource resource = (Resource) adaptable;
         final Key key = key(target);
 
         Optional<T> cachedModel = this.cache.get(resource, key);

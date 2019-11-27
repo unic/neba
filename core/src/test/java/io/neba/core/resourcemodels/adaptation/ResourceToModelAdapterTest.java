@@ -21,6 +21,7 @@ import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
 import io.neba.core.util.ResolvedModel;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -75,6 +76,8 @@ public class ResourceToModelAdapterTest {
     private Resource resource;
     @Mock
     private ResourceResolver resourceResolver;
+    @Mock
+    private SlingHttpServletRequest request;
 
     @Mock
     private RequestScopedResourceModelCache cache;
@@ -96,7 +99,7 @@ public class ResourceToModelAdapterTest {
             return null;
         },
 
-        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+                lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
                 .when(this.cache)
@@ -107,6 +110,7 @@ public class ResourceToModelAdapterTest {
                 .get(isA(Resource.class), isA(Key.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
+        doReturn(this.resource).when(this.request).getResource();
     }
 
     @Test
@@ -119,6 +123,16 @@ public class ResourceToModelAdapterTest {
         withTargetType(TestModel.class);
         withAvailableModels(new TestModel());
         adapt();
+        verifyAdapterObtainsSourceFromRegistrar();
+        verifyAdapterMapsResourceToModel();
+        assertResourceWasAdaptedToModel();
+    }
+
+    @Test
+    public void testAdaptationToModelViaRequest() {
+        withTargetType(TestModel.class);
+        withAvailableModels(new TestModel());
+        adaptViaRequest();
         verifyAdapterObtainsSourceFromRegistrar();
         verifyAdapterMapsResourceToModel();
         assertResourceWasAdaptedToModel();
@@ -249,6 +263,10 @@ public class ResourceToModelAdapterTest {
 
     private void adapt() {
         this.adapted = this.testee.getAdapter(this.resource, this.targetType);
+    }
+
+    private void adaptViaRequest() {
+        this.adapted = this.testee.getAdapter(this.request, this.targetType);
     }
 
     private void withTargetType(Class<TestModel> targetType) {
