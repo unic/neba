@@ -52,11 +52,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *     }
  * </pre>
  *
+ * @deprecated Use {@link javax.annotation.PostConstruct} instead.
  * @author Olaf Otto
  * @since 5.0.0
  */
 @Documented
 @Retention(RUNTIME)
 @Target({METHOD, ANNOTATION_TYPE})
+@Deprecated
 public @interface AfterMapping {
 }

@@ -18,21 +18,27 @@ package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
+import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.stream;
@@ -62,14 +68,14 @@ public class SpringModelRegistrar {
         final Bundle bundle = bundleContext.getBundle();
         logger.info("Discovering resource models in bundle {}  ...", bundle.getSymbolicName());
 
-        final List<ResourceModelFactory.ModelDefinition> modelDefinitions =
+        final List<ModelDefinition<?>> modelDefinitions =
                 stream(beanNamesForTypeIncludingAncestors(factory, Object.class))
                         .map(n -> {
                             final ResourceModel model = factory.findAnnotationOnBean(n, ResourceModel.class);
                             if (model == null) {
                                 return null;
                             }
-                            return new ResourceModelFactory.ModelDefinition() {
+                            return new ModelDefinition<Object>() {
                                 @Override
                                 @Nonnull
                                 public ResourceModel getResourceModel() {
@@ -95,6 +101,33 @@ public class SpringModelRegistrar {
                         .filter(Objects::nonNull)
                         .collect(toList());
 
+        final Set<String> knownNebaModelBeanNames = new HashSet<>();
+        modelDefinitions.forEach(definition -> knownNebaModelBeanNames.add(definition.getName()));
+
+        final ThreadLocal<ContentToModelMappingCallback> mappingCallbackThreadLocal = new ThreadLocal<>();
+
+        factory.addBeanPostProcessor(new BeanPostProcessor() {
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public final Object postProcessBeforeInitialization(@Nonnull Object bean, String beanName) throws BeansException {
+                if (!knownNebaModelBeanNames.contains(beanName)) {
+                    return null;
+                }
+                ContentToModelMappingCallback contentToModelMappingCallback = mappingCallbackThreadLocal.get();
+                if (contentToModelMappingCallback == null) {
+                    return null;
+                }
+
+                return contentToModelMappingCallback.map(bean);
+            }
+
+            @Override
+            public final Object postProcessAfterInitialization(@Nonnull Object bean, String beanName) throws BeansException {
+                return null;
+            }
+        });
+
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(SERVICE_DESCRIPTION, "Provides NEBA resource models from Spring Beans annotated with @" + ResourceModel.class.getSimpleName() + ".");
         properties.put(SERVICE_VENDOR, "neba.io");
@@ -104,14 +137,23 @@ public class SpringModelRegistrar {
                 new ResourceModelFactory() {
                     @Override
                     @Nonnull
-                    public Collection<ModelDefinition> getModelDefinitions() {
+                    public Collection<ModelDefinition<?>> getModelDefinitions() {
                         return modelDefinitions;
                     }
 
                     @Override
-                    @Nonnull
-                    public Object getModel(@Nonnull ModelDefinition modelDefinition) {
-                        return factory.getBean(modelDefinition.getName());
+                    public <T> T provideModel(@Nonnull ModelDefinition<T> modelDefinition, @Nonnull ContentToModelMappingCallback<T> callback) {
+                        final ContentToModelMappingCallback parent = mappingCallbackThreadLocal.get();
+                        try {
+                            mappingCallbackThreadLocal.set(callback);
+                            return callback.map(factory.getBean(modelDefinition.getName(), modelDefinition.getType()));
+                        } finally {
+                            if (parent == null) {
+                                mappingCallbackThreadLocal.remove();
+                            } else {
+                                mappingCallbackThreadLocal.set(parent);
+                            }
+                        }
                     }
                 },
                 properties

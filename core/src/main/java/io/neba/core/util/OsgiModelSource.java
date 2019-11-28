@@ -17,6 +17,7 @@
 package io.neba.core.util;
 
 import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.osgi.framework.Bundle;
@@ -29,7 +30,7 @@ import org.osgi.framework.Bundle;
  * @author Olaf Otto
  */
 public class OsgiModelSource<T> {
-    private final ModelDefinition modelDefinition;
+    private final ModelDefinition<T> modelDefinition;
     private final ResourceModelFactory factory;
     private final long bundleId;
     private final int hashCode;
@@ -40,7 +41,7 @@ public class OsgiModelSource<T> {
      * @param factory         must not be <code>null</code>.
      * @param bundle          must not be <code>null</code>.
      */
-    public OsgiModelSource(ModelDefinition modelDefinition, ResourceModelFactory factory, Bundle bundle) {
+    public OsgiModelSource(ModelDefinition<T> modelDefinition, ResourceModelFactory factory, Bundle bundle) {
         if (modelDefinition == null) {
             throw new IllegalArgumentException("Method argument modelDefinition must not be null.");
         }
@@ -61,9 +62,8 @@ public class OsgiModelSource<T> {
         this.hashCode = new HashCodeBuilder().append(this.modelDefinition.getName()).append(bundleId).toHashCode();
     }
 
-    @SuppressWarnings("unchecked")
-    public T getModel() {
-        return (T) this.factory.getModel(this.modelDefinition);
+    public T getModel(ContentToModelMappingCallback<T> callback) {
+        return this.factory.provideModel(this.modelDefinition, callback);
     }
 
     public Class<?> getModelType() {

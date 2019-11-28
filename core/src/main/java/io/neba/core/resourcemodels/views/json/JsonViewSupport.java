@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
 import io.neba.api.resourcemodels.Lazy;
 import io.neba.core.resourcemodels.mapping.Mapping;
 import io.neba.core.resourcemodels.mapping.NestedMappingSupport;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.sling.api.resource.Resource;
 
 import javax.annotation.Nonnull;
@@ -42,7 +42,7 @@ import java.util.function.Supplier;
 /**
  * Explicitly supports rendering NEBA models as JSON views by augmenting the rendered JSON with metadata
  * {@link NestedMappingSupport#beginRecordingMappings() recorded} during
- * {@link io.neba.core.resourcemodels.mapping.ResourceToModelMapper#map(Resource, ResolvedModel) resource to model mapping}.
+ * {@link io.neba.core.resourcemodels.mapping.ResourceToModelMapper#map(Resource, ResolvedModelSource) resource to model mapping}.
  * In addition, registers custom {@link JsonSerializer JSON serializers} to support serialization of Sling-specific models
  * such as {@link Resource}.
  */

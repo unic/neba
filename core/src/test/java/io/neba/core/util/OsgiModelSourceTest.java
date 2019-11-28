@@ -17,6 +17,7 @@
 package io.neba.core.util;
 
 import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,12 +26,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.osgi.framework.Bundle.ACTIVE;
 
 /**
  * @author Olaf Otto
@@ -45,6 +44,8 @@ public class OsgiModelSourceTest {
     private Bundle bundleTwo;
     @Mock
     private ModelDefinition modelDefinition;
+    @Mock
+    private ContentToModelMappingCallback callback;
 
     private String modelSourceAsString;
 
@@ -80,7 +81,7 @@ public class OsgiModelSourceTest {
     @Test
     public void testModelTypeRetrievalFromFactory() {
         getModelType();
-        verifyModelSourceModelTypeFromModelDefinitision();
+        verifyModelSourceModelTypeFromModelDefinition();
     }
 
     @Test
@@ -114,7 +115,7 @@ public class OsgiModelSourceTest {
     }
 
 
-    private void verifyModelSourceModelTypeFromModelDefinitision() {
+    private void verifyModelSourceModelTypeFromModelDefinition() {
         verify(this.modelDefinition).getType();
     }
 
@@ -123,11 +124,11 @@ public class OsgiModelSourceTest {
     }
 
     private void verifyModelSourceGetsModelFromModelFactory() {
-        verify(this.factory).getModel(this.modelDefinition);
+        verify(this.factory).provideModel(this.modelDefinition, this.callback);
     }
 
     private void getModel() {
-        this.testee.getModel();
+        this.testee.getModel(this.callback);
     }
 
     private void assertModelSourceAsStringIs(String string) {

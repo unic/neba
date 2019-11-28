@@ -16,11 +16,12 @@
 
 package io.neba.core.resourcemodels.registration;
 
+import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.util.Key;
 import io.neba.core.util.OsgiModelSource;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -64,11 +65,13 @@ public class ResourceModelResolverImplTest {
     @Mock
     private ResourceToModelMapper mapper;
     @Mock
-    private ResolvedModel<Object> resolvedModel;
+    private ResolvedModelSource<Object> resolvedModelSource;
     @Mock
     private RequestScopedResourceModelCache cache;
     @Mock
     private OsgiModelSource<Object> osgiModelSource;
+    @Mock
+    private ContentToModelMappingCallback callback;
 
     private Map<Key, Object> testCache = new HashMap<>();
     private Object resolutionResult;
@@ -85,7 +88,7 @@ public class ResourceModelResolverImplTest {
             return null;
         },
 
-        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+                lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
                 .when(this.cache)
@@ -99,30 +102,30 @@ public class ResourceModelResolverImplTest {
                 .when(this.resource)
                 .getResourceResolver();
 
-        when(this.mapper.map(isA(Resource.class), isA(ResolvedModel.class)))
+        when(this.mapper.map(isA(Resource.class), isA(ResolvedModelSource.class)))
                 .thenAnswer(inv -> {
-                    ResolvedModel<Object> resolvedModel = (ResolvedModel<Object>) inv.getArguments()[1];
-                    return resolvedModel.getSource().getModel();
+                    ResolvedModelSource<Object> resolvedModelSource = (ResolvedModelSource<Object>) inv.getArguments()[1];
+                    return resolvedModelSource.getSource().getModel(this.callback);
                 });
     }
 
     @Before
     public void provideMockResourceModel() {
-        LinkedList<ResolvedModel<?>> resolvedModels = new LinkedList<>();
-        resolvedModels.add(this.resolvedModel);
+        LinkedList<ResolvedModelSource<?>> resolvedModelSources = new LinkedList<>();
+        resolvedModelSources.add(this.resolvedModelSource);
 
         doReturn(this.osgiModelSource)
-                .when(this.resolvedModel)
+                .when(this.resolvedModelSource)
                 .getSource();
 
-        when(this.osgiModelSource.getModel())
+        when(this.osgiModelSource.getModel(isA(ContentToModelMappingCallback.class)))
                 .thenReturn(this.model);
 
         when(this.registry.lookupMostSpecificModels(eq(this.resource)))
-                .thenReturn(resolvedModels);
+                .thenReturn(resolvedModelSources);
 
         when(this.registry.lookupMostSpecificModels(eq(this.resource), anyString()))
-                .thenReturn(resolvedModels);
+                .thenReturn(resolvedModelSources);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -266,7 +269,7 @@ public class ResourceModelResolverImplTest {
     }
 
     private void withTwoResolvedModels() {
-        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(asList(mock(ResolvedModel.class), mock(ResolvedModel.class)));
+        when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(asList(mock(ResolvedModelSource.class), mock(ResolvedModelSource.class)));
     }
 
     private void withoutAnyModelInRegistry() {
@@ -302,15 +305,15 @@ public class ResourceModelResolverImplTest {
     }
 
     private void withModelFoundForResourceType(String type) {
-        when(this.resolvedModel.getResolvedResourceType()).thenReturn(type);
+        when(this.resolvedModelSource.getResolvedResourceType()).thenReturn(type);
     }
 
     private void verifyResourceIsMappedToModel() {
-        verify(this.mapper).map(eq(this.resource), eq(this.resolvedModel));
+        verify(this.mapper).map(eq(this.resource), eq(this.resolvedModelSource));
     }
 
     private void verifyResourceIsMappedToModelAgain() {
-        verify(this.mapper, times(2)).map(eq(this.resource), eq(this.resolvedModel));
+        verify(this.mapper, times(2)).map(eq(this.resource), eq(this.resolvedModelSource));
     }
 
     private void assertResolvedModelIsNull() {

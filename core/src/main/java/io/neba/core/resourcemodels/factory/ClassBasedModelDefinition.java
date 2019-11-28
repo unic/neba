@@ -16,7 +16,7 @@
 package io.neba.core.resourcemodels.factory;
 
 import io.neba.api.annotations.ResourceModel;
-import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 
 import javax.annotation.Nonnull;
 
@@ -25,10 +25,10 @@ import static java.lang.Character.toLowerCase;
 /**
  * A model definition based on a class annotated with {@link ResourceModel}.
  */
-class ClassBasedModelDefinition implements ResourceModelFactory.ModelDefinition {
-    private final Class<?> c;
+class ClassBasedModelDefinition<T> implements ModelDefinition<T> {
+    private final Class<T> c;
 
-    ClassBasedModelDefinition(Class<?> c) {
+    ClassBasedModelDefinition(Class<T> c) {
         this.c = c;
     }
 
@@ -50,7 +50,7 @@ class ClassBasedModelDefinition implements ResourceModelFactory.ModelDefinition 
 
     @Nonnull
     @Override
-    public Class<?> getType() {
+    public Class<T> getType() {
         return c;
     }
 
@@ -62,7 +62,7 @@ class ClassBasedModelDefinition implements ResourceModelFactory.ModelDefinition 
     @Override
     public boolean equals(Object obj) {
         return obj.getClass() == getClass() &&
-                ((ResourceModelFactory.ModelDefinition) obj).getType().equals(getType());
+                ((ModelDefinition) obj).getType().equals(getType());
     }
 
     @Override

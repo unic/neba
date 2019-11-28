@@ -46,28 +46,34 @@ class ModelInstantiator<T> {
     private final ModelServiceSetter[] setters;
     private final Method[] postConstructMethods;
 
-    ModelInstantiator(@Nonnull Class<T> modelType) {
+    ModelInstantiator(@Nonnull Class<? extends T> modelType) {
         this.constructor = resolveConstructor(modelType);
         this.setters = resolveServiceSetters(modelType);
         this.postConstructMethods = resolvePostConstructMethods(modelType);
     }
 
     /**
-     * @return an instance of the model with all dependencies resolved and injected.
+     * @return an instance of the model with all dependencies resolved and injected, but without
+     * {@link #postProcessAfterInitialization(Object) post-processing} applied.
      */
     @Nonnull
-    public T create(@Nonnull BundleContext context) throws ReflectiveOperationException {
+    T create(@Nonnull BundleContext context) throws ReflectiveOperationException {
         T instance = this.constructor.instantiate(context);
 
         for (ModelServiceSetter setter : this.setters) {
             setter.set(context, instance);
         }
 
+        return instance;
+    }
+
+    /**
+     * Applies initializations such as {@link javax.annotation.PostConstruct} method invocation.
+     */
+    void postProcessAfterInitialization(@Nonnull T instance) throws IllegalAccessException, InvocationTargetException {
         for (Method m : this.postConstructMethods) {
             m.invoke(instance);
         }
-
-        return instance;
     }
 
     /**
@@ -98,7 +104,7 @@ class ModelInstantiator<T> {
     }
 
     @Nonnull
-    private Method[] resolvePostConstructMethods(@Nonnull Class<T> modelType) {
+    private Method[] resolvePostConstructMethods(@Nonnull Class<? extends T> modelType) {
         Method[] postConstructMethods = methodsOf(modelType).stream()
                 .filter(m -> annotations(m).containsName(POSTCONSTRUCT_ANNOTATION_NAME))
                 .peek(m -> {
@@ -127,7 +133,7 @@ class ModelInstantiator<T> {
      */
     @SuppressWarnings("unchecked")
     @Nonnull
-    private static <T> ModelConstructor<T> resolveConstructor(@Nonnull Class<T> modelType) {
+    private static <T> ModelConstructor<T> resolveConstructor(@Nonnull Class<? extends T> modelType) {
         ModelConstructor<T> constructor;
         Constructor<T> injectionConstructor = null,
                 defaultConstructor = null;

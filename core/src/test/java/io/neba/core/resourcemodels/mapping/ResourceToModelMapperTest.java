@@ -18,13 +18,14 @@ package io.neba.core.resourcemodels.mapping;
 
 import io.neba.api.spi.AopSupport;
 import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import io.neba.api.spi.ResourceModelPostProcessor;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import io.neba.core.util.OsgiModelSource;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import io.neba.core.util.ResourcePaths;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
@@ -370,14 +371,17 @@ public class ResourceToModelMapperTest {
     @SuppressWarnings("unchecked")
     private void mapResourceToModel() {
         OsgiModelSource<TestModel> source = mock(OsgiModelSource.class);
-        when(source.getModel()).thenReturn(this.model);
+        when(source.getModel(isA(ContentToModelMappingCallback.class))).thenAnswer(inv -> {
+            ContentToModelMappingCallback cb = (ContentToModelMappingCallback) inv.getArguments()[0];
+            return cb.map(model);
+        });
         when(source.getFactory()).thenReturn(this.factory);
         doReturn(this.modelType).when(source).getModelType();
 
-        ResolvedModel<TestModel> resolvedModel = mock(ResolvedModel.class);
-        doReturn(source).when(resolvedModel).getSource();
-        doReturn("some/resource/type").when(resolvedModel).getResolvedResourceType();
+        ResolvedModelSource<TestModel> resolvedModelSource = mock(ResolvedModelSource.class);
+        doReturn(source).when(resolvedModelSource).getSource();
+        doReturn("some/resource/type").when(resolvedModelSource).getResolvedResourceType();
 
-        this.mappedModel = this.testee.map(this.resource, resolvedModel);
+        this.mappedModel = this.testee.map(this.resource, resolvedModelSource);
     }
 }
