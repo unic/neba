@@ -16,7 +16,6 @@
 package io.neba.core.resourcemodels.factory;
 
 import io.neba.api.annotations.Filter;
-import io.neba.api.spi.ResourceModelFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -256,7 +255,7 @@ public class ModelInstantiatorTest {
         withMetadataFor(TestModelWithLifecycleCallbacks.class);
 
         createModelInstance();
-        this.testee.postProcessAfterInitialization(this.modelInstance);
+        postProcessAfterInitialization();
 
         assertThat(this.modelInstance).hasFieldOrPropertyWithValue("parentPostConstructInvocation", 0);
         assertThat(this.modelInstance).hasFieldOrPropertyWithValue("localPostConstructInvocation", 1);
@@ -302,6 +301,10 @@ public class ModelInstantiatorTest {
 
     private void createModelInstance() throws ReflectiveOperationException {
         this.modelInstance = this.testee.create(this.context);
+    }
+
+    private void postProcessAfterInitialization() throws IllegalAccessException, java.lang.reflect.InvocationTargetException {
+        this.testee.postProcessAfterInitialization(this.modelInstance);
     }
 
     private <T extends TestModel> void withMetadataFor(Class<T> modelType) {

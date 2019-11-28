@@ -26,17 +26,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Olaf Otto
  */
-public class ModelProcessorTest {
+public class ModelPostProcessorTest {
     private boolean throwExceptionDuringAfterMapping;
     private int timesAfterMappingCalled;
     private TestModel model;
     private ResourceModelMetaData metadata;
 
-    private ModelProcessor testee;
+    private ModelPostProcessor testee;
 
     @Before
     public void setUp() {
-        this.testee = new ModelProcessor();
+        this.testee = new ModelPostProcessor();
         this.throwExceptionDuringAfterMapping = false;
         this.timesAfterMappingCalled = 0;
     }

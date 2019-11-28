@@ -51,7 +51,7 @@ public class ResourceToModelMapper {
     private final List<AopSupport> aopSupports = new ArrayList<>();
 
     @Reference
-    private ModelProcessor modelProcessor;
+    private ModelPostProcessor modelPostProcessor;
     @Reference
     private NestedMappingSupport nestedMappingSupport;
     @Reference
@@ -165,7 +165,7 @@ public class ResourceToModelMapper {
 
     private <T> T postProcess(final Resource resource, final T model, final ResourceModelFactory factory) {
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(model.getClass());
-        this.modelProcessor.processAfterMapping(metaData, model);
+        this.modelPostProcessor.processAfterMapping(metaData, model);
 
         T currentModel = model;
         for (ResourceModelPostProcessor processor : this.postProcessors) {

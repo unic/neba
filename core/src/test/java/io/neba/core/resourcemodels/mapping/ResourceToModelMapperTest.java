@@ -73,7 +73,7 @@ public class ResourceToModelMapperTest {
     @Mock
     private ResourceModelFactory factory;
     @Mock
-    private ModelProcessor modelProcessor;
+    private ModelPostProcessor modelPostProcessor;
     @Mock
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
     @Mock
@@ -168,13 +168,13 @@ public class ResourceToModelMapperTest {
     @Test
     public void testMappingPostProcessorIsInvokedOnDirectAdaptation() {
         mapResourceToModel();
-        verify(this.modelProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
+        verify(this.modelPostProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
     }
 
     @Test
     public void testMappingPostProcessorIsInvokedOnIndirectAdaptation() {
         mapResourceToModel();
-        verify(this.modelProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
+        verify(this.modelPostProcessor).processAfterMapping(isA(ResourceModelMetaData.class), eq(this.model));
     }
 
     @Test(expected = CycleInModelInitializationException.class)
