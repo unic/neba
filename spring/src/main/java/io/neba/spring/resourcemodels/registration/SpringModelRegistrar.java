@@ -62,7 +62,7 @@ public class SpringModelRegistrar {
         final Bundle bundle = bundleContext.getBundle();
         logger.info("Discovering resource models in bundle {}  ...", bundle.getSymbolicName());
 
-        final List<ModelDefinition<?>> modelDefinitions =
+        final List<SpringBasedModelDefinition> modelDefinitions =
                 stream(beanNamesForTypeIncludingAncestors(factory, Object.class))
                         .map(beanName -> {
                             final Class<?> modelType = factory.getType(beanName);

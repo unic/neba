@@ -16,21 +16,29 @@
 package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 import javax.annotation.Nonnull;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+/**
+ * Performs content-to-model mapping for {@link ModelDefinition known spring resource model beans}
+ * using a thread-local stack of {@link #push(ResourceModelFactory.ContentToModelMappingCallback) registered callbacks}.
+ *
+ * @see SpringModelRegistrar
+ */
 class ContentToModelMappingBeanPostProcessor implements BeanPostProcessor {
-    private final ThreadLocal<Queue<ResourceModelFactory.ContentToModelMappingCallback>> mappingCallbackThreadLocal = ThreadLocal.withInitial(LinkedList::new);
+    private final ThreadLocal<Deque<ResourceModelFactory.ContentToModelMappingCallback>> mappingCallbackThreadLocal = ThreadLocal.withInitial(LinkedList::new);
     private final Set<String> knownNebaModelBeanNames;
 
-    ContentToModelMappingBeanPostProcessor(List<ResourceModelFactory.ModelDefinition<?>> definitions) {
+    <T extends ModelDefinition> ContentToModelMappingBeanPostProcessor(List<T> definitions) {
         final Set<String> knownNebaModelBeanNames = new HashSet<>();
         definitions.forEach(definition -> knownNebaModelBeanNames.add(definition.getName()));
         this.knownNebaModelBeanNames = knownNebaModelBeanNames;
@@ -56,7 +64,7 @@ class ContentToModelMappingBeanPostProcessor implements BeanPostProcessor {
     }
 
     void push(ResourceModelFactory.ContentToModelMappingCallback callback) {
-        mappingCallbackThreadLocal.get().add(callback);
+        mappingCallbackThreadLocal.get().addFirst(callback);
     }
 
     void pop() {

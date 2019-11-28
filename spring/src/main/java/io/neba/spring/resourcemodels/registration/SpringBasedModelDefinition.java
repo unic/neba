@@ -20,6 +20,9 @@ import io.neba.api.spi.ResourceModelFactory;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Represents the meta-data of a resource model in a spring context.
+ */
 class SpringBasedModelDefinition implements ResourceModelFactory.ModelDefinition<Object> {
     private final ResourceModel model;
     private final String beanName;
@@ -50,5 +53,10 @@ class SpringBasedModelDefinition implements ResourceModelFactory.ModelDefinition
     @Nonnull
     public Class<?> getType() {
         return modelType;
+    }
+
+    @Nonnull
+    String getBeanName() {
+        return beanName;
     }
 }
