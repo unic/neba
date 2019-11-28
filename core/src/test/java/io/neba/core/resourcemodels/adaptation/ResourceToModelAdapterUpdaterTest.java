@@ -19,7 +19,9 @@ package io.neba.core.resourcemodels.adaptation;
 import io.neba.core.Eventual;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.OsgiModelSource;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterFactory;
+import org.apache.sling.api.resource.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,6 +79,8 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     private BundleContext context;
     @Mock
     private Bundle bundle;
+    @Mock
+    private ResourceToModelAdapterUpdater.Configuration configuration;
 
     private List<OsgiModelSource<?>> modelSources;
     private Dictionary<String, Object> updatedProperties;
@@ -92,6 +96,9 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         when(this.registry.getModelSources())
                 .thenReturn(this.modelSources);
 
+        when(this.configuration.allowAdaptingFromRequest())
+                .thenReturn(true);
+
         doAnswer(inv -> {
             updatedProperties = (Dictionary<String, Object>) inv.getArguments()[2];
             return registration;
@@ -100,9 +107,8 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         when(this.context.getBundle())
                 .thenReturn(this.bundle);
 
-        this.testee.activate(this.context);
+        activate();
     }
-
 
     @Test
     public void testUpdaterPerformsNoUpdatesWhileBundleNotReady() {
@@ -110,10 +116,6 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         withResolvedBundle();
         signalRegistryChange();
         assertUpdaterDoesNotUpdateModelAdapter();
-    }
-
-    private void withResolvedBundle() {
-        doReturn(Bundle.RESOLVED).when(this.bundle).getState();
     }
 
     @Test
@@ -169,6 +171,26 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
                 TestInterface.class.getName(), TestInterfaceExtended.class.getName());
     }
 
+    @Test
+    public void testAdaptationFromSlingHttpServletRequestIsEnabledByDefault() {
+        assertAdaptablesPropertyIs(Resource.class.getName(), SlingHttpServletRequest.class.getName());
+    }
+
+    @Test
+    public void testDisablingAdaptationFromRequest() {
+        withAdaptationFromRequestDisabled();
+        activate();
+        assertAdaptablesPropertyIs(Resource.class.getName());
+    }
+
+    private void withAdaptationFromRequestDisabled() {
+        doReturn(false).when(this.configuration).allowAdaptingFromRequest();
+    }
+
+    private void withResolvedBundle() {
+        doReturn(Bundle.RESOLVED).when(this.bundle).getState();
+    }
+
     private void withActiveBundle() {
         when(this.bundle.getState()).thenReturn(Bundle.ACTIVE);
     }
@@ -216,6 +238,15 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         assertThat(adapters).containsOnly(elements);
     }
 
+    private void assertAdaptablesPropertyIs(Object... elements) {
+        assertThat(this.updatedProperties).isNotNull();
+        assertThat(this.updatedProperties.get("adaptables"))
+                .isNotNull()
+                .isInstanceOf(Object[].class);
+        Object[] adapters = (Object[]) this.updatedProperties.get("adaptables");
+        assertThat(adapters).containsOnly(elements);
+    }
+
     private void signalRegistryChange() {
         this.testee.refresh();
     }
@@ -229,5 +260,9 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
 
     private void signalIllegalStateWhenUnregisteringService() {
         doThrow(new IllegalStateException("THIS IS AN EXPECTED TEST EXCEPTION")).when(this.registration).unregister();
+    }
+
+    private void activate() {
+        this.testee.activate(this.configuration, this.context);
     }
 }
