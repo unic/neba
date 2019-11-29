@@ -139,7 +139,13 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
         LOGGER.info("Servlet instance stopped");
     }
 
-    @ObjectClassDefinition(name = "NEBA model JSON view servlet")
+    @ObjectClassDefinition(
+            name = "NEBA model JSON view servlet",
+            description =
+                    "Renders resources as JSON using a NEBA model." +
+                            "The used model is either the most specific NEBA model for the current resource's type or a model " +
+                            "with the name specified in the selectors, provided that model is for a compatible resource type. " +
+                            "The JSON view can thus be resolved using </resource/path>.<one of the configured selectors>[.<optional specific model name>].json")
     public @interface Configuration {
         @AttributeDefinition(
                 name = "Encoding",
@@ -158,22 +164,23 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
                 name = "Servlet selectors",
                 description = "The selectors this servlet is listening for. Note that 'model' is the default used by the Apache Sling Exporter Framework.")
         @SuppressWarnings("unused")
-        String[] sling_servlet_selectors() default {"model"};
+        String[] sling_servlet_selectors() default "model";
 
         @AttributeDefinition(
                 name = "Resource types",
                 description =
                         "If specified, this servlet will only serve JSON views for resource with one of the given types. " +
-                                "By default, this servlet will serve requests for all resources by registering itself as the default servlet for the configured selector(s).")
+                                "By default, this servlet will serve requests for all resources by registering itself " +
+                                "as the default servlet for the configured selector(s). Defaults to sling/servlet/default.")
         @SuppressWarnings("unused")
-        String[] sling_servlet_resourceTypes() default {"sling/servlet/default"};
+        String[] sling_servlet_resourceTypes() default "sling/servlet/default";
 
         @AttributeDefinition(
                 name = "Jackson features",
                 description = "Enable or disable serialization or module features using the " +
                         "respective enumeration names and a boolean flag," +
                         " for instance SerializationFeature.INDENT_OUTPUT=false or MapperFeature.SORT_PROPERTIES_ALPHABETICALLY=true.")
-        String[] jacksonSettings() default {"SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true"};
+        String[] jacksonSettings() default "SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true";
 
         @AttributeDefinition(
                 name = "Add :type attribute",
