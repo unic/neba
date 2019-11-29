@@ -171,9 +171,11 @@
                         <Export-Package />
                         <Import-Package>
                             !org.apache.tools.*,
-                            org.eclipse.jetty.*;version="[9.2, 10)",
+                            !jdk.*,
+                            !sun.*,
                             org.eclipse.jetty.util;version="[9.2, 10)",
                             org.eclipse.jetty.websocket.server;version="[9.2, 10)",
+                            org.eclipse.jetty.*;version="[9.2, 10)",
                             javax.servlet.*;version="[2.6, 5]",
                             javax.annotation.*;version="0.0.0";resolution:=optional,
                             com.fasterxml.jackson.*;version="${jackson.importVersionRange}";resolution:=optional,
