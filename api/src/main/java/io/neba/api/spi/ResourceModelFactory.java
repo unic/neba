@@ -29,23 +29,25 @@ import java.util.Collection;
  */
 public interface ResourceModelFactory {
     /**
-     * @return A list of all {@link ModelDefinition model definitions} suitable for {@link #getModel(ModelDefinition) model} resolution.
+     * @return A list of all {@link ModelDefinition model definitions} suitable for {@link #provideModel(ModelDefinition, ContentToModelMappingCallback<T>)} (ModelDefinition, ContentToModelMappingCallback) model} resolution.
      * Never <code>null</code> but rather an empty collection.
      */
     @Nonnull
-    Collection<ModelDefinition> getModelDefinitions();
+    Collection<ModelDefinition<?>> getModelDefinitions();
 
     /**
      * @param modelDefinition must not be <code>null</code>.
-     * @return an instance of the model with the given name. Never <code>null</code>.
+     * @param callback        the callback to invoke when the model is ready for content-to-object mapping. After the invocation, the resource
+     *                        originally {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapted} to the model has been mapped to the model.
+     *                        This allows the factory to stay in control the model life cycle, for instance to invoke {@link javax.annotation.PostConstruct} methods
+     *                        after completion of content-to-model mapping.
      */
-    @Nonnull
-    Object getModel(@Nonnull ModelDefinition modelDefinition);
+    <T> T provideModel(@Nonnull ModelDefinition<T> modelDefinition, @Nonnull ContentToModelMappingCallback<T> callback);
 
     /**
      * @author Olaf Otto
      */
-    interface ModelDefinition {
+    interface ModelDefinition<T> {
         @Nonnull
         ResourceModel getResourceModel();
 
@@ -61,6 +63,21 @@ public interface ResourceModelFactory {
          * the actual model class or an interface the model implements.
          */
         @Nonnull
-        Class<?> getType();
+        Class<? extends T> getType();
+    }
+
+    /**
+     * A callback to be invoked when the model is ready for content-to-model mapping.
+     */
+    @FunctionalInterface
+    interface ContentToModelMappingCallback<T> {
+        /**
+         * A synchronous callback for models that are ready for content-to-model mapping. After completion, all properties
+         * or resources have been mapped from the resource originally {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapted}
+         * to the model.
+         *
+         * @param model must not be <code>null</code>.
+         */
+        T map(@Nonnull T model);
     }
 }

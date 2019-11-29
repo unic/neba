@@ -47,7 +47,7 @@ public class ModelInstantiatorTest {
 
     private TestModel modelInstance;
 
-    private ModelInstantiator<? extends TestModel> testee;
+    private ModelInstantiator<TestModel> testee;
 
     @Test
     public void testModelIsInstantiatedViaDefaultConstructorIfNoInjectConstructorIsPresent() throws ReflectiveOperationException {
@@ -255,6 +255,7 @@ public class ModelInstantiatorTest {
         withMetadataFor(TestModelWithLifecycleCallbacks.class);
 
         createModelInstance();
+        postProcessAfterInitialization();
 
         assertThat(this.modelInstance).hasFieldOrPropertyWithValue("parentPostConstructInvocation", 0);
         assertThat(this.modelInstance).hasFieldOrPropertyWithValue("localPostConstructInvocation", 1);
@@ -302,8 +303,12 @@ public class ModelInstantiatorTest {
         this.modelInstance = this.testee.create(this.context);
     }
 
+    private void postProcessAfterInitialization() throws IllegalAccessException, java.lang.reflect.InvocationTargetException {
+        this.testee.postProcessAfterInitialization(this.modelInstance);
+    }
+
     private <T extends TestModel> void withMetadataFor(Class<T> modelType) {
-        this.testee = new ModelInstantiator<>(modelType);
+        this.testee = new ModelInstantiator<TestModel>(modelType);
     }
 
     public static class TestModel {

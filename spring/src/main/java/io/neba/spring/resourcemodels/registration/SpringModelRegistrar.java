@@ -18,6 +18,7 @@ package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -26,10 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 import java.lang.annotation.IncompleteAnnotationException;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -63,46 +62,27 @@ public class SpringModelRegistrar {
         final Bundle bundle = bundleContext.getBundle();
         logger.info("Discovering resource models in bundle {}  ...", bundle.getSymbolicName());
 
-        final List<ResourceModelFactory.ModelDefinition> modelDefinitions =
+        final List<SpringBasedModelDefinition> modelDefinitions =
                 stream(beanNamesForTypeIncludingAncestors(factory, Object.class))
-                        .map(n -> {
-                            final Class<?> modelType = factory.getType(n);
+                        .map(beanName -> {
+                            final Class<?> modelType = factory.getType(beanName);
                             if (modelType == null) {
-                                logger.error("The spring application context cannot determine the type of the resource model bean {} in bundle {}. Skipping this model.", n, bundle);
+                                logger.error("The spring application context cannot determine the type of the resource model bean {} in bundle {}. Skipping this model.", beanName, bundle);
                                 return null;
                             }
 
-                            final ResourceModel model = getResourceModelAnnotation(factory, n, modelType);
+                            final ResourceModel model = getResourceModelAnnotation(factory, beanName, modelType);
 
                             if (model == null) {
                                 return null;
                             }
-
-                            return new ResourceModelFactory.ModelDefinition() {
-                                @Override
-                                @Nonnull
-                                public ResourceModel getResourceModel() {
-                                    return model;
-                                }
-
-                                @Override
-                                @Nonnull
-                                public String getName() {
-                                    if (model.name().isEmpty()) {
-                                        return n;
-                                    }
-                                    return model.name();
-                                }
-
-                                @Override
-                                @Nonnull
-                                public Class<?> getType() {
-                                    return modelType;
-                                }
-                            };
+                            return new SpringBasedModelDefinition(model, beanName, modelType);
                         })
                         .filter(Objects::nonNull)
                         .collect(toList());
+
+        final ContentToModelMappingBeanPostProcessor beanPostProcessor = new ContentToModelMappingBeanPostProcessor(modelDefinitions);
+        factory.addBeanPostProcessor(beanPostProcessor);
 
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(SERVICE_DESCRIPTION, "Provides NEBA resource models from Spring Beans annotated with @" + ResourceModel.class.getSimpleName() + ".");
@@ -110,19 +90,7 @@ public class SpringModelRegistrar {
 
         this.bundlesWithModels.put(bundle, bundle.getBundleContext().registerService(
                 ResourceModelFactory.class.getName(),
-                new ResourceModelFactory() {
-                    @Override
-                    @Nonnull
-                    public Collection<ModelDefinition> getModelDefinitions() {
-                        return modelDefinitions;
-                    }
-
-                    @Override
-                    @Nonnull
-                    public Object getModel(@Nonnull ModelDefinition modelDefinition) {
-                        return factory.getBean(modelDefinition.getName());
-                    }
-                },
+                new SpringResourceModelFactory(modelDefinitions, beanPostProcessor, factory),
                 properties
         ));
     }

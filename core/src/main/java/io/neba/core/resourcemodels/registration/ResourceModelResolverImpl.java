@@ -20,7 +20,7 @@ import io.neba.api.services.ResourceModelResolver;
 import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.util.Key;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -101,7 +101,7 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
             return cachedModel.get();
         }
 
-        Collection<ResolvedModel<?>> models = (modelName == null) ?
+        Collection<ResolvedModelSource<?>> models = (modelName == null) ?
                 this.registry.lookupMostSpecificModels(resource) :
                 this.registry.lookupMostSpecificModels(resource, modelName);
 
@@ -111,20 +111,20 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
         }
 
         @SuppressWarnings("unchecked")
-        ResolvedModel<T> resolvedModel = (ResolvedModel<T>) models.iterator().next();
-        if (!includeBaseTypes && isMappedFromGenericBaseType(resolvedModel)) {
+        ResolvedModelSource<T> resolvedModelSource = (ResolvedModelSource<T>) models.iterator().next();
+        if (!includeBaseTypes && isMappedFromGenericBaseType(resolvedModelSource)) {
             this.cache.put(resource, key, empty());
             return null;
         }
 
-        T model = this.mapper.map(resource, resolvedModel);
+        T model = this.mapper.map(resource, resolvedModelSource);
         this.cache.put(resource, key, of(model));
 
         return model;
     }
 
-    private boolean isMappedFromGenericBaseType(ResolvedModel resolvedModel) {
-        final String resourceType = resolvedModel.getResolvedResourceType();
+    private boolean isMappedFromGenericBaseType(ResolvedModelSource resolvedModelSource) {
+        final String resourceType = resolvedModelSource.getResolvedResourceType();
 
         return "nt:unstructured".equals(resourceType) ||
                 "nt:base".equals(resourceType) ||

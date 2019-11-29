@@ -48,7 +48,7 @@ public class NestedMappingSupport {
     private final ThreadLocal<MappingStack> mappingStack = withInitial(() -> new MappingStack(recordedMappings.get()));
 
     /**
-     * Contract: When invoked and <code>true</code> is returned,
+     * Contract: When invoked and <code>null</code> is returned,
      * one <em>must</em> invoke {@link #pop()} after the corresponding mapping was executed.<br />
      * Otherwise, a leak in the form of persisting thread-local attributes is introduced.
      *

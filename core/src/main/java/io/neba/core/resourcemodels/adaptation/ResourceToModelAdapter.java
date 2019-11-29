@@ -20,7 +20,7 @@ import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.api.resource.Resource;
@@ -82,7 +82,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
         // A null model signals that we have not mapped the specific resource before and do not know whether it can be mapped.
         // Resolve and map it, if present.
         if (cachedModel == null) {
-            Collection<ResolvedModel<?>> models = this.registry.lookupMostSpecificModels(resource, target);
+            Collection<ResolvedModelSource<?>> models = this.registry.lookupMostSpecificModels(resource, target);
 
             if (models == null || models.isEmpty()) {
                 // Cache the lookup failure

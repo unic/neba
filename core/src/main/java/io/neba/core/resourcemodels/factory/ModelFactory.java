@@ -41,13 +41,14 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Finds {@link ResourceModel} in bundles with a <code>Neba-Packages</code> header and provides the respective
- * {@link io.neba.api.spi.ResourceModelFactory.ModelDefinition model definitions} and {@link #getModel(ModelDefinition) means to instantiate}
+ * {@link io.neba.api.spi.ResourceModelFactory.ModelDefinition model definitions} and
+ * {@link #provideModel(ModelDefinition, io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback) means to instantiate}
  * the models, including injection of <em>OSGi service dependencies</em> via {@link javax.inject.Inject} and {@link io.neba.api.annotations.Filter}.
  */
 class ModelFactory implements ResourceModelFactory {
     private final Bundle bundle;
-    private List<ModelDefinition> modelDefinitions;
-    private Map<ModelDefinition, ModelInstantiator<?>> modelMetadata;
+    private List<ModelDefinition<?>> modelDefinitions;
+    private Map<ModelDefinition<?>, ModelInstantiator<?>> modelMetadata;
 
     ModelFactory(Bundle bundle) {
         this.bundle = bundle;
@@ -71,8 +72,8 @@ class ModelFactory implements ResourceModelFactory {
                         .distinct()
                         .collect(toList()));
 
-        Map<ModelDefinition, ModelInstantiator<?>> metaData = new HashMap<>();
-        for (ModelDefinition definition : this.modelDefinitions) {
+        Map<ModelDefinition<?>, ModelInstantiator<?>> metaData = new HashMap<>();
+        for (ModelDefinition<?> definition : this.modelDefinitions) {
             metaData.put(definition, new ModelInstantiator<>(definition.getType()));
         }
 
@@ -81,7 +82,7 @@ class ModelFactory implements ResourceModelFactory {
 
     @Nonnull
     @Override
-    public Collection<ModelDefinition> getModelDefinitions() {
+    public Collection<ModelDefinition<?>> getModelDefinitions() {
         return this.modelDefinitions;
     }
 
@@ -115,15 +116,18 @@ class ModelFactory implements ResourceModelFactory {
         return l.stream();
     }
 
-    @Nonnull
     @Override
-    public Object getModel(@Nonnull ModelDefinition modelDefinition) {
-        ModelInstantiator modelInstantiator = this.modelMetadata.get(modelDefinition);
+    public <T> T provideModel(@Nonnull ModelDefinition<T> modelDefinition, @Nonnull ContentToModelMappingCallback<T> callback) {
+        @SuppressWarnings("unchecked")
+        ModelInstantiator<T> modelInstantiator = (ModelInstantiator<T>) this.modelMetadata.get(modelDefinition);
         if (modelInstantiator == null) {
             throw new IllegalStateException("Unable to instantiate " + modelDefinition + ", there is no model metadata for this model type in this factory.");
         }
         try {
-            return modelInstantiator.create(this.bundle.getBundleContext());
+            T model = modelInstantiator.create(this.bundle.getBundleContext());
+            model = callback.map(model);
+            modelInstantiator.postProcessAfterInitialization(model);
+            return model;
         } catch (ReflectiveOperationException e) {
             throw new ModelInstantiationException("Unable to instantiate model " + modelDefinition, e);
         }

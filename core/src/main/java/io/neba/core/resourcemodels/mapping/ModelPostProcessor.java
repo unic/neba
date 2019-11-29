@@ -34,8 +34,8 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Olaf Otto
  */
-@Component(service = ModelProcessor.class)
-public class ModelProcessor {
+@Component(service = ModelPostProcessor.class)
+public class ModelPostProcessor {
     private final Logger logger = getLogger(getClass());
 
     /**

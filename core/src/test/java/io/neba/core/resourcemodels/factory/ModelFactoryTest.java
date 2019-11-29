@@ -16,6 +16,7 @@
 package io.neba.core.resourcemodels.factory;
 
 import io.neba.api.annotations.ResourceModel;
+import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -43,6 +46,8 @@ public class ModelFactoryTest {
     private Bundle bundle;
     @Mock
     private BundleContext bundleContext;
+    @Mock
+    private ContentToModelMappingCallback<ModelClass> callback;
 
     private ModelFactory testee;
 
@@ -67,6 +72,7 @@ public class ModelFactoryTest {
         doReturn(vector.elements()).when(this.bundle).findEntries("/first/package", "*.class", true);
         doReturn(ModelClass.class).when(this.bundle).loadClass(ModelClass.class.getName());
         doReturn(NonModelClass.class).when(this.bundle).loadClass(NonModelClass.class.getName());
+        doAnswer(inv -> inv.getArguments()[0]).when(callback).map(any());
 
         this.testee = new ModelFactory(this.bundle);
     }
@@ -84,14 +90,17 @@ public class ModelFactoryTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testModelFactoryCanCreateInstanceForModelDefinition() {
-        assertThat(this.testee.getModel(this.testee.getModelDefinitions().iterator().next()))
-                .isInstanceOf(ModelClass.class);
+        ModelDefinition<ModelClass> next = (ModelDefinition<ModelClass>) this.testee.getModelDefinitions().iterator().next();
+        Object instance = this.testee.provideModel(next, this.callback);
+        assertThat(instance).isInstanceOf(ModelClass.class);
     }
 
     @Test(expected = IllegalStateException.class)
+    @SuppressWarnings("unchecked")
     public void testHandlingOfMissingModelForModelDefinition() {
-        this.testee.getModel(mock(ModelDefinition.class));
+        this.testee.provideModel(mock(ModelDefinition.class), this.callback);
     }
 
     @Test(expected = UnsupportedOperationException.class)

@@ -18,7 +18,7 @@ package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.core.util.OsgiModelSource;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
@@ -60,7 +60,7 @@ public class ModelRegistryTest {
 
     private Set<ResourceModel> resourceModelAnnotations;
     private long bundleId;
-    private Collection<ResolvedModel<?>> lookedUpModels;
+    private Collection<ResolvedModelSource<?>> lookedUpModels;
     
     @InjectMocks
     private ModelRegistry testee;
@@ -550,7 +550,7 @@ public class ModelRegistryTest {
         for (ResourceModel resourceModel : this.resourceModelAnnotations) {
             String resourceTypeName = resourceModel.value()[0];
             Resource resource = mockResourceWithResourceType(resourceTypeName);
-            Collection<ResolvedModel<?>> models = this.testee.lookupMostSpecificModels(resource);
+            Collection<ResolvedModelSource<?>> models = this.testee.lookupMostSpecificModels(resource);
             assertThat(models).hasSize(1);
         }
     }
@@ -559,7 +559,7 @@ public class ModelRegistryTest {
         for (ResourceModel resourceModel : this.resourceModelAnnotations) {
             String resourceTypeName = resourceModel.value()[0];
             Resource resource = mockResourceWithSupertype(resourceTypeName);
-            Collection<ResolvedModel<?>> models = this.testee.lookupMostSpecificModels(resource);
+            Collection<ResolvedModelSource<?>> models = this.testee.lookupMostSpecificModels(resource);
             assertThat(models).hasSize(1);
         }
     }

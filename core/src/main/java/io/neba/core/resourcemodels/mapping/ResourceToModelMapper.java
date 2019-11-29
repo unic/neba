@@ -23,7 +23,7 @@ import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiModelSource;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -31,6 +31,7 @@ import org.osgi.service.component.annotations.Reference;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
@@ -50,7 +51,7 @@ public class ResourceToModelMapper {
     private final List<AopSupport> aopSupports = new ArrayList<>();
 
     @Reference
-    private ModelProcessor modelProcessor;
+    private ModelPostProcessor modelPostProcessor;
     @Reference
     private NestedMappingSupport nestedMappingSupport;
     @Reference
@@ -61,47 +62,64 @@ public class ResourceToModelMapper {
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
     /**
-     * @param <T>         the model type.
-     * @param resource    must not be <code>null</code>.
-     * @param resolvedModel must not be <code>null</code>.
+     * @param <T>                 the model type.
+     * @param resource            must not be <code>null</code>.
+     * @param resolvedModelSource must not be <code>null</code>.
      * @return never <code>null</code>.
      */
-    public <T> T map(final Resource resource, final ResolvedModel<T> resolvedModel) {
+    @SuppressWarnings("unchecked")
+    public <T> T map(final Resource resource, final ResolvedModelSource<T> resolvedModelSource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");
         }
-        if (resolvedModel == null) {
+        if (resolvedModelSource == null) {
             throw new IllegalArgumentException("Method argument modelSource must not be null");
         }
 
-        T model;
-        final OsgiModelSource<T> modelSource = resolvedModel.getSource();
+        final OsgiModelSource<T> modelSource = resolvedModelSource.getSource();
         final Class<?> modelType = modelSource.getModelType();
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(modelType);
-        final Mapping<T> mapping = new Mapping<>(resource.getPath(), metaData, resolvedModel.getResolvedResourceType());
+        final Mapping<T> mapping = new Mapping<>(resource.getPath(), metaData, resolvedModelSource.getResolvedResourceType());
         // Do not track mapping time for nested resource models of the same type: this would yield
         // a useless average and total mapping time as the mapping durations would sum up multiple times.
         final boolean trackMappingDuration = !this.nestedMappingSupport.hasOngoingMapping(metaData);
 
         final Mapping<T> alreadyOngoingMapping = this.nestedMappingSupport.push(mapping);
 
-        if (alreadyOngoingMapping == null) {
-            try {
-                // Phase 1: Obtain model instance. All standard model lifecycle phases (such as @PostConstruct)
-                // and processors are executed during this invocation.
-                final T mappedModel = modelSource.getModel();
+        if (alreadyOngoingMapping != null) {
+            // Yield the currently mapped model.
+            T model = alreadyOngoingMapping.getMappedModel();
 
+            if (model == null) {
+                // This can only be the case if a cycle was introduced during phase 1.
+                // Cycles introduced during model initialization in the model factory always
+                // represent unresolvable programming errors (the model depends on itself to initialize itself),
+                // thus we must raise an exception.
+                throw new CycleInModelInitializationException("Unable to provide model " + modelType +
+                        " for resource " + resource + ". The model initialization resulted in a cycle: "
+                        + join(this.nestedMappingSupport.getMappingStack(), " >> ") + " >> " + mapping + ". " +
+                        "Does the model depend on itself to initialize, e.g. in a @PostConstruct method?");
+            }
+            return model;
+        }
+
+        try {
+            // Phase 1: Delegate model instantiation to factory.
+            // Here, we delegate the model lifecycle to the model factory, and provide a callback that
+            // applies the content-to-model mapping when invoked. This way, a factory may construct the object, inject collaborators, map content to the model
+            // and then complete initialization e.g. by invoking @PostConstruct methods on the model.
+            ContentToModelMappingCallback<T> cb = model -> {
+                // Track the successful instantiation of the model.
                 metaData.getStatistics().countInstantiation();
 
                 // Phase 2: Retain the model prior to mapping in order to return it if the mapping results in a cycle.
-                mapping.setMappedModel(mappedModel);
-
+                mapping.setMappedModel(model);
                 // Phase 3: Map the model (may create a cycle).
 
                 // Retain current time for statistics
                 final long startTimeInMs = trackMappingDuration ? currentTimeMillis() : 0;
 
-                model = map(resource, mappedModel, metaData, modelSource.getFactory());
+                T mappedModel = ResourceToModelMapper.this.map(resource, model, metaData, modelSource.getFactory());
 
                 // Always count the subsequent mapping, if there is a parent.
                 Mapping<?> parent = nestedMappingSupport.peek();
@@ -114,26 +132,13 @@ public class ResourceToModelMapper {
                     metaData.getStatistics().countMappingDuration((int) (currentTimeMillis() - startTimeInMs));
                 }
 
-            } finally {
-                this.nestedMappingSupport.pop();
-            }
-        } else {
-            // Yield the currently mapped model.
-            model = alreadyOngoingMapping.getMappedModel();
+                return mappedModel;
+            };
 
-            if (model == null) {
-                // This can only be the case if a cycle was introduced during phase 1.
-                // Cycles introduced during model initialization in the model factory always
-                // represent unresolvable programming errors (the model depends on itself to initialize itself),
-                // thus we must raise an exception.
-                throw new CycleInModelInitializationException("Unable to provide model " + modelType +
-                        " for resource " + resource + ". The model initialization resulted in a cycle: "
-                        + join(this.nestedMappingSupport.getMappingStack(), " >> ") + " >> " + mapping + ". " +
-                        "Does the model depend on itself to initialize, e.g. in a @PostConstruct method?");
-            }
+            return modelSource.getModel(cb);
+        } finally {
+            this.nestedMappingSupport.pop();
         }
-
-        return model;
     }
 
     private <T> T map(final Resource resource, final T model, final ResourceModelMetaData metaData, final ResourceModelFactory factory) {
@@ -160,7 +165,7 @@ public class ResourceToModelMapper {
 
     private <T> T postProcess(final Resource resource, final T model, final ResourceModelFactory factory) {
         final ResourceModelMetaData metaData = this.resourceModelMetaDataRegistrar.get(model.getClass());
-        this.modelProcessor.processAfterMapping(metaData, model);
+        this.modelPostProcessor.processAfterMapping(metaData, model);
 
         T currentModel = model;
         for (ResourceModelPostProcessor processor : this.postProcessors) {

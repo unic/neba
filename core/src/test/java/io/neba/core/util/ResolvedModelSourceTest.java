@@ -29,24 +29,24 @@ import static org.mockito.Mockito.mock;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ResolvedModelTest {
+public class ResolvedModelSourceTest {
     @Mock
     private OsgiModelSource<?> modelSource;
-    private ResolvedModel<?> testee;
+    private ResolvedModelSource<?> testee;
 
     @Before
     public void setUp() {
-        this.testee = new ResolvedModel<>(this.modelSource, "junit/test/type");
+        this.testee = new ResolvedModelSource<>(this.modelSource, "junit/test/type");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorArgumentSourceMustNotBeNull() {
-        new ResolvedModel<>(null, "some/resource/type");
+        new ResolvedModelSource<>(null, "some/resource/type");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorArgumentResourceTypeMustNotBeNull() {
-        new ResolvedModel<>(this.modelSource, null);
+        new ResolvedModelSource<>(this.modelSource, null);
     }
 
     @Test
@@ -62,19 +62,19 @@ public class ResolvedModelTest {
     @Test
     public void testEqualsToResultForOtherSource() {
         OsgiModelSource<?> modelSource = mock(OsgiModelSource.class);
-        ResolvedModel other = new ResolvedModel<>(modelSource, "junit/test/type");
+        ResolvedModelSource other = new ResolvedModelSource<>(modelSource, "junit/test/type");
 
         assertLookupResultIsNotEqualTo(other);
     }
 
     @Test
     public void testEqualsToResultForDifferentResourceType() {
-        assertLookupResultIsNotEqualTo(new ResolvedModel<>(this.modelSource, "junit/other/type"));
+        assertLookupResultIsNotEqualTo(new ResolvedModelSource<>(this.modelSource, "junit/other/type"));
     }
 
     @Test
     public void testEqualsToResultForSameSourceAndResourceType() {
-        assertThat(this.testee).isEqualTo(new ResolvedModel<>(this.modelSource, "junit/test/type"));
+        assertThat(this.testee).isEqualTo(new ResolvedModelSource<>(this.modelSource, "junit/test/type"));
     }
 
     @Test

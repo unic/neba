@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.registration;
 
 import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import io.neba.core.resourcemodels.adaptation.ResourceToModelAdapterUpdater;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.OsgiModelSource;
@@ -92,11 +93,11 @@ public class ModelRegistrar {
     }
 
     private void registerModels(Bundle bundle, ResourceModelFactory factory) {
-        final Collection<ResourceModelFactory.ModelDefinition> modelDefinitions = factory.getModelDefinitions();
+        final Collection<ModelDefinition<?>> modelDefinitions = factory.getModelDefinitions();
 
         logger.info("Registering {} resource models from bundle: " + displayNameOf(bundle) + " ...", modelDefinitions.size());
         modelDefinitions.forEach(d -> {
-            final OsgiModelSource<Object> source = new OsgiModelSource<>(d, factory, bundle);
+            final OsgiModelSource<?> source = new OsgiModelSource<>(d, factory, bundle);
             this.resourceModelMetaDataRegistrar.register(source);
             this.registry.add(getTypes(d), source);
             logger.debug("Registered model {} as a model for the resource types {}.", d.getName(), join(getTypes(d), ","));
@@ -105,7 +106,7 @@ public class ModelRegistrar {
         this.resourceToModelAdapterUpdater.refresh();
     }
 
-    private String[] getTypes(ResourceModelFactory.ModelDefinition d) {
+    private String[] getTypes(ModelDefinition d) {
         try {
             return d.getResourceModel().value();
         } catch (IncompleteAnnotationException e) {

@@ -20,7 +20,7 @@ import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache;
 import io.neba.core.resourcemodels.mapping.ResourceToModelMapper;
 import io.neba.core.resourcemodels.registration.ModelRegistry;
 import io.neba.core.util.Key;
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -86,7 +86,7 @@ public class ResourceToModelAdapterTest {
     private Class<?> targetType;
     private Object adapted;
     private Object[] models;
-    private List<ResolvedModel<?>> resolvedModels;
+    private List<ResolvedModelSource<?>> resolvedModelSources;
 
     @InjectMocks
     private ResourceToModelAdapter testee;
@@ -217,7 +217,7 @@ public class ResourceToModelAdapterTest {
 
     @SuppressWarnings("unchecked")
     private void verifyAdapterDoesNotMapResourceToModel() {
-        verify(this.mapper, never()).map(isA(Resource.class), isA(ResolvedModel.class));
+        verify(this.mapper, never()).map(isA(Resource.class), isA(ResolvedModelSource.class));
     }
 
     private void withNullReturnedAsModelSourceFromRegistrar() {
@@ -245,19 +245,19 @@ public class ResourceToModelAdapterTest {
     }
 
     private void verifyAdapterMapsResourceToModel(int i) {
-        verify(this.mapper).map(eq(this.resource), eq(this.resolvedModels.get(i)));
+        verify(this.mapper).map(eq(this.resource), eq(this.resolvedModelSources.get(i)));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void withAvailableModels(Object... models) {
         this.models = models;
-        this.resolvedModels = new ArrayList<>();
-        when(this.registry.lookupMostSpecificModels(isA(Resource.class), isA(Class.class))).thenReturn(this.resolvedModels);
+        this.resolvedModelSources = new ArrayList<>();
+        when(this.registry.lookupMostSpecificModels(isA(Resource.class), isA(Class.class))).thenReturn(this.resolvedModelSources);
 
         for (Object model : models) {
-            ResolvedModel resolvedModel = mock(ResolvedModel.class);
-            this.resolvedModels.add(resolvedModel);
-            when(this.mapper.map(eq(this.resource), eq(resolvedModel))).thenReturn(model);
+            ResolvedModelSource resolvedModelSource = mock(ResolvedModelSource.class);
+            this.resolvedModelSources.add(resolvedModelSource);
+            when(this.mapper.map(eq(this.resource), eq(resolvedModelSource))).thenReturn(model);
         }
     }
 

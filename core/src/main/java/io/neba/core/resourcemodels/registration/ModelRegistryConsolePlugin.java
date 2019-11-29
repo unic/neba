@@ -16,7 +16,7 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.ResolvedModel;
+import io.neba.core.util.ResolvedModelSource;
 import io.neba.core.util.OsgiModelSource;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.sling.api.resource.LoginException;
@@ -357,11 +357,11 @@ public class ModelRegistryConsolePlugin extends AbstractWebConsolePlugin {
                 if (resource == null) {
                     return types;
                 }
-                Collection<ResolvedModel<?>> resolvedModels = this.registry.lookupAllModels(resource);
-                if (resolvedModels == null) {
+                Collection<ResolvedModelSource<?>> resolvedModelSources = this.registry.lookupAllModels(resource);
+                if (resolvedModelSources == null) {
                     return types;
                 }
-                types.addAll(resolvedModels.stream().map(ResolvedModel::getSource).collect(Collectors.toList()));
+                types.addAll(resolvedModelSources.stream().map(ResolvedModelSource::getSource).collect(Collectors.toList()));
             } finally {
                 resolver.get().close();
             }

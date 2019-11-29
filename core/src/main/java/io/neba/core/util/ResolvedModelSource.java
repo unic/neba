@@ -26,7 +26,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  *
  * @author Olaf Otto
  */
-public class ResolvedModel<T> {
+public class ResolvedModelSource<T> {
     private final OsgiModelSource<T> source;
     private final String resourceType;
     private final int hashCode;
@@ -35,7 +35,7 @@ public class ResolvedModel<T> {
      * @param source       must not be <code>null</code>
      * @param resourceType must not be <code>null</code>
      */
-    public ResolvedModel(OsgiModelSource<T> source, String resourceType) {
+    public ResolvedModelSource(OsgiModelSource<T> source, String resourceType) {
         if (source == null) {
             throw new IllegalArgumentException("Method argument source must not be null.");
         }
@@ -86,7 +86,7 @@ public class ResolvedModel<T> {
             return false;
         }
 
-        ResolvedModel other = (ResolvedModel) obj;
+        ResolvedModelSource other = (ResolvedModelSource) obj;
 
         return this.source.equals(other.source) &&
                 this.resourceType.equals(other.resourceType);
