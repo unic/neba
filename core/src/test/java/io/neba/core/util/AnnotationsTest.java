@@ -106,14 +106,13 @@ public class AnnotationsTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testGetAnnotations() {
         assertAnnotationsAre(MetaAnnotation.class, CyclicAnnotation.class);
     }
 
     @Test
     public void testIteratorProvidesExpectedAnnotations() {
-        assertThat(this.testee.iterator()).containsOnly(this.allAnnotations.toArray(new Annotation[]{}));
+        assertThat(this.testee.iterator()).toIterable().containsOnly(this.allAnnotations.toArray(new Annotation[]{}));
     }
 
     @Test

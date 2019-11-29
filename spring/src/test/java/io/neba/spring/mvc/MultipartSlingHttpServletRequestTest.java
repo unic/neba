@@ -29,8 +29,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -173,7 +178,7 @@ public class MultipartSlingHttpServletRequestTest {
 	}
 
 	private void assertExtractedFileNamesAre(String... names) {
-		assertThat(this.testee.getFileNames()).containsOnly(names);
+		assertThat(this.testee.getFileNames()).toIterable().containsOnly(names);
 	}
 
 	@SuppressWarnings("unchecked")
