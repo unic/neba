@@ -34,12 +34,14 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.regex.Pattern;
 
 import static io.neba.core.util.BundleUtil.displayNameOf;
 import static java.util.regex.Pattern.compile;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_MODIFIED;
 import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
 
 @Component(
@@ -90,6 +92,20 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
             return;
         }
 
+        if (configuration.generateEtag()) {
+            final String etag = "W/\"" + request.getResource().getResourceMetadata().getModificationTime() + "-" + request.getResource().getPath() + '"';
+            Enumeration<String> clientEtags = request.getHeaders("If-None-Match");
+            if (clientEtags.hasMoreElements()) {
+                while (clientEtags.hasMoreElements()) {
+                    if (etag.equals(clientEtags.nextElement())) {
+                        response.setStatus(SC_NOT_MODIFIED);
+                        return;
+                    }
+                }
+            }
+            response.setHeader("Etag", etag);
+        }
+
         nestedMappingSupport.beginRecordingMappings();
         try {
             String[] selectors = request.getRequestPathInfo().getSelectors();
@@ -122,6 +138,7 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
             }
 
             response.setContentType("application/json");
+            response.setHeader("Cache-Control", configuration.cacheControlHeader());
             response.setCharacterEncoding(this.configuration.encoding());
             serializer.serialize(response.getWriter(), model);
         } finally {
@@ -143,7 +160,7 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
             name = "NEBA model JSON view servlet",
             description =
                     "Renders resources as JSON using a NEBA model." +
-                            "The used model is either the most specific NEBA model for the current resource's type or a model " +
+                            "The used model is either the most specific NEBA model for the requested resource's type or a model " +
                             "with the name specified in the selectors, provided that model is for a compatible resource type. " +
                             "The JSON view can thus be resolved using </resource/path>.<one of the configured selectors>[.<optional specific model name>].json")
     public @interface Configuration {
@@ -171,15 +188,16 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
                 description =
                         "If specified, this servlet will only serve JSON views for resource with one of the given types. " +
                                 "By default, this servlet will serve requests for all resources by registering itself " +
-                                "as the default servlet for the configured selector(s). Defaults to sling/servlet/default.")
+                                "as the default servlet for the configured selector(s). Defaults to sling/servlet/default. " +
+                                "Note that primary note types, such as nt:unstructured, are not supported by Sling Servlets.")
         @SuppressWarnings("unused")
         String[] sling_servlet_resourceTypes() default "sling/servlet/default";
 
         @AttributeDefinition(
                 name = "Jackson features",
                 description = "Enable or disable serialization or module features using the " +
-                        "respective enumeration names and a boolean flag," +
-                        " for instance SerializationFeature.INDENT_OUTPUT=false or MapperFeature.SORT_PROPERTIES_ALPHABETICALLY=true.")
+                        "respective enumeration names and a boolean flag, " +
+                        "for instance SerializationFeature.INDENT_OUTPUT=false or MapperFeature.SORT_PROPERTIES_ALPHABETICALLY=true.")
         String[] jacksonSettings() default "SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true";
 
         @AttributeDefinition(
@@ -187,5 +205,17 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
                 description = "Automatically add the resource type for which the model was resolved in an attribute called ':type' to the generated JSON. " +
                         "This is useful e.g. to determine the frontend components responsible for rendering generated JSON.")
         boolean addTypeAttribute() default false;
+
+        @AttributeDefinition(
+                name = "Generate Etag",
+                description = "Generate an Etag header based on the path and modification date of the request's resource. " +
+                        "Enabling this must be done in combination with a cache-control header that allows caching (see below), " +
+                        "e.g. 'private, max-age=86400, must-revalidate', which would allow in-browser caching for 24 hours.")
+        boolean generateEtag() default false;
+
+        @AttributeDefinition(
+                name = "Cache-Control header",
+                description = "Add the following Cache-Control HTTP header to all responses.")
+        String cacheControlHeader() default "private, no-cache, no-store, must-revalidate";
     }
 }

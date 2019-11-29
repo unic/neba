@@ -23,6 +23,7 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceMetadata;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,31 +39,41 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.util.Enumeration;
 import java.util.Optional;
 
 import static java.util.Arrays.stream;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_MODIFIED;
 import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JsonViewServletsTest {
+    private static final long RESOURCE_MODIFICATION_TIMESTAMP = 123L;
+    private static final String IF_NONE_MATCH = "If-None-Match";
+
     @Mock
     private ResourceModelResolver resourceModelResolver;
     @Mock
     private NestedMappingSupport nestedMappingSupport;
     @Mock
     private Resource resource;
+    @Mock
+    private ResourceMetadata resourceMetadata;
     @Mock
     private ComponentContext context;
     @Mock
@@ -96,6 +107,11 @@ public class JsonViewServletsTest {
         doReturn("GET").when(request).getMethod();
         doReturn(this.requestPathInfo).when(this.request).getRequestPathInfo();
         doReturn(this.resource).when(this.request).getResource();
+        doReturn(this.resourceMetadata).when(this.resource).getResourceMetadata();
+        doReturn(RESOURCE_MODIFICATION_TIMESTAMP).when(this.resourceMetadata).getModificationTime();
+
+        doReturn(mock(Enumeration.class)).when(this.request).getHeaders(IF_NONE_MATCH);
+
         doAnswer(inv -> this.selectors).when(this.requestPathInfo).getSelectors();
         doReturn("/some/resource/path").when(resource).getPath();
 
@@ -219,6 +235,89 @@ public class JsonViewServletsTest {
         withSelectors("model", "modelName", "nonsense");
         serveRequest();
         verify(this.response).sendError(SC_BAD_REQUEST, "Invalid selectors. The expected format is <json servlet selector>[.<optional model name>]");
+    }
+
+    @Test
+    public void testEtagsAreNeitherGeneratedNotTestedWhenEtagsAreDisabled() throws IOException {
+        withEtagsDisabled();
+        withValidEtagInRequest();
+
+        serveRequest();
+
+        verifyNoEtagInResponse();
+        verifyOriginalResponseStatusIsKept();
+    }
+
+    @Test
+    public void testValidEtagInRequestWithEtagGenerationEnabledYieldsNotModifiedStatus() throws IOException {
+        withEtagsEnabled();
+        withValidEtagInRequest();
+
+        serveRequest();
+
+        verifyResponseStatusIsChangedToNotModified();
+        verifyNoEtagInResponse();
+    }
+
+    @Test
+    public void testEtagsAreAddedToResponseWhenEtagGenerationIsEnabled() throws IOException {
+        withEtagsEnabled();
+
+        serveRequest();
+
+        verifyEtagIsAddedToResponse();
+    }
+
+    @Test
+    public void testCacheControlHeaderIsAddedFromConfiguration() throws IOException {
+        withConfiguredCacheControlHeader("private, max-age=0");
+
+        serveRequest();
+
+        verifyCacheControlHeaderInResponseIs("private, max-age=0");
+    }
+
+    private void verifyCacheControlHeaderInResponseIs(String value) {
+        verify(this.response).setHeader("Cache-Control", value);
+    }
+
+    private void withConfiguredCacheControlHeader(String value) {
+        doReturn(value).when(this.configuration).cacheControlHeader();
+    }
+
+    private void verifyResponseStatusIsChangedToNotModified() {
+        verify(this.response).setStatus(SC_NOT_MODIFIED);
+    }
+
+    private void verifyEtagIsAddedToResponse() {
+        verify(this.response).setHeader("Etag", getExpectedEtag());
+    }
+
+    private void withEtagsEnabled() {
+        doReturn(true).when(this.configuration).generateEtag();
+    }
+
+    private void verifyOriginalResponseStatusIsKept() {
+        verify(this.response, never()).setStatus(anyInt());
+    }
+
+    private void withValidEtagInRequest() {
+        Enumeration etagHeaderValues = mock(Enumeration.class);
+        doReturn(true, true, false).when(etagHeaderValues).hasMoreElements();
+        doReturn(getExpectedEtag()).when(etagHeaderValues).nextElement();
+        doReturn(etagHeaderValues).when(this.request).getHeaders(IF_NONE_MATCH);
+    }
+
+    private String getExpectedEtag() {
+        return "W/\"" + RESOURCE_MODIFICATION_TIMESTAMP + '-' + resource.getPath() + "\"";
+    }
+
+    private void verifyNoEtagInResponse() {
+        verify(this.response, never()).addHeader(eq("Etag"), any());
+    }
+
+    private void withEtagsDisabled() {
+        doReturn(false).when(this.configuration).generateEtag();
     }
 
     private void withExceptionDuringResponseAccess() throws IOException {
