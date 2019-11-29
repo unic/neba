@@ -532,7 +532,7 @@ $(function () {
      */
     function logfileParametersChanged() {
         var file = $logfile.val(),
-            amount = $amount.val(),
+            amount = parseFloat($amount.val()),
             grep = $grep.val(),
             href = document.location.href,
             queryPos = Math.max(href.indexOf("?"), href.indexOf("#")),
@@ -556,7 +556,7 @@ $(function () {
             return;
         }
 
-        tailSocket.send("tail:" + amount + 'mb:' + file);
+        tailSocket.send("tail:" + parseFloat(amount) + 'mb:' + file);
     }
 
     /**
@@ -570,7 +570,7 @@ $(function () {
             return;
         }
 
-        tailSocket.send("follow:" + amount + 'mb:' + file);
+        tailSocket.send("follow:" + parseFloat(amount) + 'mb:' + file);
     }
 
     /**
