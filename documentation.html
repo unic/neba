@@ -48,7 +48,9 @@ description: A comprehensive guide to using the NEBA features
                         </ul>
                     </li>
                     <li><a href="#lazy_loading">Lazy loading</a></li>
-                    <li><a href="#the_premapping_and_postmapping_annotations">Performing additional initializations</a></li>
+                    <li><a href="#json_views">Rendering NEBA models as JSON</a></li>
+                    <li><a href="#lifecycle_annotations">Performing additional initializations</a></li>
+                    <li><a href="#caching">Application-level caching</a></li>
                 </ul>
             </section>
             <section>
@@ -71,7 +73,6 @@ description: A comprehensive guide to using the NEBA features
                 <ul>
                     <li><a href="#custom_annotations">Implementing custom annotations</a></li>
                     <li><a href="#lifecycle_callbacks">Lifecycle callbacks</a></li>
-                    <li><a href="#cache_extension">Caching and cache extension</a></li>
                     <li><a href="#custom_models">Providing custom resource models</a></li>
                 </ul>
             </section>
@@ -216,7 +217,7 @@ description: A comprehensive guide to using the NEBA features
         package)</p>
 
     <figure class="listing" id="listing:resource-model-annotation">
-        {% highlight java %}@ResourceModel(types = "foundation/components/carousel")
+        {% highlight java %}@ResourceModel("foundation/components/carousel")
 public class Carousel {
 }{% endhighlight %}<figcaption>Application of the @ResourceModel annotation</figcaption></figure>
 
@@ -244,7 +245,7 @@ public class Carousel {
                 <p>
             NEBA makes a clear distinction between IOC (dependency injection) and content to object mapping and makes sure that these two concepts are not mixed.
             The bottom line is: Collaborators are injected with @Inject (or other means, when models are <a href="#spring">managed by a Spring application context</a>), and content
-            is injected using NEBA's dedicated annotations.
+            is injected into suitable fields by default, additionally using NEBA's dedicated annotations.
         </p>
 
         <h4 id="the_filter_annotation">Injecting OSGi services with NEBA core</h4>
@@ -254,7 +255,7 @@ public class Carousel {
         </p>
 
         <figure class="listing" id="listing:field-injection">
-        {% highlight java %}@ResourceModel(types = "my/resource/type")
+        {% highlight java %}@ResourceModel("my/resource/type")
 public class SomeModelClass {
     @Inject
     @Filter("(zone=eu)")
@@ -269,7 +270,7 @@ public class SomeModelClass {
         </p>
 
         <figure class="listing" id="listing:constructor-injection">
-        {% highlight java %}@ResourceModel(types = "my/resource/type")
+        {% highlight java %}@ResourceModel("my/resource/type")
 public class SomeModelClass {
     public SomeModelClass(@Inject @Filter("(zone=eu)") DataSource ds) {
         this.dataSource = ds;
@@ -288,7 +289,7 @@ public class SomeModelClass {
         </p>
 
         <figure class="listing" id="listing:optional-injection">
-        {% highlight java %}@ResourceModel(types = "my/resource/type")
+        {% highlight java %}@ResourceModel("my/resource/type")
 public class SomeModelClass {
     @Inject
     private Optional<OtherService> otherService;
@@ -302,7 +303,7 @@ public class SomeModelClass {
         <p>NEBA allows injecting multiple instances of the same service, with an optional @Filter annotation (the @Filter annotation is optional since NEBA 5.0.1). </p>
 
         <figure class="listing" id="listing:multiple-injection">
-        {% highlight java %}@ResourceModel(types = "my/resource/type")
+        {% highlight java %}@ResourceModel("my/resource/type")
 public class SomeModelClass {
     @Inject
     @Filter("(some=filter)")
@@ -351,7 +352,7 @@ public class SomeModelClass {
     <p>Let's select &quot;pages&quot;, &quot;playSpeed&quot;, &quot;transTime&quot; and add them to the model:</p>
 
     <figure class="listing" id="listing:neba-resourcemodel-with-simple-fields">
-        {% highlight java %}@ResourceModel(types = "foundation/components/carousel")
+        {% highlight java %}@ResourceModel("foundation/components/carousel")
 public class Carousel {
     private String playSpeed;
     private String transTime;
@@ -535,7 +536,7 @@ private Resource homepage;{% endhighlight %}
     accessing the underlying Resource but has significant architectural value. Using @This, one may split up a model into multiple aspects and compose them dynamically, like so:</p>
 
     <figure class="listing" id="listing:neba-this-annotation">
-        {% highlight java %}@ResourceModel(types = ...)
+        {% highlight java %}@ResourceModel(...)
 public class MyModel {
     @This
     // OtherModel models a different aspect of the same resource.
@@ -561,7 +562,7 @@ private Resource resource;{% endhighlight %}<figcaption>Using the @This annotati
         a model for any access restricted content like so:</p>
 
     <figure class="listing" id="listing:resourcemodel-for-mixin-type">
-        {% highlight java %}@ResourceModel(types = "mix:AccessRestricted")
+        {% highlight java %}@ResourceModel("mix:AccessRestricted")
 public class AccessRestricted {
  ....
 }{% endhighlight %}<figcaption>Defining a @ResourceModel for a mixin type</figcaption></figure>
@@ -593,7 +594,7 @@ public class AccessRestricted {
     </p>
 
     <figure class="listing" id="listing:neba-implicit-lazy-loading">
-        {% highlight java %}@ResourceModel(types = "...")
+        {% highlight java %}@ResourceModel("...")
 public class MyModel {
   @Children
   private List<Page> children; // Provided as a lazy-loading proxy
@@ -614,7 +615,7 @@ public class MyModel {
     </p>
 
     <figure class="listing" id="listing:explicit-lazy-loading-with-lazy">
-        {% highlight java %}@ResourceModel(types = "...")
+        {% highlight java %}@ResourceModel("...")
 public class MyModel {
   @Reference
   private Lazy<Page> page;
@@ -631,7 +632,7 @@ public class MyModel {
         </p>
 
         <figure class="listing">
-        {% highlight java %}@ResourceModel(types = "...")
+        {% highlight java %}@ResourceModel("...")
 public class MyModel {
   @Reference
   private Resource r;
@@ -665,7 +666,7 @@ public class MyModel {
     </p>
 
     <figure class="listing" id="listing:explicit-lazy-loading-collections">
-        {% highlight java %}@ResourceModel(types = "...")
+        {% highlight java %}@ResourceModel("...")
 public class MyModel {
   @Children
   private Lazy<Collection<Page>> children;
@@ -678,24 +679,54 @@ public class MyModel {
         the Lazy interface implementation.
     </p>
 
-    <h3 id="the_premapping_and_postmapping_annotations">Performing additional initializations</h3>
+    <h3 id="json_views">Rendering NEBA models as JSON</h3>
+        <p>
+    Since 5.1.0, NEBA features an out of the box JSON rendering servlet. This servlet can be configured to respond to certain selectors and resource types and will adapt the request's
+        resource to a specified or the most specific NEBA model and render a JSON view.
+        To enable the JSON rendering, head to the system console's configuration tab and add a configuration to the <em>NEBA model JSON view servlet</em>.
+        </p>
+        <p>
+            Here, you can configure an arbitrary amount of JSON view renderers. For each configuration, a dedicated servlet instance will be published hence allowing for dedicated
+            configurations in a multi-tenant scenario. Each JSON view servlet can be configured wth its own selectors and Jackson features. In addition, The servlet supports
+            HTTP Etag generation based on the resource and customized Cache-Control headers.
+        </p>
+        <p>
+            After a JSON view configuration is added, a resource's model can be rendered as JSON using the URL schema
+{% highlight java %}</resource/path>.<one of the configured selectors>[.<optional specific model name>].json
+// E.g. /content/site/en_US/contact.neba.json
+{% endhighlight %}
+        </p>
+        <p>
+            An example for configuring and using NEBA JSON views can be found in the <a href="#sample_project">NEBA sample project</a>.
+        </p>
+
+
+    <h3 id="lifecycle_annotations">Performing additional initializations</h3>
 
     <p>Sometimes it is necessary to perform additional initializations
-        after all collaborators of a @ResourceModel are injected and all resource properties have been mapped to the model.
-        NEBA supports this case with the <a href="apidocs/neba-api/io/neba/api/annotations/AfterMapping.html">@AfterMapping annotation</a>.
-        Methods with this annotation are automatically invoked after all properties of a resource model are mapped from its resource:</p>
+        after all collaborators of a @ResourceModel are injected and all resource properties have been mapped to the model. Since NEBA 5.1.0, methods annotated with
+        @PostConstruct will be invoked after dependency and content injection. Prior to NEBA 5.1.0, the <a href="apidocs/neba-api/io/neba/api/annotations/AfterMapping.html">@AfterMapping annotation</a>
+        must be used since @PostConstruct was called before to content-to-model mapping.
+    </p>
 
     <figure class="listing" id="listing:postmapping">
-        {% highlight java %}@ResourceModel(types = "my/model/type")
+        {% highlight java %}@ResourceModel("my/model/type")
 public class MyModel {
    @This
    private Resource resource;
-   @AfterMapping
+   @PostConstruct
    public void initializeSomething() {
         // resource is initialized at this point.
         this.resource.adaptTo...
    }
-}{% endhighlight %}<figcaption>Using the @AfterMapping annotation</figcaption></figure>
+}{% endhighlight %}<figcaption>Using the @PostConstruct annotation</figcaption></figure>
+
+<h3 id="caching">Application-level caching</h3>
+<p>
+NEBA's central and most performance critical feature is the adaptation of resource models. There, resource and model resolution, content-to-model mapping and data type conversion occurs.
+This core functionality features a safe and sensible integrated cache, the <em>request-scoped resource model cache.</em>
+This cache can be disabled via the Felix console (configuration tab). For further information, consult the Javadoc of the <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelCache.html">ResourceModelCache</a>.</p>
+
     </section>
 
 
@@ -793,7 +824,7 @@ import org.springframework.context.annotation.Scope;
 
 @Scope("prototype")
 @Component
-@ResourceModel(types = "my/resource/type")
+@ResourceModel("my/resource/type")
 public class MyModel {
     ...
 }{% endhighlight %}
@@ -1042,7 +1073,6 @@ public class MyType {
         adding to better performing implementations.
     </p>
 
-
     <h3 id="tooling_logviewer">The  log viewer</h3>
     <p>
         Developers do not always have serial access to a system in order to analyse log files - however, being able to investigate the log files of a Sling instance
@@ -1067,12 +1097,64 @@ public class MyType {
 <h3 id="custom_annotations">Implementing custom annotations</h3>
 
 <p>
-    NEBA allows registering mappers for fields annotated with arbitrary custom annotations. A mapper is an OSGi service implementing the
-    <a href="apidocs/neba-api/io/neba/api/spi/AnnotatedFieldMapper.html">AnnotatedFieldMapper interface</a>.
-    Implementations may map any non-transient annotated field, including
-    fields directly or indirectly (meta-annotations) annotated with any of NEBA's standard annotations. Thus, AnnotatedFieldMappers can not only be used to support custom annotations, but are
-    allowed to augment NEBA's standard annotation-based mapping behaviour.
+    With NEBA, you can easily add your own annotations to provide additional features. Fields annotated with a custom annotation are handled by the corresponding
+    OSGi service implementing the <a href="apidocs/neba-api/io/neba/api/spi/AnnotatedFieldMapper.html">AnnotatedFieldMapper interface</a>.
+    Implementations may map any non-transient annotated field, including fields directly or indirectly (meta-annotations) annotated with any of NEBA's standard annotations.
+    Thus, AnnotatedFieldMappers can not only be used to support custom annotations, but are allowed to augment NEBA's standard annotation-based mapping behaviour.
 </p>
+    <p>
+        Here is an example for an annotation and a custom processor that translates a field's string value using a locale obtained from the resource path.
+    </p>
+<figure class="listing" id="listing:custom-annotation">{% highlight java %}@Retention(RUNTIME)
+public @interface Translate {
+}
+
+
+@Component(service = AnnotatedFieldMapper.class)
+public class TranslateAnnotationMapper implements AnnotatedFieldMapper<String, Translate> {
+    // E.g. /content/site/en_US/...
+    private static final Pattern LANGUAGE_IN_PATH = compile("/content/(?<site>[^/]+)/(?<locale>[A-z]{2}(_[A-z]{2})?)/.*");
+
+    @Inject
+    @Filter("(component.name=org.apache.sling.i18n.impl.JcrResourceBundleProvider)")
+    private ResourceBundleProvider resourceBundleProvider;
+
+    @Nonnull
+    @Override
+    public Class<? super String> getFieldType() {
+        return String.class;
+    }
+
+    @Nonnull
+    @Override
+    public Class<Translate> getAnnotationType() {
+        return Translate.class;
+    }
+
+    @CheckForNull
+    @Override
+    public String map(OngoingMapping<String, Translate> ongoingMapping) {
+        String value = ongoingMapping.getResolvedValue();
+        if (isEmpty(value)) {
+            return value;
+        }
+        return resourceBundleProvider.getResourceBundle(getLocale(ongoingMapping.getResource())).getString(value);
+    }
+
+    private Locale getLocale(Resource resource) {
+        return LocaleUtils.toLocale(LANGUAGE_IN_PATH.matcher(resource.getPath()).group("locale"));
+    }
+}
+    {% endhighlight %}<figcaption>Providing a mapper for custom annotations</figcaption></figure>
+
+    <p>This annotation could then be used in your model like so:</p>
+
+    <figure class="listing" id="listing:explicit-lazy-loading-collections">
+        {% highlight java %}@ResourceModel("project/components/cta")
+public class CallToAction {
+  @Translated
+  private String buttonText;
+}{% endhighlight %}<figcaption>Using a custom annotation on a model's field</figcaption></figure>
 
 <h3 id="lifecycle_callbacks">Lifecycle callbacks</h3>
 
@@ -1080,15 +1162,6 @@ public class MyType {
     For programmatic extensibility, the NEBA API contains the lifecycle callback interface <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelPostProcessor.html">ResourceModelPostProcessor</a>.
     Providing an OSGi service with this interface allows customizing and even overriding a ResourceModel after the resource properties are mapped to it.
 </p>
-
-<h3 id="cache_extension">Caching and cache extension</h3>
-<p>
-NEBA's central and most performance critical feature is the adaptation of resource models. There, resource and model resolution, content-to-object mapping and data type conversion occurs.
-This core functionality features an extensible caching interface. Any OSGi service implementing the NEBA API interface <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelCache.html">ResourceModelCache</a> will automatically be
-registered and used to cache the result of the resource to model adaptation.</p><p>NEBA ships with a safe and
-sensible default implementation of this interface contained in the core, the <em>request-scoped resource model
-cache.</em>
-This cache can be disabled via the Felix console (configuration tab). For further information, consult the Javadoc of the <a href="apidocs/neba-api/io/neba/api/spi/ResourceModelCache.html">ResourceModelCache</a>.</p>
 
 <h3 id="custom_models">Providing custom resource model factories</h3>
 
