@@ -1,8 +1,8 @@
 markdown: kramdown
 url: https://www.neba.io
-nebaVersion: 5.0.7
+nebaVersion: 5.1.0
 geminiVersion: 3.0.0.M01
-springDocumentationVersion: 5.1.x
+springDocumentationVersion: 5.2.x
 contextpath:
 include: [_headers, _redirects]
 exclude: [.idea]

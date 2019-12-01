@@ -1,0 +1,15 @@
+<p>
+    Implementors of NEBA's Service Provider API (SPI) providing custom application-level caches (a rare use cases) can no longer do so since support for custom caching extensions has been dropped.
+</p>
+<p>
+    Implementors of NEBA's Service Provider API (SPI) providing custom model factories (a rare use cases) must adapt the API changes introduced in 5.1.0. Specifically, the
+    <a href="/apidocs/neba-api/io/neba/api/spi/ResourceModelFactory.html">resource model factory</a> now receives a callback to apply content-to-model mapping, thius allowing full control ofer the models
+    creation process.
+</p>
+<p>
+    The <a href="/apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel annotation</a> has been simplified. Since 5.1.0, users can pass the resource types of a model as the annotation value, e.g. @ResourceModel("resource/type"). using the "type" property is still supported, but deprecated.
+    Code compiled with NEBA < 5.1.0 will continue to work, thus this change is not mandatory, but recommended for actively developed solutions.
+</p>
+<p>
+    Users of the optional Spring integration must upgrade to <a href="https://search.maven.org/search?q=g:org.apache.servicemix.bundles%20v:5.2.1.RELEASE_1">Spring 5.2.x</a>
+</p>

@@ -1,0 +1,91 @@
+---
+title: NEBA 5.1.0
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.1.0 Ships with JSON views, a simplified API, improved performance and optionally Spring 5.2.
+tags: [release,current]
+release:
+    version: 5.1.0
+    previousVersion: 5.0.7
+    requiresChange: true
+---
+
+<section>
+    <header><h1>NEBA 5.1.0 released</h1></header>
+    <p>
+        NEBA 5.1.0 ships with major additions and improvements. NEBA now features out-of-the-box <a href="/documentation.html#json_views">JSON rendering for NEBA models</a>, a simplified @ResourceModel annotation
+        and includes various performance optimizations. For instance, NEBA's <a href="/documentation.html#lazy_loading">lazy-loading
+        support</a> now uses
+        <a href="https://bytebuddy.net">ByteBuddy</a> instead of CGlib, resulting in a 60% performance gain when
+        resolving lazy collections. Users of the
+    <a href="/documentation.html#spring">Spring integration</a> upgrade to Spring 5.2 and can now safely use
+        @PostConstruct to <a href="/documentation.html#lifecycle_annotations">initialize models after their content has been injected</a>.
+    </p>
+
+    <section>
+        <header><h2>Highlights of this release</h2></header>
+        <section>
+            <header><h3>NEBA 5.1.0 ships with JSON views</h3></header>
+            <p>
+                Similar to the <a
+                    href="https://sling.apache.org/documentation/bundles/models.html#exporter-framework-since-130">Sling
+                model exporter framework</a>, NEBA now provides a safe and fast
+                default mechanism to <a href="/documentation.html#json_views">render NEBA models as JSON</a>. This new
+                feature also introduced
+                a technical platform allowing the injection of arbitrary additional data into the JSON views of models.
+                For instance, the JSON view mechanism allows
+                automatic addition of a ":type" attribute into the JSON view of a NEBA model, containing the resource
+                type effectively used to adapt to the model.
+                In the future, this will be further extended to automatically generate all data required for use cases
+                such as <a
+                    href="https://docs.adobe.com/content/help/en/experience-manager-65/developing/headless/spas/spa-overview.html">AEM&trade;'s
+                SPA editor</a>.
+            </p>
+        </section>
+        <section>
+            <header><h3>NEBA 5.1.0 consolidates @PostConstruct and @AfterMapping</h3></header>
+            <p>
+                Prior to 5.1.0, NEBA featured a lifecycle with two subsequent initialization phases:
+            </p>
+
+            <ol>
+                <li>Initially, a model was instantiated and injected with collaborators</li>
+                <li>Then, life cycle callbacks for @PostConstruct where invoked</li>
+                <li>Then, Content-To-Model mapping occurred</li>
+                <li>Finally, @AfterMapping methods and NEBA's model post-processors where applied</li>
+            </ol>
+
+            Now, the lifecycle has been consolidated to work in a straightforward and transparent way for both NEBA core and when using Spring beans as models:
+
+            <ol>
+                <li>Initially, a model was instantiated and injected with collaborators</li>
+                <li>Then, Content-To-Model mapping occurred and NEBA's model post-processors are applied</li>
+                <li>Then, life cycle callbacks for @AfterMapping are invoked (legacy support)</li>
+                <li>Finally, life cycle callbacks for @PostConstruct are invoked</li>
+            </ol>
+
+            Thus, the <a href="/apidocs/neba-api/io/neba/api/annotations/AfterMapping.html">@AfterMapping annotation</a> is deprecated
+            and users can solely rely on @PostConstruct.
+        </section>
+    </section>
+    <p>
+        Lastly, the optional NEBA Spring integration has been updated to <a
+            href="https://search.maven.org/search?q=g:org.apache.servicemix.bundles%20v:5.2.1.RELEASE_1">Spring
+        Version 5.2.1</a>, containing <a href="https://github.com/spring-projects/spring-framework/milestone/223?closed=1">important additions, bugfixes and improvements</a>.
+    </p>
+
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="31" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="31" data-labels="bug"></ul>
+    </section>
+</section>
