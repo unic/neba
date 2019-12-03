@@ -82,58 +82,58 @@ public final class ReflectionUtil {
 
         // Wildcard type <X ... Y>
         if (resolvedType instanceof WildcardType) {
-            resolvedType = resolveWildCard((WildcardType) resolvedType);
+            resolvedType = resolveWildCard((WildcardType) resolvedType, assigningType);
         }
 
         if (resolvedType instanceof TypeVariable) {
-            resolvedType = resolveTypeVariable(resolvedType, assigningType);
+            resolvedType = resolveTypeVariable((TypeVariable) resolvedType, assigningType);
         }
 
         if (resolvedType == null) {
             throw new IllegalArgumentException("Cannot obtain the generic type of " + type +
-                    ", it has a wildcard declaration with neither a lower nor an upper boundary. " +
+                    ", it has a generic signature with no resolvable lower or upper boundary. " +
                     "Either a specific type, e.g. List<MyType>, a lower bound, e.g. List<? super MyType> " +
-                    "or an upper bound, e.g. List<? extends MyType> must be present.");
+                    "or an upper bound, e.g. List<? extends MyType> must be resolvable for the generic signature.");
         }
 
         return resolvedType;
     }
 
-    private static Type resolveTypeVariable(final Type typeArgument, final Type assigningType) {
-        Type resolvedType = typeArgument;
-
+    private static Type resolveTypeVariable(final TypeVariable variable, final Type assigningType) {
         // Can the type variable be resolved?
-        if (TypeUtils.getRawType(typeArgument, assigningType) == null) {
+        if (TypeUtils.getRawType(variable, assigningType) == null) {
             // It cannot be resolved - we must look at the boundaries.
-            TypeVariable tv = (TypeVariable) typeArgument;
-            Type[] bounds = tv.getBounds();
+            Type[] bounds = variable.getBounds();
 
             // Type variables only have upper bounds. There are now four options:
 
             // 1: There are multiple boundaries, e.g. <? extends A & B>, which means the type cannot be derived. Bail.
             if (bounds.length != 1) {
-                resolvedType = null;
+                return null;
             }
 
             // 2: There is one boundary, and it is java.lan.Object. This means there is none. Bail.
             if (bounds[0] == Object.class) {
-                resolvedType = null;
+                return null;
             }
 
             // 3: There is one boundary, and it's a Type Variable. Repeat.
             if (bounds[0] instanceof TypeVariable) {
-                resolvedType = resolveTypeVariable((TypeVariable) bounds[0]);
+                return resolveTypeVariable((TypeVariable) bounds[0], assigningType);
             }
 
             // 4: There is one boundary, and it's a Parametrized or wildcard type. Return the respective type, e.g. List<? extends SomeType<V>> -> SomeType
             if (bounds[0] instanceof WildcardType) {
-                resolvedType = resolveWildCard((WildcardType) bounds[0]);
+                return resolveWildCard((WildcardType) bounds[0], assigningType);
             }
+
+            return bounds[0];
         }
-        return resolvedType;
+
+        return variable;
     }
 
-    private static Type resolveWildCard(final WildcardType typeArgument) {
+    private static Type resolveWildCard(final WildcardType typeArgument, Type assigningType) {
         Type resolvedType = null;
         // Start with the lower boundary as it is the most specific
         Type[] boundaries = typeArgument.getLowerBounds();
@@ -152,32 +152,11 @@ public final class ReflectionUtil {
         }
 
         if (resolvedType instanceof WildcardType) {
-            resolvedType = resolveWildCard((WildcardType) resolvedType);
+            resolvedType = resolveWildCard((WildcardType) resolvedType, assigningType);
         }
 
         if (resolvedType instanceof TypeVariable) {
-            resolvedType = resolveTypeVariable((TypeVariable) resolvedType);
-        }
-
-        return resolvedType;
-    }
-
-    private static Type resolveTypeVariable(final TypeVariable variable) {
-        Type[] bounds = variable.getBounds();
-
-        // If there are multiple upper bounds, e.g. List<? extends A & B>, the type cannot be derived.
-        if (bounds.length != 1) {
-            return null;
-        }
-
-        Type resolvedType = bounds[0];
-
-        if (resolvedType instanceof TypeVariable) {
-            resolvedType = resolveTypeVariable((TypeVariable) resolvedType);
-        }
-
-        if (resolvedType instanceof WildcardType) {
-            resolvedType = resolveWildCard((WildcardType) resolvedType);
+            resolvedType = resolveTypeVariable((TypeVariable) resolvedType, assigningType);
         }
 
         return resolvedType;

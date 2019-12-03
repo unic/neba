@@ -20,6 +20,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Test;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Olaf Otto
  */
-public class ReflectionUtilTest<T extends ReflectionUtilTest> {
+public class ReflectionUtilTest<T extends ReflectionUtilTest, K, V extends W, W extends ReflectionUtilTest, X extends Serializable & List> {
     /**
      * Declares a member with a type variable.
      */
@@ -140,6 +141,14 @@ public class ReflectionUtilTest<T extends ReflectionUtilTest> {
     @SuppressWarnings("unused")
     private Collection<?> unknownCollection;
     @SuppressWarnings("unused")
+    private Collection<K> collectionWithUnresolvableTypeVariable;
+    @SuppressWarnings("unused")
+    private Collection<T> collectionWithResolvableTypeVariable;
+    @SuppressWarnings("unused")
+    private Collection<V> collectionWithTypeVariableBoundByTypeVariable;
+    @SuppressWarnings("unused")
+    private Collection<X> collectionWithMultipleLowerBounds;
+    @SuppressWarnings("unused")
     private Collection<? extends T> readOnlyCollection;
     @SuppressWarnings("unused")
     private Collection<? super ReflectionUtilTest> boundCollection;
@@ -168,9 +177,31 @@ public class ReflectionUtilTest<T extends ReflectionUtilTest> {
         assertTypeParameterIs(ReflectionUtilTest.class);
     }
 
+    @Test
+    public void testResolutionOfCollectionWithResolvableTypeVariable() {
+        getGenericTypeParameterOf("collectionWithResolvableTypeVariable");
+        assertTypeParameterIs(ReflectionUtilTest.class);
+    }
+
+    @Test
+    public void testResolutionOfCollectionWithTypeVariableBoundByTypeVariable() {
+        getGenericTypeParameterOf("collectionWithTypeVariableBoundByTypeVariable");
+        assertTypeParameterIs(ReflectionUtilTest.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testResolutionOfCollectionWithUnresolvableTypeVariable() {
+        getGenericTypeParameterOf("collectionWithUnresolvableTypeVariable");
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testResolutionOfUnknownCollectionType() {
         getGenericTypeParameterOf("unknownCollection");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testResolutionOfCollectionWithTypeVariableHavingMultipleLowerBounds() {
+        getGenericTypeParameterOf("collectionWithMultipleLowerBounds");
     }
 
     @Test
