@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
+import static io.neba.core.util.ReflectionUtil.getBoundaryOfParametrizedType;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
@@ -64,12 +64,12 @@ class ServiceDependency {
         if (rawType.isAssignableFrom(List.class)) {
             // The service type may be a List<X> of services.
             // In this case, the service type is X.
-            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameterOrFail(serviceType), modelType);
+            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameterOrFail(serviceType, modelType), modelType);
             this.isList = true;
             this.isOptional = false;
         } else if (serviceType instanceof ParameterizedType && rawType == Optional.class) {
             // If an the type is Optional<X>, the service type type is X.
-            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameterOrFail(serviceType), modelType);
+            actualServiceType = getRawType(getLowerBoundOfSingleTypeParameterOrFail(serviceType, modelType), modelType);
             this.isOptional = true;
             this.isList = false;
         } else {
@@ -155,9 +155,9 @@ class ServiceDependency {
                 '}';
     }
 
-    private Type getLowerBoundOfSingleTypeParameterOrFail(@Nonnull Type serviceType) {
+    private Type getLowerBoundOfSingleTypeParameterOrFail(@Nonnull Type serviceType, @Nonnull Type assigningType) {
         try {
-            return getLowerBoundOfSingleTypeParameter(serviceType);
+            return getBoundaryOfParametrizedType(serviceType, assigningType);
         } catch (IllegalArgumentException e) {
             throw new InvalidModelException("Unable to resolve the type parameter of " + serviceType + ".", e);
         }

@@ -16,6 +16,7 @@
 
 package io.neba.core.util;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -30,18 +31,17 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.neba.core.util.ReflectionUtil.findField;
-import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
+import static io.neba.core.util.ReflectionUtil.getBoundaryOfParametrizedType;
 import static io.neba.core.util.ReflectionUtil.instantiateCollectionType;
 import static io.neba.core.util.ReflectionUtil.isInstantiableCollectionType;
 import static io.neba.core.util.ReflectionUtil.makeAccessible;
 import static io.neba.core.util.ReflectionUtil.methodsOf;
-import static org.apache.commons.lang3.reflect.TypeUtils.getRawType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Olaf Otto
  */
-public class ReflectionUtilTest {
+public class ReflectionUtilTest<T extends ReflectionUtilTest> {
     /**
      * Declares a member with a type variable.
      */
@@ -140,7 +140,7 @@ public class ReflectionUtilTest {
     @SuppressWarnings("unused")
     private Collection<?> unknownCollection;
     @SuppressWarnings("unused")
-    private Collection<? extends ReflectionUtilTest> readOnlyCollection;
+    private Collection<? extends T> readOnlyCollection;
     @SuppressWarnings("unused")
     private Collection<? super ReflectionUtilTest> boundCollection;
 
@@ -162,9 +162,10 @@ public class ReflectionUtilTest {
         assertTypeParameterIs(String.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testResolutionOfReadOnlyCollectionType() {
         getGenericTypeParameterOf("readOnlyCollection");
+        assertTypeParameterIs(ReflectionUtilTest.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -378,7 +379,7 @@ public class ReflectionUtilTest {
     }
 
     private void getGenericTypeParameterOf(String name) {
-        this.typeParameter = getRawType(getLowerBoundOfSingleTypeParameter(getField(name).getGenericType()), this.type);
+        this.typeParameter = TypeUtils.getRawType(getBoundaryOfParametrizedType(getField(name).getGenericType(), this.type), this.type);
     }
 
     private Field getField(String name) {
