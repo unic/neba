@@ -92,8 +92,9 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
             return;
         }
 
+        String etag = null;
         if (configuration.generateEtag()) {
-            final String etag = "W/\"" + request.getResource().getResourceMetadata().getModificationTime() + "-" + request.getResource().getPath() + '"';
+            etag = "W/\"" + request.getResource().getResourceMetadata().getModificationTime() + "-" + request.getResource().getPath() + '"';
             Enumeration<String> clientEtags = request.getHeaders("If-None-Match");
             if (clientEtags.hasMoreElements()) {
                 while (clientEtags.hasMoreElements()) {
@@ -103,7 +104,6 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
                     }
                 }
             }
-            response.setHeader("Etag", etag);
         }
 
         nestedMappingSupport.beginRecordingMappings();
@@ -139,6 +139,9 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
 
             response.setContentType("application/json");
             response.setHeader("Cache-Control", configuration.cacheControlHeader());
+            if (etag != null) {
+                response.setHeader("Etag", etag);
+            }
             response.setCharacterEncoding(this.configuration.encoding());
             serializer.serialize(response.getWriter(), model);
         } finally {
