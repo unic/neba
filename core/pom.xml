@@ -22,6 +22,7 @@
         <bundle.symbolicName>io.neba-core</bundle.symbolicName>
         <bundle.namespace>io.neba</bundle.namespace>
         <byte-buddy.artifactId>byte-buddy</byte-buddy.artifactId>
+        <jackson.importVersionRange>[2.9,3)</jackson.importVersionRange>
     </properties>
 
     <dependencies>
