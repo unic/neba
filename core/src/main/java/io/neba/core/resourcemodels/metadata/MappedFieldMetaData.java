@@ -39,8 +39,8 @@ import java.util.concurrent.Callable;
 
 import static io.neba.core.util.Annotations.annotations;
 import static io.neba.core.util.ReflectionUtil.getInstantiableCollectionTypes;
-import static io.neba.core.util.ReflectionUtil.getLowerBoundOfSingleTypeParameter;
 import static io.neba.core.util.ReflectionUtil.makeAccessible;
+import static io.neba.core.util.ReflectionUtil.getBoundaryOfParametrizedType;
 import static io.neba.core.util.ResourcePaths.path;
 import static net.bytebuddy.description.modifier.Visibility.PRIVATE;
 import static net.bytebuddy.implementation.FieldAccessor.ofField;
@@ -114,7 +114,7 @@ public class MappedFieldMetaData {
         this.isLazy = field.getType() == Lazy.class;
         this.annotations = annotations(field);
 
-        // Treat Optional<X> fields transparently like X fields: This way, anyone operating on the metadata is not
+        // Treat Lazy<X> fields transparently like X fields: This way, anyone operating on the metadata is not
         // forced to be aware of the lazy-loading value holder indirection but can operate on the target type directly.
         this.genericFieldType = this.isLazy ? getParameterTypeOf(field.getGenericType()) : field.getGenericType();
         this.fieldType = this.isLazy ? getRawType(this.genericFieldType, this.modelType) : field.getType();
@@ -142,12 +142,12 @@ public class MappedFieldMetaData {
     }
 
     /**
-     * Wraps {@link io.neba.core.util.ReflectionUtil#getLowerBoundOfSingleTypeParameter(java.lang.reflect.Type)}
+     * Wraps {@link io.neba.core.util.ReflectionUtil#getBoundaryOfParametrizedType(java.lang.reflect.Type, java.lang.reflect.Type)}
      * in order to provide a field-related error message to signal users which field is affected.
      */
     private Type getParameterTypeOf(Type type) {
         try {
-            return getLowerBoundOfSingleTypeParameter(type);
+            return getBoundaryOfParametrizedType(type, this.modelType);
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to resolve a generic parameter type of the mapped field " + this.field + ".", e);
         }

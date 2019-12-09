@@ -16,11 +16,14 @@
 
 package io.neba.core.util;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,18 +44,21 @@ public final class ReflectionUtil {
     private static final int DEFAULT_COLLECTION_SIZE = 32;
 
     /**
-     * Resolves the {@link Type} of the lower bound of a single type argument of a
+     * Resolves the {@link Type} of the lower, or, if no lower bound is present, the upper bound of a single type argument of a
      * {@link ParameterizedType}.
      * <p/>
      * <pre>
      *   private List&lt;MyModel&gt; myModel -&gt; MyModel.
+     *   private List&lt;? extends MyModel&gt; myModel -&gt; MyModel.
+     *   private List&lt;? super MyModel&gt; myModel -&gt; MyModel.
+     *   private List&lt;T&gt; myModel | T extends MyModel -&gt; MyModel.
      *   private Optional&lt;MyModel&gt; myModel -&gt; MyModel.
      * </pre>
      *
      * @param type must not be <code>null</code>.
      * @return never null.
      */
-    public static Type getLowerBoundOfSingleTypeParameter(Type type) {
+    public static Type getBoundaryOfParametrizedType(final Type type, final Type assigningType) {
         if (type == null) {
             throw new IllegalArgumentException("Method parameter type must not be null.");
         }
@@ -65,8 +71,6 @@ public final class ReflectionUtil {
 
         // Only the ParametrizedType contains reflection information about the actual type.
         ParameterizedType parameterizedType = (ParameterizedType) type;
-
-
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
 
         // We expect exactly one argument representing the model type.
@@ -74,23 +78,88 @@ public final class ReflectionUtil {
             signalUnsupportedNumberOfTypeDeclarations(type);
         }
 
-        Type typeArgument = typeArguments[0];
+        Type resolvedType = typeArguments[0];
 
         // Wildcard type <X ... Y>
-        if (typeArgument instanceof WildcardType) {
-            WildcardType wildcardType = (WildcardType) typeArgument;
-            Type[] lowerBounds = wildcardType.getLowerBounds();
-            if (lowerBounds.length == 0) {
-                throw new IllegalArgumentException("Cannot obtain the generic type of " + type +
-                        ", it has a wildcard declaration with an upper" +
-                        " bound (<? extends Y>) and is thus read-only." +
-                        " Only simple type parameters (e.g. <MyType>)" +
-                        " or lower bound wildcards (e.g. <? super MyModel>)" +
-                        " are supported.");
-            }
-            typeArgument = lowerBounds[0];
+        if (resolvedType instanceof WildcardType) {
+            resolvedType = resolveWildCard((WildcardType) resolvedType, assigningType);
         }
-        return typeArgument;
+
+        if (resolvedType instanceof TypeVariable) {
+            resolvedType = resolveTypeVariable((TypeVariable) resolvedType, assigningType);
+        }
+
+        if (resolvedType == null) {
+            throw new IllegalArgumentException("Cannot obtain the generic type of " + type +
+                    ", it has a generic signature with no resolvable lower or upper boundary. " +
+                    "Either a specific type, e.g. List<MyType>, a lower bound, e.g. List<? super MyType> " +
+                    "or an upper bound, e.g. List<? extends MyType> must be resolvable for the generic signature.");
+        }
+
+        return resolvedType;
+    }
+
+    private static Type resolveTypeVariable(final TypeVariable variable, final Type assigningType) {
+        // Can the type variable be resolved?
+        if (TypeUtils.getRawType(variable, assigningType) == null) {
+            // It cannot be resolved - we must look at the boundaries.
+            Type[] bounds = variable.getBounds();
+
+            // Type variables only have upper bounds. There are now four options:
+
+            // 1: There are multiple boundaries, e.g. <? extends A & B>, which means the type cannot be derived. Bail.
+            if (bounds.length != 1) {
+                return null;
+            }
+
+            // 2: There is one boundary, and it is java.lan.Object. This means there is none. Bail.
+            if (bounds[0] == Object.class) {
+                return null;
+            }
+
+            // 3: There is one boundary, and it's a Type Variable. Repeat.
+            if (bounds[0] instanceof TypeVariable) {
+                return resolveTypeVariable((TypeVariable) bounds[0], assigningType);
+            }
+
+            // 4: There is one boundary, and it's a Parametrized or wildcard type. Return the respective type, e.g. List<? extends SomeType<V>> -> SomeType
+            if (bounds[0] instanceof WildcardType) {
+                return resolveWildCard((WildcardType) bounds[0], assigningType);
+            }
+
+            return bounds[0];
+        }
+
+        return variable;
+    }
+
+    private static Type resolveWildCard(final WildcardType typeArgument, Type assigningType) {
+        Type resolvedType = null;
+        // Start with the lower boundary as it is the most specific
+        Type[] boundaries = typeArgument.getLowerBounds();
+        if (boundaries.length != 0) {
+            resolvedType = boundaries[0];
+        } else {
+            // Fall back to the upper bounds
+            boundaries = typeArgument.getUpperBounds();
+            if (boundaries.length != 0) {
+                resolvedType = boundaries[0];
+            }
+        }
+
+        if (resolvedType == null || resolvedType == Object.class) {
+            return null;
+        }
+
+        if (resolvedType instanceof WildcardType) {
+            resolvedType = resolveWildCard((WildcardType) resolvedType, assigningType);
+        }
+
+        if (resolvedType instanceof TypeVariable) {
+            resolvedType = resolveTypeVariable((TypeVariable) resolvedType, assigningType);
+        }
+
+        return resolvedType;
     }
 
     private static void signalUnsupportedNumberOfTypeDeclarations(Type type) {
@@ -215,6 +284,7 @@ public final class ReflectionUtil {
 
     /**
      * Makes the {@link Field#setAccessible(boolean) accessible} only if it is not.
+     *
      * @param field must not be <code>null</code>.
      * @return the given field.
      */
