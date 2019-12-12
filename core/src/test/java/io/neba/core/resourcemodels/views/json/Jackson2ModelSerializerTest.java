@@ -15,6 +15,7 @@
 */
 package io.neba.core.resourcemodels.views.json;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import io.neba.api.resourcemodels.Lazy;
 import io.neba.core.resourcemodels.mapping.Mapping;
 import org.apache.sling.api.resource.Resource;
@@ -83,7 +84,7 @@ public class Jackson2ModelSerializerTest {
     @Test
     public void testSerializationWithoutTypeAttribute() throws IOException {
         serialize();
-        assertJsonIs("{\"helloWorld\":\"Hello, world\",\"lazy\":\"Lazy value\",\"resource\":\"/some/resource/path\"}");
+        assertJsonIs("{\"helloWorld\":\"Hello, world\",\"lazy\":\"Lazy value\",\"resource\":\"/some/resource/path\",\"subModelProperty\":\"sub model property\"}");
     }
 
     @Test
@@ -93,7 +94,7 @@ public class Jackson2ModelSerializerTest {
         initializeModelSerializer();
         serialize();
 
-        assertJsonIs("{\":type\":\"some/resource/type\",\"helloWorld\":\"Hello, world\",\"lazy\":\"Lazy value\",\"resource\":\"/some/resource/path\"}");
+        assertJsonIs("{\":type\":\"some/resource/type\",\"helloWorld\":\"Hello, world\",\"lazy\":\"Lazy value\",\"resource\":\"/some/resource/path\",\"subModelProperty\":\"sub model property\"}");
     }
 
     private void withTypeGenerationEnabled() {
@@ -157,6 +158,18 @@ public class Jackson2ModelSerializerTest {
                     return Optional.of("Lazy value");
                 }
             };
+        }
+
+        @JsonUnwrapped
+        public SubModel getSubModel() {
+            return new SubModel();
+        }
+    }
+
+    private static class SubModel {
+        @SuppressWarnings("unused")
+        public String getSubModelProperty() {
+            return "sub model property";
         }
     }
 

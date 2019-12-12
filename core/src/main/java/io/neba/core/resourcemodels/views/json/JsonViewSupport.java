@@ -26,7 +26,9 @@ import com.fasterxml.jackson.databind.ser.BeanSerializer;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.impl.BeanAsArraySerializer;
 import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
+import com.fasterxml.jackson.databind.ser.impl.UnwrappingBeanSerializer;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
+import com.fasterxml.jackson.databind.util.NameTransformer;
 import io.neba.api.resourcemodels.Lazy;
 import io.neba.core.resourcemodels.mapping.Mapping;
 import io.neba.core.resourcemodels.mapping.NestedMappingSupport;
@@ -107,6 +109,11 @@ class JsonViewSupport extends SimpleModule {
         @Override
         protected ResourceModelSerializer withIgnorals(Set<String> toIgnore) {
             return new ResourceModelSerializer(this, toIgnore, mappings, configuration);
+        }
+
+        @Override
+        public JsonSerializer<Object> unwrappingSerializer(NameTransformer unwrapper) {
+            return new UnwrappingBeanSerializer(this, unwrapper);
         }
 
         @Override
