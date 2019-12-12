@@ -20,6 +20,8 @@ import io.neba.core.resourcemodels.mapping.NestedMappingSupport;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -48,10 +50,10 @@ import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         property = {
                 "sling.servlet.extensions=json"
         },
-        service = Servlet.class
+        service = {Servlet.class, BundleListener.class}
 )
 @Designate(ocd = JsonViewServlets.Configuration.class, factory = true)
-public class JsonViewServlets extends SlingAllMethodsServlet {
+public class JsonViewServlets extends SlingAllMethodsServlet implements BundleListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonViewServlets.class);
     private static final Pattern EXPECTED_MODEL_NAME = compile("[A-z0-9_\\-#]+");
     private static final long serialVersionUID = -7762218328479266916L;
@@ -64,19 +66,28 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
 
     private Jackson2ModelSerializer serializer;
     private Configuration configuration;
+    private String bundleName;
 
     @Activate
     protected void activate(@Nonnull ComponentContext context, @Nonnull Configuration configuration) {
         this.configuration = configuration;
-        // Jackson is an optional dependency.
+        this.bundleName = displayNameOf(context.getUsingBundle());
+        refresh();
+    }
+
+    /**
+     * Check if the optional Jackson dependency is available
+     */
+    public void refresh() {
+        //
         try {
             Class<?> generatorClass = getClass().getClassLoader().loadClass("com.fasterxml.jackson.core.JsonGenerator");
             LOGGER.info("Found JSON generator from {}. JSON views are enabled.", generatorClass.getClassLoader());
-            this.serializer = new Jackson2ModelSerializer(nestedMappingSupport::getRecordedMappings, configuration.jacksonSettings(), configuration.addTypeAttribute());
+            this.serializer = new Jackson2ModelSerializer(nestedMappingSupport::getRecordedMappings, this.configuration.jacksonSettings(), this.configuration.addTypeAttribute());
         } catch (ClassNotFoundException e) {
             LOGGER.info("JSON views will not be available since Jackson2 cannot be found from bundle {}. Jackson is an optional dependency. " +
                     "To use the NEBA model to JSON mapping, install at least the jackson-core " +
-                    "and jackson-databind bundles.", displayNameOf(context.getUsingBundle()));
+                    "and jackson-databind bundles.", bundleName);
         }
     }
 
@@ -157,6 +168,13 @@ public class JsonViewServlets extends SlingAllMethodsServlet {
     @Override
     public void destroy() {
         LOGGER.info("Servlet instance stopped");
+    }
+
+    @Override
+    public void bundleChanged(BundleEvent event) {
+        // We do not care about the specific type of bundle change but generally assume it may potentially cause
+        // classes to change that have been cached in the object mapper.
+        refresh();
     }
 
     @ObjectClassDefinition(
