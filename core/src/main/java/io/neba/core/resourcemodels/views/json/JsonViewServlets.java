@@ -215,6 +215,15 @@ public class JsonViewServlets extends SlingAllMethodsServlet implements BundleLi
         String[] sling_servlet_resourceTypes() default "sling/servlet/default";
 
         @AttributeDefinition(
+                name = "Ranking",
+                description =
+                        "Defines the service ranking of the servlet. The higher the number, the higher the ranking. " +
+                                "This can be used to override the default sling models jackson export when using the same selectors and resource types," +
+                                "as servlets with a higher ranking can override servlets with a lower ranking.")
+        @SuppressWarnings("unused")
+        int service_ranking() default 0;
+
+        @AttributeDefinition(
                 name = "Jackson features",
                 description = "Enable or disable serialization or module features using the " +
                         "respective enumeration names and a boolean flag, " +
