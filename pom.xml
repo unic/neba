@@ -60,6 +60,7 @@
 		<language.level>1.8</language.level>
 		<sling.url>http://localhost:4502/system/console</sling.url>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jackson.importVersionRange>[2.10,3)</jackson.importVersionRange>
 	</properties>
 
 	<scm>

@@ -18,7 +18,6 @@
         <bundle.symbolicName>io.neba-spring</bundle.symbolicName>
         <bundle.namespace>io.neba</bundle.namespace>
         <api.version>5.0.0</api.version>
-        <jackson.importVersionRange>[2.10,3)</jackson.importVersionRange>
     </properties>
 
     <dependencies>
