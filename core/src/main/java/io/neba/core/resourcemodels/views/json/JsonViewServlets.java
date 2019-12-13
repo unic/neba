@@ -25,6 +25,7 @@ import org.osgi.framework.BundleListener;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -50,7 +51,7 @@ import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         property = {
                 "sling.servlet.extensions=json"
         },
-        service = {Servlet.class, BundleListener.class}
+        service = Servlet.class
 )
 @Designate(ocd = JsonViewServlets.Configuration.class, factory = true)
 public class JsonViewServlets extends SlingAllMethodsServlet implements BundleListener {
@@ -67,12 +68,20 @@ public class JsonViewServlets extends SlingAllMethodsServlet implements BundleLi
     private Jackson2ModelSerializer serializer;
     private Configuration configuration;
     private String bundleName;
+    private ComponentContext context;
 
     @Activate
     protected void activate(@Nonnull ComponentContext context, @Nonnull Configuration configuration) {
         this.configuration = configuration;
         this.bundleName = displayNameOf(context.getUsingBundle());
+        this.context = context;
+        this.context.getBundleContext().addBundleListener(this);
         refresh();
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        this.context.getBundleContext().removeBundleListener(this);
     }
 
     /**

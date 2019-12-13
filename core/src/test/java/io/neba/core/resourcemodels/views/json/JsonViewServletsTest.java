@@ -32,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 import javax.servlet.Servlet;
@@ -77,6 +78,8 @@ public class JsonViewServletsTest {
     @Mock
     private ComponentContext context;
     @Mock
+    private BundleContext bundleContext;
+    @Mock
     private JsonViewServlets.Configuration configuration;
     @Mock
     private SlingHttpServletRequest request;
@@ -118,12 +121,13 @@ public class JsonViewServletsTest {
         doAnswer((inv) -> this.writer).when(this.response).getWriter();
 
         doReturn(this.bundle).when(this.context).getUsingBundle();
+        doReturn(this.bundleContext).when(this.context).getBundleContext();
 
         doReturn("UTF-8").when(this.configuration).encoding();
         doReturn(new String[]{"SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true"})
                 .when(this.configuration).jacksonSettings();
 
-        this.testee.activate(this.context, this.configuration);
+        activate();
     }
 
     @Test
@@ -165,6 +169,14 @@ public class JsonViewServletsTest {
 
         jsonViewServlets.service(this.request, this.response);
         verify(this.response).sendError(SC_SERVICE_UNAVAILABLE, "The JSON view service is not available.");
+    }
+
+    @Test
+    public void testRegistrationAsBundleListener() {
+        verifyJsonViewServletsIsAddedAsBundleListener();
+
+        deactivate();
+        verifyJsonViewServletsAreRemovedAsBundleListener();
     }
 
     @Test
@@ -275,6 +287,22 @@ public class JsonViewServletsTest {
         serveRequest();
 
         verifyCacheControlHeaderInResponseIs("private, max-age=0");
+    }
+
+    private void activate() {
+        this.testee.activate(this.context, this.configuration);
+    }
+
+    private void deactivate() {
+        this.testee.deactivate();
+    }
+
+    private void verifyJsonViewServletsAreRemovedAsBundleListener() {
+        verify(this.bundleContext).removeBundleListener(this.testee);
+    }
+
+    private void verifyJsonViewServletsIsAddedAsBundleListener() {
+        verify(this.bundleContext).addBundleListener(this.testee);
     }
 
     private void verifyCacheControlHeaderInResponseIs(String value) {
