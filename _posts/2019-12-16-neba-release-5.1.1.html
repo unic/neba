@@ -1,0 +1,45 @@
+---
+title: NEBA 5.1.1
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.1.1 Ships with better generics support, improved JSON views and bugfixes.
+tags: [release,current]
+release:
+    version: 5.1.1
+    previousVersion: 5.1.0
+    requiresChange: false
+---
+
+<section>
+    <header><h1>NEBA 5.1.1 released</h1></header>
+    <p>
+        NEBA 5.1.1 further improves <a href="/documentation.html#json_views">the JSON views introduced with NEBA 5.1.0</a>.
+        The views now work with the Jackson libraries shipped out of the box with Sling Models and allow selectively overriding the
+        default export servlet of the Sling Models Exporter framework where needed.
+    </p>
+    <p>
+        Furthermore, NEBA now also performs type derivation from wildcard types for resource-to-model mapping, like so:
+    </p>
+
+{% highlight java %}
+@Children
+List<? extends SomeType>
+{% endhighlight %}
+<p>
+    This is especially important when using Kotlin, where unmodifiable collections are automatically compiled from Collection&lt;X&gt; to Collection&lt;? extends X&gt;
+</p>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="32" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="32" data-labels="bug"></ul>
+    </section>
+</section>
