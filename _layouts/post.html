@@ -14,10 +14,12 @@
     <aside class="up-to-three-columns">
         <header><h2>Related posts</h2></header>
         {% for post in site.posts %}
+        {% unless page.url == post.url %}
         <section>
             <header><h3>{{ post.title }}</h3></header>
             <p><a href="{{post.url}}">{{post.description}}</a></p>
         </section>
+        {% endunless %}
         {% endfor %}
     </aside>
 </main>
