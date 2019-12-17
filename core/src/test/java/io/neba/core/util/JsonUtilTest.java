@@ -39,7 +39,7 @@ public class JsonUtilTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullMapIsNotTolerated() {
-        toJson((Map) null);
+        toJson((Map<?, ?>) null);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class JsonUtilTest {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("first", null);
         map.put("second", 1);
-        map.put("second", true);
+        map.put("third", true);
 
         Map<String, Object> nested = new LinkedHashMap<>();
         nested.put("first", "value \"with quotes\"");
@@ -60,7 +60,8 @@ public class JsonUtilTest {
         assertThat(toJson(map)).isEqualTo(
                 "{" +
                         "\"first\":\"\"," +
-                        "\"second\":true," +
+                        "\"second\":1," +
+                        "\"third\":true," +
                         "\"collection\":[" +
                             "\"one\"," +
                             "2," +
