@@ -15,6 +15,7 @@
  */
 package io.neba.core.logviewer;
 
+import io.neba.core.logviewer.Tail.Mode;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.neba.core.logviewer.Tail.Mode.FOLLOW;
+import static io.neba.core.logviewer.Tail.Mode.TAIL;
 import static java.lang.Math.round;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.regex.Pattern.compile;
@@ -85,17 +88,15 @@ public class TailSocket extends WebSocketAdapter {
         }
 
         try {
-            float bytesToRead = toFloat(m.group("amount"));
-            String path = m.group("path");
-            File file = resolveLogFile(path);
-            Tail.Mode mode = "tail".equals(m.group("mode")) ? Tail.Mode.TAIL : Tail.Mode.FOLLOW;
-
+            File file = resolveLogFile(m.group("path"));
             if (file == null) {
                 return;
             }
 
-            long bytesToTail = round(bytesToRead * 1024L * 1024L);
+            float fractionOfMegabyteToRead = toFloat(m.group("amount"));
+            long bytesToTail = round(fractionOfMegabyteToRead * 1024L * 1024L);
 
+            Mode mode = "tail".equals(m.group("mode")) ? TAIL : FOLLOW;
             tail(file, bytesToTail, mode);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -114,7 +115,7 @@ public class TailSocket extends WebSocketAdapter {
         return "ping".equals(message);
     }
 
-    private void tail(File file, long bytesToTail, Tail.Mode mode) {
+    private void tail(File file, long bytesToTail, Mode mode) {
         stopTail();
         this.tail = new Tail(getRemote(), file, bytesToTail, mode);
         this.executorService.execute(this.tail);
