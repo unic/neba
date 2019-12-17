@@ -47,9 +47,9 @@ public class AnnotatedFieldMappers {
      */
     public static class AnnotationMapping {
         private final Annotation annotation;
-        private final AnnotatedFieldMapper mapper;
+        private final AnnotatedFieldMapper<?, ?> mapper;
 
-        AnnotationMapping(Annotation annotation, AnnotatedFieldMapper mapper) {
+        AnnotationMapping(Annotation annotation, AnnotatedFieldMapper<?, ?> mapper) {
             this.annotation = annotation;
             this.mapper = mapper;
         }
@@ -58,13 +58,13 @@ public class AnnotatedFieldMappers {
             return annotation;
         }
 
-        AnnotatedFieldMapper getMapper() {
+        AnnotatedFieldMapper<?, ?> getMapper() {
             return mapper;
         }
     }
 
     private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache = new ConcurrentDistinctMultiValueMap<>();
-    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers = new ConcurrentDistinctMultiValueMap<>();
+    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper<?, ?>> fieldMappers = new ConcurrentDistinctMultiValueMap<>();
 
     @Reference(cardinality = MULTIPLE, policy = DYNAMIC, unbind = "unbind")
     protected synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
@@ -107,14 +107,14 @@ public class AnnotatedFieldMappers {
     private Collection<AnnotationMapping> resolveCompatibleMappers(MappedFieldMetaData metaData) {
         List<AnnotationMapping> compatibleMappers = new ArrayList<>();
         for (Annotation annotation : metaData.getAnnotations()) {
-            Collection<AnnotatedFieldMapper> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
+            Collection<AnnotatedFieldMapper<?, ?>> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
             if (mappersForAnnotation == null) {
                 continue; // with next element
             }
             for (AnnotatedFieldMapper<?, ?> mapper : mappersForAnnotation) {
                 // Mappers supporting boxed types must also support the primitive equivalent,
                 // e.g. Boolean / boolean, Integer / int.
-                Class type = primitiveToWrapper(metaData.getType());
+                Class<?> type = primitiveToWrapper(metaData.getType());
                 if (mapper.getFieldType().isAssignableFrom(type)) {
                     compatibleMappers.add(new AnnotationMapping(annotation, mapper));
                 }
