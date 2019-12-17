@@ -162,7 +162,7 @@ public class FieldValueMappingCallback {
                         getField(fieldData) == null;
 
         @SuppressWarnings("unchecked")
-        Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection>) fieldData.metaData.getType()) : null;
+        Object defaultValue = preventNullCollection ? instantiateCollectionType((Class<Collection<Object>>) fieldData.metaData.getType()) : null;
 
         // Provide the custom mappers with the default value in case of empty collections for convenience
         value = applyCustomMappings(fieldData, value == null ? defaultValue : value);
@@ -174,10 +174,10 @@ public class FieldValueMappingCallback {
      * Applies all {@link AnnotatedFieldMapper registered field mappers}
      * to the provided value and returns the result.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Object applyCustomMappings(FieldData fieldData, final Object value) {
         Object result = value;
-        for (final AnnotationMapping mapping : this.annotatedFieldMappers.get(fieldData.metaData)) {
+        for (final AnnotationMapping<?, ?> mapping : this.annotatedFieldMappers.get(fieldData.metaData)) {
             result = mapping.getMapper().map(new OngoingFieldMapping(this.model, result, mapping, fieldData, this.resource, this.properties));
         }
         return result;
@@ -382,7 +382,6 @@ public class FieldValueMappingCallback {
      * {@link FieldData#isRelative() relative} or {@link  FieldData#isAbsolute() absolute} paths
      * are interpreted as references to the properties of another resource and are resolved
      * via {@link #resolvePropertyTypedValueFromForeignResource(FieldData, Class)}.
-     *
      * <br />
      * Ignores all {@link FieldValueMappingCallback.FieldData#metaData meta data}
      * except for the field path as the desired return type is explicitly specified.
@@ -676,9 +675,9 @@ public class FieldValueMappingCallback {
     /**
      * @author Olaf Otto
      */
-    private static class OngoingFieldMapping implements AnnotatedFieldMapper.OngoingMapping {
-        private final Object resolvedValue;
-        private final AnnotationMapping mapping;
+    private static class OngoingFieldMapping<FieldType, AnnotationType extends Annotation> implements AnnotatedFieldMapper.OngoingMapping<FieldType, AnnotationType> {
+        private final FieldType resolvedValue;
+        private final AnnotationMapping<FieldType, AnnotationType> mapping;
         private final FieldData fieldData;
         private final Object model;
         private final Resource resource;
@@ -686,8 +685,8 @@ public class FieldValueMappingCallback {
         private final MappedFieldMetaData metaData;
 
         OngoingFieldMapping(Object model,
-                            Object resolvedValue,
-                            AnnotationMapping mapping,
+                            FieldType resolvedValue,
+                            AnnotationMapping<FieldType, AnnotationType> mapping,
                             FieldData fieldData,
                             Resource resource,
                             ValueMap properties) {
@@ -703,13 +702,13 @@ public class FieldValueMappingCallback {
 
         @CheckForNull
         @Override
-        public Object getResolvedValue() {
+        public FieldType getResolvedValue() {
             return resolvedValue;
         }
 
         @Override
         @Nonnull
-        public Object getAnnotation() {
+        public AnnotationType getAnnotation() {
             return mapping.getAnnotation();
         }
 
