@@ -5,4 +5,5 @@ io.neba.core.resourcemodels.factory
 io.neba.core.resourcemodels.mapping
 io.neba.core.resourcemodels.metadata
 io.neba.core.resourcemodels.registration
+io.neba.core.resourcemodels.views.json
 io.neba.core.util
