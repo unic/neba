@@ -79,6 +79,24 @@ public class MyModel {
 {% endhighlight %}
         </section>
         <section>
+            <h2>Spring integration</h2>
+            <p>
+                The optional <a href="documentation.html#spring">Spring integration</a> supports all Spring MVC features - including first-class support for
+                Sling specific request parameters
+                such as the Resource resolver. For an in-depth documentation of the Spring MVC support, see
+                <a href="documentation.html#spring">how NEBA supports Spring MVC</a> and
+                <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/web.html">Spring's MVC documentation</a>.
+            </p>
+{% highlight java %}@Controller
+public class MyController {
+@RequestMapping("/something")
+@ResponseBody
+public String handle(@RequestParam String param) {
+    return "redirect:/success.html";
+}
+{% endhighlight %}
+        </section>
+        <section>
             <h2>Realtime model insights</h2>
             <p>The <a href="documentation.html#tooling_modelstatistics">resource model statistics console</a> allows exploring the performance of resource models in real time,
                 directly on the system.</p>
@@ -133,24 +151,6 @@ public class MyModel {
                 <img src="assets/images/logviewer-large.png"
                      alt="The NEBA log viewer allows following, analyzing and downloading logfiles of AEM or Sling instances">
             </figure>
-        </section>
-        <section>
-            <h2>Spring integration</h2>
-            <p>
-                The optional <a href="documentation.html#spring">Spring integration</a> supports all Spring MVC features - including first-class support for
-                Sling specific request parameters
-                such as the Resource resolver. For an in-depth documentation of the Spring MVC support, see
-                <a href="documentation.html#spring">how NEBA supports Spring MVC</a> and
-                <a href="https://docs.spring.io/spring/docs/{{site.springDocumentationVersion}}/spring-framework-reference/web.html">Spring's MVC documentation</a>.
-            </p>
-{% highlight java %}@Controller
-public class MyController {
-@RequestMapping("/something")
-@ResponseBody
-public String handle(@RequestParam String param) {
-    return "redirect:/success.html";
-}
-{% endhighlight %}
         </section>
     </section>
 </main>
