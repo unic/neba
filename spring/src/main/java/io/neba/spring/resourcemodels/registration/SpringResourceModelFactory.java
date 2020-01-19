@@ -46,6 +46,7 @@ class SpringResourceModelFactory implements ResourceModelFactory {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T provideModel(@Nonnull ModelDefinition<T> modelDefinition, @Nonnull ContentToModelMappingCallback<T> callback) {
         if (!(modelDefinition instanceof SpringBasedModelDefinition)) {
             throw new IllegalArgumentException("Unable to provide the model " + modelDefinition + ": The model definition does not stem from spring. This factory should not have been asked to provide a model for it.");
@@ -54,7 +55,7 @@ class SpringResourceModelFactory implements ResourceModelFactory {
         SpringBasedModelDefinition springBasedModelDefinition = (SpringBasedModelDefinition) modelDefinition;
 
         try {
-            beanPostProcessor.push(callback);
+            beanPostProcessor.push((ContentToModelMappingCallback<Object>) callback);
             return callback.map(factory.getBean(springBasedModelDefinition.getBeanName(), modelDefinition.getType()));
         } finally {
             beanPostProcessor.pop();

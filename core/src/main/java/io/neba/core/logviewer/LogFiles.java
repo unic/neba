@@ -85,7 +85,7 @@ public class LogFiles {
     }
 
     private File getConfiguredLogfile(Configuration logConfiguration) throws IOException {
-        Dictionary properties = logConfiguration.getProperties();
+        Dictionary<?, ?> properties = logConfiguration.getProperties();
         if (properties == null) {
             return null;
         }

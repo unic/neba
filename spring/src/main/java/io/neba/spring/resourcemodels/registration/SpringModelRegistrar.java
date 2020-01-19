@@ -18,7 +18,6 @@ package io.neba.spring.resourcemodels.registration;
 
 import io.neba.api.annotations.ResourceModel;
 import io.neba.api.spi.ResourceModelFactory;
-import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -56,7 +55,7 @@ import static org.springframework.beans.factory.BeanFactoryUtils.beanNamesForTyp
 @Service
 public class SpringModelRegistrar {
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final Map<Bundle, ServiceRegistration> bundlesWithModels = new ConcurrentHashMap<>();
+    private final Map<Bundle, ServiceRegistration<?>> bundlesWithModels = new ConcurrentHashMap<>();
 
     public void registerModels(BundleContext bundleContext, ConfigurableListableBeanFactory factory) {
         final Bundle bundle = bundleContext.getBundle();

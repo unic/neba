@@ -172,7 +172,7 @@ public class MvcServlet extends SlingAllMethodsServlet {
         }
 
         if (this.logger.isDebugEnabled()) {
-            this.logger.debug("No controller found for request " + request + ".");
+            this.logger.debug("No handler found for request {}.", request);
         }
 
         response.sendError(SC_NOT_FOUND);

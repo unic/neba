@@ -15,7 +15,7 @@
  */
 package io.neba.spring.resourcemodels.registration;
 
-import io.neba.api.spi.ResourceModelFactory;
+import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -30,27 +30,26 @@ import java.util.Set;
 
 /**
  * Performs content-to-model mapping for {@link ModelDefinition known spring resource model beans}
- * using a thread-local stack of {@link #push(ResourceModelFactory.ContentToModelMappingCallback) registered callbacks}.
+ * using a thread-local stack of {@link #push(ContentToModelMappingCallback) registered callbacks}.
  *
  * @see SpringModelRegistrar
  */
 class ContentToModelMappingBeanPostProcessor implements BeanPostProcessor {
-    private final ThreadLocal<Deque<ResourceModelFactory.ContentToModelMappingCallback>> mappingCallbackThreadLocal = ThreadLocal.withInitial(LinkedList::new);
+    private final ThreadLocal<Deque<ContentToModelMappingCallback<Object>>> mappingCallbackThreadLocal = ThreadLocal.withInitial(LinkedList::new);
     private final Set<String> knownNebaModelBeanNames;
 
-    <T extends ModelDefinition> ContentToModelMappingBeanPostProcessor(List<T> definitions) {
+    <T extends ModelDefinition<Object>> ContentToModelMappingBeanPostProcessor(List<T> definitions) {
         final Set<String> knownNebaModelBeanNames = new HashSet<>();
         definitions.forEach(definition -> knownNebaModelBeanNames.add(definition.getName()));
         this.knownNebaModelBeanNames = knownNebaModelBeanNames;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public final Object postProcessBeforeInitialization(@Nonnull Object bean, String beanName) throws BeansException {
         if (!knownNebaModelBeanNames.contains(beanName)) {
             return null;
         }
-        ResourceModelFactory.ContentToModelMappingCallback contentToModelMappingCallback = mappingCallbackThreadLocal.get().peek();
+        ContentToModelMappingCallback<Object> contentToModelMappingCallback = mappingCallbackThreadLocal.get().peek();
         if (contentToModelMappingCallback == null) {
             return null;
         }
@@ -63,12 +62,12 @@ class ContentToModelMappingBeanPostProcessor implements BeanPostProcessor {
         return null;
     }
 
-    void push(ResourceModelFactory.ContentToModelMappingCallback callback) {
+    void push(ContentToModelMappingCallback<Object> callback) {
         mappingCallbackThreadLocal.get().addFirst(callback);
     }
 
     void pop() {
-        Queue<ResourceModelFactory.ContentToModelMappingCallback> stack = mappingCallbackThreadLocal.get();
+        Queue<ContentToModelMappingCallback<Object>> stack = mappingCallbackThreadLocal.get();
         stack.remove();
         if (stack.isEmpty()) {
             mappingCallbackThreadLocal.remove();
