@@ -36,7 +36,7 @@ public class ContentToModelMappingBeanPostProcessorTest {
 
     @Before
     public void setUp() {
-        Answer returnModel = inv -> inv.getArguments()[0];
+        Answer<?> returnModel = inv -> inv.getArguments()[0];
         doAnswer(returnModel).when(parentCallback).map(any());
         doAnswer(returnModel).when(childCallback).map(any());
         doReturn(BEAN_NAME).when(this.modelDefinition).getName();
@@ -60,14 +60,14 @@ public class ContentToModelMappingBeanPostProcessorTest {
 
         pop();
         postProcessBean();
-        assertNoCallbackWasAvailable();
+        assertPostProcessorReturnsOriginalBean();
     }
 
     @Test
     public void testPostProcessorIgnoresBeansWithUnknownName() {
         push(parentCallback);
         postProcessBeanWithName("unknownName");
-        assertPostProcessorSignalsNoChange();
+        assertPostProcessorReturnsOriginalBean();
         verifyNoMappingIsDoneUsing(this.parentCallback);
     }
 
@@ -79,12 +79,8 @@ public class ContentToModelMappingBeanPostProcessorTest {
         this.postProcessedBean = this.testee.postProcessAfterInitialization(this.model, beanName);
     }
 
-    private void assertPostProcessorSignalsNoChange() {
-        assertThat(this.postProcessedBean).isNull();
-    }
-
-    private void assertNoCallbackWasAvailable() {
-        assertThat(this.postProcessedBean).isNull();
+    private void assertPostProcessorReturnsOriginalBean() {
+        assertThat(this.postProcessedBean).isEqualTo(this.model);
     }
 
     private void verifyPostProcessorInvokesAgain(ContentToModelMappingCallback<Object> cb) {
@@ -103,7 +99,7 @@ public class ContentToModelMappingBeanPostProcessorTest {
         this.postProcessedBean = this.testee.postProcessBeforeInitialization(this.model, BEAN_NAME);
     }
 
-    private void push(ContentToModelMappingCallback cb) {
+    private void push(ContentToModelMappingCallback<Object> cb) {
         this.testee.push(cb);
     }
 }
