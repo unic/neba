@@ -28,7 +28,7 @@ import static org.osgi.framework.Bundle.STOP_TRANSIENT;
 
 /**
  * When an application context activation fails, NEBA removes any previously
- * registered resource models, self tests, MVC infrastructure and the like, since these
+ * registered resource models, MVC infrastructure and the like, since these
  * are registered before the application context is
  * {@link org.springframework.context.ConfigurableApplicationContext#refresh() activated}.
  *

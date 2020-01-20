@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
@@ -32,12 +33,13 @@ import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 public class SlingMultipartResolver implements MultipartResolver {
 
     @Override
-    public boolean isMultipart(HttpServletRequest request) {
+    public boolean isMultipart(@Nonnull HttpServletRequest request) {
         return request != null && isMultipartContent(request);
     }
 
     @Override
-    public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
+    @Nonnull
+    public MultipartHttpServletRequest resolveMultipart(@Nonnull HttpServletRequest request) throws MultipartException {
         if (request == null) {
             throw new IllegalArgumentException("Method argument request must not be null.");
         }
@@ -49,7 +51,7 @@ public class SlingMultipartResolver implements MultipartResolver {
     }
 
     @Override
-    public void cleanupMultipart(MultipartHttpServletRequest request) {
+    public void cleanupMultipart(@Nonnull MultipartHttpServletRequest request) {
         // This is done by sling.
     }
 
