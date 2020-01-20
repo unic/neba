@@ -1,6 +1,6 @@
 markdown: kramdown
 url: https://www.neba.io
-nebaVersion: 5.1.1
+nebaVersion: 5.1.2
 geminiVersion: 3.0.0.M01
 springDocumentationVersion: 5.2.x
 contextpath:

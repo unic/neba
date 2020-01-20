@@ -1,0 +1,36 @@
+---
+title: NEBA 5.1.2
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.1.2 Ships a critical fix for the Spring integration and updates to Spring 5.2.2.
+tags: [release,current]
+release:
+    version: 5.1.2
+    previousVersion: 5.1.1
+    requiresChange: false
+---
+
+<section>
+    <header><h1>NEBA 5.1.2 released</h1></header>
+    <p>
+        NEBA 5.1.2 contains a critical fix for an <a href="https://github.com/unic/neba/issues/372">issue introduced in NEBA 5.1.0</a>. In NEBA 5.1.0, a Spring bean post processor was introduced that accidentally terminates the bean post-processing chain for non-model beans.
+        Because of this issue, the @PostConstruct methods of Spring beans may no longer be invoked.
+    </p>
+    <p>
+        NEBA 5.1.2 also updates to Spring 5.2.2, containing <a href="https://github.com/spring-projects/spring-framework/milestone/227?closed=1">important additions, bugfixes and improvements</a>.
+    </p>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="33" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="33" data-labels="bug"></ul>
+    </section>
+</section>
