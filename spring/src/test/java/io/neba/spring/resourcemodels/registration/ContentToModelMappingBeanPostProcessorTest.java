@@ -23,7 +23,7 @@ public class ContentToModelMappingBeanPostProcessorTest {
     private static final String BEAN_NAME = "beanName";
 
     @Mock
-    private ModelDefinition<?> modelDefinition;
+    private ModelDefinition<Object> modelDefinition;
     @Mock
     private ContentToModelMappingCallback<Object> parentCallback;
     @Mock
