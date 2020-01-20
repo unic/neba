@@ -69,6 +69,17 @@ public class ContentToModelMappingBeanPostProcessorTest {
         postProcessBeanWithName("unknownName");
         assertPostProcessorReturnsOriginalBean();
         verifyNoMappingIsDoneUsing(this.parentCallback);
+        assertPostProcessorReturnsOriginalBean();
+    }
+
+    @Test
+    public void testPostProcessorReturnOriginalBeanAfterInitialization() {
+        postProcessBeanAfterInitialization();
+        assertPostProcessorReturnsOriginalBean();
+    }
+
+    private void postProcessBeanAfterInitialization() {
+        this.postProcessedBean = this.testee.postProcessAfterInitialization(this.model, "someName");
     }
 
     private void verifyNoMappingIsDoneUsing(ContentToModelMappingCallback<Object> cb) {
@@ -76,7 +87,7 @@ public class ContentToModelMappingBeanPostProcessorTest {
     }
 
     private void postProcessBeanWithName(String beanName) {
-        this.postProcessedBean = this.testee.postProcessAfterInitialization(this.model, beanName);
+        this.postProcessedBean = this.testee.postProcessBeforeInitialization(this.model, beanName);
     }
 
     private void assertPostProcessorReturnsOriginalBean() {
