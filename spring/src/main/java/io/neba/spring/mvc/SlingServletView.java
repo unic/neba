@@ -24,6 +24,7 @@ import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.springframework.web.servlet.View;
 
+import javax.annotation.Nonnull;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,7 +67,7 @@ public class SlingServletView implements View {
      * @param response must not be <code>null</code>.
      */
     @Override
-    public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void render(Map<String, ?> model, HttpServletRequest request, @Nonnull HttpServletResponse response) throws Exception {
         final SlingHttpServletRequest slingRequest = (SlingHttpServletRequest) request;
         final ResourceResolver resourceResolver = slingRequest.getResourceResolver();
         final String resourcePath = request.getPathInfo();
@@ -98,6 +99,7 @@ public class SlingServletView implements View {
         }
 
         @Override
+        @Nonnull
         public Resource getResource() {
             return resource;
         }
@@ -119,6 +121,7 @@ public class SlingServletView implements View {
         }
 
         @Override
+        @Nonnull
         public ValueMap getValueMap() {
             ValueMap properties = new ValueMapDecorator(new HashMap<>());
             if (this.model != null) {

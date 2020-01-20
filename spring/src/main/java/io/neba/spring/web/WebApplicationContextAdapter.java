@@ -29,6 +29,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -53,11 +54,13 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     }
 
     @Override
+    @Nonnull
     public String getApplicationName() {
         return wrapped.getApplicationName();
     }
 
     @Override
+    @Nonnull
     public String getDisplayName() {
         return wrapped.getDisplayName();
     }
@@ -73,17 +76,19 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     }
 
     @Override
+    @Nonnull
     public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException {
         return wrapped.getAutowireCapableBeanFactory();
     }
 
     @Override
+    @Nonnull
     public Environment getEnvironment() {
         return wrapped.getEnvironment();
     }
 
     @Override
-    public boolean containsBeanDefinition(String beanName) {
+    public boolean containsBeanDefinition(@Nonnull String beanName) {
         return wrapped.containsBeanDefinition(beanName);
     }
 
@@ -93,127 +98,144 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     }
 
     @Override
+    @Nonnull
     public String[] getBeanDefinitionNames() {
         return wrapped.getBeanDefinitionNames();
     }
 
     @Override
-    public String[] getBeanNamesForType(ResolvableType type) {
+    @Nonnull
+    public String[] getBeanNamesForType(@Nonnull ResolvableType type) {
         return wrapped.getBeanNamesForType(type);
     }
 
     @Override
-    public String[] getBeanNamesForType(ResolvableType resolvableType, boolean includeNonSingletons, boolean allowEagerInit) {
+    @Nonnull
+    public String[] getBeanNamesForType(@Nonnull ResolvableType resolvableType, boolean includeNonSingletons, boolean allowEagerInit) {
         return wrapped.getBeanNamesForType(resolvableType, includeNonSingletons, allowEagerInit);
     }
 
     @Override
+    @Nonnull
     public String[] getBeanNamesForType(Class<?> type) {
         return wrapped.getBeanNamesForType(type);
     }
 
     @Override
+    @Nonnull
     public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
         return wrapped.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
     }
 
     @Override
+    @Nonnull
     public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
         return wrapped.getBeansOfType(type);
     }
 
     @Override
+    @Nonnull
     public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) throws BeansException {
         return wrapped.getBeansOfType(type, includeNonSingletons, allowEagerInit);
     }
 
     @Override
-    public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
+    @Nonnull
+    public String[] getBeanNamesForAnnotation(@Nonnull Class<? extends Annotation> annotationType) {
         return wrapped.getBeanNamesForAnnotation(annotationType);
     }
 
     @Override
-    public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) throws BeansException {
+    @Nonnull
+    public Map<String, Object> getBeansWithAnnotation(@Nonnull Class<? extends Annotation> annotationType) throws BeansException {
         return wrapped.getBeansWithAnnotation(annotationType);
     }
 
     @Override
-    public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) throws NoSuchBeanDefinitionException {
+    public <A extends Annotation> A findAnnotationOnBean(@Nonnull String beanName, @Nonnull Class<A> annotationType) throws NoSuchBeanDefinitionException {
         return wrapped.findAnnotationOnBean(beanName, annotationType);
     }
 
     @Override
-    public Object getBean(String name) throws BeansException {
+    @Nonnull
+    public Object getBean(@Nonnull String name) throws BeansException {
         return wrapped.getBean(name);
     }
 
     @Override
-    public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+    @Nonnull
+    public <T> T getBean(@Nonnull String name, @Nonnull Class<T> requiredType) throws BeansException {
         return wrapped.getBean(name, requiredType);
     }
 
     @Override
-    public <T> T getBean(Class<T> requiredType) throws BeansException {
+    @Nonnull
+    public <T> T getBean(@Nonnull Class<T> requiredType) throws BeansException {
         return wrapped.getBean(requiredType);
     }
 
     @Override
-    public Object getBean(String name, Object... args) throws BeansException {
+    @Nonnull
+    public Object getBean(@Nonnull String name, @Nonnull Object... args) throws BeansException {
         return wrapped.getBean(name, args);
     }
 
     @Override
-    public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+    @Nonnull
+    public <T> T getBean(@Nonnull Class<T> requiredType, @Nonnull Object... args) throws BeansException {
         return wrapped.getBean(requiredType, args);
     }
 
     @Override
-    public <T> ObjectProvider<T> getBeanProvider(Class<T> aClass) {
+    @Nonnull
+    public <T> ObjectProvider<T> getBeanProvider(@Nonnull Class<T> aClass) {
         return wrapped.getBeanProvider(aClass);
     }
 
     @Override
-    public <T> ObjectProvider<T> getBeanProvider(ResolvableType resolvableType) {
+    @Nonnull
+    public <T> ObjectProvider<T> getBeanProvider(@Nonnull ResolvableType resolvableType) {
         return wrapped.getBeanProvider(resolvableType);
     }
 
     @Override
-    public boolean containsBean(String name) {
+    public boolean containsBean(@Nonnull String name) {
         return wrapped.containsBean(name);
     }
 
     @Override
-    public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+    public boolean isSingleton(@Nonnull String name) throws NoSuchBeanDefinitionException {
         return wrapped.isSingleton(name);
     }
 
     @Override
-    public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+    public boolean isPrototype(@Nonnull String name) throws NoSuchBeanDefinitionException {
         return wrapped.isPrototype(name);
     }
 
     @Override
-    public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
+    public boolean isTypeMatch(@Nonnull String name, @Nonnull ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
         return wrapped.isTypeMatch(name, typeToMatch);
     }
 
     @Override
-    public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+    public boolean isTypeMatch(@Nonnull String name, @Nonnull Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
         return wrapped.isTypeMatch(name, typeToMatch);
     }
 
     @Override
-    public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
+    public Class<?> getType(@Nonnull String name) throws NoSuchBeanDefinitionException {
         return wrapped.getType(name);
     }
 
     @Override
-    public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+    public Class<?> getType(@Nonnull String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
         return wrapped.getType(name, allowFactoryBeanInit);
     }
 
     @Override
-    public String[] getAliases(String name) {
+    @Nonnull
+    public String[] getAliases(@Nonnull String name) {
         return wrapped.getAliases(name);
     }
 
@@ -223,42 +245,46 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     }
 
     @Override
-    public boolean containsLocalBean(String name) {
+    public boolean containsLocalBean(@Nonnull String name) {
         return wrapped.containsLocalBean(name);
     }
 
     @Override
-    public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
+    public String getMessage(@Nonnull String code, Object[] args, String defaultMessage, @Nonnull Locale locale) {
         return wrapped.getMessage(code, args, defaultMessage, locale);
     }
 
     @Override
-    public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+    @Nonnull
+    public String getMessage(@Nonnull String code, Object[] args, @Nonnull Locale locale) throws NoSuchMessageException {
         return wrapped.getMessage(code, args, locale);
     }
 
     @Override
-    public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
+    @Nonnull
+    public String getMessage(@Nonnull MessageSourceResolvable resolvable, @Nonnull Locale locale) throws NoSuchMessageException {
         return wrapped.getMessage(resolvable, locale);
     }
 
     @Override
-    public void publishEvent(ApplicationEvent event) {
+    public void publishEvent(@Nonnull ApplicationEvent event) {
         wrapped.publishEvent(event);
     }
 
     @Override
-    public void publishEvent(Object event) {
+    public void publishEvent(@Nonnull Object event) {
         wrapped.publishEvent(event);
     }
 
     @Override
-    public Resource[] getResources(String locationPattern) throws IOException {
+    @Nonnull
+    public Resource[] getResources(@Nonnull String locationPattern) throws IOException {
         return wrapped.getResources(locationPattern);
     }
 
     @Override
-    public Resource getResource(String location) {
+    @Nonnull
+    public Resource getResource(@Nonnull String location) {
         return wrapped.getResource(location);
     }
 

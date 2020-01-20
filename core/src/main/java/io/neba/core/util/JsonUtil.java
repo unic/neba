@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-
 import static org.apache.commons.lang3.ClassUtils.wrapperToPrimitive;
 
 /**
@@ -74,7 +73,7 @@ public class JsonUtil {
             return '"' + ((String) value).replaceAll("\"", "\\\\\"") + '"';
         }
         if (value instanceof Collection) {
-            return toJson((Collection) value);
+            return toJson((Collection<?>) value);
         }
         if (value instanceof Map) {
             return toJson((Map<?, ?>) value);

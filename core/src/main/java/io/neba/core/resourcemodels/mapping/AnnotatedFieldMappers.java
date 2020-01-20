@@ -45,26 +45,26 @@ public class AnnotatedFieldMappers {
      *
      * @author Olaf Otto
      */
-    public static class AnnotationMapping {
-        private final Annotation annotation;
-        private final AnnotatedFieldMapper mapper;
+    public static class AnnotationMapping<FieldType, AnnotationType extends Annotation> {
+        private final AnnotationType annotation;
+        private final AnnotatedFieldMapper<FieldType, AnnotationType> mapper;
 
-        AnnotationMapping(Annotation annotation, AnnotatedFieldMapper mapper) {
+        AnnotationMapping(AnnotationType annotation, AnnotatedFieldMapper<FieldType, AnnotationType> mapper) {
             this.annotation = annotation;
             this.mapper = mapper;
         }
 
-        public Annotation getAnnotation() {
+        public AnnotationType getAnnotation() {
             return annotation;
         }
 
-        AnnotatedFieldMapper getMapper() {
+        AnnotatedFieldMapper<FieldType, AnnotationType> getMapper() {
             return mapper;
         }
     }
 
-    private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping> cache = new ConcurrentDistinctMultiValueMap<>();
-    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper> fieldMappers = new ConcurrentDistinctMultiValueMap<>();
+    private final ConcurrentDistinctMultiValueMap<Field, AnnotationMapping<?, ?>> cache = new ConcurrentDistinctMultiValueMap<>();
+    private final ConcurrentDistinctMultiValueMap<Class<? extends Annotation>, AnnotatedFieldMapper<?, ?>> fieldMappers = new ConcurrentDistinctMultiValueMap<>();
 
     @Reference(cardinality = MULTIPLE, policy = DYNAMIC, unbind = "unbind")
     protected synchronized void bind(AnnotatedFieldMapper<?, ?> mapper) {
@@ -90,12 +90,12 @@ public class AnnotatedFieldMappers {
      * @param metaData must not be <code>null</code>.
      * @return never <code>null</code> but rather an empty collection.
      */
-    public Collection<AnnotationMapping> get(MappedFieldMetaData metaData) {
+    public Collection<AnnotationMapping<?, ?>> get(MappedFieldMetaData metaData) {
         if (metaData == null) {
             throw new IllegalArgumentException("Method argument metaData must not be null.");
         }
 
-        Collection<AnnotationMapping> mappers = this.cache.get(metaData.getField());
+        Collection<AnnotationMapping<?, ?>> mappers = this.cache.get(metaData.getField());
 
         if (mappers != null) {
             return mappers;
@@ -104,17 +104,18 @@ public class AnnotatedFieldMappers {
         return this.cache.computeIfAbsent(metaData.getField(), key -> resolveCompatibleMappers(metaData));
     }
 
-    private Collection<AnnotationMapping> resolveCompatibleMappers(MappedFieldMetaData metaData) {
-        List<AnnotationMapping> compatibleMappers = new ArrayList<>();
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private Collection<AnnotationMapping<?, ?>> resolveCompatibleMappers(MappedFieldMetaData metaData) {
+        List<AnnotationMapping<?, ?>> compatibleMappers = new ArrayList<>();
         for (Annotation annotation : metaData.getAnnotations()) {
-            Collection<AnnotatedFieldMapper> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
+            Collection<AnnotatedFieldMapper<?, ?>> mappersForAnnotation = this.fieldMappers.get(annotation.annotationType());
             if (mappersForAnnotation == null) {
                 continue; // with next element
             }
             for (AnnotatedFieldMapper<?, ?> mapper : mappersForAnnotation) {
                 // Mappers supporting boxed types must also support the primitive equivalent,
                 // e.g. Boolean / boolean, Integer / int.
-                Class type = primitiveToWrapper(metaData.getType());
+                Class<?> type = primitiveToWrapper(metaData.getType());
                 if (mapper.getFieldType().isAssignableFrom(type)) {
                     compatibleMappers.add(new AnnotationMapping(annotation, mapper));
                 }

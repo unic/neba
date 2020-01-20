@@ -16,15 +16,17 @@
 
 package io.neba.spring.mvc;
 
+import org.apache.sling.api.request.RequestParameter;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.apache.sling.api.request.RequestParameter;
-import org.springframework.web.multipart.MultipartFile;
-
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.copy;
@@ -46,6 +48,7 @@ public class SlingMultipartFile implements MultipartFile {
 	}
 
 	@Override
+	@Nonnull
 	public String getName() {
 		return this.name;
 	}
@@ -71,6 +74,7 @@ public class SlingMultipartFile implements MultipartFile {
 	}
 
 	@Override
+	@Nonnull
 	public byte[] getBytes() {
 		return this.source.get();
 	}

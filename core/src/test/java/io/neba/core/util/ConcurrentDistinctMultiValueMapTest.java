@@ -110,21 +110,21 @@ public class ConcurrentDistinctMultiValueMapTest {
     }
 
     @Test
-    public void testGetContentsContainsAllData() {
+    public void testShallowCopyContainsAllData() {
         testee.put("key", "value");
 
-        assertThat(testee.getContents()).containsOnlyKeys("key");
-        assertThat(testee.getContents().get("key")).containsExactly("value");
+        assertThat(testee.shallowCopy()).containsOnlyKeys("key");
+        assertThat(testee.shallowCopy().get("key")).containsExactly("value");
     }
 
     @Test
-    public void testGetContentsReturnsShallowCopy() {
+    public void testShallowCopyReturnsShallowCopy() {
         testee.put("key", "value");
-        testee.getContents().clear();
+        testee.shallowCopy().clear();
 
         assertThat(testee).containsOnly("key", "value");
 
-        testee.getContents().get("key").add("additional value");
+        testee.shallowCopy().get("key").add("additional value");
 
         assertThat(testee).containsOnly("key", "value");
     }

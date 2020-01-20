@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 abstract class ContextShutdownHandler {
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private SpringModelRegistrar modelRegistrar;
     @Autowired

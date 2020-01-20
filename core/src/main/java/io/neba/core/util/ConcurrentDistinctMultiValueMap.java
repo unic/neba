@@ -26,10 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * A thread-safe storage for key -&gt; value associations. Unlike
- * {@link ConcurrentHashMap}, this map synchronizes writes since the multi-value
- * associations require two independent read/writes to the map state; one to
- * retrieve an existing collection, a second one to add another value to it. <br />
+ * A thread-safe storage for key -&gt; value associations.
  * Note that it is <em>not</em> save to modify the contents of the collection
  * returned by this map since it is still based on the contents of this map and
  * not a shallow copy for performance considerations.
@@ -41,6 +38,7 @@ import java.util.function.Function;
  * @param <K> The key's type.
  * @param <V> The value's type.
  * @author Olaf Otto
+ * @see ConcurrentLinkedDistinctQueue
  */
 public class ConcurrentDistinctMultiValueMap<K, V> {
     private final Map<K, Collection<V>> store = new ConcurrentHashMap<>(128);
@@ -84,7 +82,7 @@ public class ConcurrentDistinctMultiValueMap<K, V> {
      * modify the state of the returned map and the state of the
      * collections returned as the map values. Never returns null.
      */
-    public Map<K, Collection<V>> getContents() {
+    public Map<K, Collection<V>> shallowCopy() {
         HashMap<K, Collection<V>> contents = new HashMap<>(this.store.size());
         Set<Entry<K, Collection<V>>> entries = this.store.entrySet();
         for (Entry<K, Collection<V>> entry : entries) {

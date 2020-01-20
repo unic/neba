@@ -44,7 +44,7 @@ public class ConcurrentMultiValueMapTest {
         withEntry("b", "v1");
         withEntry("b", "v2");
         
-        Map<String, Collection<String>> copy = this.testee.getContents();
+        Map<String, Collection<String>> copy = this.testee.shallowCopy();
         
         assertThat(copy)
                   .isNotNull()
@@ -60,7 +60,7 @@ public class ConcurrentMultiValueMapTest {
         withEntry("b", "v1");
         withEntry("b", "v2");
 
-        Map<String, Collection<String>> copy1 = this.testee.getContents();
+        Map<String, Collection<String>> copy1 = this.testee.shallowCopy();
 
         copy1.remove("a");
 
@@ -69,7 +69,7 @@ public class ConcurrentMultiValueMapTest {
         .hasSize(1)
         .contains(entry("b", v("v1", "v2")));
 
-        Map<String, Collection<String>> copy2 = this.testee.getContents();
+        Map<String, Collection<String>> copy2 = this.testee.shallowCopy();
 
         assertThat(copy2)
         .isNotNull()

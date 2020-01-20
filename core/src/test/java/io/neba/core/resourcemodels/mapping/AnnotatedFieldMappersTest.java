@@ -59,6 +59,7 @@ public class AnnotatedFieldMappersTest {
     private @interface CustomAnnotation2 {}
 
     private static class TestModel1 {
+        @SuppressWarnings("unused")
         @CustomAnnotation1
         public List<Resource> resources;
     }
@@ -74,7 +75,7 @@ public class AnnotatedFieldMappersTest {
     private Annotations annotations1, annotations2;
 
     @Mock
-    private AnnotatedFieldMapper mapper1, mapper2, mapper3;
+    private AnnotatedFieldMapper<?, ?> mapper1, mapper2, mapper3;
 
     @InjectMocks
     private AnnotatedFieldMappers testee;
@@ -241,11 +242,11 @@ public class AnnotatedFieldMappersTest {
         verify(this.metadata1).getAnnotations();
     }
 
-    private void unbind(AnnotatedFieldMapper mapper) {
+    private void unbind(AnnotatedFieldMapper<?, ?> mapper) {
         this.testee.unbind(mapper);
     }
 
-    private void withMapperSupporting(AnnotatedFieldMapper mapper, Class<?> type) {
+    private void withMapperSupporting(AnnotatedFieldMapper<?, ?> mapper, Class<?> type) {
         doReturn(type).when(mapper).getFieldType();
     }
 
@@ -253,7 +254,7 @@ public class AnnotatedFieldMappersTest {
         assertThat(this.testee.get(metadata)).isEmpty();
     }
 
-    private void assertMetadataHasMappers(MappedFieldMetaData metadata, AnnotatedFieldMapper... mappers) {
+    private void assertMetadataHasMappers(MappedFieldMetaData metadata, AnnotatedFieldMapper<?, ?>... mappers) {
         assertThat(this.testee.get(metadata)).extracting("mapper").containsOnly((Object[]) mappers);
     }
 
@@ -261,7 +262,7 @@ public class AnnotatedFieldMappersTest {
         assertThat(this.testee.get(metadata)).extracting("annotation").containsOnly((Object[]) annotations);
     }
 
-    private void bind(AnnotatedFieldMapper mapper) {
+    private void bind(AnnotatedFieldMapper<?, ?> mapper) {
         this.testee.bind(mapper);
     }
 }

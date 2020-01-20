@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.neba</groupId>
 	<artifactId>io.neba.neba-parent</artifactId>
-    <version>5.1.2-SNAPSHOT</version>
+    <version>5.1.2</version>
 	<name>NEBA parent POM</name>
 	<packaging>pom</packaging>
 	
@@ -54,7 +54,7 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.2.1.RELEASE_1</spring.version>
+		<spring.version>5.2.2.RELEASE_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
 		<language.level>1.8</language.level>

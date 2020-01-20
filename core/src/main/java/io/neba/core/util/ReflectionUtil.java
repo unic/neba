@@ -86,7 +86,7 @@ public final class ReflectionUtil {
         }
 
         if (resolvedType instanceof TypeVariable) {
-            resolvedType = resolveTypeVariable((TypeVariable) resolvedType, assigningType);
+            resolvedType = resolveTypeVariable((TypeVariable<?>) resolvedType, assigningType);
         }
 
         if (resolvedType == null) {
@@ -99,7 +99,7 @@ public final class ReflectionUtil {
         return resolvedType;
     }
 
-    private static Type resolveTypeVariable(final TypeVariable variable, final Type assigningType) {
+    private static Type resolveTypeVariable(final TypeVariable<?> variable, final Type assigningType) {
         // Can the type variable be resolved?
         if (TypeUtils.getRawType(variable, assigningType) == null) {
             // It cannot be resolved - we must look at the boundaries.
@@ -119,7 +119,7 @@ public final class ReflectionUtil {
 
             // 3: There is one boundary, and it's a Type Variable. Repeat.
             if (bounds[0] instanceof TypeVariable) {
-                return resolveTypeVariable((TypeVariable) bounds[0], assigningType);
+                return resolveTypeVariable((TypeVariable<?>) bounds[0], assigningType);
             }
 
             // 4: There is one boundary, and it's a Parametrized or wildcard type. Return the respective type, e.g. List<? extends SomeType<V>> -> SomeType
@@ -156,7 +156,7 @@ public final class ReflectionUtil {
         }
 
         if (resolvedType instanceof TypeVariable) {
-            resolvedType = resolveTypeVariable((TypeVariable) resolvedType, assigningType);
+            resolvedType = resolveTypeVariable((TypeVariable<?>) resolvedType, assigningType);
         }
 
         return resolvedType;

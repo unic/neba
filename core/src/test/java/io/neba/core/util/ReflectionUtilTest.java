@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static io.neba.core.util.ReflectionUtil.findField;
@@ -42,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Olaf Otto
  */
-public class ReflectionUtilTest<T extends ReflectionUtilTest, K, V extends W, W extends ReflectionUtilTest, X extends Serializable & List> {
+public class ReflectionUtilTest<T extends ReflectionUtilTest<?, ?, ?, ?, ?>, K, V extends W, W extends ReflectionUtilTest<?, ?, ?, ?, ?>, X extends Serializable & List<?>> {
     /**
      * Declares a member with a type variable.
      */
@@ -82,6 +81,7 @@ public class ReflectionUtilTest<T extends ReflectionUtilTest, K, V extends W, W 
     }
 
     private static abstract class TestSuperClass {
+        @SuppressWarnings("unused")
         private String superClassField;
 
         private void superClassMethod() {
@@ -93,6 +93,7 @@ public class ReflectionUtilTest<T extends ReflectionUtilTest, K, V extends W, W 
     }
 
     private static class TestClass extends TestSuperClass implements TestInterface {
+        @SuppressWarnings("unused")
         private String testClassField;
 
         @Inject
@@ -107,7 +108,6 @@ public class ReflectionUtilTest<T extends ReflectionUtilTest, K, V extends W, W 
         public void abstractInterfaceMethod() {
 
         }
-
     }
 
     @SuppressWarnings("unused")
@@ -151,13 +151,12 @@ public class ReflectionUtilTest<T extends ReflectionUtilTest, K, V extends W, W 
     @SuppressWarnings("unused")
     private Collection<? extends T> readOnlyCollection;
     @SuppressWarnings("unused")
-    private Collection<? super ReflectionUtilTest> boundCollection;
+    private Collection<? super ReflectionUtilTest<?, ?, ?, ?, ?>> boundCollection;
 
     private Field field;
     private Method method;
     private Class<?> typeParameter;
     private Object collectionInstance;
-    private Optional<Method> resolvedMethod;
     private Class<?> type = getClass();
 
     @Test(expected = IllegalArgumentException.class)
@@ -400,12 +399,12 @@ public class ReflectionUtilTest<T extends ReflectionUtilTest, K, V extends W, W 
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private <T extends Collection> void instantiate(Class<T> collectionType) {
+    private <Z extends Collection> void instantiate(Class<Z> collectionType) {
         this.collectionInstance = instantiateCollectionType(collectionType);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private <T extends Collection> void instantiate(Class<T> collectionType, int length) {
+    private <Z extends Collection> void instantiate(Class<Z> collectionType, int length) {
         this.collectionInstance = instantiateCollectionType(collectionType, length);
     }
 

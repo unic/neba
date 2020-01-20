@@ -18,9 +18,9 @@ package io.neba.core.resourcemodels.registration;
 
 import io.neba.core.util.ConcurrentDistinctMultiValueMap;
 import io.neba.core.util.Key;
-import io.neba.core.util.ResolvedModelSource;
 import io.neba.core.util.MatchedBundlesPredicate;
 import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.framework.Bundle;
@@ -293,7 +293,7 @@ public class ModelRegistry {
      * @return all type -&gt; model mappings.
      */
     Map<String, Collection<OsgiModelSource<?>>> getTypeMappings() {
-        return this.typeNameToModelSourcesMap.getContents();
+        return this.typeNameToModelSourcesMap.shallowCopy();
     }
 
     /**
