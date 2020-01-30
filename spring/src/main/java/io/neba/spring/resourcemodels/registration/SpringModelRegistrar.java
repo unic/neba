@@ -80,16 +80,13 @@ public class SpringModelRegistrar {
                         .filter(Objects::nonNull)
                         .collect(toList());
 
-        final ContentToModelMappingBeanPostProcessor beanPostProcessor = new ContentToModelMappingBeanPostProcessor(modelDefinitions);
-        factory.addBeanPostProcessor(beanPostProcessor);
-
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(SERVICE_DESCRIPTION, "Provides NEBA resource models from Spring Beans annotated with @" + ResourceModel.class.getSimpleName() + ".");
         properties.put(SERVICE_VENDOR, "neba.io");
 
         this.bundlesWithModels.put(bundle, bundle.getBundleContext().registerService(
                 ResourceModelFactory.class.getName(),
-                new SpringResourceModelFactory(modelDefinitions, beanPostProcessor, factory),
+                new SpringResourceModelFactory(modelDefinitions, factory),
                 properties
         ));
     }
