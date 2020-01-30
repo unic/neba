@@ -128,7 +128,7 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     @Test
-    public void testLookupOfSameResourcePathsWithDifferentResourceResolvers() throws Exception {
+    public void testLookupOfSameResourcePathsWithDifferentResourceResolversWithoutUserIds() throws Exception {
         request(() -> {
             withResourcePath("/junit/test/1");
             withDifferentResourceResolver();
@@ -137,6 +137,21 @@ public class RequestScopedResourceModelCacheTest {
             assertModelIsInCache();
 
             withDifferentResourceResolver();
+            lookupModelFromCache();
+            assertModelIsNotInCache();
+        });
+    }
+
+    @Test
+    public void testLookupOfSameResourcePathsWithDifferentResourceResolversWithUserIds() throws Exception {
+        request(() -> {
+            withResourcePath("/junit/test/1");
+            withResourceResolverUserId("anonymous");
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelIsInCache();
+
+            withResourceResolverUserId("admin");
             lookupModelFromCache();
             assertModelIsNotInCache();
         });
@@ -348,6 +363,10 @@ public class RequestScopedResourceModelCacheTest {
 
     private void withDifferentResourceResolver() {
         doReturn(mock(ResourceResolver.class)).when(this.resource).getResourceResolver();
+    }
+
+    private void withResourceResolverUserId(String userId) {
+        doReturn(userId).when(this.resolver).getUserID();
     }
 
     private void withDisabledCache() {
