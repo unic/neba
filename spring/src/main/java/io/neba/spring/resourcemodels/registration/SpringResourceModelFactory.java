@@ -25,17 +25,13 @@ import java.util.List;
 
 /**
  * Retrieves resource model beans from a {@link org.springframework.beans.factory.ListableBeanFactory#getBean(String, Class) bean factory}.
- * Registers {@link io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback mapping callbacks}
- * with the {@link ContentToModelMappingBeanPostProcessor} to map content to models during their creation.
  */
 class SpringResourceModelFactory implements ResourceModelFactory {
     private final List<SpringBasedModelDefinition> modelDefinitions;
-    private final ContentToModelMappingBeanPostProcessor beanPostProcessor;
     private final ConfigurableListableBeanFactory factory;
 
-    SpringResourceModelFactory(List<SpringBasedModelDefinition> modelDefinitions, ContentToModelMappingBeanPostProcessor beanPostProcessor, ConfigurableListableBeanFactory factory) {
+    SpringResourceModelFactory(List<SpringBasedModelDefinition> modelDefinitions, ConfigurableListableBeanFactory factory) {
         this.modelDefinitions = modelDefinitions;
-        this.beanPostProcessor = beanPostProcessor;
         this.factory = factory;
     }
 
@@ -46,19 +42,13 @@ class SpringResourceModelFactory implements ResourceModelFactory {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T provideModel(@Nonnull ModelDefinition<T> modelDefinition, @Nonnull ContentToModelMappingCallback<T> callback) {
         if (!(modelDefinition instanceof SpringBasedModelDefinition)) {
             throw new IllegalArgumentException("Unable to provide the model " + modelDefinition + ": The model definition does not stem from spring. This factory should not have been asked to provide a model for it.");
         }
 
         SpringBasedModelDefinition springBasedModelDefinition = (SpringBasedModelDefinition) modelDefinition;
-
-        try {
-            beanPostProcessor.push((ContentToModelMappingCallback<Object>) callback);
-            return callback.map(factory.getBean(springBasedModelDefinition.getBeanName(), modelDefinition.getType()));
-        } finally {
-            beanPostProcessor.pop();
-        }
+        T bean = factory.getBean(springBasedModelDefinition.getBeanName(), modelDefinition.getType());
+        return callback.map(bean);
     }
 }

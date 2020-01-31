@@ -4,7 +4,6 @@ import io.neba.api.spi.ResourceModelFactory.ContentToModelMappingCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -15,7 +14,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -24,8 +22,6 @@ public class SpringResourceModelFactoryTest {
 
     @Mock
     private ConfigurableListableBeanFactory factory;
-    @Mock
-    private ContentToModelMappingBeanPostProcessor postProcessor;
     @Mock
     private SpringBasedModelDefinition modelDefinition;
     @Mock
@@ -46,7 +42,7 @@ public class SpringResourceModelFactoryTest {
 
         doReturn(this.modelReturnedFromCallback).when(this.callback).map(any());
 
-        this.testee = new SpringResourceModelFactory(singletonList(this.modelDefinition), this.postProcessor, this.factory);
+        this.testee = new SpringResourceModelFactory(singletonList(this.modelDefinition), this.factory);
     }
 
     @Test
@@ -55,13 +51,14 @@ public class SpringResourceModelFactoryTest {
     }
 
     @Test
-    public void testModelRetrievalFromBeanFactoryIsUsingOriginalBeanNameAndModelTypeAndRegistersCallback() {
+    public void testModelRetrievalFromBeanFactoryIsUsingOriginalBeanNameAndModelTypeAndInvokesCallback() {
         provideModel();
-        InOrder inOrder = inOrder(this.postProcessor, this.factory, this.postProcessor);
-        inOrder.verify(this.postProcessor).push(this.callback);
-        inOrder.verify(this.factory).getBean(BEAN_NAME, getClass());
-        verify(this.postProcessor).pop();
+        verifyModelBeanIsObtainedFromBeanFactory();
         assertResourceModelFactoryProvidesModelReturnedFromCallback();
+    }
+
+    private void verifyModelBeanIsObtainedFromBeanFactory() {
+        verify(this.factory).getBean(BEAN_NAME, getClass());
     }
 
     private void assertResourceModelFactoryProvidesModelReturnedFromCallback() {

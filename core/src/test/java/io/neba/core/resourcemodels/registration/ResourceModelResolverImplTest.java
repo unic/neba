@@ -71,7 +71,7 @@ public class ResourceModelResolverImplTest {
     @Mock
     private OsgiModelSource<Object> osgiModelSource;
     @Mock
-    private ContentToModelMappingCallback callback;
+    private ContentToModelMappingCallback<Object> callback;
 
     private Map<Key, Object> testCache = new HashMap<>();
     private Object resolutionResult;
@@ -83,7 +83,7 @@ public class ResourceModelResolverImplTest {
     @Before
     @SuppressWarnings("unchecked")
     public void prepareContainerAdapter() {
-        Answer storeInCache = invocation -> {
+        Answer<?> storeInCache = invocation -> {
             testCache.put(buildCacheInvocationKey(invocation), invocation.getArguments()[2]);
             return null;
         },

@@ -11,7 +11,7 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>5.1.2</version>
+        <version>5.1.3</version>
     </parent>
 
     <properties>

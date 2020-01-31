@@ -20,6 +20,7 @@ import io.neba.core.util.Key;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -146,7 +147,7 @@ public class RequestScopedResourceModelCache implements Filter {
      * {@inheritDoc}
      */
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain) throws IOException, ServletException {
         if (!this.configuration.enabled()) {
             chain.doFilter(request, response);
             return;
@@ -158,7 +159,7 @@ public class RequestScopedResourceModelCache implements Filter {
 
         final SlingHttpServletRequest slingHttpServletRequest = (SlingHttpServletRequest) request;
         this.requestHolder.set(slingHttpServletRequest);
-        this.cacheHolder.set(new HashMap<>(1024));
+        this.cacheHolder.set(new HashMap<>(256));
 
         try {
             chain.doFilter(slingHttpServletRequest, response);
@@ -185,7 +186,8 @@ public class RequestScopedResourceModelCache implements Filter {
      * @return A request-state sensitive key if the cached if the current thread is a HTTP request, the original key if not.
      * @see #createKey(Resource, Key)
      */
-    private Key createSafeModeKey(Resource resource, Key key) {
+    @Nonnull
+    private Key createSafeModeKey(@Nonnull Resource resource, @Nonnull Key key) {
         // Create a request-state sensitive key to scope the cached model to a request with specific parameters.
         final SlingHttpServletRequest request = this.requestHolder.get();
 
@@ -198,7 +200,7 @@ public class RequestScopedResourceModelCache implements Filter {
                 resource.getPath(),
                 key,
                 resource.getResourceType(),
-                resource.getResourceResolver().hashCode(),
+                identityOf(resource.getResourceResolver()),
 
                 substringBefore(requestPathInfo.getResourcePath(), "/jcr:content"),
                 requestPathInfo.getSelectorString(),
@@ -213,12 +215,29 @@ public class RequestScopedResourceModelCache implements Filter {
      * included (synthetic resources...) with different resource types, and the resource resolver identity, since different resource resolvers
      * may be used within the same request and they might feature different views on resource trees, e.g. through deviating privileges.
      */
-    private static Key createKey(Resource resource, Key key) {
+    @Nonnull
+    private static Key createKey(@Nonnull Resource resource, @Nonnull Key key) {
         return new Key(
                 resource.getPath(),
                 key,
                 resource.getResourceType(),
-                resource.getResourceResolver().hashCode());
+                identityOf(resource.getResourceResolver())
+        );
+    }
+
+    /**
+     * A resource resolver is associated with specific repository permissions. To avoid leaking privileges by sharing resource-to-model mapping results
+     * between different resource resolvers, the resource resolver identity is used as part of the cache key. Here, we either use the
+     * user ID associated with the resolver or, if no user is associated, the resolver itself, which translates
+     * to the {@link ResourceResolver#hashCode() resource resolver's hash code} being used in the key.
+     */
+    @Nonnull
+    private static Object identityOf(@Nonnull ResourceResolver resourceResolver) {
+        Object id = resourceResolver.getUserID();
+        if (id != null) {
+            return id;
+        }
+        return resourceResolver;
     }
 
     @ObjectClassDefinition(name = "NEBA request-scoped resource model cache", description = "Provides a request-scoped resource model cache")

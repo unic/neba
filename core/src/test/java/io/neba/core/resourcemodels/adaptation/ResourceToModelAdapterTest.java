@@ -93,7 +93,7 @@ public class ResourceToModelAdapterTest {
 
     @Before
     public void setUp() {
-        Answer storeInCache = invocation -> {
+        Answer<?> storeInCache = invocation -> {
             Object model = invocation.getArguments()[2];
             testCache.put(buildCacheInvocationKey(invocation), model);
             return null;
@@ -110,6 +110,7 @@ public class ResourceToModelAdapterTest {
                 .get(isA(Resource.class), isA(Key.class));
 
         doReturn(this.resourceResolver).when(resource).getResourceResolver();
+        doReturn("anonymous").when(resourceResolver).getUserID();
         doReturn(this.resource).when(this.request).getResource();
     }
 
@@ -287,6 +288,6 @@ public class ResourceToModelAdapterTest {
     private Key buildCacheInvocationKey(InvocationOnMock invocation) {
         Resource resource = (Resource) invocation.getArguments()[0];
         Key key = (Key) invocation.getArguments()[1];
-        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().hashCode());
+        return new Key(resource.getPath(), key, resource.getResourceType(), resource.getResourceResolver().getUserID());
     }
 }
