@@ -1,0 +1,44 @@
+---
+title: NEBA 5.1.3
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.1.3 Ships a critical fix for the Spring integration and improves caching efficiency
+tags: [release,current]
+release:
+    version: 5.1.3
+    previousVersion: 5.1.2
+    requiresChange: true
+---
+
+<section>
+    <header><h1>NEBA 5.1.3 released</h1></header>
+    <p>
+        NEBA 5.1.3 contains a critical fix for an <a href="https://github.com/unic/neba/issues/375">issue introduced in NEBA 5.1.0</a>. In NEBA 5.1.0, the resource-to-model mapping lifecycle phase
+        was integrated into the Spring bean creation lifecycle such that @PostConstruct would be applied after dependency injection <em>and</em> content-to-model mapping where executed.
+        However, this created a semantic mismatch. Content-to-object mapping is usually applied to an object graph. Object graphs naturally contain cycles or multiple nested instances
+        of the same model type. For instance, a model for Comment might posses a list of comments as a member representing replies, and may eagerly initialize those.
+    </p>
+    <p>
+        Nested model instances could thus mean that the same prototypic bean could be obtained multiple times during bean instantiation (Comment.init -> factory.get("comment")). Spring, however,
+        assumes a programming error in such a case and reports a cycle. Thus, the content-to-model mapping phase cannot be integrated into the Bean lifecycle, but must
+        be applied <em>after</em> a bean has been retrieved from the application context. This means that @PostConstruct will always be invoked prior to content-to-model mapping.
+    </p>
+    <p>Consequently, users of Spring beans as resource models <em>must</em> use <a href="/documentation.html#lifecycle_annotations">use @AfterMapping</a> when an initialization method requires mapped content or initiates content-to-model mapping.</p>
+    <p>
+        NEBA 5.1.3 also <a href="https://github.com/unic/neba/issues/376">contains an improvement</a> of the <a href="/documentation.html#caching">request-scoped resource model cache</a> that can lead to a better cache/miss ratio.
+    </p>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="34" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="34" data-labels="bug"></ul>
+    </section>
+</section>

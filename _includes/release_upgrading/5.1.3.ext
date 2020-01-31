@@ -1,0 +1,5 @@
+<p>
+    Usages of @PostConstruct in @ResourceModel beans <em>must</em> be reviewed and must be changed to <a href="/documentation.html#lifecycle_annotations">@AfterMapping</a>
+    whenever content-to-object mapping is required for the initialization, e.g. when the initialization relies on mapped members or performs adaptation from resources to spring-based resource
+    models.
+</p>

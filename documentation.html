@@ -704,22 +704,24 @@ public class MyModel {
     <h3 id="lifecycle_annotations">Performing additional initializations</h3>
 
     <p>Sometimes it is necessary to perform additional initializations
-        after all collaborators of a @ResourceModel are injected and all resource properties have been mapped to the model. Since NEBA 5.1.0, methods annotated with
-        @PostConstruct will be invoked after dependency and content injection. Prior to NEBA 5.1.0, the <a href="apidocs/neba-api/io/neba/api/annotations/AfterMapping.html">@AfterMapping annotation</a>
-        must be used since @PostConstruct was called before to content-to-model mapping.
+        after all collaborators of a @ResourceModel are injected and all resource properties have been mapped to the model.
+        Here, using the <a href="apidocs/neba-api/io/neba/api/annotations/AfterMapping.html">@AfterMapping annotation</a> is recommended,
+        as it guarantees that model construction, dependency injection and content-to-model mapping have completed regardless of the
+        model source, e.g. <a href="#add_neba_packages_header">Neba-Packages</a> or a spring application context).
+        When using Spring, @PostConstruct will always be invoked <em>prior to content-to-object mapping</em> due to bean life cycle restrictions by spring.
     </p>
 
-    <figure class="listing" id="listing:postmapping">
+    <figure class="listing" id="listing:aftermapping">
         {% highlight java %}@ResourceModel("my/model/type")
 public class MyModel {
    @This
    private Resource resource;
-   @PostConstruct
+   @AfterMapping
    public void initializeSomething() {
         // resource is initialized at this point.
         this.resource.adaptTo...
    }
-}{% endhighlight %}<figcaption>Using the @PostConstruct annotation</figcaption></figure>
+}{% endhighlight %}<figcaption>Using the @AfterMapping annotation</figcaption></figure>
 
 <h3 id="caching">Application-level caching</h3>
 <p>
