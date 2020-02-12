@@ -4,6 +4,11 @@ Node.prototype.tag = function(name) {
 
 var releases = undefined;
 
+upgradePathForm.onsubmit = function () {
+    showUpgradePath();
+    return false;
+};
+
 function showUpgradePath() {
     if (!fromVersion.selectedIndex || !toVersion.selectedIndex) {
         return;
