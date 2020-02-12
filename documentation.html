@@ -115,6 +115,16 @@ description: A comprehensive guide to using the NEBA features
                     </li>
                 </ul>
             </section>
+            <section>
+                <header>
+                    <h2>Upgrading</h2>
+                </header>
+                <ul>
+                    <li>
+                        <a href="#upgrading" title="Upgrading from one NEBA version to another">Upgrading from previous NEBA versions</a>
+                    </li>
+                </ul>
+            </section>
         </nav>
     </section>
 
@@ -1232,6 +1242,111 @@ public class CallToAction {
     <img src="assets/images/neba-resourcemodel-registration-and-adaptation.png" alt="NEBA core registers all ResourceModelFactory services, and provides a Sling AdapterFactory for the respective models.">
 </section>
 
+<section>
+    <header><h2 id="upgrading">Upgrading from previous versions</h2></header>
+
+    <p>
+        Please use the below form to see the upgrade path from one version of NEBA to another.
+    </p>
+
+    {% assign posts = site.posts | where_exp:"item", "item.tags contains 'release'" | sort: "release.version" %}
+    <form title="Upgrading from..." onsubmit="showUpgradePath(); return false;">
+        <fieldset title="Version selection">
+            See changes required when upgrading
+            <label for="fromVersion">from</label>
+            <select id="fromVersion">
+                <option value="">Please choose</option>
+                {% for post in posts %}
+                <option name="{{ post.release.version }}">{{ post.release.version }}</option>
+                {% endfor %}
+
+            </select>
+            <label for="toVersion">to</label>
+            <select id="toVersion">
+                <option value="">Please choose</option>
+                {% for post in posts %}
+                <option name="{{ post.release.version }}">{{ post.release.version }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Submit</button>
+        </fieldset>
+    </form>
+
+    <section id="requiredChanges"></section>
+
+    <script async>
+        Node.prototype.tag = function(name) {
+            return this.getElementsByTagName(name)[0];
+        };
+
+        var releases = undefined;
+
+        function showUpgradePath() {
+            if (!fromVersion.selectedIndex || !toVersion.selectedIndex) {
+                return;
+            }
+
+            if (!releases) {
+                loadUpgradePath();
+            } else {
+                renderUpgradePath();
+            }
+        }
+
+        function renderUpgradePath() {
+            while (requiredChanges.lastChild) {
+                requiredChanges.removeChild(requiredChanges.lastChild);
+            }
+
+            var from = fromVersion.options[fromVersion.selectedIndex].value,
+                to =   toVersion.options[toVersion.selectedIndex].value,
+                include = false;
+
+            for (i = 0; i < releases.length; ++i) {
+                let name = releases[i].tag("name").textContent;
+                if (include && releases[i].tag("requiresChange").textContent === "true") {
+                    var section = document.createElement("section");
+                    var header = document.createElement("header");
+                    var h2 = document.createElement("h2");
+                    var a = document.createElement("a");
+                    a.setAttribute("href", releases[i].tag("url").textContent);
+                    a.textContent = "Complete release notes of " + name;
+                    section.setAttribute("class", "info");
+                    h2.textContent = "Changes introduced in " + name;
+                    header.appendChild(h2);
+                    header.appendChild(a);
+                    section.appendChild(header);
+
+                    var div = document.createElement("div");
+                    div.innerHTML = releases[i].tag("changeDescription").textContent;
+                    section.appendChild(div);
+                    requiredChanges.appendChild(section);
+                }
+                if (name === to) {
+                    break;
+                }
+                if (name === from) {
+                    include = true;
+                }
+            }
+
+            if (!requiredChanges.lastChild) {
+                requiredChanges.innerHTML = "<section><header><h2>No changes are required when updating from " + from + " to " + to + ".</h2></header></section>";
+            }
+        }
+
+        function loadUpgradePath() {
+            var oReq = new XMLHttpRequest();
+            oReq.addEventListener("load", function (_) {
+                releases = oReq.responseXML.childNodes[0].childNodes;
+                renderUpgradePath();
+            });
+            oReq.open("GET", "/releases.xml");
+            oReq.send();
+        }
+
+    </script>
+</section>
 </main>
 
 {% include footer.ext %}

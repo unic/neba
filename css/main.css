@@ -351,6 +351,15 @@ figure.listing figcaption {
     border-top: 1px solid #f0f0f0
 }
 
+fieldset {
+    border: none;
+    padding: 0;
+}
+
+select, button {
+    padding: .2em;
+}
+
 .highlight {
     overflow-x: auto;
 }
