@@ -10,6 +10,10 @@ upgradePathForm.onsubmit = function () {
 };
 
 function showUpgradePath() {
+    while (requiredChanges.lastChild) {
+        requiredChanges.removeChild(requiredChanges.lastChild);
+    }
+
     if (!fromVersion.selectedIndex || !toVersion.selectedIndex) {
         return;
     }
@@ -22,10 +26,6 @@ function showUpgradePath() {
 }
 
 function renderUpgradePath() {
-    while (requiredChanges.lastChild) {
-        requiredChanges.removeChild(requiredChanges.lastChild);
-    }
-
     var from = fromVersion.options[fromVersion.selectedIndex].value,
         to =   toVersion.options[toVersion.selectedIndex].value,
         include = false;
