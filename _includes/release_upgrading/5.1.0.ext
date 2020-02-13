@@ -3,7 +3,7 @@
 </p>
 <p>
     Implementors of NEBA's Service Provider API (SPI) providing custom model factories (a rare use cases) must adapt the API changes introduced in 5.1.0. Specifically, the
-    <a href="/apidocs/neba-api/io/neba/api/spi/ResourceModelFactory.html">resource model factory</a> now receives a callback to apply content-to-model mapping, thius allowing full control ofer the models
+    <a href="/apidocs/neba-api/io/neba/api/spi/ResourceModelFactory.html">resource model factory</a> now receives a callback to apply content-to-model mapping, thus allowing full control over the models
     creation process.
 </p>
 <p>
