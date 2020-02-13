@@ -1,74 +1,84 @@
-Node.prototype.tag = function(name) {
-    return this.getElementsByTagName(name)[0];
-};
+(function() {
+    Node.prototype.tag = function(name) {
+        return this.getElementsByTagName(name)[0].textContent;
+    };
 
-var releases = undefined;
-
-upgradePathForm.onsubmit = function () {
-    showUpgradePath();
-    return false;
-};
-
-function showUpgradePath() {
-    while (requiredChanges.lastChild) {
-        requiredChanges.removeChild(requiredChanges.lastChild);
+    function $(name) {
+        return document.createElement(name);
     }
 
-    if (!fromVersion.selectedIndex || !toVersion.selectedIndex) {
-        return;
-    }
+    this.releases = undefined;
 
-    if (!releases) {
-        loadUpgradePath();
-    } else {
-        renderUpgradePath();
-    }
-}
+    upgradePathForm.onsubmit = function () {
+        showUpgradePath();
+        return false;
+    };
 
-function renderUpgradePath() {
-    var from = fromVersion.options[fromVersion.selectedIndex].value,
-        to =   toVersion.options[toVersion.selectedIndex].value,
-        include = false;
-
-    for (i = 0; i < releases.length; ++i) {
-        let name = releases[i].tag("name").textContent;
-        if (include && releases[i].tag("requiresChange").textContent === "true") {
-            var section = document.createElement("section");
-            var header = document.createElement("header");
-            var h2 = document.createElement("h2");
-            var a = document.createElement("a");
-            a.setAttribute("href", releases[i].tag("url").textContent);
-            a.textContent = "Complete release notes of " + name;
-            section.setAttribute("class", "info");
-            h2.textContent = "Changes introduced in " + name;
-            header.appendChild(h2);
-            header.appendChild(a);
-            section.appendChild(header);
-
-            var div = document.createElement("div");
-            div.innerHTML = releases[i].tag("changeDescription").textContent;
-            section.appendChild(div);
-            requiredChanges.appendChild(section);
+    function showUpgradePath() {
+        while (requiredChanges.lastChild) {
+            requiredChanges.removeChild(requiredChanges.lastChild);
         }
-        if (name === to) {
-            break;
+
+        if (!fromVersion.selectedIndex || !toVersion.selectedIndex) {
+            return;
         }
-        if (name === from) {
-            include = true;
+
+        if (!releases) {
+            loadUpgradePath();
+        } else {
+            renderUpgradePath();
         }
     }
 
-    if (!requiredChanges.lastChild) {
-        requiredChanges.innerHTML = "<section><header><h2>No changes are required when updating from " + from + " to " + to + ".</h2></header></section>";
-    }
-}
+    function renderUpgradePath() {
 
-function loadUpgradePath() {
-    var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", function (_) {
-        releases = oReq.responseXML.childNodes[0].childNodes;
-        renderUpgradePath();
-    });
-    oReq.open("GET", "/releases.xml");
-    oReq.send();
-}
+        var from = fromVersion.options[fromVersion.selectedIndex].value,
+            to =   toVersion.options[toVersion.selectedIndex].value,
+            include = false;
+
+        for (i = 0; i < releases.length; ++i) {
+            let versionName = releases[i].tag("name");
+            if (include && releases[i].tag("requiresChange") === "true") {
+                var section = $("section"),
+                    header = $("header"),
+                    h2 = $("h2"),
+                    a = $("a"),
+                    div = $("div");
+
+                a.setAttribute("href", releases[i].tag("url"));
+                a.textContent = "Complete release notes of " + versionName;
+                h2.textContent = "Changes introduced in " + versionName;
+                div.innerHTML = releases[i].tag("changeDescription");
+
+                header.appendChild(h2);
+                header.appendChild(a);
+
+                section.appendChild(header);
+                section.setAttribute("class", "info");
+                section.appendChild(div);
+
+                requiredChanges.appendChild(section);
+            }
+            if (versionName === to) {
+                break;
+            }
+            if (versionName === from) {
+                include = true;
+            }
+        }
+
+        if (!requiredChanges.lastChild) {
+            requiredChanges.innerHTML = "<section><header><h2>No changes are required when updating from " + from + " to " + to + ".</h2></header></section>";
+        }
+    }
+
+    function loadUpgradePath() {
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", function (_) {
+            releases = oReq.responseXML.childNodes[0].childNodes;
+            renderUpgradePath();
+        });
+        oReq.open("GET", "/releases.xml");
+        oReq.send();
+    }
+})();
