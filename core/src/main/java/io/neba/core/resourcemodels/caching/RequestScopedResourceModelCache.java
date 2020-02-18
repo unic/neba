@@ -16,6 +16,7 @@
 
 package io.neba.core.resourcemodels.caching;
 
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
 import io.neba.core.util.Key;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
@@ -23,6 +24,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -40,7 +42,10 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 import static org.osgi.framework.Constants.SERVICE_RANKING;
 import static org.osgi.framework.Constants.SERVICE_VENDOR;
@@ -63,9 +68,12 @@ import static org.osgi.framework.Constants.SERVICE_VENDOR;
 )
 @Designate(ocd = RequestScopedResourceModelCache.Configuration.class)
 public class RequestScopedResourceModelCache implements Filter {
-    private final ThreadLocal<Map<Object, Object>> cacheHolder = new ThreadLocal<>();
+    private final ThreadLocal<Map<Key, Optional<?>>> cacheHolder = new ThreadLocal<>();
     private final ThreadLocal<SlingHttpServletRequest> requestHolder = new ThreadLocal<>();
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Reference
+    private ResourceModelMetaDataRegistrar metaDataRegistrar;
 
     private Configuration configuration;
 
@@ -79,11 +87,12 @@ public class RequestScopedResourceModelCache implements Filter {
      *
      * @param resource The resource {@link Resource#adaptTo(Class) adapted} to the target type. Never <code>null</code>.
      * @param key      The key used to identify the stored model. Never <code>null</code>.
-     * @return The cached model, or <code>null</code>.
+     * @return Either an instance of Optional - which means the object was stored as non null or known null value, depending on whether the option {@link Optional#isPresent()},
+     * or <code>null</code>, signaling that the key is not known to the cache.
      */
     @CheckForNull
     @SuppressWarnings("unchecked")
-    public <T> T get(@Nonnull Resource resource, @Nonnull Key key) {
+    public <T> Optional<T> get(@Nonnull Resource resource, @Nonnull Key key) {
         if (key == null) {
             throw new IllegalArgumentException("Method argument key must not be null.");
         }
@@ -91,20 +100,27 @@ public class RequestScopedResourceModelCache implements Filter {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
         if (!this.configuration.enabled()) {
-            return null;
+            return empty();
         }
 
-        Map<Object, T> cache = (Map<Object, T>) this.cacheHolder.get();
+        Map<Key, Optional<?>> cache = this.cacheHolder.get();
         if (cache == null) {
             this.logger.debug("No cache found, the cache will not be used.");
-            return null;
+            return empty();
         }
 
+        final Optional<T> lookupResult;
         if (this.configuration.safeMode()) {
-            return cache.get(createSafeModeKey(resource, key));
+            lookupResult = (Optional<T>) cache.get(createSafeModeKey(resource, key));
+        } else {
+            lookupResult = (Optional<T>) cache.get(createKey(resource, key));
         }
 
-        return cache.get(createKey(resource, key));
+        if (lookupResult != null && lookupResult.isPresent()) {
+            metaDataRegistrar.get(lookupResult.get().getClass()).getStatistics().countCacheHit();
+        }
+
+        return lookupResult;
     }
 
     /**
@@ -121,26 +137,24 @@ public class RequestScopedResourceModelCache implements Filter {
             throw new IllegalArgumentException("Method argument key must not be null.");
         }
 
-        if (model == null) {
-            return;
-        }
-
         if (!this.configuration.enabled()) {
             return;
         }
 
-        Map<Object, Object> cache = this.cacheHolder.get();
+        Map<Key, Optional<?>> cache = this.cacheHolder.get();
         if (cache == null) {
             this.logger.debug("No cache found, the cache will not be used.");
             return;
         }
 
+        final Optional<?> storedValue = ofNullable(model);
+
         if (this.configuration.safeMode()) {
-            cache.put(createSafeModeKey(resource, key), model);
+            cache.put(createSafeModeKey(resource, key), storedValue);
             return;
         }
 
-        cache.put(createKey(resource, key), model);
+        cache.put(createKey(resource, key), storedValue);
     }
 
     /**
