@@ -32,8 +32,6 @@ import java.util.Optional;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 import static io.neba.core.util.Key.key;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * Resolves a {@link Resource} to a {@link io.neba.api.annotations.ResourceModel}
@@ -93,12 +91,8 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
         final Key key = key(includeBaseTypes, modelName);
 
         Optional<T> cachedModel = this.cache.get(resource, key);
-        if (cachedModel == empty()) {
-            return null;
-        }
-
         if (cachedModel != null) {
-            return cachedModel.get();
+            return cachedModel.orElse(null);
         }
 
         Collection<ResolvedModelSource<?>> models = (modelName == null) ?
@@ -106,19 +100,19 @@ public class ResourceModelResolverImpl implements ResourceModelResolver {
                 this.registry.lookupMostSpecificModels(resource, modelName);
 
         if (models == null || models.size() != 1) {
-            this.cache.put(resource, key, empty());
+            this.cache.put(resource, key, null);
             return null;
         }
 
         @SuppressWarnings("unchecked")
         ResolvedModelSource<T> resolvedModelSource = (ResolvedModelSource<T>) models.iterator().next();
         if (!includeBaseTypes && isMappedFromGenericBaseType(resolvedModelSource)) {
-            this.cache.put(resource, key, empty());
+            this.cache.put(resource, key, null);
             return null;
         }
 
         T model = this.mapper.map(resource, resolvedModelSource);
-        this.cache.put(resource, key, of(model));
+        this.cache.put(resource, key, model);
 
         return model;
     }

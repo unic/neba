@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -81,7 +82,7 @@ public class ResourceToModelAdapterTest {
 
     @Mock
     private RequestScopedResourceModelCache cache;
-    private Map<Key, Object> testCache = new HashMap<>();
+    private Map<Key, Optional<Object>> testCache = new HashMap<>();
 
     private Class<?> targetType;
     private Object adapted;
@@ -95,11 +96,10 @@ public class ResourceToModelAdapterTest {
     public void setUp() {
         Answer<?> storeInCache = invocation -> {
             Object model = invocation.getArguments()[2];
-            testCache.put(buildCacheInvocationKey(invocation), model);
+            testCache.put(buildCacheInvocationKey(invocation), Optional.ofNullable(model));
             return null;
         },
-
-                lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
+        lookupFromCache = invocation -> testCache.get(buildCacheInvocationKey(invocation));
 
         doAnswer(storeInCache)
                 .when(this.cache)

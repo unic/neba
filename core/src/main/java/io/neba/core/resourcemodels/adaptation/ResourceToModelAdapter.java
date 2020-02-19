@@ -32,8 +32,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static io.neba.core.util.Key.key;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static org.apache.commons.lang3.StringUtils.join;
 
 /**
@@ -86,7 +84,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
             if (models == null || models.isEmpty()) {
                 // Cache the lookup failure
-                this.cache.put(resource, key, empty());
+                this.cache.put(resource, key, null);
                 return null;
             }
 
@@ -97,7 +95,7 @@ public class ResourceToModelAdapter implements AdapterFactory {
 
             T model = (T) this.mapper.map(resource, models.iterator().next());
 
-            this.cache.put(resource, key, of(model));
+            this.cache.put(resource, key, model);
 
             return model;
         }

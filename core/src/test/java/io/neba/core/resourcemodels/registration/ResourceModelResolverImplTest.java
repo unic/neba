@@ -36,6 +36,7 @@ import org.mockito.stubbing.Answer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 
 import static io.neba.api.Constants.SYNTHETIC_RESOURCETYPE_ROOT;
 import static java.util.Arrays.asList;
@@ -73,7 +74,7 @@ public class ResourceModelResolverImplTest {
     @Mock
     private ContentToModelMappingCallback<Object> callback;
 
-    private Map<Key, Object> testCache = new HashMap<>();
+    private Map<Key, Optional<Object>> testCache = new HashMap<>();
     private Object resolutionResult;
     private final Object model = new Object();
 
@@ -84,7 +85,8 @@ public class ResourceModelResolverImplTest {
     @SuppressWarnings("unchecked")
     public void prepareContainerAdapter() {
         Answer<?> storeInCache = invocation -> {
-            testCache.put(buildCacheInvocationKey(invocation), invocation.getArguments()[2]);
+            Object model = invocation.getArguments()[2];
+            testCache.put(buildCacheInvocationKey(invocation), Optional.ofNullable(model));
             return null;
         },
 

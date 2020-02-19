@@ -17,6 +17,9 @@
 package io.neba.core.resourcemodels.caching;
 
 import io.neba.core.resourcemodels.caching.RequestScopedResourceModelCache.Configuration;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
+import io.neba.core.resourcemodels.metadata.ResourceModelMetaDataRegistrar;
+import io.neba.core.resourcemodels.metadata.ResourceModelStatistics;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
@@ -24,11 +27,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletResponse;
+import java.util.Optional;
 
 import static io.neba.core.util.Key.key;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +41,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -57,17 +64,30 @@ public class RequestScopedResourceModelCacheTest {
     private FilterChain chain;
     @Mock
     private Configuration configuration;
+    @Mock
+    private ResourceModelMetaDataRegistrar metaDataRegistrar;
+    @Mock
+    private ResourceModelMetaData resourceModelMetaData;
+    @Mock
+    private ResourceModelStatistics resourceModelStatistics;
 
     private Object model = new Object();
     private Class<?> modelType = Object.class;
 
-    private Object cachedModel;
+    private Optional<Object> cachedModel;
 
+    @InjectMocks
     private RequestScopedResourceModelCache testee;
 
     @Before
     public void setUp() {
-        this.testee = new RequestScopedResourceModelCache();
+        doReturn(this.resourceModelMetaData)
+                .when(this.metaDataRegistrar)
+                .get(this.modelType);
+
+        doReturn(this.resourceModelStatistics)
+                .when(this.resourceModelMetaData)
+                .getStatistics();
 
         doReturn(this.requestPathInfo)
                 .when(this.request)
@@ -86,7 +106,7 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
 
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
             putModelInCache();
 
             lookupModelFromCache();
@@ -103,7 +123,7 @@ public class RequestScopedResourceModelCacheTest {
 
             withResourcePath("/junit/test/2");
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
 
             withResourcePath("/junit/test/1");
             lookupModelFromCache();
@@ -123,7 +143,7 @@ public class RequestScopedResourceModelCacheTest {
 
             withResourceType("other/resource/type");
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
         });
     }
 
@@ -138,7 +158,7 @@ public class RequestScopedResourceModelCacheTest {
 
             withDifferentResourceResolver();
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
         });
     }
 
@@ -153,7 +173,7 @@ public class RequestScopedResourceModelCacheTest {
 
             withResourceResolverUserId("admin");
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
         });
     }
 
@@ -236,7 +256,7 @@ public class RequestScopedResourceModelCacheTest {
             withSelector("new.selector");
 
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
         });
     }
 
@@ -253,7 +273,7 @@ public class RequestScopedResourceModelCacheTest {
             withSuffix("/newSuffix");
 
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
         });
     }
 
@@ -272,7 +292,7 @@ public class RequestScopedResourceModelCacheTest {
             withRequestedPagePath("/new/path");
 
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
         });
     }
 
@@ -308,7 +328,7 @@ public class RequestScopedResourceModelCacheTest {
             withQueryString("new=parameter");
 
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsNotKnownToCache();
         });
     }
 
@@ -320,7 +340,7 @@ public class RequestScopedResourceModelCacheTest {
     @Test
     public void testCacheGracefullyHandlesMissingRequestContextDuringCacheRead() {
         lookupModelFromCache();
-        assertModelIsNotInCache();
+        assertModelIsKnownLookupFailure();
     }
 
     @Test
@@ -330,7 +350,7 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelIsNotInCache();
+            assertModelIsKnownLookupFailure();
         });
     }
 
@@ -355,6 +375,48 @@ public class RequestScopedResourceModelCacheTest {
         request(() -> {
             testee.put(this.resource, null, this.model);
         });
+    }
+
+    @Test
+    public void testLookupOfUnknownModelIsNotCountedAsCacheHit() throws Exception {
+        request(() -> {
+            lookupModelFromCache();
+            assertModelIsNotKnownToCache();
+            verifyNoCacheHitIsCounted();
+        });
+    }
+
+    @Test
+    public void testKnownLookupFailureIsNotCountedAsCacheHit() throws Exception {
+        request(() -> {
+            withNullModel();
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelIsKnownLookupFailure();
+            verifyNoCacheHitIsCounted();
+        });
+    }
+
+    @Test
+    public void testSuccessfulModelLookupIsCountedAsCacheHit() throws Exception {
+        request(() -> {
+            putModelInCache();
+            lookupModelFromCache();
+            assertModelIsInCache();
+            verifyCacheHitIsCounted();
+        });
+    }
+
+    private void verifyCacheHitIsCounted() {
+        verify(this.resourceModelStatistics).countCacheHit();
+    }
+
+    private void withNullModel() {
+        this.model = null;
+    }
+
+    private void verifyNoCacheHitIsCounted() {
+        verify(this.resourceModelStatistics, never()).countCacheHit();
     }
 
     private void withResourceType(String type) {
@@ -398,11 +460,15 @@ public class RequestScopedResourceModelCacheTest {
     }
 
     private void assertModelIsInCache() {
-        assertThat(this.cachedModel).isEqualTo(this.model);
+        assertThat(this.cachedModel).contains(this.model);
     }
 
-    private void assertModelIsNotInCache() {
+    private void assertModelIsNotKnownToCache() {
         assertThat(this.cachedModel).isNull();
+    }
+
+    private void assertModelIsKnownLookupFailure() {
+        assertThat(this.cachedModel).isEmpty();
     }
 
     private void lookupModelFromCache() {
