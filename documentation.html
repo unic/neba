@@ -1121,7 +1121,7 @@ public class TranslateAnnotationMapper implements AnnotatedFieldMapper<String, T
     // E.g. /content/site/en_US/...
     private static final Pattern LANGUAGE_IN_PATH = compile("/content/(?<site>[^/]+)/(?<locale>[A-z]{2}(_[A-z]{2})?)/.*");
 
-    @Inject
+    @Reference
     @Filter("(component.name=org.apache.sling.i18n.impl.JcrResourceBundleProvider)")
     private ResourceBundleProvider resourceBundleProvider;
 
@@ -1158,7 +1158,7 @@ public class TranslateAnnotationMapper implements AnnotatedFieldMapper<String, T
     <figure class="listing" id="listing:explicit-lazy-loading-collections">
         {% highlight java %}@ResourceModel("project/components/cta")
 public class CallToAction {
-  @Translated
+  @Translate
   private String buttonText;
 }{% endhighlight %}<figcaption>Using a custom annotation on a model's field</figcaption></figure>
 
