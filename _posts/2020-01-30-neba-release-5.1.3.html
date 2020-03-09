@@ -23,7 +23,7 @@ release:
         assumes a programming error in such a case and reports a cycle. Thus, the content-to-model mapping phase cannot be integrated into the Bean lifecycle, but must
         be applied <em>after</em> a bean has been retrieved from the application context. This means that @PostConstruct will always be invoked prior to content-to-model mapping.
     </p>
-    <p>Consequently, users of Spring beans as resource models <em>must</em> use <a href="/documentation.html#lifecycle_annotations">use @AfterMapping</a> when an initialization method requires mapped content or initiates content-to-model mapping.</p>
+    <p>Consequently, users of Spring beans as resource models <em>must</em> <a href="/documentation.html#lifecycle_annotations">use @AfterMapping</a> when an initialization method requires mapped content or initiates content-to-model mapping.</p>
     <p>
         NEBA 5.1.3 also <a href="https://github.com/unic/neba/issues/376">contains an improvement</a> of the <a href="/documentation.html#caching">request-scoped resource model cache</a> that can lead to a better cache/miss ratio.
     </p>
