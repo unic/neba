@@ -16,7 +16,7 @@
         <neba.installation.path>/apps/neba/install</neba.installation.path>
         <spring.artifacts.sourcedir>${project.build.directory}/spring-artifacts</spring.artifacts.sourcedir>
         <spring.artifacts.targetdir>
-            ${project.build.directory}/filefault-work-spring/jcr_root/${neba.installation.path}/17
+            ${project.build.directory}/filevault-work-spring/jcr_root/${neba.installation.path}/17
         </spring.artifacts.targetdir>
     </properties>
 
@@ -217,7 +217,13 @@
                             <root>/apps/neba</root>
                         </filter>
                     </filters>
-                    <thumbnailImage>${project.build.directory}/filefault-work/META-INF/vault/definition/thumbnail.png</thumbnailImage>
+                    <thumbnailImage>${project.build.directory}/filevault-work/META-INF/vault/definition/thumbnail.png</thumbnailImage>
+                    <validatorsSettings>
+                        <!-- this validation fails to validate ordered numerical folders -->
+                        <jackrabbit-emptyelements>
+                            <isDisabled>true</isDisabled>
+                        </jackrabbit-emptyelements>
+                    </validatorsSettings>
                 </configuration>
                 <executions>
                     <execution>
@@ -230,7 +236,7 @@
                         <configuration>
                             <packageType>container</packageType>
                             <finalName>${project.artifactId}-${project.version}-spring</finalName>
-                            <workDirectory>${project.build.directory}/filefault-work-spring</workDirectory>
+                            <workDirectory>${project.build.directory}/filevault-work-spring</workDirectory>
                             <name>io.neba.neba-delivery-aem-spring</name>
                             <properties>
                                 <comment>NEBA with Spring support</comment>
@@ -300,7 +306,7 @@
                                 <description>Packages the NEBA core and API bundles.</description>
                             </properties>
                             <packageType>container</packageType>
-                            <workDirectory>${project.build.directory}/filefault-work</workDirectory>
+                            <workDirectory>${project.build.directory}/filevault-work</workDirectory>
                             <embeddeds>
                                 <embedded>
                                     <groupId>${project.groupId}</groupId>

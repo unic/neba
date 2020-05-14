@@ -198,9 +198,6 @@ public class SpringBundlesTransformer {
             target.putNextEntry(entry);
             target.closeEntry();
             File[] files = listFiles(source);
-            if (files == null) {
-                return;
-            }
             for (File nestedFile : files) {
                 pack(nestedFile, sourceDirectory, target);
             }
