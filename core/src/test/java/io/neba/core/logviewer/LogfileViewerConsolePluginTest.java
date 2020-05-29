@@ -160,7 +160,7 @@ public class LogfileViewerConsolePluginTest {
     }
 
     @Test
-    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException, ServletException {
+    public void testRenderContentsContainsDropdownWithSelectedOptionWhenFileParameterIsPresent() throws IOException {
         withFileRequestParameter(pathOf("logs/error.log"));
         renderContent();
         assertResponseContains("value=\"" + pathOf("logs/error.log") + "\" selected");

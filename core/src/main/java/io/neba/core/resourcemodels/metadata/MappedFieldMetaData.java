@@ -164,12 +164,12 @@ public class MappedFieldMetaData {
     private Class<? extends NebaDelegatingLazyLoadingProxy> prepareProxyFactoryForCollectionTypes() {
         if (this.isInstantiableCollectionType) {
             return (Class<? extends NebaDelegatingLazyLoadingProxy>) new ByteBuddy()
-                    .subclass(this.fieldType)
-                    .defineField("__neba__lazyLoading_handler", InvocationHandler.class, PRIVATE)
-                    .implement(NebaDelegatingLazyLoadingProxy.class)
-                    .intercept(ofField("__neba__lazyLoading_handler"))
-                    .method(not(isDeclaredBy(NebaDelegatingLazyLoadingProxy.class)))
-                    .intercept(toField("__neba__lazyLoading_handler"))
+                    .subclass(this.fieldType) // Enhance the field type by subclassing it.
+                    .defineField("__neba__lazyLoading_handler", InvocationHandler.class, PRIVATE) // Create a private member that will contain the lazy loading handler.
+                    .implement(NebaDelegatingLazyLoadingProxy.class) // We will inject the lazy loading handler using this interface.
+                    .intercept(ofField("__neba__lazyLoading_handler")) // When the interface's setter method is called, store the argument in this member.
+                    .method(not(isDeclaredBy(NebaDelegatingLazyLoadingProxy.class))) // Intercept all method calls of fieldType, except for those defined by the internal interface.
+                    .intercept(toField("__neba__lazyLoading_handler")) // Delegate all intercepted method calls to the this member
                     .make()
                     .load(getClass().getClassLoader())
                     .getLoaded();

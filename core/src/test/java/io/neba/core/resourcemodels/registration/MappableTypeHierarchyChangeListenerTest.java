@@ -135,7 +135,7 @@ public class MappableTypeHierarchyChangeListenerTest {
 
     private void withInterruptedExceptionThrownWhileBlocked() throws IllegalAccessException, InterruptedException {
         Field field = getField(MappableTypeHierarchyChangeListener.class, "invalidationRequests", true);
-        BlockingQueue queue = mock(BlockingQueue.class);
+        BlockingQueue<?> queue = mock(BlockingQueue.class);
         writeField(field, this.testee, queue);
         doThrow(new InterruptedException("THIS IS AN EXPECTED TEST EXCEPTION"))
                 .when(queue)

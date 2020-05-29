@@ -40,7 +40,7 @@ import static io.neba.core.util.Key.key;
  * Serves as a source for generic models if the resource cannot be
  * {@link Resource#adaptTo(Class) adapted} to a specific target type.<br />
  * If multiple generic models specifically target the type of the given resource through their
- * {@link io.neba.api.annotations.ResourceModel#types()}, this provider
+ * {@link io.neba.api.annotations.ResourceModel#value()}, this provider
  * may return <code>null</code> since there are no means to automatically resolve such ambiguities.
  *
  * @author Olaf Otto

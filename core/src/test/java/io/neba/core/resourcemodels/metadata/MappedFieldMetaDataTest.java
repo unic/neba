@@ -286,10 +286,10 @@ public class MappedFieldMetaDataTest {
         assertLazyLoadingProxyHasType(List.class);
         withListReturnedFromLazyLoadingCallback();
 
-        ((List) this.lazyLoadingProxy).isEmpty();
+        ((List<?>) this.lazyLoadingProxy).isEmpty();
         assertLazyLoadingCallbackWasCalledExactlyOnceDuringTestExecution();
 
-        ((List) this.lazyLoadingProxy).size();
+        ((List<?>) this.lazyLoadingProxy).size();
         assertLazyLoadingCallbackWasCalledExactlyOnceDuringTestExecution();
     }
 
@@ -335,7 +335,6 @@ public class MappedFieldMetaDataTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testRetrievalOfAnnotations() {
         createMetadataForTestModelFieldWithName("referencedResource");
         assertThat(this.testee.getAnnotations()).isNotEmpty();
@@ -352,7 +351,7 @@ public class MappedFieldMetaDataTest {
         doReturn(new ArrayList<>()).when(this.callbackForLazyLoading).call();
     }
 
-    private void assertLazyLoadingProxyHasType(Class<List> expectedType) {
+    private <T> void assertLazyLoadingProxyHasType(Class<List> expectedType) {
         assertThat(this.lazyLoadingProxy).isInstanceOf(expectedType);
     }
 

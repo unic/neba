@@ -180,7 +180,6 @@ public class ServiceDependencyTest {
         fail("Since the model has an invalid @Filter setter argument annotation, creating instantiation metadata must fail.");
     }
 
-    @SuppressWarnings("unchecked")
     private void assertDependencyIsResolvedToEmptyList() {
         assertThat(this.resolvedDependency).isInstanceOf(List.class);
         assertThat((List<?>) this.resolvedDependency).isEmpty();
@@ -190,10 +189,9 @@ public class ServiceDependencyTest {
         assertThat(this.resolvedDependency).isNull();
     }
 
-    @SuppressWarnings("unchecked")
     private void assertDependencyResolvedToEmptyOptional() {
         assertThat(this.resolvedDependency).isInstanceOf(Optional.class);
-        assertThat((Optional) this.resolvedDependency).isEmpty();
+        assertThat((Optional<?>) this.resolvedDependency).isEmpty();
     }
 
     private void withFilter(Filter f) {
@@ -205,7 +203,7 @@ public class ServiceDependencyTest {
         assertThat(this.resolvedDependency)
                 .describedAs("The resolved service dependencies must be a non-null list")
                 .isInstanceOf(List.class);
-        assertThat((List) this.resolvedDependency)
+        assertThat((List<Object>) this.resolvedDependency)
                 .describedAs("The list of service dependencies must contain the expected dependency")
                 .containsExactly(this.expectedDependency);
     }
@@ -213,7 +211,7 @@ public class ServiceDependencyTest {
     @SuppressWarnings("unchecked")
     private void assertDependencyWasResolvedToOptional() {
         assertThat(this.resolvedDependency).isInstanceOf(Optional.class);
-        assertThat((Optional) this.resolvedDependency).hasValue(this.expectedDependency);
+        assertThat((Optional<Object>) this.resolvedDependency).hasValue(this.expectedDependency);
     }
 
     private Type parameterOf(String methodName) {

@@ -28,6 +28,7 @@ import java.io.IOException;
  * Supports serialization of NEBA's {@link Lazy} fields, thus enabling declaration of lazy fields that are only loaded
  * when a model is serialized to JSON.
  */
+@SuppressWarnings("rawtypes")
 public class LazyLoadingSerializer extends StdSerializer<Lazy> {
     private static final long serialVersionUID = -4291272104765126426L;
 

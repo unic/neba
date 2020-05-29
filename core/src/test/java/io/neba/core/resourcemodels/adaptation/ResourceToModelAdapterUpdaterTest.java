@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
@@ -74,7 +73,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
     @Mock
     private ResourceToModelAdapter adapter;
     @Mock
-    private ServiceRegistration registration;
+    private ServiceRegistration<?> registration;
     @Mock
     private BundleContext context;
     @Mock
@@ -102,7 +101,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         doAnswer(inv -> {
             updatedProperties = (Dictionary<String, Object>) inv.getArguments()[2];
             return registration;
-        }).when(this.context).registerService(eq(AdapterFactory.class.getName()), eq(this.adapter), isA(Dictionary.class));
+        }).when(this.context).registerService(eq(AdapterFactory.class), eq(this.adapter), isA(Dictionary.class));
 
         when(this.context.getBundle())
                 .thenReturn(this.bundle);
@@ -222,7 +221,7 @@ public class ResourceToModelAdapterUpdaterTest implements Eventual {
         // when the service is refreshed (unregistered and re-registered)
         eventually(() ->
                 verify(this.context, times(2))
-                        .registerService(anyString(), eq(this.adapter), isA(Dictionary.class)));
+                        .registerService(eq(AdapterFactory.class), eq(this.adapter), isA(Dictionary.class)));
     }
 
     private void assertUpdaterDoesNotUpdateModelAdapter() {

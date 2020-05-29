@@ -18,9 +18,7 @@ package io.neba.core.util;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.osgi.framework.Bundle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,8 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class OsgiModelReferenceTest {
-	@Mock
-	private Bundle bundle;
 	private Object model = new Object();
 	private long bundleId = 123L;
 

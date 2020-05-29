@@ -294,9 +294,9 @@ public class ModelInstantiatorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void assertModelWasInjectedWithListOf(Object... serviceInstance) {
+    private <T> void assertModelWasInjectedWithListOf(T... serviceInstance) {
         assertThat(this.modelInstance.getInjected()).isInstanceOf(List.class);
-        assertThat((List) this.modelInstance.getInjected()).containsExactly(serviceInstance);
+        assertThat((List<T>) this.modelInstance.getInjected()).containsExactly(serviceInstance);
     }
 
     private void createModelInstance() throws ReflectiveOperationException {

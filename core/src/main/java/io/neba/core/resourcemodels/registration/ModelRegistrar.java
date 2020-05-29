@@ -46,7 +46,8 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Specifically, this service tracks all {@link ResourceModelFactory resource model factory services} and {@link #registerModels(Bundle, ResourceModelFactory) registers}
  * or {@link #unregister(Bundle) unregisters} their models using the {@link ModelRegistry}. Subsequently, it
  * {@link ResourceToModelAdapterUpdater#refresh() refreshes} the resource to model adapter factory to reflect the changes.
- *</p>
+ * </p>
+ *
  * @author Olaf Otto
  */
 @Component(immediate = true)
@@ -60,7 +61,7 @@ public class ModelRegistrar {
     @Reference
     private ResourceModelMetaDataRegistrar resourceModelMetaDataRegistrar;
 
-    private ServiceTracker tracker;
+    private ServiceTracker<ResourceModelFactory, ResourceModelFactory> tracker;
 
     @Activate
     protected void activate(BundleContext context) {
@@ -106,7 +107,8 @@ public class ModelRegistrar {
         this.resourceToModelAdapterUpdater.refresh();
     }
 
-    private String[] getTypes(ModelDefinition d) {
+    @SuppressWarnings("deprecation")
+    private String[] getTypes(ModelDefinition<?> d) {
         try {
             return d.getResourceModel().value();
         } catch (IncompleteAnnotationException e) {

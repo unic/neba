@@ -80,7 +80,7 @@ public class ResourceToModelAdapterUpdater {
     private ResourceToModelAdapter adapter;
 
     private BundleContext context = null;
-    private ServiceRegistration resourceToModelAdapterRegistration = null;
+    private ServiceRegistration<AdapterFactory> resourceToModelAdapterRegistration = null;
     private ExecutorService executorService;
     private Configuration configuration;
 
@@ -137,8 +137,7 @@ public class ResourceToModelAdapterUpdater {
      */
     private void registerModelAdapter() {
         Dictionary<String, Object> properties = createResourceToModelAdapterProperties();
-        String serviceClassName = AdapterFactory.class.getName();
-        this.resourceToModelAdapterRegistration = this.context.registerService(serviceClassName, this.adapter, properties);
+        this.resourceToModelAdapterRegistration = this.context.registerService(AdapterFactory.class, this.adapter, properties);
     }
 
     private void unregisterModelAdapter() {
