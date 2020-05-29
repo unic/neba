@@ -55,19 +55,17 @@ public class ConcurrentMultiValueMapAssert extends AbstractAssert<ConcurrentMult
         return myself;
     }
 
-    ConcurrentMultiValueMapAssert containsExactlyOneValueFor(Object key) {
+    void containsExactlyOneValueFor(Object key) {
         Collection<?> values = valuesOrFail(key);
         if (values.size() != 1) {
             failWithMessage("Expected exactly one value for " + key + ", but got " + values + ".");
         }
-        return myself;
     }
 
-    ConcurrentMultiValueMapAssert doesNotContain(Object key) {
+    void doesNotContain(Object key) {
         if (this.actual.get(key) != null) {
             failWithMessage(this.actual + " does contains the key " + key + ".");
         }
-        return myself;
     }
 
     private Collection<?> valuesForKey(Object key) {

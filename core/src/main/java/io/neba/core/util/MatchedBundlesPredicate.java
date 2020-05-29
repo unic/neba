@@ -19,15 +19,12 @@ package io.neba.core.util;
 import org.apache.commons.collections.Predicate;
 import org.osgi.framework.Bundle;
 
-
 /**
  * {@link #evaluate(Object)} returns <code>false</code> if the bundle matches to
  * signal
  * {@link org.apache.commons.collections.CollectionUtils#filter(java.util.Collection, Predicate)}
- * to remove the element it.
- * 
- * Works only on collections of {@link OsgiModelSource}.
- * 
+ * to remove the element it. Works only on collections of {@link OsgiModelSource}.
+ *
  * @author Olaf Otto
  */
 public class MatchedBundlesPredicate implements Predicate {

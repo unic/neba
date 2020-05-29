@@ -112,6 +112,7 @@ public class ResourceModelResolverImplTest {
     }
 
     @Before
+    @SuppressWarnings("unchecked")
     public void provideMockResourceModel() {
         LinkedList<ResolvedModelSource<?>> resolvedModelSources = new LinkedList<>();
         resolvedModelSources.add(this.resolvedModelSource);
@@ -270,6 +271,7 @@ public class ResourceModelResolverImplTest {
         verifyRegistryWasQueriedOnceWithoutModelName();
     }
 
+    @SuppressWarnings("unchecked")
     private void withTwoResolvedModels() {
         when(this.registry.lookupMostSpecificModels(eq(this.resource))).thenReturn(asList(mock(ResolvedModelSource.class), mock(ResolvedModelSource.class)));
     }

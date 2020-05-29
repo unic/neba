@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Olaf Otto
  */
 public class ClassBasedModelDefinitionTest {
-    private ClassBasedModelDefinition testee;
+    private ClassBasedModelDefinition<?> testee;
 
     @Test
     public void testModelDefinition() {
@@ -36,9 +36,9 @@ public class ClassBasedModelDefinitionTest {
 
     @Test
     public void testHashCodeAnEquals() {
-        ClassBasedModelDefinition one = new ClassBasedModelDefinition(Model.class);
-        ClassBasedModelDefinition sameOne = new ClassBasedModelDefinition(Model.class);
-        ClassBasedModelDefinition two = new ClassBasedModelDefinition(OtherModel.class);
+        ClassBasedModelDefinition<Model> one = new ClassBasedModelDefinition<>(Model.class);
+        ClassBasedModelDefinition<Model> sameOne = new ClassBasedModelDefinition<>(Model.class);
+        ClassBasedModelDefinition<OtherModel> two = new ClassBasedModelDefinition<>(OtherModel.class);
 
         assertThat(one).isEqualTo(sameOne);
         assertThat(sameOne).isEqualTo(one);
@@ -72,7 +72,7 @@ public class ClassBasedModelDefinitionTest {
     }
 
     private void withClassBasedModelDefinition(Class<?> c) {
-        this.testee = new ClassBasedModelDefinition(c);
+        this.testee = new ClassBasedModelDefinition<>(c);
     }
 
     @ResourceModel("some/type")

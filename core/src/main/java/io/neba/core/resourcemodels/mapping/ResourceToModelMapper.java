@@ -67,7 +67,6 @@ public class ResourceToModelMapper {
      * @param resolvedModelSource must not be <code>null</code>.
      * @return never <code>null</code>.
      */
-    @SuppressWarnings("unchecked")
     public <T> T map(final Resource resource, final ResolvedModelSource<T> resolvedModelSource) {
         if (resource == null) {
             throw new IllegalArgumentException("Method argument resource must not be null");

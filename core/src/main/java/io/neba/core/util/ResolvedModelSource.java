@@ -86,7 +86,7 @@ public class ResolvedModelSource<T> {
             return false;
         }
 
-        ResolvedModelSource other = (ResolvedModelSource) obj;
+        ResolvedModelSource<?> other = (ResolvedModelSource<?>) obj;
 
         return this.source.equals(other.source) &&
                 this.resourceType.equals(other.resourceType);

@@ -62,7 +62,7 @@ class ClassBasedModelDefinition<T> implements ModelDefinition<T> {
     @Override
     public boolean equals(Object obj) {
         return obj.getClass() == getClass() &&
-                ((ModelDefinition) obj).getType().equals(getType());
+                ((ModelDefinition<?>) obj).getType().equals(getType());
     }
 
     @Override

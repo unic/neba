@@ -53,17 +53,17 @@ public class MappingTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testMappingConstructorRequiresNonNullResourcePath() {
-        new Mapping(null, this.metaData, "resource/type");
+        new Mapping<>(null, this.metaData, "resource/type");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testMappingConstructorRequiresNonNullMetaData() {
-        new Mapping("/some/resource/path", null, "resource/type");
+        new Mapping<>("/some/resource/path", null, "resource/type");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testMappingConstructorRequiresNonNullResourceType() {
-        new Mapping("/some/resource/path", this.metaData, null);
+        new Mapping<>("/some/resource/path", this.metaData, null);
     }
 
     @Test

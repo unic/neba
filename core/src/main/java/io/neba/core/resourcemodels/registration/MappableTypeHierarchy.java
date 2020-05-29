@@ -16,12 +16,12 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import java.util.Iterator;
-import javax.annotation.Nonnull;
-import javax.jcr.Node;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.sling.api.resource.Resource;
 
+import javax.annotation.Nonnull;
+import javax.jcr.Node;
+import java.util.Iterator;
 
 import static io.neba.core.util.NodeTypeHierarchyIterator.typeHierarchyOf;
 import static io.neba.core.util.ResourceTypeHierarchyIterator.typeHierarchyOf;
@@ -59,7 +59,7 @@ public class MappableTypeHierarchy implements Iterable<String> {
         Iterator<String> it;
         final Iterator<String> resourceTypeIterator = typeHierarchyOf(this.resource);
         final Node node = this.resource.adaptTo(Node.class);
-        // A virtual resource must not have a node.
+        // A resource may not represent a JCR node (e.g. synthetic resources)
         if (node != null) {
             final Iterator<String> nodeTypeIterator = typeHierarchyOf(node);
             it = IteratorUtils.chainedIterator(resourceTypeIterator, nodeTypeIterator);

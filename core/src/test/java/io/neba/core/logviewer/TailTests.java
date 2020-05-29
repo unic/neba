@@ -15,6 +15,13 @@
  */
 package io.neba.core.logviewer;
 
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,13 +30,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.jetty.websocket.api.RemoteEndpoint;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-
 
 import static java.lang.Thread.sleep;
 import static java.lang.Thread.yield;
@@ -122,7 +122,7 @@ public abstract class TailTests {
      *
      * @param c must not be <code>null</code>.
      */
-    public void uponWriteToRemoteDo(Callable c) throws IOException {
+    public void uponWriteToRemoteDo(Callable<?> c) throws IOException {
         doAnswer(invocation -> {
             // Still track the received text
             recordText.answer(invocation);

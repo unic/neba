@@ -178,14 +178,14 @@ public class ModelRegistrarTest {
 
         ResourceModelFactory factory = mock(ResourceModelFactory.class);
         ResourceModel resourceModel = mock(ResourceModel.class);
-        ModelDefinition modelDefinition = mock(ModelDefinition.class);
+        ModelDefinition<?> modelDefinition = mock(ModelDefinition.class);
 
         doReturn(this.modelResourceTypes).when(resourceModel).value();
         doReturn(resourceModel).when(modelDefinition).getResourceModel();
         doReturn(bundle).when(referenceToModelFactory).getBundle();
         doReturn(new ServiceReference[]{referenceToModelFactory}).when(this.context).getAllServiceReferences(any(), any());
         doReturn(factory).when(this.context).getService(referenceToModelFactory);
-        List<ModelDefinition> modelDefinitions = singletonList(modelDefinition);
+        List<ModelDefinition<?>> modelDefinitions = singletonList(modelDefinition);
         doReturn(modelDefinitions).when(factory).getModelDefinitions();
     }
 
