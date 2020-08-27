@@ -330,7 +330,7 @@ public class JsonViewServletsTest {
     }
 
     private void withValidEtagInRequest() {
-        Enumeration etagHeaderValues = mock(Enumeration.class);
+        Enumeration<?> etagHeaderValues = mock(Enumeration.class);
         doReturn(true, true, false).when(etagHeaderValues).hasMoreElements();
         doReturn(getExpectedEtag()).when(etagHeaderValues).nextElement();
         doReturn(etagHeaderValues).when(this.request).getHeaders(IF_NONE_MATCH);

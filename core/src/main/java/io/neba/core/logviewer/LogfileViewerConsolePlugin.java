@@ -66,6 +66,7 @@ import static org.osgi.framework.Constants.SERVICE_VENDOR;
 )
 public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
     static final String LABEL = "logviewer";
+    private static final long serialVersionUID = 5963934292569659695L;
     private static final String RESOURCES_ROOT = "/META-INF/consoleplugin/logviewer";
     private static final String DECORATED_OBJECT_FACTORY = "org.eclipse.jetty.util.DecoratedObjectFactory";
     private static final FastDateFormat DATETIME_FORMAT = FastDateFormat.getInstance("dd.MM.yyyy HH:mm:ss.S", TimeZone.getDefault());

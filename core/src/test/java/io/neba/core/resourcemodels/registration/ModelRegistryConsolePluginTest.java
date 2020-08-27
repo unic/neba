@@ -16,8 +16,8 @@
 
 package io.neba.core.resourcemodels.registration;
 
-import io.neba.core.util.ResolvedModelSource;
 import io.neba.core.util.OsgiModelSource;
+import io.neba.core.util.ResolvedModelSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
@@ -128,7 +128,6 @@ public class ModelRegistryConsolePluginTest {
     private ModelRegistryConsolePlugin testee;
 
     @Before
-    @SuppressWarnings({"unchecked", "deprecation"})
     public void setUp() throws Exception {
         this.internalWriter = new StringWriter();
         Writer writer = new PrintWriter(this.internalWriter);
@@ -463,9 +462,9 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void withPathResourceLookedUp() {
-        Set<ResolvedModelSource> resolvedModelSources = new HashSet<>();
+        Set<ResolvedModelSource<?>> resolvedModelSources = new HashSet<>();
         for (OsgiModelSource<?> source : this.modelSources) {
-            ResolvedModelSource result = mock(ResolvedModelSource.class);
+            ResolvedModelSource<?> result = mock(ResolvedModelSource.class);
             doReturn(source).when(result).getSource();
             resolvedModelSources.add(result);
         }

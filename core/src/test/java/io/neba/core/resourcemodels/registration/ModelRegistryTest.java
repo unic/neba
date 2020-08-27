@@ -599,7 +599,7 @@ public class ModelRegistryTest {
         withModelSourcesForAllResourceModels();
     }
     
-    private void withModelForType(String resourceType, Class modelType) {
+    private void withModelForType(String resourceType, Class<?> modelType) {
         withModelForType(resourceType, modelType, "defaultModelName");
     }
 
