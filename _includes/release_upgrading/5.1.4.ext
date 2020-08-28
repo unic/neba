@@ -1,0 +1,1 @@
+If you <a href="/documentation.html#spring">are using NEBA's Spring integration</a>, we recommend upgrading to <a href="https://search.maven.org/search?q=g:org.apache.servicemix.bundles%20v:5.2.8.RELEASE_1">Spring 5.2.8</a>.
