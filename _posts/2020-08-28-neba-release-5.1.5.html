@@ -1,0 +1,34 @@
+---
+title: NEBA 5.1.5
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.1.5 Resolves an issue with the request scoped resource model cache.
+tags: [release,current]
+release:
+    version: 5.1.5
+    previousVersion: 5.1.4
+    requiresChange: false
+---
+
+<section>
+    <header><h1>NEBA 5.1.5 released</h1></header>
+    <p>
+        NEBA 5.1.5 Resolves an issue with the request-scoped resource model cache introduced in NEBA 5.1.4. This issue
+        results in no model instances being returned from an .adaptTo call when the request-scoped resource model cache is unavailable, e.g. is disabled
+        or called outside of a request. Users of NEBA 5.1.4 should update tto 5.1.5 as soon as possible.
+    </p>
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        None
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="36" data-labels="bug"></ul>
+    </section>
+</section>
