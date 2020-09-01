@@ -44,7 +44,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 import static org.osgi.framework.Constants.SERVICE_RANKING;
@@ -100,13 +99,13 @@ public class RequestScopedResourceModelCache implements Filter {
             throw new IllegalArgumentException("Method argument resource must not be null.");
         }
         if (!this.configuration.enabled()) {
-            return empty();
+            return null;
         }
 
         Map<Key, Optional<?>> cache = this.cacheHolder.get();
         if (cache == null) {
             this.logger.debug("No cache found, the cache will not be used.");
-            return empty();
+            return null;
         }
 
         final Optional<T> lookupResult;

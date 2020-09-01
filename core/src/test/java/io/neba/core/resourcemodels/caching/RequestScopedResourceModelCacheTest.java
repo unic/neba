@@ -340,7 +340,7 @@ public class RequestScopedResourceModelCacheTest {
     @Test
     public void testCacheGracefullyHandlesMissingRequestContextDuringCacheRead() {
         lookupModelFromCache();
-        assertModelIsKnownLookupFailure();
+        assertModelIsNotKnownToCache();
     }
 
     @Test
@@ -350,7 +350,7 @@ public class RequestScopedResourceModelCacheTest {
             withResourcePath("/junit/test/1");
             putModelInCache();
             lookupModelFromCache();
-            assertModelIsKnownLookupFailure();
+            assertModelIsNotKnownToCache();
         });
     }
 
