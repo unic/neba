@@ -138,5 +138,4 @@ public class TailSocket extends WebSocketAdapter {
                 .findFirst()
                 .orElse(null);
     }
-
 }
