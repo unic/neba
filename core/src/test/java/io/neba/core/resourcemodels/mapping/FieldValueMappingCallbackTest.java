@@ -36,7 +36,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -50,6 +49,9 @@ import java.util.concurrent.Callable;
 
 import static io.neba.api.spi.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
+import static io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel.Enum.ONE;
+import static io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel.Enum.THREE;
+import static io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel.Enum.TWO;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
@@ -246,6 +248,23 @@ public class FieldValueMappingCallbackTest {
     }
 
     /**
+     * <pre>
+     *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
+     *     public class MyModel {
+     *         enum EnumType { ... }
+     *         private EnumType someEnumField;
+     *     }
+     * </pre>
+     */
+    @Test
+    public void testMappingOfEnumField() {
+        withPropertyField(TestResourceModel.Enum.class, "TWO");
+        mapField();
+        withExpectedMappingResult(TWO);
+        assertFieldIsMapped();
+    }
+
+    /**
      * Tests mapping a {@link io.neba.api.annotations.ResourceModel} from a
      * {@link org.apache.sling.api.resource.ResourceUtil#isSyntheticResource(org.apache.sling.api.resource.Resource) synthetic}
      * resource.
@@ -398,7 +417,6 @@ public class FieldValueMappingCallbackTest {
      * as, by design, {@link io.neba.api.resourcemodels.Lazy} fields
      * must not be null. For instance, a resource without properties will never have a resource path stored in the property
      * "link", thus the following example would always yield <code>null</code> but must still provide a non-null {@link io.neba.api.resourcemodels.Lazy}:
-     *
      * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
@@ -437,7 +455,7 @@ public class FieldValueMappingCallbackTest {
      *         private {@link io.neba.api.resourcemodels.Lazy}&lt;Collection&lt;Resource&gt;&gt; links;
      *     }
      * </pre>
-     *
+     * <p/>
      * In this case, lazy-loading mus exclusively occur via the provided {@link Lazy} implementation, i.e.
      * the collection lazy-loaded via {@link Lazy} should not be a lazy-loading collection.
      */
@@ -508,7 +526,7 @@ public class FieldValueMappingCallbackTest {
      * Tests that {@link AnnotatedFieldMapper annotated field mappers} are supported on
      * {@link Lazy lazy-loading} resource model fields, i.e. that these mappers are invoked when the
      * lazy loading callback is triggered in a case such as this:
-     * <p />
+     * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
      *     public class MyModel {
@@ -795,7 +813,7 @@ public class FieldValueMappingCallbackTest {
      * Tests that the resolved children default to an empty list if the parent
      * resource cannot ne resolved, e.g. when the field is a reference
      * pointing to a nonexistent resource.
-     *
+     * <p>
      * <p/>
      * <pre>
      *     &#64;{@link io.neba.api.annotations.ResourceModel}(types = ...)
@@ -1014,6 +1032,26 @@ public class FieldValueMappingCallbackTest {
 
         assertFieldIsFetchedFromValueMapAs(String[].class);
         assertMappedFieldValueIsCollectionWithEntries((Object[]) propertyValues);
+    }
+
+    /**
+     * Properties of a resource may be arrays. In this case, one may use the corresponding collection
+     * types instead of arrays, e.g. <code>List&lt;SomeEnum&gt;</code> instead of <code>SomeEnum[]</code>.
+     */
+    @Test
+    public void testMappingOfArrayPropertyToCollectionOfEnumInstances() {
+        String[] propertyValues = {"ONE", "TWO", "THREE", ""};
+
+        withField(Collection.class);
+        withInstantiableCollectionTypedField();
+        withTypeParameter(TestResourceModel.Enum.class);
+        withPropertyTypedField();
+        withPropertyValue(propertyValues);
+
+        mapField();
+
+        assertFieldIsFetchedFromValueMapAs(String[].class);
+        assertMappedFieldValueIsCollectionWithEntries(ONE, TWO, THREE);
     }
 
     /**
@@ -1398,7 +1436,7 @@ public class FieldValueMappingCallbackTest {
         assertThat(this.ongoingMapping.getAnnotationsOfField()).isSameAs(this.mappedFieldMetadata.getAnnotations().getAnnotations());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void withCustomFieldMapperMappingTo(final Object value) {
         AnnotationMapping mapping = mock(AnnotationMapping.class);
         doReturn(this.annotatedFieldMapper).when(mapping).getMapper();
@@ -1441,7 +1479,7 @@ public class FieldValueMappingCallbackTest {
     }
 
     @SuppressWarnings("unchecked")
-	private <T> void withParentOfTargetResourceProperty(String propertyName, T propertyValue) {
+    private <T> void withParentOfTargetResourceProperty(String propertyName, T propertyValue) {
         this.targetValue = propertyValue;
         ValueMap properties = mock(ValueMap.class);
         when(this.parentOfResourceTargetedByMapping.adaptTo(eq(ValueMap.class))).thenReturn(properties);
@@ -1470,8 +1508,8 @@ public class FieldValueMappingCallbackTest {
     }
 
     private void mapReferenceCollectionField(
-    		@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType,
-    		Class<?> componentType, String... referencePaths) {
+            @SuppressWarnings("rawtypes") Class<? extends Collection> collectionType,
+            Class<?> componentType, String... referencePaths) {
         withPropertyField(collectionType, referencePaths);
         withTypeParameter(componentType);
         withReferenceAnnotationPresent();
@@ -1491,6 +1529,10 @@ public class FieldValueMappingCallbackTest {
         withFieldPath(fieldPath);
         withPathAnnotationPresent();
         withPropertyTypedField();
+    }
+
+    private void withExpectedMappingResult(TestResourceModel.Enum value) {
+        this.targetValue = value;
     }
 
     private void mapChildResourceField(Class<?> fieldType) {

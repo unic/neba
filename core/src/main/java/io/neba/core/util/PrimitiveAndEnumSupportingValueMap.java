@@ -19,6 +19,7 @@ package io.neba.core.util;
 import org.apache.sling.api.resource.ValueMap;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -32,13 +33,13 @@ import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
  *
  * @author Olaf Otto
  */
-public class PrimitiveSupportingValueMap implements ValueMap {
+public class PrimitiveAndEnumSupportingValueMap implements ValueMap {
     private final ValueMap map;
 
     /**
      * @param valueMap must not be <code>null</code>.
      */
-    public PrimitiveSupportingValueMap(ValueMap valueMap) {
+    public PrimitiveAndEnumSupportingValueMap(ValueMap valueMap) {
         if (valueMap == null) {
             throw new IllegalArgumentException("Method argument valueMap must not be null.");
         }
@@ -53,8 +54,57 @@ public class PrimitiveSupportingValueMap implements ValueMap {
         if (type == null) {
             throw new IllegalArgumentException("Method argument type must not be null.");
         }
+
+        if (type.isEnum()) {
+            return getEnumInstance(name, (Class<Enum>) type);
+        }
+
+        if (type.isArray() && type.getComponentType().isEnum()) {
+            return getEnumInstanceArray(name, type);
+        }
+
         final Class<?> boxedType = primitiveToWrapper(type);
         return (T) this.map.get(name, boxedType);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private <T> T getEnumInstance(@Nonnull String name, @Nonnull Class<Enum> type) {
+        String instanceName = this.map.get(name, String.class);
+        if (instanceName == null) {
+            return null;
+        }
+
+        try {
+            return (T) Enum.valueOf(type, instanceName);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private <T> T getEnumInstanceArray(@Nonnull String name, @Nonnull Class<T> type) {
+        String[] instanceNames = this.map.get(name, String[].class);
+        if (instanceNames == null) {
+            return null;
+        }
+        Enum[] enumInstances = (Enum[]) Array.newInstance(type.getComponentType(), instanceNames.length);
+
+        int numberOfEnumInstances = 0;
+        for (String instanceName : instanceNames) {
+            try {
+                enumInstances[numberOfEnumInstances] = Enum.valueOf((Class<Enum>) type.getComponentType(), instanceName);
+                ++numberOfEnumInstances;
+            } catch (IllegalArgumentException e) {
+                // Ignore; continue.
+            }
+        }
+        if (numberOfEnumInstances == enumInstances.length) {
+            return (T) enumInstances;
+        }
+
+        Enum[] effectiveInstances = (Enum[]) Array.newInstance(type.getComponentType(), numberOfEnumInstances);
+        System.arraycopy(enumInstances, 0, effectiveInstances, 0, effectiveInstances.length);
+        return (T) effectiveInstances;
     }
 
     @Override
