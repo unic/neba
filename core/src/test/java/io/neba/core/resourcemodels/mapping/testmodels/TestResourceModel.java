@@ -40,6 +40,12 @@ import java.util.List;
  */
 @ResourceModel("ignored/junit/test/type")
 public class TestResourceModel {
+    public enum Enum {
+        ONE,
+        TWO,
+        THREE
+    }
+
     private static String staticField;
     private final String finalField = "finalValue";
     private String stringField;
@@ -51,6 +57,7 @@ public class TestResourceModel {
     private short primitiveShortField;
     private Date dateField;
     private Calendar calendarField;
+    private Enum enumField;
 
     @This
     private Resource thisResource;
@@ -106,6 +113,8 @@ public class TestResourceModel {
     private Lazy<OtherTestResourceModel> lazyReferenceToChildAsOtherModel;
 
     private Collection<String> collectionOfStrings;
+
+    private Collection<Enum> collectionOfEnums;
 
     @Unmapped
     private String unmappedStringField;

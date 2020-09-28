@@ -20,7 +20,7 @@ import io.neba.api.resourcemodels.Lazy;
 import io.neba.api.spi.AnnotatedFieldMapper;
 import io.neba.api.spi.ResourceModelFactory;
 import io.neba.core.resourcemodels.metadata.MappedFieldMetaData;
-import io.neba.core.util.PrimitiveSupportingValueMap;
+import io.neba.core.util.PrimitiveAndEnumSupportingValueMap;
 import io.neba.core.util.ReflectionUtil;
 import io.neba.core.util.ResourcePaths;
 import org.apache.sling.api.resource.Resource;
@@ -442,7 +442,7 @@ public class FieldValueMappingCallback {
             return null;
         }
 
-        return new PrimitiveSupportingValueMap(properties).get(property.getName(), propertyType);
+        return new PrimitiveAndEnumSupportingValueMap(properties).get(property.getName(), propertyType);
     }
 
     /**
@@ -487,7 +487,7 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Provides the properties of the resource as a {@link PrimitiveSupportingValueMap}.
+     * Provides the properties of the resource as a {@link PrimitiveAndEnumSupportingValueMap}.
      *
      * @param resource must not be <code>null</code>.
      * @return the value map, or <code>null</code> if the resource has no properties,
@@ -496,7 +496,7 @@ public class FieldValueMappingCallback {
     private static ValueMap toValueMap(Resource resource) {
         ValueMap propertyMap = resource.adaptTo(ValueMap.class);
         if (propertyMap != null) {
-            propertyMap = new PrimitiveSupportingValueMap(propertyMap);
+            propertyMap = new PrimitiveAndEnumSupportingValueMap(propertyMap);
         }
         return propertyMap;
     }
