@@ -252,16 +252,17 @@ public class Carousel {
 
         <section>
             <header><h3 id="dependency_injection">Dependency injection</h3></header>
-                <p>
-            NEBA makes a clear distinction between IOC (dependency injection) and content to object mapping and makes sure that these two concepts are not mixed.
-            The bottom line is: Collaborators are injected with @Inject (or other means, when models are <a href="#spring">managed by a Spring application context</a>), and content
-            is injected into suitable fields by default, additionally using NEBA's dedicated annotations.
+        <p>
+            NEBA clearly separates dependency injection from content mapping and makes sure these two concepts are not mixed.
+            The bottom line is: Dependency injection exclusively uses @Inject (if you are using <a href="#spring">Spring</a>, you can also use all Spring DI features).
+            Content mapping is not dependency injection, and is performed automatically on suitable fields of a model, optionally using <a href="#resource_model_annotations">NEBA's dedicated annotations</a>.
+            Mapped content is always optional, whereas injected dependencies are mandatory by default, unless explicitly <a href="#optional_dependency_injection">made optional</a>.
         </p>
 
-        <h4 id="the_filter_annotation">Injecting OSGi services with NEBA core</h4>
+        <h4 id="the_filter_annotation">Injecting OSGi services</h4>
         <p>
-            Unless the model is a Spring bean, NEBA exclusively injects OSGi services into a constructor, field or setter annotated with <code>@Inject</code>.
-            The injected services can be filtered using the <a href="/apidocs/neba-api/io/neba/api/annotations/Filter.html">@Filter</a> annotation.
+            Unless the model is a Spring bean, NEBA exclusively injects OSGi services. Dependency injection is performed using a constructor, fields or setter methods annotated with <code>@Inject</code>.
+            Additionally, the injected services can be filtered using the <a href="/apidocs/neba-api/io/neba/api/annotations/Filter.html">@Filter</a> annotation.
         </p>
 
         <figure class="listing" id="listing:field-injection">
@@ -276,7 +277,7 @@ public class SomeModelClass {
             or by using the gemini blueprint @ServiceReference annotation</a>.
 
         <p>
-        NEBA also supports constructor injection in the same fashion:
+        NEBA supports constructor injection in the same fashion:
         </p>
 
         <figure class="listing" id="listing:constructor-injection">
