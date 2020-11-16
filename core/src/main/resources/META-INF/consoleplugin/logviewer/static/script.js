@@ -124,14 +124,14 @@ $(function () {
         buffer: "",
 
         /**
-         * The currently open error section, if any.
+         * The currently open section (logically connected lines of a logfile, e.g. a stacktrace), if any.
          */
         currentSection: undefined,
 
         followMode: false,
 
         /**
-         * Clears the tail and re-sets any associated state.
+         * Clears the log excerpt and re-sets any associated state.
          */
         clear: function () {
             tailDomNode.innerHTML = "";
