@@ -133,15 +133,15 @@ description: A comprehensive guide to using the NEBA features
             <h2 id="what_is_neba">What is NEBA?</h2>
         </header>
             <p>
-            NEBA is a lightweight, high-performance Content-to-Object mapping library for Apache Sling and Adobe AEM&trade; provided as a set of production-ready OSGib bundles via Maven Central.
-            In addition, NEBA provides an optional, straightforward integration of <a href="#spring">Spring and Spring MVC</a>.
+            NEBA is a lightweight, high-performance Content-to-Object mapping library for Apache Sling and Adobe AEM&trade; provided as a set of production-ready OSGi bundles via Maven Central.
+            In addition, NEBA provides an optional integration of <a href="#spring">Spring and Spring MVC</a>.
             </p>
             <p>
                 <a href="#what_is_a_resource_model">NEBA models are Java POJO's with a simple annotation</a>, allowing <em>type-safe</em> representation of repository data. Performance-Critical features, such as <a href="#lazy_loading">lazy loading</a>
                 and <a href="#tooling_modelstatistics">tooling to monitor model behavior</a> are provided out-of-the-box.
             </p>
             <p>
-                NEBA strives for simplicity, conciseness and architectural cleanliness to further readable and changeable code. It does so by adhering to the principals of Separation of Concerns and providing sensible defaults.
+                NEBA strives for simplicity and furthers readable and changeable code. It does so by adhering to the principals of Separation of Concerns and providing sensible defaults.
                 For instance, NEBA does not mix <a href="#dependency_injection">Dependency Injection</a> with content mapping or handling HTTP requests and maps content to fields by default - just like mature
                 persistence standards like the Java Persistence API (JPA).
             </p>
@@ -151,7 +151,7 @@ description: A comprehensive guide to using the NEBA features
         </p>
         The key differences are:
         <ul>
-            <li>NEBA associates its models with sling resource types or JCR node types to facilitate type safety.</li>
+            <li>NEBA always associates its models with sling resource types or JCR node types to facilitate type safety.</li>
             <li>NEBA has been developed for high-performance and features request-scoped caching and lazy-loading out of the box.</li>
             <li>NEBA ships with comprehensive tooling to support developers and administrators.</li>
             <li>NEBA provides extensible semantic annotations for almost all possible use cases to maximise convenience and minimize code.</li>
