@@ -339,7 +339,7 @@
 				<groupId>com.google.code.tld-generator</groupId>
 				<artifactId>tld-generator</artifactId>
 				<version>1.1</version>
-				<scope>compile</scope>
+				<scope>provided</scope>
 				<optional>true</optional>
 				<exclusions>
 					<exclusion>
