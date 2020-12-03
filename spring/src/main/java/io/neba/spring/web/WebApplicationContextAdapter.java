@@ -27,6 +27,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.NonNull;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.Nonnull;
@@ -296,5 +297,17 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     @Override
     public ServletContext getServletContext() {
         return this.servletContext;
+    }
+
+    @Override
+    @NonNull
+    public <T> ObjectProvider<T> getBeanProvider(@NonNull Class<T> aClass, boolean b) {
+        return wrapped.getBeanProvider(aClass, b);
+    }
+
+    @Override
+    @NonNull
+    public <T> ObjectProvider<T> getBeanProvider(@NonNull ResolvableType resolvableType, boolean b) {
+        return wrapped.getBeanProvider(resolvableType, b);
     }
 }
