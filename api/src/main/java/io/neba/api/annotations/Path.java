@@ -31,9 +31,9 @@ import static java.lang.annotation.ElementType.FIELD;
  * <p>
  * Defines the relative or absolute path of a property or resource mapped to a
  * field. Can be used when the name of the field does not match the name of
- * the mapped child resource or property, e.g. in case namespaces are used, or
+ * the mapped child resource or property, e.g. in case namespaces like <code>jcr:</code> are used, or
  * if an absolute or relative path is to be mapped. <br /> Supports placeholders of the form
- * ${name}, which are resolved by {@link PlaceholderVariableResolver} service.
+ * ${name}, which are resolved by {@link PlaceholderVariableResolver} services.
  *</p>
  *
  * <h2>Example</h2>
