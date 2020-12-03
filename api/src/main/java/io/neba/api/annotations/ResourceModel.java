@@ -50,7 +50,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <h2>Obtaining model instances</h2>
  * Resources with suitable types can be {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapted to}
- * the corresponding models. This adaptation can be done automatically using <code>/apps/neba/neba.js</code> with HTL, {@link io.neba.api.tags.DefineObjectsTag}
+ * the corresponding models. This adaptation can also be done automatically using <code>/apps/neba/neba.js</code> with HTL, {@link io.neba.api.tags.DefineObjectsTag}
  * with JSP or the {@link io.neba.api.services.ResourceModelResolver} service.
  *
  * <h2>Mapping resource properties to models</h2>
@@ -87,7 +87,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Therefore, if a {@link org.apache.sling.api.resource.Resource} has no
  * specific {@link ResourceModel}, i.e. no mapping to its
  * {@link org.apache.sling.api.resource.Resource#getResourceType()} or node
- * type, its resource hierarchy, followed by its node type hierarchy (including mixin types) are
+ * type, its sling:resourceType hierarchy, followed by its JCR node type hierarchy (including mixin node types) are
  * searched for a less specific model.
  * </p>
  *
