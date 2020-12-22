@@ -17,16 +17,15 @@
 package io.neba.core.resourcemodels.mapping;
 
 import io.neba.api.annotations.AfterMapping;
+import io.neba.api.annotations.AfterMapping.ExceptionInAfterMappingMethod;
 import io.neba.core.resourcemodels.metadata.MethodMetaData;
 import io.neba.core.resourcemodels.metadata.ResourceModelMetaData;
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static io.neba.core.util.ReflectionUtil.makeAccessible;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Invokes the {@link ResourceModelMetaData#getAfterMappingMethods() post-mapping methods}
@@ -36,8 +35,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Component(service = ModelPostProcessor.class)
 public class ModelPostProcessor {
-    private final Logger logger = getLogger(getClass());
-
     /**
      * @param metaData must not be <code>null</code>.
      * @param model    must not be <code>null</code>.
@@ -55,10 +52,10 @@ public class ModelPostProcessor {
             makeAccessible(method);
             try {
                 method.invoke(model);
-            } catch (InvocationTargetException | SecurityException e) {
-                logger.error("Unable to invoke the @" + AfterMapping.class.getSimpleName() + " method " + method + ".", e);
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException("It must not be illegal to access " + method + ".", e);
+            } catch (InvocationTargetException e) {
+                throw new ExceptionInAfterMappingMethod("Unable to invoke the @" + AfterMapping.class.getSimpleName() + " method " + method + ".", e);
+            } catch (IllegalAccessException | SecurityException e) {
+                throw new IllegalStateException("Unable to access @" + AfterMapping.class.getSimpleName() + " method " + method + ".", e);
             }
         }
     }
