@@ -58,7 +58,10 @@ public class ModelPostProcessorTest {
         assertAfterMappingMethodsAreInvoked();
     }
 
-    @Test
+    /**
+     * Exceptions in methods annotated with {@link AfterMapping} must bubble up.
+     */
+    @Test(expected = AfterMapping.ExceptionInAfterMappingMethod.class)
     public void testHandlingOfExceptionDuringAfterMappingPhase() {
         withModel(new TestModel());
         withExceptionDuringAfterMappingMethodInvocation();
