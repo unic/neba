@@ -54,7 +54,7 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.3.0_1</spring.version>
+		<spring.version>5.3.1_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
 		<language.level>1.8</language.level>
