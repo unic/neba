@@ -1,0 +1,52 @@
+---
+title: NEBA 5.2.0
+layout: post
+twitterAuthor: nebaframework
+description: NEBA 5.2.0 Adds enumeration support, upgrades to Spring 5.3.3 and fixes minor issues.
+tags: [release,current]
+release:
+    version: 5.2.0
+    previousVersion: 5.1.5
+    requiresChange: false
+---
+
+<section>
+    <header><h1>NEBA 5.2.0 released</h1></header>
+
+    <section>
+        <header><h2>New feature: Support for mapping enumerations</h2></header>
+        <p>
+            NEBA 5.2.0 Adds enumeration support - now, NEBA supports mapping resource properties to single enum instances as well as arrays or collection of enumerations, like so:
+{% highlight java %}
+@ResourceModel
+    class MyModel {
+    private EnumType field = EnumType.SOME_INITIAL_VALUE; // or null, or Optional<EnumType>, EnumType[] array, List<EnumType>...
+}
+{% endhighlight java %}
+        </p>
+        Here, "field" would be a resource property containing the constant name ("SOME_INITIAL_VALUE") or an array of constant names.
+    </section>
+    <section>
+        <header><h2>Consistent error handling for @AfterMapping methods</h2></header>
+        <p>
+            Previously, NEBA used to log but not re-throw exceptions occurring in <a href="/documentation.html#lifecycle_annotations">@AfterMapping</a> methods.
+            This could lead to situations where models where returned from .adaptTo calls in an unexpected state. Since 5.2.0, such failures will now lead
+            to an exception in the .adaptTo call. See also <a href="https://github.com/unic/neba/issues/410">https://github.com/unic/neba/issues/410</a>.
+        </p>
+    </section>
+
+</section>
+
+<section>
+    <header><h2>Release notes</h2></header>
+
+    <section>
+        <header><h3>Improvements</h3></header>
+        <ul class="issue-list" data-milestone="37" data-labels="enhancement"></ul>
+    </section>
+
+    <section>
+        <header><h3>Fixed bugs</h3></header>
+        <ul class="issue-list" data-milestone="37" data-labels="bug"></ul>
+    </section>
+</section>
