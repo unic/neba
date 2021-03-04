@@ -31,7 +31,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * If multiple methods are annotated, all of them are executed in no particular order. Inherited annotated
  * methods are executed as well, though after the execution of the callbacks on the child class.
  * </p>
- *
+ * <p>
  * Example:
  * <pre>
  *     &#064;{@link ResourceModel}
@@ -51,7 +51,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *          }
  *     }
  * </pre>
- *
+ * <p>
+ * When an exception arises during the invocation of an after-mapping method, a {@link ExceptionInAfterMappingMethod} will
+ * be thrown. If the method itself is inaccessible - e.g. due to a security manager issue - an {@link IllegalStateException} is thrown instead.
+ * </p>
  * @author Olaf Otto
  * @since 5.0.0
  */
@@ -59,4 +62,15 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target({METHOD, ANNOTATION_TYPE})
 public @interface AfterMapping {
+
+    /**
+     * Represents an issue when invoking a model method annotated with {@link AfterMapping}.
+     */
+    class ExceptionInAfterMappingMethod extends RuntimeException {
+        private static final long serialVersionUID = -4551759236956505577L;
+
+        public ExceptionInAfterMappingMethod(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 }

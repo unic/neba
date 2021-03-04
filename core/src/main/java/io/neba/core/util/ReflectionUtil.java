@@ -63,13 +63,11 @@ public final class ReflectionUtil {
             throw new IllegalArgumentException("Method parameter type must not be null.");
         }
 
-        // The generic type may contain the generic type declarations, e.g. List<String>.
+        // Only the ParametrizedType contains reflection information about the actual type.
         if (!(type instanceof ParameterizedType)) {
             throw new IllegalArgumentException("Cannot obtain the component type of " + type +
                     ", it does not declare generic type parameters.");
         }
-
-        // Only the ParametrizedType contains reflection information about the actual type.
         ParameterizedType parameterizedType = (ParameterizedType) type;
         Type[] typeArguments = parameterizedType.getActualTypeArguments();
 
@@ -105,14 +103,14 @@ public final class ReflectionUtil {
             // It cannot be resolved - we must look at the boundaries.
             Type[] bounds = variable.getBounds();
 
-            // Type variables only have upper bounds. There are now four options:
+            // Type variables only have upper bounds. There are now five options:
 
             // 1: There are multiple boundaries, e.g. <? extends A & B>, which means the type cannot be derived. Bail.
             if (bounds.length != 1) {
                 return null;
             }
 
-            // 2: There is one boundary, and it is java.lan.Object. This means there is none. Bail.
+            // 2: There is one boundary, and it is java.lang.Object. This means there is no boundary. Bail.
             if (bounds[0] == Object.class) {
                 return null;
             }
@@ -127,6 +125,8 @@ public final class ReflectionUtil {
                 return resolveWildCard((WildcardType) bounds[0], assigningType);
             }
 
+            // 5: At this point, we know there is exactly one boundary, which is not a generic symbol and not java.lang.Object.
+            //    Thus, it must be the effective type, e.g. List<? extends SpecificType> -> SpecificType
             return bounds[0];
         }
 

@@ -91,7 +91,7 @@ public class LogfileViewerConsolePlugin extends AbstractWebConsolePlugin {
             this.tailServlet.init(getServletConfig());
         } catch (Throwable t) {
             this.logger.error("Unable to initialize the tail servlet - the log viewer will not be available", t);
-            // We have to catch and re-throw here, as Sling tends not to log exceptions thrown in servlet's init() methods.
+            // We have to catch and re-throw here, as Sling tends not to log exceptions thrown in a servlet's init() method.
             throw new ServletException("Unable to initialize the tail servlet - the log viewer will not be available", t);
         } finally {
             currentThread().setContextClassLoader(ccl);

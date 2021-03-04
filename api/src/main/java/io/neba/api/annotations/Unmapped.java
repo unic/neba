@@ -27,8 +27,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * <p>
  * Excludes a field from the resource-to-model mapping. The annotated field's value is not
- * resolved from the {@link org.apache.sling.api.resource.Resource}. Note: Fields annotated with javax.inject.Inject
- * are automatically considered {@link Unmapped}, thus this annotation is not required for such fields.
+ * resolved from the {@link org.apache.sling.api.resource.Resource}.
+ * Fields annotated with @Inject, @Autowired or @Resource as well as final or static fields
+ * are automatically considered unmapped, thus this annotation is not required for such fields.
  * </p>
  *
  * <h2>Example</h2>

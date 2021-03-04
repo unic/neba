@@ -14,13 +14,13 @@
     <parent>
         <groupId>io.neba</groupId>
         <artifactId>io.neba.neba-parent</artifactId>
-        <version>5.1.5</version>
+        <version>5.2.0</version>
     </parent>
 
     <properties>
         <bundle.symbolicName>io.neba-api</bundle.symbolicName>
         <bundle.namespace>io.neba</bundle.namespace>
-        <api.version>5.1.0</api.version>
+        <api.version>5.1.1</api.version>
     </properties>
 
     <build>

@@ -15,17 +15,6 @@
  */
 package io.neba.spring.web;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.apache.sling.bgservlets.BackgroundHttpServletRequest;
 import org.junit.After;
 import org.junit.Before;
@@ -38,15 +27,24 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static javax.servlet.DispatcherType.REQUEST;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocaleContext;
 import static org.springframework.util.ReflectionUtils.findMethod;
 import static org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST;
@@ -97,11 +95,15 @@ public class NebaRequestContextFilterTest {
 
             return null;
         }).when(chain)
-          .doFilter(isA(HttpServletRequest.class), isA(HttpServletResponse.class));
+                .doFilter(isA(HttpServletRequest.class), isA(HttpServletResponse.class));
 
         doReturn(locale)
                 .when(request)
                 .getLocale();
+
+        doReturn(REQUEST)
+                .when(this.request)
+                .getDispatcherType();
     }
 
     @After
@@ -225,6 +227,9 @@ public class NebaRequestContextFilterTest {
 
     private void withBackgroundRequest() {
         request = mock(BackgroundHttpServletRequest.class);
+        doReturn(REQUEST)
+                .when(request)
+                .getDispatcherType();
     }
 
     private void doFilter() throws ServletException, IOException {

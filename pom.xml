@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.neba</groupId>
 	<artifactId>io.neba.neba-parent</artifactId>
-    <version>5.1.5</version>
+    <version>5.2.0</version>
 	<name>NEBA parent POM</name>
 	<packaging>pom</packaging>
 	
@@ -54,7 +54,7 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.2.8.RELEASE_1</spring.version>
+		<spring.version>5.3.3_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
 		<language.level>1.8</language.level>
@@ -339,7 +339,7 @@
 				<groupId>com.google.code.tld-generator</groupId>
 				<artifactId>tld-generator</artifactId>
 				<version>1.1</version>
-				<scope>compile</scope>
+				<scope>provided</scope>
 				<optional>true</optional>
 				<exclusions>
 					<exclusion>
@@ -373,7 +373,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.10.1</version>
+				<version>2.10.5.1</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -387,7 +387,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.12</version>
+				<version>4.13.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -482,6 +482,11 @@
 					<groupId>external.atlassian.jgitflow</groupId>
 					<artifactId>jgitflow-maven-plugin</artifactId>
 					<version>1.0-m5.1</version>
+					<configuration>
+						<flowInitContext>
+							<masterBranchName>main</masterBranchName>
+						</flowInitContext>
+					</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>

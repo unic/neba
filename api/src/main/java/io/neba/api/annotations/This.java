@@ -26,8 +26,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * <p>
- * Marks a field as representing the {@link org.apache.sling.api.resource.Resource resource}
- * represented by the current {@link ResourceModel}.
+ * Fields with this annotation refer to the current {@link org.apache.sling.api.resource.Resource resource},
+ * i.e. the resource mapped to the model containing this field.
  * <br />
  * If the field's type is not {@link org.apache.sling.api.resource.Resource}, the
  * resource is {@link org.apache.sling.api.resource.Resource#adaptTo(Class) adapted}

@@ -240,7 +240,7 @@ public class LogfileViewerConsolePluginTest {
                     throw new ClassNotFoundException("THIS IS AN EXPECTED TEST EXCEPTION. The presence of " + DecoratedObjectFactory.class.getName() + " is optional.");
                 }
                 if (LogfileViewerConsolePlugin.class.getName().equals(name)) {
-                    // Define the test subject's class class in this class loader, thus its dependencies -
+                    // Define the test subject's class in this class loader, thus its dependencies -
                     // such as the DecoratedObjectFactory - are also loaded via this class loader.
                     try {
                         byte[] classFileData = toByteArray(getResourceAsStream(name.replace('.', '/').concat(".class")));

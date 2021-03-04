@@ -16,9 +16,6 @@
 
 package io.neba.core.util;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import org.apache.sling.api.resource.ValueMap;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +23,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,17 +38,57 @@ import static org.mockito.Mockito.when;
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PrimitiveSupportingValueMapTest {
-	@Mock
-	private ValueMap wrapped;
+public class PrimitiveAndEnumSupportingValueMapTest {
+    @Mock
+    private ValueMap wrapped;
 
-	private Object result;
+    private Object result;
 
-    private PrimitiveSupportingValueMap testee;
+    private PrimitiveAndEnumSupportingValueMap testee;
 
     @Before
     public void prepareValueMap() {
-        this.testee = new PrimitiveSupportingValueMap(this.wrapped);
+        this.testee = new PrimitiveAndEnumSupportingValueMap(this.wrapped);
+    }
+
+    @Test
+    public void testEnumInstanceSupport() {
+        with("INSTANCE");
+        get(Enum.class);
+        assertResultIs(Enum.INSTANCE);
+    }
+
+    @Test
+    public void testEnumInstanceSupportReturnsNullWhenInstanceNameIsWrong() {
+        with("WRONG");
+        get(Enum.class);
+        assertResultIsNull();
+    }
+
+    @Test
+    public void testEnumInstanceSupportReturnsNullWhenInstanceNAmeISNull() {
+        get(Enum.class);
+        assertResultIsNull();
+    }
+
+    @Test
+    public void testEnumArraySupport() {
+        with(new String[]{"INSTANCE"});
+        get(Enum[].class);
+        assertResultIs(new Enum[]{Enum.INSTANCE});
+    }
+
+    @Test
+    public void testEnumArraySupportDiscardsUnknownInstanceNames() {
+        with(new String[]{"INSTANCE", "", "nonsense"});
+        get(Enum[].class);
+        assertResultIs(new Enum[]{Enum.INSTANCE});
+    }
+
+    @Test
+    public void testEnumArraySupportReturnsNullWhenInstanceNamesAreNull() {
+        get(Enum[].class);
+        assertResultIsNull();
     }
 
     @Test
@@ -248,7 +288,7 @@ public class PrimitiveSupportingValueMapTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testHandlingOfNullArgumentToConstructor() {
-        new PrimitiveSupportingValueMap(null);
+        new PrimitiveAndEnumSupportingValueMap(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -300,9 +340,13 @@ public class PrimitiveSupportingValueMapTest {
         when(this.wrapped.get(eq("test"), eq(typeOf(value)))).thenReturn(value);
         when(this.wrapped.get(eq("test"))).thenReturn(value);
     }
-    
-	@SuppressWarnings("unchecked")
-	private <T> Class<T> typeOf(T value) {
-		return (Class<T>) value.getClass();
-	}
+
+    @SuppressWarnings("unchecked")
+    private <T> Class<T> typeOf(T value) {
+        return (Class<T>) value.getClass();
+    }
+
+    enum Enum {
+        INSTANCE
+    }
 }
