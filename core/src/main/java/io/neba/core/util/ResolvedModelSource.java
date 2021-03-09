@@ -62,11 +62,6 @@ public class ResolvedModelSource<T> {
         return resourceType;
     }
 
-    /**
-     * Customized toString for better error log information.
-     *
-     * @return a description of the ResolvedModel
-     */
     @Override
     public String toString() {
         return this.resourceType + " -> [" + this.source + "]";

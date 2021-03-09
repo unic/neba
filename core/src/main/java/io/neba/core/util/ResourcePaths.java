@@ -10,7 +10,9 @@ import static java.util.Collections.singletonList;
 import static java.util.regex.Pattern.compile;
 
 /**
- * A factory for {@link ResourcePath paths}.
+ * A factory for {@link ResourcePath paths}, which are efficient immutable representations for paths of the form
+ * <code>/some/segment/${placeholder}/...</code>, such that an effective paths can be {@link ResourcePath#resolve(Function) resolved}
+ * using a callback function.
  */
 public class ResourcePaths {
     private static final String MATCH_NAME = "placeholder";
