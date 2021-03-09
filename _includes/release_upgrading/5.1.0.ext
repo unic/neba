@@ -1,8 +1,8 @@
 <p>
-    Implementors of NEBA's Service Provider API (SPI) providing custom application-level caches (a rare use cases) can no longer do so since support for custom caching extensions has been dropped.
+    Implementors of NEBA's Service Provider API (SPI) providing custom application-level caches ((a rare use case)) can no longer do so since support for custom caching extensions has been dropped.
 </p>
 <p>
-    Implementors of NEBA's Service Provider API (SPI) providing custom model factories (a rare use cases) must adapt the API changes introduced in 5.1.0. Specifically, the
+    Implementors of NEBA's Service Provider API (SPI) providing custom model factories ((a rare use case)) must adapt the API changes introduced in 5.1.0. Specifically, the
     <a href="/apidocs/neba-api/io/neba/api/spi/ResourceModelFactory.html">resource model factory</a> now receives a callback to apply content-to-model mapping, thus allowing full control over the models
     creation process.
 </p>
