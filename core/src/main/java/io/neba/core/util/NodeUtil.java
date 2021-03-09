@@ -31,8 +31,8 @@ public class NodeUtil {
     private static final String JCR_MIXIN_TYPES = "jcr:mixinTypes";
 
     /**
-     * @param node must not ne <code>null</code>.
-     * @return the primary type name of the given node, never <code>null</code>.
+     * @param node must not be <code>null</code>.
+     * @return the <code>primary type</code> name of the given node, never <code>null</code>.
      * @throws RepositoryException if accessing the node fails due to an unrecoverable repository error.
      */
     public static @Nonnull
@@ -43,7 +43,7 @@ public class NodeUtil {
     }
 
     /**
-     * @param node must not ne <code>null</code>.
+     * @param node must not be <code>null</code>.
      * @return a String with the comma separated mixin type names assigned to the given node, or <code>null</code> if the node has no mixin types.
      * @throws RepositoryException if accessing the node fails due to an unrecoverable repository error.
      */
