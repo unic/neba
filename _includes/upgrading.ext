@@ -12,3 +12,37 @@
 
     {% include release_upgrading/{{ page.release.version }}.ext %}
 </section>
+
+<section>
+    <header><h2 id="upgrading">Upgrading from previous versions</h2></header>
+
+    <p>
+        Please use the below form to see the upgrade path from one version of NEBA to another.
+    </p>
+
+    {% assign posts = site.posts | where_exp:"item", "item.tags contains 'release'" | sort: "release.version" %}
+    <form title="Upgrading from..." id="upgradePathForm">
+        <fieldset title="Version selection">
+            See changes required when upgrading
+            <label for="fromVersion">from</label>
+            <select id="fromVersion">
+                <option value="">Please choose</option>
+                {% for post in posts %}
+                <option name="{{ post.release.version }}">{{ post.release.version }}</option>
+                {% endfor %}
+
+            </select>
+            <label for="toVersion">to</label>
+            <select id="toVersion">
+                <option value="">Please choose</option>
+                {% for post in posts %}
+                <option name="{{ post.release.version }}" {% if post.release.version ==  page.release.version%}selected{% endif %}>{{ post.release.version }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Submit</button>
+        </fieldset>
+    </form>
+
+    <section id="requiredChanges"></section>
+    <script async src="/js/upgradepath.js"></script>
+</section>

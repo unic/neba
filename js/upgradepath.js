@@ -9,10 +9,13 @@
 
     this.releases = undefined;
 
-    upgradePathForm.onsubmit = function () {
+    var handleSelection = function () {
         showUpgradePath();
         return false;
     };
+    upgradePathForm.onsubmit = handleSelection;
+    fromVersion.onchange = handleSelection;
+    toVersion.onchange = handleSelection;
 
     function showUpgradePath() {
         while (requiredChanges.lastChild) {
