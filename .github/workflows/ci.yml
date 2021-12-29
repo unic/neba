@@ -24,7 +24,7 @@ jobs:
           architecture: x64
           cache: maven
       - name: Build with Maven
-        run: mvn --batch-mode clean verify
+        run: mvn --batch-mode -T2.0C clean verify
       - name: Assemble coder coverage report
         run: mvn jacoco:report
       - name: Upload code coverage data to codecov
