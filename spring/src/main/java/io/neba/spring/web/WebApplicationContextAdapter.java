@@ -158,6 +158,11 @@ public class WebApplicationContextAdapter implements WebApplicationContext {
     }
 
     @Override
+    public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+        return wrapped.findAnnotationOnBean(beanName, annotationType, allowFactoryBeanInit);
+    }
+
+    @Override
     @Nonnull
     public Object getBean(@Nonnull String name) throws BeansException {
         return wrapped.getBean(name);
