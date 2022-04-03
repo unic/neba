@@ -544,6 +544,9 @@
 					<executions>
 						<execution>
 							<id>sign-artifacts</id>
+							<configuration>
+								<keyname>18E90DD9D9D315A7927F58F8333A3360EBA50244</keyname>
+							</configuration>
 							<phase>verify</phase>
 							<goals>
 								<goal>sign</goal>
