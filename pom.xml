@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.neba</groupId>
 	<artifactId>io.neba.neba-parent</artifactId>
-    <version>5.2.0</version>
+    <version>5.2.1</version>
 	<name>NEBA parent POM</name>
 	<packaging>pom</packaging>
 	
@@ -54,7 +54,7 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.3.3_1</spring.version>
+		<spring.version>5.3.18_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
 		<language.level>1.8</language.level>
@@ -177,7 +177,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.4</version>
+				<version>2.7</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -544,6 +544,9 @@
 					<executions>
 						<execution>
 							<id>sign-artifacts</id>
+							<configuration>
+								<keyname>18E90DD9D9D315A7927F58F8333A3360EBA50244</keyname>
+							</configuration>
 							<phase>verify</phase>
 							<goals>
 								<goal>sign</goal>

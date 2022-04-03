@@ -44,19 +44,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import static java.lang.System.arraycopy;
 import static org.apache.commons.io.IOUtils.toByteArray;
@@ -64,12 +55,7 @@ import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -514,7 +500,7 @@ public class ModelRegistryConsolePluginTest {
     }
 
     private void verifyDefaultComponentIconIsWritten() throws IOException {
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[8192];
         byte[] expected = toByteArray(getClass().getResourceAsStream("/META-INF/consoleplugin/modelregistry/static/noicon.png"));
 
         arraycopy(expected, 0, buffer, 0, expected.length);
@@ -533,7 +519,7 @@ public class ModelRegistryConsolePluginTest {
 
     private void assertResourceContains(String resourceFragment) throws IOException {
         assertThat(this.resourceUrl).isNotNull();
-        assertThat(IOUtils.toString(this.resourceUrl.openStream())).contains(resourceFragment);
+        assertThat(IOUtils.toString(this.resourceUrl.openStream(), StandardCharsets.UTF_8)).contains(resourceFragment);
     }
 
     private void withResolution(String resourceTypePath, String resourcePath) {
