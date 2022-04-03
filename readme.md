@@ -1,6 +1,6 @@
 ﻿# NEBA GitHub Pages
 
-This branch contains the documentation for NEBA based on GitHub Pages using Jekyll.
+This branch contains the documentation site for NEBA. We are using Jekyll.
 
 If you're looking for the generated documentation you can find it [here](https://neba.io).
 
