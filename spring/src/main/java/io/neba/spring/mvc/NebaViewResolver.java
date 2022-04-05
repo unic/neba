@@ -34,7 +34,7 @@ import static org.springframework.web.servlet.view.UrlBasedViewResolver.FORWARD_
 import static org.springframework.web.servlet.view.UrlBasedViewResolver.REDIRECT_URL_PREFIX;
 
 /**
- * Supports "redirect:" and "forward:" views and falls back to eh {@link SlingServletView} for a provided view name.
+ * Supports "redirect:" and "forward:" views and falls back to a {@link SlingServletView} for a provided view name.
  *
  * @author Olaf Otto
  */
