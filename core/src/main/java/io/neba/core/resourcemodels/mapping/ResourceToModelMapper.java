@@ -113,7 +113,8 @@ public class ResourceToModelMapper {
 
                 // Phase 2: Retain the model prior to mapping in order to return it if the mapping results in a cycle.
                 mapping.setMappedModel(model);
-                // Phase 3: Map the model (may create a cycle).
+               
+                // Phase 3: Map the model. This may create a cycle, which is supported at this point (see above).
 
                 // Retain current time for statistics
                 final long startTimeInMs = trackMappingDuration ? currentTimeMillis() : 0;
