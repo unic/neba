@@ -3,21 +3,21 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.neba</groupId>
 	<artifactId>io.neba.neba-parent</artifactId>
-    <version>5.2.2-SNAPSHOT</version>
+	<version>5.2.2-SNAPSHOT</version>
 	<name>NEBA parent POM</name>
 	<packaging>pom</packaging>
 	
 	<description>
 		NEBA - simple and high performance content to object mapping for Apache Sling.
 	</description>
-
-    <url>https://neba.io</url>
+	
+	<url>https://neba.io</url>
 
 	<modules>
 		<module>api</module>
 		<module>core</module>
 		<module>spring</module>
-        <module>delivery-aem</module>
+		<module>delivery-aem</module>
 		<module>delivery-sling</module>
 	</modules>
 
@@ -54,7 +54,7 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.3.18_1</spring.version>
+		<spring.version>5.3.19_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
 		<language.level>1.8</language.level>
