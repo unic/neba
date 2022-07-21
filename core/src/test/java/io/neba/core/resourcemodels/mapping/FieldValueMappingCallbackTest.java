@@ -38,39 +38,23 @@ import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static io.neba.api.spi.AnnotatedFieldMapper.OngoingMapping;
 import static io.neba.core.resourcemodels.mapping.AnnotatedFieldMappers.AnnotationMapping;
-import static io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel.Enum.ONE;
-import static io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel.Enum.THREE;
-import static io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel.Enum.TWO;
+import static io.neba.core.resourcemodels.mapping.testmodels.TestResourceModel.Enum.*;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
 import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(MockitoJUnitRunner.class)
 public class FieldValueMappingCallbackTest {
     @Mock
@@ -101,7 +85,7 @@ public class FieldValueMappingCallbackTest {
     private Field mappedField;
 
     private Object targetValue;
-    private Object model = this;
+    private final Object model = this;
 
     private OngoingMapping<?, ?> ongoingMapping;
 
@@ -1409,11 +1393,13 @@ public class FieldValueMappingCallbackTest {
             e = ex;
         }
 
+        // There is a bug in SUN's JDK 8 implementation, where incompatible values set to a field are always reported as "null",
+        // thus we omit the to <X> part in the message test.
         assertThat(e)
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Can not set java.lang.String field " +
+                .hasMessageStartingWith("Can not set java.lang.String field " +
                         "io.neba.core.resourcemodels.mapping.FieldValueMappingCallbackTest.mappedFieldOfTypeString " +
-                        "to java.util.ArrayList");
+                        "to ");
     }
 
     private void assertOngoingMappingsResolvedValueIsNull() {
@@ -1727,7 +1713,7 @@ public class FieldValueMappingCallbackTest {
     @SuppressWarnings("unchecked")
     private void assertLazyFieldIsJavaUtilOptionalWithValue(Object value) {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Lazy.class);
-        assertThat(((Lazy) this.mappedFieldOfTypeObject).asOptional()).hasValue(value);
+        assertThat(((Lazy<Object>) this.mappedFieldOfTypeObject).asOptional()).hasValue(value);
     }
 
     @SuppressWarnings("unchecked")
@@ -1740,7 +1726,7 @@ public class FieldValueMappingCallbackTest {
         assertThat(this.mappedFieldOfTypeObject).isInstanceOf(Collection.class);
         @SuppressWarnings("unchecked")
         Collection<Resource> resources = (Collection<Resource>) this.mappedFieldOfTypeObject;
-        assertArrayHoldsResourcesWithPaths(resources.toArray(new Resource[resources.size()]), referencedResources);
+        assertArrayHoldsResourcesWithPaths(resources.toArray(new Resource[0]), referencedResources);
     }
 
     private void assertArrayHoldsResourcesWithPaths(Resource[] array, String... resourcePaths) {
