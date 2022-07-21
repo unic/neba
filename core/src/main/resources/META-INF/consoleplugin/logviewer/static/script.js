@@ -61,6 +61,8 @@ $(function () {
         NEWLINE = /\r?\n/,
         LINES_PER_MB = 14000, // approximate number of log viewer lines per MB log data.
         PATTERN_SECTION_START = /\*(TRACE|DEBUG|INFO|WARN|ERROR)\*/,
+        PATTERN_REQUEST_START = /^(.* )\[(\d+)]( -> (GET|POST|PUT|HEAD|DELETE) .*)$/,
+        PATTERN_REQUEST_END = /^(.* )\[(\d+)]( <- \d+ .*)$/,
         textDecoder = new TextDecoder("UTF-8"),
         tailSocket,
         tailDomNode = document.getElementById("tail"),
@@ -173,22 +175,7 @@ $(function () {
                 return div;
             }
 
-            /**
-             * Regexp instances have state and must the be re-created upon each usage.
-             */
-            function requestStartPattern() {
-                return /(.* )\[([0-9]+)]( -> (GET|POST|PUT|HEAD|DELETE) .*)/g;
-            }
-
-            /**
-             * Regexp instances have state and must the be re-created upon each usage.
-             */
-            function requestEndPattern() {
-                return /(.* )\[([0-9]+)]( <- [0-9]+ .*)/g;
-            }
-
             var lines = (this.buffer + text).split(NEWLINE);
-
 
             for (var i = 0; i < lines.length - 1; ++i) {
                 /**
@@ -200,6 +187,7 @@ $(function () {
                  * @type {Text}
                  */
                 var textNode = document.createTextNode(lines[i]);
+                var textContentForPatternMatching = textNode.nodeValue;
 
                 // Enable section detection if we know we are in an error.log or the logfile type is not known.
                 if (this.logType === Tail.LogType.ERROR_LOG || this.logType === undefined) {
@@ -224,8 +212,8 @@ $(function () {
                         this.currentSection = undefined;
                     }
 
-                    // A new interrelated section is detected is detected.
-                    var match = PATTERN_SECTION_START.exec(textNode.nodeValue);
+                    // A new interrelated section is detected.
+                    var match = PATTERN_SECTION_START.exec(textContentForPatternMatching);
                     if (match !== null) {
                         this.logType = Tail.LogType.ERROR_LOG;
                         // Create a new div that will hold all elements of the logged entry, including stack traces
@@ -241,7 +229,7 @@ $(function () {
                 }
 
                 if (this.logType === Tail.LogType.REQUEST_LOG || this.logType === undefined) {
-                    var requestStartMatch = requestStartPattern().exec(textNode.nodeValue);
+                    var requestStartMatch = PATTERN_REQUEST_START.exec(textContentForPatternMatching);
                     if (requestStartMatch != null) {
                         this.logType = Tail.LogType.REQUEST_LOG;
                         var id = requestStartMatch[2];
@@ -260,7 +248,7 @@ $(function () {
                         continue;
                     }
 
-                    var requestEndMatch = requestEndPattern().exec(textNode.nodeValue);
+                    var requestEndMatch = PATTERN_REQUEST_END.exec(textContentForPatternMatching);
                     if (requestEndMatch != null) {
                         this.logType = Tail.LogType.REQUEST_LOG;
                         var id = requestEndMatch[2];

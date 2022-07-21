@@ -152,8 +152,8 @@ class ModelInstantiator<T> {
                 .peek(ReflectionUtil::makeAccessible)
                 .toArray(Method[]::new);
 
-        // The post construct methods shall be applied in inverse order, i.e. the once stemming from base classes shall be called first.
-        // The assumption is that child classes depend on the initialization of their base classes. Note that this is
+        // The post construct methods shall be applied in inverse order, i.e. the ones stemming from base classes shall be called first.
+        // The assumption here is that child classes depend on the initialization of their base classes. Note that this is
         // a deviation from the contract described in @PostConstruct, which states that there shall only be one post construct method.
         // However, invoking all is the de facto standard used e.g. by the spring framework.
         reverse(postConstructMethods);

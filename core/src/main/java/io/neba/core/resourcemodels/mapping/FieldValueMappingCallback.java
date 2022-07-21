@@ -236,9 +236,9 @@ public class FieldValueMappingCallback {
     }
 
     /**
-     * Loads the children fo a field annotated with {@link io.neba.api.annotations.Children}.
-     * Resolves the parent who's children are to be loaded (this might e.g. be a {@link io.neba.api.annotations.Reference referenced} resource).
-     * Loads all children of the respective parent resource, {@link #convert(org.apache.sling.api.resource.Resource, Class) adapts}
+     * Loads the children for a field annotated with {@link io.neba.api.annotations.Children}.
+     * Resolves the parent who's children are to be loaded (e.g. a {@link io.neba.api.annotations.Reference referenced} resource).
+     * Loads all children of the parent resource, {@link #convert(org.apache.sling.api.resource.Resource, Class) adapts}
      * them if required, and adds them to a newly create collection compatible to the
      * {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#getType() field type}, if the adaptation result is not
      * <code>null</code>.
@@ -290,7 +290,7 @@ public class FieldValueMappingCallback {
     /**
      * Resolves the String path(s) stored in the resource property designated by the given field to respective resources and adapts
      * them if necessary. May provide a single adapted value or a collection of references,
-     * with regard to the field's meta data.
+     * depending on the field's meta data.
      */
     private Object resolveReferenceValueOfField(FieldData field) {
         Object value = null;
@@ -335,7 +335,7 @@ public class FieldValueMappingCallback {
 
     /**
      * Resolves and converts all resources defined in the given array of resource paths.<br />
-     * Afterwards, the resulting instances are stored in a {@link java.util.Collection} compatible to the
+     * The resulting instances are stored in a {@link java.util.Collection} compatible to the
      * collection type of the given {@link io.neba.core.resourcemodels.metadata.MappedFieldMetaData#getType()}.
      *
      * @param paths relative or absolute paths to resources.
