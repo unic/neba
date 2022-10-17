@@ -101,6 +101,18 @@ class JsonViewSupport extends SimpleModule {
             this.configuration = configuration;
         }
 
+        public ResourceModelSerializer(ResourceModelSerializer resourceModelSerializer, Set<String> toIgnore, Set<String> toInclude, Supplier<Map<Object, Mapping<?>>> mappings, Configuration configuration) {
+            super(resourceModelSerializer, toIgnore, toInclude);
+            this.mappings = mappings;
+            this.configuration = configuration;
+        }
+
+        public ResourceModelSerializer(ResourceModelSerializer resourceModelSerializer, BeanPropertyWriter[] properties, BeanPropertyWriter[] filteredProperties, Supplier<Map<Object, Mapping<?>>> mappings, Configuration configuration) {
+            super(resourceModelSerializer, properties, filteredProperties);
+            this.mappings = mappings;
+            this.configuration = configuration;
+        }
+
         @Override
         public ResourceModelSerializer withObjectIdWriter(ObjectIdWriter objectIdWriter) {
             return new ResourceModelSerializer(this, objectIdWriter, _propertyFilterId, mappings, configuration);
@@ -109,6 +121,11 @@ class JsonViewSupport extends SimpleModule {
         @Override
         protected ResourceModelSerializer withIgnorals(Set<String> toIgnore) {
             return new ResourceModelSerializer(this, toIgnore, mappings, configuration);
+        }
+
+        @Override
+        protected ResourceModelSerializer withByNameInclusion(Set<String> toIgnore, Set<String> toInclude) {
+            return new ResourceModelSerializer(this, toIgnore, toInclude, mappings, configuration);
         }
 
         @Override
@@ -133,6 +150,11 @@ class JsonViewSupport extends SimpleModule {
         @Override
         public BeanSerializerBase withFilterId(Object filterId) {
             return new ResourceModelSerializer(this, _objectIdWriter, filterId, mappings, configuration);
+        }
+
+        @Override
+        protected BeanSerializerBase withProperties(BeanPropertyWriter[] properties, BeanPropertyWriter[] filteredProperties) {
+            return new ResourceModelSerializer(this, properties, filteredProperties, mappings, configuration);
         }
 
         @Override
