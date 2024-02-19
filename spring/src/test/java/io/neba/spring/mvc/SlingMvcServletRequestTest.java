@@ -24,9 +24,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import javax.servlet.http.HttpServletMapping;
+import javax.servlet.http.MappingMatch;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.web.util.WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE;
 import static org.springframework.web.util.WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE;
 
@@ -73,7 +75,7 @@ public class SlingMvcServletRequestTest {
      * a completely different path was included. For instance, a request to
      * "/test.html" with a subsequent &lt;sling:include path="/other/path"&gt; will
      * yield the include path "".
-     *
+     * <p>
      * Test that the {@link SlingMvcServletRequest} overrides this behavior, providing
      * the actually included servlet path. This allows including MVC resources, e.g.
      * &lt;sling:include path="/bin/mvc.do/controller"&gt;
@@ -89,7 +91,7 @@ public class SlingMvcServletRequestTest {
      * a completely different URI was included. For instance, a request to
      * "/test.html" with a subsequent &lt;sling:include path="/servlet/path"&gt; will
      * yield the include URI path "/test.html".
-     *
+     * <p>
      * Test that the {@link SlingMvcServletRequest} overrides this behavior, providing
      * the actually included URI. This allows including MVC resources, e.g.
      * &lt;sling:include path="/bin/mvc.do/controller"&gt;
@@ -104,5 +106,44 @@ public class SlingMvcServletRequestTest {
     public void testOtherAttributesAreFetchedFromTheOriginalRequest() {
         this.testee.getAttribute("other.attribute");
         verify(this.request).getAttribute("other.attribute");
+    }
+
+    @Test
+    public void testNullMappingMatchIsPassedOn() {
+        withNullMapping();
+        assertThat(this.testee.getHttpServletMapping()).isNull();
+    }
+
+    @Test
+    public void testExistingPathMappingIsPassedOn() {
+        withExistingPathMapping();
+        assertThat(this.testee.getHttpServletMapping()).isEqualTo(this.request.getHttpServletMapping());
+    }
+
+    @Test
+    public void testNonPathMappingIsReplacedWithPathMapping() {
+        withDefaultServletMapping();
+
+        assertThat(this.testee.getHttpServletMapping().getMappingMatch()).isNotNull();
+        assertThat(this.testee.getHttpServletMapping()).isNotEqualTo(this.request.getHttpServletMapping());
+        assertThat(this.testee.getHttpServletMapping().getMappingMatch()).isEqualTo(MappingMatch.PATH);
+        assertThat(this.testee.getHttpServletMapping().getMatchValue()).isEqualTo("/controllerPath");
+        assertThat(this.testee.getHttpServletMapping().getPattern()).isEqualTo("/bin/mvc.do/*");
+    }
+
+    private void withDefaultServletMapping() {
+        HttpServletMapping mapping = mock(HttpServletMapping.class);
+        doReturn(MappingMatch.DEFAULT).when(mapping).getMappingMatch();
+        doReturn(mapping).when(this.request).getHttpServletMapping();
+    }
+
+    private void withExistingPathMapping() {
+        HttpServletMapping mapping = mock(HttpServletMapping.class);
+        doReturn(MappingMatch.PATH).when(mapping).getMappingMatch();
+        doReturn(mapping).when(this.request).getHttpServletMapping();
+    }
+
+    private void withNullMapping() {
+        doReturn(null).when(this.request).getHttpServletMapping();
     }
 }

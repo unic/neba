@@ -20,6 +20,10 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
 
+import javax.servlet.http.HttpServletMapping;
+import javax.servlet.http.MappingMatch;
+
+import static org.apache.commons.lang3.StringUtils.removeStart;
 import static org.springframework.web.util.WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE;
 import static org.springframework.web.util.WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE;
 
@@ -44,6 +48,42 @@ public class SlingMvcServletRequest extends SlingHttpServletRequestWrapper {
             return getServletPath();
         }
         return super.getAttribute(name);
+    }
+
+
+    @Override
+    public HttpServletMapping getHttpServletMapping() {
+        HttpServletMapping mapping = super.getHttpServletMapping();
+        if (mapping == null) {
+            return null;
+        }
+        if (MappingMatch.PATH.equals(mapping.getMappingMatch())) {
+            return mapping;
+        }
+
+        // It's not a PATH mapping. This cannot be correct, since we know the MVC servlet is mapped to a path.
+        // We therefore create a new mapping with the correct path.
+        return new HttpServletMapping() {
+            @Override
+            public String getMatchValue() {
+                return getRequestPathInfo().getSuffix();
+            }
+
+            @Override
+            public String getPattern() {
+                return getServletPath() + "/*";
+            }
+
+            @Override
+            public String getServletName() {
+                return "io.neba.spring.mvc.MvcServlet";
+            }
+
+            @Override
+            public MappingMatch getMappingMatch() {
+                return MappingMatch.PATH;
+            }
+        };
     }
 
     @Override
