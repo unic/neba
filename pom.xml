@@ -54,7 +54,7 @@
 	</developers>
 
 	<properties>
-		<spring.version>5.3.21_1</spring.version>
+		<spring.version>5.3.31_1</spring.version>
 		<gemini.version>3.0.0.M01</gemini.version>
 		<aopalliance.version>1.0_6</aopalliance.version>
 		<language.level>1.8</language.level>
@@ -111,13 +111,13 @@
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
-				<version>3.1.0</version>
+				<version>4.0.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet.jsp</groupId>
 				<artifactId>jsp-api</artifactId>
-				<version>2.0</version>
+				<version>2.1</version>
 				<scope>provided</scope>
 			</dependency>
 
