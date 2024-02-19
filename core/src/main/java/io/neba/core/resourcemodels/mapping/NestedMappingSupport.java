@@ -210,7 +210,7 @@ public class NestedMappingSupport {
          */
         private static class Entry<T> {
             private final Mapping<T> mapping;
-            private Entry<?> previous;
+            private final Entry<?> previous;
 
             private Entry(Mapping<T> mapping, Entry<?> previous) {
                 this.mapping = mapping;

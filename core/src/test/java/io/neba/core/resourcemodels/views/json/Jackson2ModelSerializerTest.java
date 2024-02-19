@@ -72,7 +72,7 @@ public class Jackson2ModelSerializerTest {
         initializeModelSerializer();
 
         serialize();
-        assertJsonIs("{\"date\":\"1970-01-01T00:00:00.000+0000\"}");
+        assertJsonIs("{\"date\":\"1970-01-01T00:00:00.000+00:00\"}");
 
         withSettings("Invalid.Setting=EXPECTED ERROR", "SerializationFeature.WRITE_DATES_AS_TIMESTAMPS=true");
         initializeModelSerializer();
