@@ -202,7 +202,7 @@ description: A comprehensive guide to using the NEBA features
         <h3 id="what_is_a_resource_model">What is a resource model?</h3>
 
         <p>
-            A Resource model is a type safe representation of a <a href="https://sling.apache.org/documentation/the-sling-engine/resources.html">Sling resource</a>, written as a Java class. The data of a resource can be mapped to the resource model, similar to an ORM mapping the data of a relational DB to an entity class.
+            A resource model is a type safe representation of a <a href="https://sling.apache.org/documentation/the-sling-engine/resources.html">Sling resource</a>, written as a Java class. The data of a resource can be mapped to the resource model, similar to an ORM mapping the data of a relational DB to an entity class.
             In addition, resource models can be injected with collaborators, e.g. OSGi services.
             Resource model instances are obtained by <a href="https://sling.apache.org/documentation/the-sling-engine/adapters.html#adaptable">adapting</a> a resource to the type or super type of the resource model.
             A resource model and the Sling resource types it represents are defined using the <a href="apidocs/neba-api/io/neba/api/annotations/ResourceModel.html">@ResourceModel</a> annotation.
@@ -578,7 +578,7 @@ private Resource homepage;{% endhighlight %}
     <h4 id="the_this_annotation">The @This annotation</h4>
 
         <p>Fields annotated with <a href="apidocs/neba-api/io/neba/api/annotations/This.html">@This</a> are injected with the current resource, or anything the resource is adaptable to. This annotation is thus not just useful for
-    accessing the underlying Resource but has significant architectural value. Using @This, one may split up a model into multiple aspects and compose them dynamically, like so:</p>
+    accessing the underlying Resource but has significant architectural value. Using @This, one can provide different aspects of the same resource type in dedicated resource models and compose them dynamically, like so:</p>
 
     <figure class="listing" id="listing:neba-this-annotation">
         {% highlight java %}@ResourceModel(...)
