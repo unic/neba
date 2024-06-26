@@ -157,6 +157,14 @@
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <parallel>both</parallel>
+                    <perCoreThreadCount>true</perCoreThreadCount>
+                    <threadCount>32</threadCount>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
