@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.neba.neba-delivery-aem</artifactId>
     <name>NEBA delivery</name>
@@ -205,12 +206,13 @@
             <!-- Build the content package including bundles with customized manifests (those are already copied to the target/vault-work directory) -->
             <plugin>
                 <groupId>org.apache.jackrabbit</groupId>
-                    <artifactId>filevault-package-maven-plugin</artifactId>
+                <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
+                    <excludes>**/*.class</excludes>
                     <showImportPackageReport>false</showImportPackageReport>
                     <version>${project.version}</version>
                     <failOnMissingEmbed>true</failOnMissingEmbed>
-                    <filterSource />
+                    <filterSource/>
                     <filters>
                         <filter>
                             <mode>replace</mode>
@@ -240,9 +242,10 @@
                             <name>io.neba.neba-delivery-aem-spring</name>
                             <properties>
                                 <comment>NEBA with Spring support</comment>
-                                <description>Packages NEBA core and API bundles along with the NEBA Spring integration and the Spring Framework.</description>
+                                <description>Packages NEBA core and API bundles along with the NEBA Spring integration
+                                    and the Spring Framework.
+                                </description>
                             </properties>
-
                             <embeddeds>
                                 <!-- Spring dependencies shall start first at start level 16 -->
                                 <embedded>
@@ -339,7 +342,9 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.version}-spring.zip</file>
+                                    <file>
+                                        ${project.build.directory}/${project.artifactId}-${project.version}-spring.zip
+                                    </file>
                                     <type>zip</type>
                                     <classifier>spring</classifier>
                                 </artifact>
