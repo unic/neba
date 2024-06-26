@@ -25,17 +25,22 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.springframework.stereotype.Component;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
@@ -61,32 +66,46 @@ public class ModelFactoryTest {
 
         doReturn(this.bundleContext).when(this.bundle).getBundleContext();
 
-        // The actual protocol for OSGi bundles is "bundleresource:", but this protocol is not registered for unit tests.
-        URL modelClassResource = new URL("file://bundleId.bundleVersion" + "/" + ModelClass.class.getName().replace('.', '/') + ".class");
-        URL nonModelClassResource = new URL("file://bundleId.bundleVersion" + "/" + NonModelClass.class.getName().replace('.', '/') + ".class");
+        List<Class<?>> modelTypes = asList(ModelClass.class, ModelClassWithMetaAnnotation.class, NonModelClass.class, SpringModelClass.class, SpringModelClassWithMetaAnnotation.class);
 
-        Vector<URL> vector = new Vector<>();
-        vector.add(modelClassResource);
-        vector.add(nonModelClassResource);
+        Vector<URL> vector = modelTypes.stream()
+                // The actual protocol for OSGi bundles is "bundleresource:", but this protocol is not registered for unit tests.
+                .map(cls -> "file://bundleId.bundleVersion" + "/" + cls.getName().replace('.', '/') + ".class")
+                .map(ModelFactoryTest::toUrl).collect(java.util.stream.Collectors.toCollection(Vector::new));
 
         doReturn(vector.elements()).when(this.bundle).findEntries("/first/package", "*.class", true);
-        doReturn(ModelClass.class).when(this.bundle).loadClass(ModelClass.class.getName());
-        doReturn(NonModelClass.class).when(this.bundle).loadClass(NonModelClass.class.getName());
+        modelTypes.forEach(cls -> {
+            try {
+                doReturn(cls).when(this.bundle).loadClass(cls.getName());
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         doAnswer(inv -> inv.getArguments()[0]).when(callback).map(any());
 
         this.testee = new ModelFactory(this.bundle);
     }
 
     @Test
+    @SuppressWarnings("rawtypes")
     public void testModelFactoryFindsResourceModel() {
         assertThat(this.testee.getModelDefinitions())
-                .hasSize(1);
-        assertThat(this.testee.getModelDefinitions().iterator().next().getType())
-                .isSameAs(ModelClass.class);
-        assertThat(this.testee.getModelDefinitions().iterator().next().getName())
-                .isEqualTo("modelClass");
-        assertThat(this.testee.getModelDefinitions().iterator().next().getResourceModel())
-                .isSameAs(ModelClass.class.getAnnotation(ResourceModel.class));
+                .hasSize(2);
+
+        assertThat(this.testee.getModelDefinitions())
+                .extracting(def -> (Class) def.getType())
+                .containsExactly(ModelClass.class, ModelClassWithMetaAnnotation.class);
+
+        assertThat(this.testee.getModelDefinitions())
+                .extracting(ModelDefinition::getName)
+                .containsExactly("modelClass", "modelClassWithMetaAnnotation");
+
+        assertThat(this.testee.getModelDefinitions()).extracting(ModelDefinition::getResourceModel)
+                .containsExactly(
+                        ModelClass.class.getAnnotation(ResourceModel.class),
+                        ModelClassWithMetaAnnotation.class.getAnnotation(CustomModelStereotype.class).annotationType().getAnnotation(ResourceModel.class)
+                );
     }
 
     @Test
@@ -108,10 +127,58 @@ public class ModelFactoryTest {
         this.testee.getModelDefinitions().add(mock(ModelDefinition.class));
     }
 
+    @Test
+    public void testSpringModelsAreExcluded() {
+        assertDetectedModelsDoesNotInclude(SpringModelClass.class);
+    }
+
+    private void assertDetectedModelsDoesNotInclude(Class<?> modelType) {
+        List<Class<?>> detectedTypes =
+                this.testee.getModelDefinitions()
+                        .stream()
+                        .map(ModelDefinition::getType)
+                        .collect(toList());
+
+        assertThat(detectedTypes).doesNotContain(modelType);
+    }
+
     @ResourceModel("some/type")
     public static class ModelClass {
     }
 
+    @CustomModelStereotype
+    public static class ModelClassWithMetaAnnotation {
+    }
+
     public static class NonModelClass {
+    }
+
+    @Component
+    @ResourceModel("some/type")
+    public static class SpringModelClass {
+    }
+
+    @CustomSpringModelStereotype
+    @ResourceModel("some/type")
+    public static class SpringModelClassWithMetaAnnotation {
+    }
+
+    @ResourceModel("some/type")
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface CustomModelStereotype {
+
+    }
+
+    @Component
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface CustomSpringModelStereotype {
+    }
+
+    private static URL toUrl(String s) {
+        try {
+            return new URL(s);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
