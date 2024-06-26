@@ -15,11 +15,7 @@
  */
 package io.neba.core.resourcemodels.registration;
 
-import java.lang.reflect.Field;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import io.neba.core.Eventual;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,26 +25,21 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.service.event.Event;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Field;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang3.reflect.FieldUtils.getField;
 import static org.apache.commons.lang3.reflect.FieldUtils.writeField;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Otto
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MappableTypeHierarchyChangeListenerTest {
+public class MappableTypeHierarchyChangeListenerTest implements Eventual {
     @Mock
     private ModelRegistry modelRegistry;
 
@@ -70,9 +61,8 @@ public class MappableTypeHierarchyChangeListenerTest {
         deactivate();
 
         withChangeOn("/apps/testapp/components/test");
-        sleep();
 
-        verifyModelRegistryCacheIsNotCleared();
+        eventually(this::verifyModelRegistryCacheIsNotCleared);
     }
 
     @Test
@@ -80,9 +70,8 @@ public class MappableTypeHierarchyChangeListenerTest {
         activate();
 
         withChangeOn("/apps/testapp/components/test");
-        sleep();
 
-        verifyModelRegistryCacheIsCleared();
+        eventually(this::verifyModelRegistryCacheIsCleared);
     }
 
     /**
@@ -98,9 +87,8 @@ public class MappableTypeHierarchyChangeListenerTest {
         withChangeOn("/apps/testapp/components/test");
 
         activate();
-        sleep();
 
-        verifyModelRegistryCacheIsCleared();
+        eventually(this::verifyModelRegistryCacheIsCleared);
     }
 
     @Test
@@ -110,11 +98,9 @@ public class MappableTypeHierarchyChangeListenerTest {
         withTraceLogging();
         withChangeOn("/apps/testapp/components/test");
 
-        sleep();
-
-        verifyLoggerTraces(
+        eventually(() -> verifyLoggerTraces(
                 "Invalidating the resource model registry lookup cache due to changes to {}.",
-                "/apps/testapp/components/test");
+                "/apps/testapp/components/test"));
     }
 
     @Test
@@ -124,9 +110,7 @@ public class MappableTypeHierarchyChangeListenerTest {
 
         withChangeOn("/some/path");
 
-        sleep();
-
-        verifyLoggerDebugs("The type hierarchy change listener got interrupted, but was not shut down.");
+        eventually(() -> verifyLoggerDebugs("The type hierarchy change listener got interrupted, but was not shut down."));
     }
 
     private void verifyLoggerDebugs(String message) {
@@ -152,10 +136,6 @@ public class MappableTypeHierarchyChangeListenerTest {
         doReturn(true).when(this.logger).isTraceEnabled();
     }
 
-    private void verifyModelRegistryCacheIsClearedAtMost(int times) {
-        verify(this.modelRegistry, atMost(times)).clearLookupCaches();
-    }
-
     private void verifyModelRegistryCacheIsCleared() {
         verify(this.modelRegistry).clearLookupCaches();
     }
@@ -166,10 +146,6 @@ public class MappableTypeHierarchyChangeListenerTest {
 
     private void verifyModelRegistryCacheIsNotCleared() {
         verify(this.modelRegistry, never()).clearLookupCaches();
-    }
-
-    private void sleep() throws InterruptedException {
-        Thread.sleep(SECONDS.toMillis(2));
     }
 
     private void withChangeOn(String path) {
