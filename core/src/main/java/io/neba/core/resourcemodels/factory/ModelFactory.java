@@ -22,21 +22,14 @@ import org.osgi.framework.Bundle;
 
 import javax.annotation.Nonnull;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static io.neba.core.util.Annotations.annotations;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.*;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -46,9 +39,10 @@ import static java.util.stream.Collectors.toList;
  * the models, including injection of <em>OSGi service dependencies</em> via {@link javax.inject.Inject} and {@link io.neba.api.annotations.Filter}.
  */
 class ModelFactory implements ResourceModelFactory {
+    private static final String SPRING_COMPONENT_STEREOTYPE = "org.springframework.stereotype.Component";
     private final Bundle bundle;
-    private List<ModelDefinition<?>> modelDefinitions;
-    private Map<ModelDefinition<?>, ModelInstantiator<?>> modelMetadata;
+    private final List<ModelDefinition<?>> modelDefinitions;
+    private final Map<ModelDefinition<?>, ModelInstantiator<?>> modelMetadata;
 
     ModelFactory(Bundle bundle) {
         this.bundle = bundle;
@@ -66,8 +60,10 @@ class ModelFactory implements ResourceModelFactory {
                         .flatMap(this::streamUrls)
                         .map(this::urlToClassName)
                         .map(this::loadClass)
-                        .filter(o -> o.map(c -> c.isAnnotationPresent(ResourceModel.class)).orElse(false))
+                        .filter(Optional::isPresent)
                         .map(Optional::get)
+                        .filter(c -> annotations(c).contains(ResourceModel.class))
+                        .filter(c -> !annotations(c).containsName(SPRING_COMPONENT_STEREOTYPE))
                         .map(ClassBasedModelDefinition::new)
                         .distinct()
                         .collect(toList()));

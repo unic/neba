@@ -20,6 +20,7 @@ import io.neba.api.spi.ResourceModelFactory.ModelDefinition;
 
 import javax.annotation.Nonnull;
 
+import static io.neba.core.util.Annotations.annotations;
 import static java.lang.Character.toLowerCase;
 
 /**
@@ -35,7 +36,7 @@ class ClassBasedModelDefinition<T> implements ModelDefinition<T> {
     @Nonnull
     @Override
     public ResourceModel getResourceModel() {
-        return c.getAnnotation(ResourceModel.class);
+        return annotations(c).get(ResourceModel.class);
     }
 
     @Nonnull
