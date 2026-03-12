@@ -21,10 +21,8 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
-import tldgen.Tag;
-import tldgen.TagAttribute;
-
 import javax.annotation.CheckForNull;
+
 import javax.servlet.jsp.tagext.TagSupport;
 
 import static io.neba.api.Constants.MODEL;

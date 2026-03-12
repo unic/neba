@@ -17,6 +17,7 @@
 package io.neba.core.resourcemodels.metadata;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.webconsole.servlet.RequestVariableResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +77,11 @@ public class ModelStatisticsConsolePluginTest {
         doReturn(this.metadataList)
                 .when(this.registrar)
                 .get();
+
+        RequestVariableResolver variableResolver = new RequestVariableResolver();
+        variableResolver.put(RequestVariableResolver.KEY_APP_ROOT, "/system/console");
+        variableResolver.put(RequestVariableResolver.KEY_PLUGIN_ROOT, "/system/console/" + ModelStatisticsConsolePlugin.LABEL);
+        doReturn(variableResolver).when(this.request).getAttribute(RequestVariableResolver.REQUEST_ATTRIBUTE);
     }
 
     @Test

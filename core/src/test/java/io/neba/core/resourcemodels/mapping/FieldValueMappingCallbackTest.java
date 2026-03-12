@@ -1378,7 +1378,7 @@ public class FieldValueMappingCallbackTest {
     /**
      * A {@link AnnotatedFieldMapper} implementation must take
      * care to return an assignment-compatible value as a mapping result. However,
-     * there is no way to enforce this at compile time. This test verifies that a suitable exception
+     * there are no enforce this at compile time. This test verifies that a suitable exception
      * is thrown in case a field mapper returns an incompatible value at runtime.
      */
     @Test

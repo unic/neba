@@ -50,6 +50,19 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>io.neba</groupId>
+                            <artifactId>io.neba.neba-api-tld</artifactId>
+                            <version>${project.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
             <plugin>
@@ -60,6 +73,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>io.neba</groupId>
+            <artifactId>io.neba.neba-api-tld</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>javax.servlet.jsp</groupId>
             <artifactId>jsp-api</artifactId>
@@ -87,10 +106,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.tld-generator</groupId>
-            <artifactId>tld-generator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
