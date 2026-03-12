@@ -14,17 +14,25 @@
   limitations under the License.
 */
 
-/**
- * Contains the NEBA tag libraries.
- * All tag libraries contained in this package are not extensible to prevent direct dependencies
- * of project-specific implementations to the NEBA core, i.e. to prevent
- * project code to inherit from these tag implementations.
- */
-@Deprecated
-@TagLibrary(
-        value = "http://neba.io/1.0",
-        descriptorFile = "neba.tld",
-        shortName = "neba",
-        description = "NEBA tag library"
-)
 package io.neba.api.tags;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Declares a JSP tag. Used on {@link javax.servlet.jsp.tagext.TagSupport} subclasses
+ * to generate the tag metadata in the TLD.
+ */
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.TYPE)
+public @interface Tag {
+
+    /**
+     * Description of the tag.
+     */
+    String description();
+}
